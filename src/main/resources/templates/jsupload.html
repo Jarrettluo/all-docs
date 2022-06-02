@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JS文件上传</title>
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.12.2/jquery.min.js"></script>
+    <script type="text/javascript">
+        //先用cdn，如未加载到jquery再加载项目下的
+        if (typeof jQuery == "undefined") {
+            var js = "/scripts/jquery-1.8.3.min.js";
+            document.write('<script type="text/javascript" src="' + js + '"><\/script>');
+        }
+    </script>
+    <script type="text/javascript" th:src="@{/scripts/md5.min.js}"></script>
+</head>
+<body>
+
+<input id="upload1" type="file" name="file"/>
+<div id="result">内容</div>
+
+<script type="text/javascript">
+    //增加全局hex转string函数
+    Array.prototype.toHexString = ArrayBuffer.prototype.toHexString = function () {
+        var array = new Uint8Array(this);
+        var hex = '';
+        for (var i = 0; i < array.length; ++i) {
+            var c = array[i].toString('16');
+            hex += c.length == 1 ? '0' + c : c;
+        }
+        return hex;
+    };
+
+    //服务器地址
+    var ServerUrl = "http://localhost:8082";
+
+    document.querySelector('input').addEventListener('change', function () {
+        var form = new FormData();
+        form.append("file", document.querySelector('input').files[0]);
+
+        var url = ServerUrl + '/files/upload/';
+        $.ajax({
+            url: url,
+            type: "post",
+            data: form,
+            processData: false,
+            contentType: false,
+            success: function (result) {
+                alert(JSON.stringify(result));
+                document.getElementById("result").innerText = JSON.stringify(result);
+            }
+        });
+    }, false);
+
+    /*document.querySelector('input').addEventListener('change', function () {
+        var reader = new FileReader();
+        reader.file = document.querySelector('input').files[0];
+        reader.fileName = reader.file.name;
+        reader.ext = reader.fileName.substring(reader.fileName.lastIndexOf(".") + 1, reader.fileName.length);
+        reader.onload = function () {
+            var self = this;
+            var bytesArray = new Uint8Array(self.result);
+            console.log(bytesArray);
+            $.ajax({
+                //上传文件地址格式 /files/upload/被上传文件的md5值 /服务器会验证文件md5值是否一致确保文件上传内容完整  扩展名'jpg'请根据实际情况确定
+                url : ServerUrl + '/files/upload/' + md5.arrayBuffer(bytesArray).toHexString() +'/'+ reader.ext + '?name=' + reader.fileName +'&description=description' ,
+                type: 'POST',
+                data: bytesArray,
+                processData: false,
+                beforeSend: function (xhr) {
+                    //身份验证账号
+                    //xhr.setRequestHeader("Authorization", "Basic dXBsb2FkZXI6dXBsb2FkZXI=");//base64(用户名:密码) 默认账密 uploader:uploader
+                    xhr.setRequestHeader("Content-Type", "application/octet-stream");
+                }
+            }).done(function (result) {
+                alert(JSON.stringify(result));
+                document.getElementById("result").innerText = JSON.stringify(result);
+            }).fail(function (err) {
+                alert(JSON.stringify(err));
+            })
+        };
+        reader.readAsArrayBuffer(this.files[0]);
+    }, false);
+*/
+
+    //byte数组转字符串
+    function byteToString(arr) {
+        if (typeof arr === 'string') {
+            return arr;
+        }
+        var str = '',
+            _arr = arr;
+        for (var i = 0; i < _arr.length; i++) {
+            var one = _arr[i].toString(2),
+                v = one.match(/^1+?(?=0)/);
+            if (v && one.length == 8) {
+                var bytesLength = v[0].length;
+                var store = _arr[i].toString(2).slice(7 - bytesLength);
+                for (var st = 1; st < bytesLength; st++) {
+                    store += _arr[st + i].toString(2).slice(2);
+                }
+                str += String.fromCharCode(parseInt(store, 2));
+                i += bytesLength - 1;
+            } else {
+                str += String.fromCharCode(_arr[i]);
+            }
+        }
+        return str;
+    }
+
+    //将字符串转为 Array byte数组
+    function stringToByte(str) {
+        var bytes = new Array();
+        var len, c;
+        len = str.length;
+        for (var i = 0; i < len; i++) {
+            c = str.charCodeAt(i);
+            if (c >= 0x010000 && c <= 0x10FFFF) {
+                bytes.push(((c >> 18) & 0x07) | 0xF0);
+                bytes.push(((c >> 12) & 0x3F) | 0x80);
+                bytes.push(((c >> 6) & 0x3F) | 0x80);
+                bytes.push((c & 0x3F) | 0x80);
+            } else if (c >= 0x000800 && c <= 0x00FFFF) {
+                bytes.push(((c >> 12) & 0x0F) | 0xE0);
+                bytes.push(((c >> 6) & 0x3F) | 0x80);
+                bytes.push((c & 0x3F) | 0x80);
+            } else if (c >= 0x000080 && c <= 0x0007FF) {
+                bytes.push(((c >> 6) & 0x1F) | 0xC0);
+                bytes.push((c & 0x3F) | 0x80);
+            } else {
+                bytes.push(c & 0xFF);
+            }
+        }
+        return bytes;
+    }
+</script>
+
+</body>
+</html>
