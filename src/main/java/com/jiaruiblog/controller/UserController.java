@@ -7,6 +7,8 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 //import io.swagger.annotations.Api;
 //import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -26,7 +28,7 @@ import java.util.List;
  * @Date 2022/6/4 9:38 上午
  * @Version 1.0
  **/
-//@Api(tags = "mongoDB模块")
+@Api(tags = "mongoDB模块")
 @RestController
 @Slf4j
 @RequestMapping("/mongodb")
@@ -35,7 +37,7 @@ public class UserController {
     @Autowired
     private MongoTemplate template;
 
-//    @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
+    @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")
     public ApiResult insertObj(@RequestBody  User user){
         log.info("新增用户入参=={}",user.toString());
