@@ -32,6 +32,8 @@ public class User {
 
     private String hobby;
 
+    private String avatar;
+
     private Date createDate;
 
     private Date updateDate;

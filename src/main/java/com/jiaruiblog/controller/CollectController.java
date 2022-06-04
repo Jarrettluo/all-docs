@@ -23,35 +23,35 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/collect")
 public class CollectController {
 
-    @ApiOperation(value = "新增单个标签", notes = "新增单个标签")
+    @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/insert")
     public ApiResult insertTag(@RequestBody Tag tag){
         return ApiResult.success("新增成功");
     }
 
-    @ApiOperation(value = "更新标签", notes = "更新标签")
-    @PostMapping(value = "/update")
-    public ApiResult updateTag(@RequestBody Tag tag){
-        return ApiResult.success("新增成功");
-    }
+//    @ApiOperation(value = "更新标签", notes = "更新标签")
+//    @PostMapping(value = "/update")
+//    public ApiResult updateTag(@RequestBody Tag tag){
+//        return ApiResult.success("新增成功");
+//    }
 
-    @ApiOperation(value = "根据id移除某个标签", notes = "根据id移除某个标签")
+    @ApiOperation(value = "根据id移除某个收藏文档", notes = "根据id移除某个文档")
     @PostMapping(value = "/remove")
     public ApiResult removeTag(@RequestBody Tag tag){
         return ApiResult.success("新增成功");
     }
 
-    @ApiOperation(value = "根据id查询某个标签", notes = "根据id查询某个标签")
-    @PostMapping(value = "/queryById")
-    public ApiResult queryById(@RequestBody Tag tag){
-        return ApiResult.success("新增成功");
-    }
-
-    @ApiOperation(value = "根据关键字检索标签", notes = "检索标签")
-    @PostMapping(value = "/search")
-    public ApiResult search(@RequestBody Tag tag){
-        return ApiResult.success("新增成功");
-    }
+//    @ApiOperation(value = "根据id查询某个标签", notes = "根据id查询某个标签")
+//    @PostMapping(value = "/queryById")
+//    public ApiResult queryById(@RequestBody Tag tag){
+//        return ApiResult.success("新增成功");
+//    }
+//
+//    @ApiOperation(value = "根据关键字检索标签", notes = "检索标签")
+//    @PostMapping(value = "/search")
+//    public ApiResult search(@RequestBody Tag tag){
+//        return ApiResult.success("新增成功");
+//    }
 
 
 }
