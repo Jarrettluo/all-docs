@@ -18,9 +18,9 @@ public class CollectDocRelationship {
     @Id
     private Long id;
 
-    private Integer createUser;
+    private Long userId;
 
-    private String content;
+    private Long docId;
 
     private Date createDate;
 

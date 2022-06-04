@@ -3,6 +3,8 @@ package com.jiaruiblog.entity;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -18,8 +20,10 @@ public class Comment {
     @Id
     private Long id;
 
+    @NotNull
     private Integer createUser;
 
+    @NotBlank(message = "")
     private String content;
 
     private Date createDate;

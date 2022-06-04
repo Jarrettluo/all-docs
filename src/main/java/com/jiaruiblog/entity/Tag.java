@@ -3,6 +3,7 @@ package com.jiaruiblog.entity;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 /**
@@ -18,6 +19,9 @@ public class Tag {
 
     @Id
     private Long id;
+
+    @NotBlank(message = "")
+    private String name;
 
     private Date createDate;
 

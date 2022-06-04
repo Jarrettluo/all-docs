@@ -21,15 +21,15 @@ import java.util.List;
 
 /**
  * @ClassName UserController
- * @Description TODO
+ * @Description 关于用户的所有请求关系
  * @Author luojiarui
  * @Date 2022/6/4 9:38 上午
  * @Version 1.0
  **/
-@Api(tags = "mongoDB模块")
+@Api(tags = "用户模块")
 @RestController
 @Slf4j
-@RequestMapping("/mongodb")
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired

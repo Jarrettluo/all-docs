@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 
@@ -22,6 +23,7 @@ public class User {
     @Id
     private Long id;
 
+    @NotBlank(message = "非空")
     private String username;
 
     private String message;
