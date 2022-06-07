@@ -26,7 +26,8 @@ import java.util.Date;
 public class CommentServiceImpl implements ICommentService {
 
     @Autowired
-    private MongoTemplate template;
+    MongoTemplate template;
+
 
     @Override
     public ApiResult insertTag(Comment comment) {
