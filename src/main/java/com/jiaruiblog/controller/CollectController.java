@@ -1,14 +1,14 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.entity.CollectDocRelationship;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.service.CollectService;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @ClassName CollectController
@@ -23,10 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/collect")
 public class CollectController {
 
+    @Autowired
+    CollectService collectService;
+
     @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/insert")
-    public ApiResult insertTag(@RequestBody Tag tag){
-        return ApiResult.success("新增成功");
+    public ApiResult insert(@RequestBody CollectDocRelationship collect){
+        return collectService.insert(collect);
     }
 
 //    @ApiOperation(value = "更新标签", notes = "更新标签")
@@ -36,9 +39,9 @@ public class CollectController {
 //    }
 
     @ApiOperation(value = "根据id移除某个收藏文档", notes = "根据id移除某个文档")
-    @PostMapping(value = "/remove")
-    public ApiResult removeTag(@RequestBody Tag tag){
-        return ApiResult.success("新增成功");
+    @DeleteMapping(value = "/remove")
+    public ApiResult remove(@RequestBody CollectDocRelationship collect){
+        return collectService.remove(collect);
     }
 
 //    @ApiOperation(value = "根据id查询某个标签", notes = "根据id查询某个标签")
