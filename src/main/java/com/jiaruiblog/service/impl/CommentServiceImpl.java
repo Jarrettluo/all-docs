@@ -30,7 +30,7 @@ public class CommentServiceImpl implements ICommentService {
 
 
     @Override
-    public ApiResult insertTag(Comment comment) {
+    public ApiResult insert(Comment comment) {
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
         Comment savedComment = template.save(comment);
@@ -38,7 +38,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public ApiResult updateTag(Comment comment) {
+    public ApiResult update(Comment comment) {
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
         Update update  = new Update();
         update.set("content", comment.getContent());
@@ -48,7 +48,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public ApiResult removeTag(Comment comment) {
+    public ApiResult remove(Comment comment) {
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 

@@ -5,9 +5,9 @@ import com.jiaruiblog.utils.ApiResult;
 
 public interface ICommentService {
 
-    ApiResult insertTag(Comment comment);
-    ApiResult updateTag(Comment comment);
-    ApiResult removeTag(Comment comment);
+    ApiResult insert(Comment comment);
+    ApiResult update(Comment comment);
+    ApiResult remove(Comment comment);
     ApiResult queryById(Comment comment);
     ApiResult search(Comment comment);
 

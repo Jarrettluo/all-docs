@@ -1,6 +1,7 @@
 package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.utils.ApiResult;
 
 /**
@@ -20,5 +21,8 @@ public interface TagService {
 
     ApiResult search(Tag tag);
 
-    
+    ApiResult addRelationShip(TagDocRelationship relationship);
+
+    ApiResult cancleTagRelationship(TagDocRelationship relationship);
+
 }

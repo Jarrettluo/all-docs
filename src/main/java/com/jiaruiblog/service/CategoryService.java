@@ -1,5 +1,6 @@
 package com.jiaruiblog.service;
 
+import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
@@ -37,6 +38,7 @@ public interface CategoryService {
      * @param category -> Category 实体
      * @return -> ApiResult
      */
+
     ApiResult queryById(Category category);
 
     /**
@@ -45,4 +47,9 @@ public interface CategoryService {
      * @return -> ApiResult
      */
     ApiResult search(Category category);
+
+    ApiResult addRelationShip(CateDocRelationship relationship);
+
+    ApiResult cancleCategoryRelationship(CateDocRelationship relationship);
+
 }

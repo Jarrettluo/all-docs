@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.service.CategoryService;
@@ -57,4 +58,14 @@ public class CategoryController {
     }
     // // TODO: 2022/6/4 添加种类下的doc动作，解除
 
+    @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
+    @PostMapping(value = "/addRelationship")
+    public ApiResult addRealationship(@RequestBody CateDocRelationship relationship) {
+        return categoryService.addRelationShip(relationship);
+    }
+    @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
+    @DeleteMapping(value = "/moveRelationship")
+    public ApiResult removeRelationship(@RequestBody CateDocRelationship relationship) {
+        return categoryService.cancleCategoryRelationship(relationship);
+    }
 }

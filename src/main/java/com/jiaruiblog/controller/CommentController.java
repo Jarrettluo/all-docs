@@ -32,20 +32,20 @@ public class CommentController {
 
     @ApiOperation(value = "新增单个评论", notes = "新增单个评论")
     @PostMapping(value = "/insert")
-    public ApiResult insertTag(@RequestBody Comment comment){
-        return commentService.insertTag(comment);
+    public ApiResult insert(@RequestBody Comment comment){
+        return commentService.insert(comment);
     }
 
     @ApiOperation(value = "更新评论", notes = "更新评论")
     @PostMapping(value = "/update")
-    public ApiResult updateTag(@RequestBody Comment comment){
-        return commentService.updateTag(comment);
+    public ApiResult update(@RequestBody Comment comment){
+        return commentService.update(comment);
     }
 
     @ApiOperation(value = "根据id移除某个评论", notes = "根据id移除某个评论")
     @PostMapping(value = "/remove")
-    public ApiResult removeTag(@RequestBody Comment comment){
-        return commentService.removeTag(comment);
+    public ApiResult remove(@RequestBody Comment comment){
+        return commentService.remove(comment);
     }
 
     @ApiOperation(value = "根据id查询某个评论", notes = "根据id查询某个评论")

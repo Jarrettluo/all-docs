@@ -1,6 +1,8 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.utils.ApiResult;
@@ -8,10 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 
@@ -59,6 +58,18 @@ public class TagController {
     @PostMapping(value = "/search")
     public ApiResult search(@RequestBody Tag tag){
         return tagService.search(tag);
+    }
+
+
+    @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
+    @PostMapping(value = "/addRelationship")
+    public ApiResult addRealationship(@RequestBody TagDocRelationship relationship) {
+        return tagService.addRelationShip(relationship);
+    }
+    @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
+    @DeleteMapping(value = "/moveRelationship")
+    public ApiResult removeRelationship(@RequestBody TagDocRelationship relationship) {
+        return tagService.cancleTagRelationship(relationship);
     }
 
 
