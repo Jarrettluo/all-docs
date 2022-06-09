@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/category")
 public class CategoryController {
 
+    // 一个文章只能有一个分类项目
+
     @Autowired
     CategoryService categoryService;
 
@@ -45,7 +47,8 @@ public class CategoryController {
         return categoryService.remove(category);
     }
 
-    @ApiOperation(value = "根据id查询某个分类", notes = "根据id查询某个分类")
+
+    @ApiOperation(value = "根据id查询某个分类", notes = "根据id查询某个分类下全部的文档")
     @GetMapping(value = "/queryById")
     public ApiResult queryById(@RequestBody Category category){
         return categoryService.queryById(category);
@@ -56,6 +59,8 @@ public class CategoryController {
     public ApiResult search(@RequestBody Category category){
         return categoryService.search(category);
     }
+
+
     // // TODO: 2022/6/4 添加种类下的doc动作，解除
 
     @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
@@ -68,4 +73,6 @@ public class CategoryController {
     public ApiResult removeRelationship(@RequestBody CateDocRelationship relationship) {
         return categoryService.cancleCategoryRelationship(relationship);
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.jiaruiblog.entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
 import java.util.Date;
@@ -13,6 +14,7 @@ import java.util.Date;
  * @Date 2022/6/4 10:28 上午
  * @Version 1.0
  **/
+@Document
 @Data
 public class Category {
 

@@ -2,6 +2,7 @@ package com.jiaruiblog.entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
@@ -12,18 +13,24 @@ import java.util.Date;
  * @Date 2022/6/4 10:30 上午
  * @Version 1.0
  **/
+@Document
 @Data
 public class CateDocRelationship {
 
+    // 主键ID
     @Id
-    private Long id;
+    Long id;
 
-    private Integer createUser;
+    // 分类id
+    Integer categoryId;
 
-    private String content;
+    // 文件id
+    Integer fileId;
 
-    private Date createDate;
+    // 创建时间
+    Date createDate;
 
-    private Date updateDate;
+    // 修改时间
+    Date updateDate;
 
 }
