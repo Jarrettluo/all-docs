@@ -1,16 +1,23 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
+import com.jiaruiblog.entity.DTO.CategoryDTO;
+import com.jiaruiblog.entity.DTO.RelationDTO;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.enums.Type;
 import com.jiaruiblog.service.CategoryService;
+import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @ClassName CategoryController
@@ -32,40 +39,112 @@ public class CategoryController {
     @Autowired
     CategoryService categoryService;
 
+    @Autowired
+    TagService tagService;
+
     @ApiOperation(value = "新增单个分类", notes = "新增单个分类")
     @PostMapping(value = "/insert")
-    public ApiResult insert(@RequestBody Category category){
-        return categoryService.insert(category);
+    public ApiResult insert(@RequestBody CategoryDTO categoryDTO){
+        switch (categoryDTO.getType()) {
+            case CATEGORY:
+                Category category = new Category();
+                return categoryService.insert(category);
+            case TAG:
+                Tag tag = new Tag();
+                tag.setName(categoryDTO.getName());
+                return tagService.insert(tag);
+            default:
+                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
     }
 
     @ApiOperation(value = "更新分类", notes = "更新分类")
     @PutMapping(value = "/update")
-    public ApiResult update(@RequestBody Category category){
-        return categoryService.update(category);
+    public ApiResult update(@RequestBody CategoryDTO categoryDTO){
+        switch (categoryDTO.getType()) {
+            case CATEGORY:
+                Category category = new Category();
+                category.setName(categoryDTO.getName());
+                category.setId(categoryDTO.getId());
+                return categoryService.update(category);
+            case TAG:
+                Tag tag = new Tag();
+                tag.setName(categoryDTO.getName());
+                tag.setId(categoryDTO.getId());
+                return tagService.update(tag);
+            default:
+                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
     }
 
     @ApiOperation(value = "根据id移除某个分类", notes = "根据id移除某个分类")
     @DeleteMapping(value = "/remove")
-    public ApiResult remove(@RequestBody Category category){
-        return categoryService.remove(category);
+    public ApiResult remove(@RequestBody CategoryDTO categoryDTO, HttpServletRequest request){
+        Long userId = (Long) request.getAttribute("id");
+        switch (categoryDTO.getType()) {
+            case CATEGORY:
+                Category category = new Category();
+                category.setId(categoryDTO.getId());
+                return categoryService.remove(category);
+            case TAG:
+                Tag tag = new Tag();
+                tag.setId(categoryDTO.getId());
+                return tagService.remove(tag);
+            default:
+                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
     }
 
-    @ApiOperation(value = "根据id移除某个分类", notes = "根据id移除某个分类")
+    @ApiOperation(value = "查询所有的分类或者是标签", notes = "查询列表")
     @GetMapping(value = "/all")
     public ApiResult list(@RequestParam Type type){
-        return categoryService.remove(category);
+        switch (type) {
+            case CATEGORY:
+                return categoryService.list();
+            case TAG:
+                return tagService.list();
+            default:
+                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
     }
 
     @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
     @PostMapping(value = "/addRelationship")
-    public ApiResult addRealationship(@RequestBody CateDocRelationship relationship) {
-        return categoryService.addRelationShip(relationship);
+    public ApiResult addRealationship(@RequestBody RelationDTO relationDTO) {
+        switch (relationDTO.getType()) {
+            case CATEGORY:
+                CateDocRelationship category = new CateDocRelationship();
+                category.setCategoryId(relationDTO.getId());
+                category.setFileId(relationDTO.getDocId());
+                return categoryService.addRelationShip(category);
+            case TAG:
+                TagDocRelationship tag = new TagDocRelationship();
+                tag.setTagId(relationDTO.getId());
+                tag.setFileId(relationDTO.getDocId());
+                return tagService.addRelationShip(tag);
+            default:
+                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
     }
-    @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
+    @ApiOperation(value = "断开连接关系s", notes = "检索分类")
     @DeleteMapping(value = "/removeRelationship")
-    public ApiResult removeRelationship(@RequestBody CateDocRelationship relationship) {
-        return categoryService.cancleCategoryRelationship(relationship);
+    public ApiResult removeRelationship(@RequestBody RelationDTO relationDTO) {
+        switch (relationDTO.getType()) {
+            case CATEGORY:
+                CateDocRelationship category = new CateDocRelationship();
+                category.setCategoryId(relationDTO.getId());
+                category.setFileId(relationDTO.getDocId());
+                return categoryService.cancleCategoryRelationship(category);
+            case TAG:
+                TagDocRelationship tag = new TagDocRelationship();
+                tag.setTagId(relationDTO.getId());
+                tag.setFileId(relationDTO.getDocId());
+                return tagService.cancleTagRelationship(tag);
+            default:
+                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
     }
+
 
 
 }

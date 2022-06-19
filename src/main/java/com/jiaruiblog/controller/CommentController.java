@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @ClassName CommentController
  * @Description TODO
@@ -30,7 +32,7 @@ public class CommentController {
 
     @ApiOperation(value = "新增单个评论", notes = "新增单个评论")
     @PostMapping(value = "/insert")
-    public ApiResult insert(@RequestBody CommentDTO commentDTO){
+    public ApiResult insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request){
         Comment comment = new Comment();
         comment.setContent(commentDTO.getContent());
         comment.setDocId(commentDTO.getDocId().longValue());
@@ -40,13 +42,13 @@ public class CommentController {
 
     @ApiOperation(value = "更新评论", notes = "更新评论")
     @PostMapping(value = "/update")
-    public ApiResult update(@RequestBody Comment comment){
+    public ApiResult update(@RequestBody Comment comment, HttpServletRequest request){
         return commentService.update(comment);
     }
 
     @ApiOperation(value = "根据id移除某个评论", notes = "根据id移除某个评论")
     @DeleteMapping(value = "/remove")
-    public ApiResult remove(@RequestBody Comment comment){
+    public ApiResult remove(@RequestBody Comment comment, HttpServletRequest request){
         return commentService.remove(comment);
     }
 

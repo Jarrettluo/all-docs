@@ -22,10 +22,10 @@ public class CateDocRelationship {
     Long id;
 
     // 分类id
-    Integer categoryId;
+    Long categoryId;
 
     // 文件id
-    Integer fileId;
+    Long fileId;
 
     // 创建时间
     Date createDate;

@@ -18,6 +18,12 @@ public class TagDocRelationship {
     @Id
     private Long id;
 
+    // 分类id
+    Long tagId;
+
+    // 文件id
+    Long fileId;
+
     private Date createDate;
 
     private Date updateDate;
