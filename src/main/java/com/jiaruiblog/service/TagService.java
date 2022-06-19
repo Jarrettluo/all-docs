@@ -21,6 +21,8 @@ public interface TagService {
 
     ApiResult search(Tag tag);
 
+    ApiResult list();
+
     ApiResult addRelationShip(TagDocRelationship relationship);
 
     ApiResult cancleTagRelationship(TagDocRelationship relationship);

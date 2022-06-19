@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Author Jarrett Luo
@@ -36,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
     MongoTemplate mongoTemplate;
 
     @Autowired
-    FileDocumentService file;
+    FileDocumentService fileDocumentService;
 
     /**
      * 新增一条分类记录
@@ -96,12 +97,17 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Query query = new Query(Criteria.where("categoryId").is(categoryDb.getId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
-        List<Integer> ids = relationships.stream().map(CateDocRelationship::getFileid).collect(Collectors.toList());
+        List<Long> ids = relationships.stream().map(CateDocRelationship::getFileid).collect(Collectors.toList());
         return null;
     }
 
     @Override
     public ApiResult search(Category category) {
+        return null;
+    }
+
+    @Override
+    public ApiResult list() {
         return null;
     }
 

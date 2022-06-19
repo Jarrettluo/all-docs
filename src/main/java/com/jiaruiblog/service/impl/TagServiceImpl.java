@@ -65,6 +65,13 @@ public class TagServiceImpl implements TagService {
         return null;
     }
 
+
+    @Override
+    public ApiResult list() {
+        return null;
+    }
+
+
     /**
      *
      * @param relationship

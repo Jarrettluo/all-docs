@@ -48,6 +48,8 @@ public interface CategoryService {
      */
     ApiResult search(Category category);
 
+    ApiResult list();
+
     ApiResult addRelationShip(CateDocRelationship relationship);
 
     ApiResult cancleCategoryRelationship(CateDocRelationship relationship);
