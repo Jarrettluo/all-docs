@@ -2,7 +2,7 @@ package com.jiaruiblog.repository;
 
 import com.jiaruiblog.entity.Book;
 import org.elasticsearch.search.SearchHits;
-import org.springframework.data.elasticsearch.annotations.Highlight;
+import org.springframework.data.elasticsearch.annotationsI.Highlight;
 import org.springframework.data.elasticsearch.annotations.HighlightField;
 import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.core.SearchHits;
