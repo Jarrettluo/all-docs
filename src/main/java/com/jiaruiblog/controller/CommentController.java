@@ -48,7 +48,7 @@ public class CommentController {
         return commentService.remove(comment);
     }
 
-    @ApiOperation(value = "根据id查询某个评论", notes = "根据id查询某个评论")
+    @ApiOperation(value = "根据文档id查询相关评论", notes = "根据id查询某个评论")
     @PostMapping(value = "/queryById")
     public ApiResult queryById(@RequestBody Comment comment){
         return commentService.queryById(comment);
