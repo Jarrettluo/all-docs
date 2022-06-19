@@ -3,6 +3,7 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.enums.Type;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 public class CategoryController {
 
     // 一个文章只能有一个分类项目
+    // 一个文章下可能有多个列表
+
 
     @Autowired
     CategoryService categoryService;
@@ -47,21 +50,11 @@ public class CategoryController {
         return categoryService.remove(category);
     }
 
-
-    @ApiOperation(value = "根据id查询某个分类", notes = "根据id查询某个分类下全部的文档")
-    @GetMapping(value = "/queryById")
-    public ApiResult queryById(@RequestBody Category category){
-        return categoryService.queryById(category);
+    @ApiOperation(value = "根据id移除某个分类", notes = "根据id移除某个分类")
+    @GetMapping(value = "/all")
+    public ApiResult list(@RequestParam Type type){
+        return categoryService.remove(category);
     }
-
-    @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
-    @PostMapping(value = "/search")
-    public ApiResult search(@RequestBody Category category){
-        return categoryService.search(category);
-    }
-
-
-    // // TODO: 2022/6/4 添加种类下的doc动作，解除
 
     @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
     @PostMapping(value = "/addRelationship")
@@ -69,7 +62,7 @@ public class CategoryController {
         return categoryService.addRelationShip(relationship);
     }
     @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
-    @DeleteMapping(value = "/moveRelationship")
+    @DeleteMapping(value = "/removeRelationship")
     public ApiResult removeRelationship(@RequestBody CateDocRelationship relationship) {
         return categoryService.cancleCategoryRelationship(relationship);
     }

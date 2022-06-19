@@ -493,7 +493,7 @@ DELETE /category/remove
 
 #### 3.5.2 接口地址
 ```http request
-POST /categroy/add
+POST /categroy/addRelationship
 ```
 #### 3.5.3 请求参数
 
@@ -527,7 +527,7 @@ POST /categroy/add
 
 #### 3.6.2 接口地址
 ```http request
-DELETE /category/remove
+DELETE /category/removeRelationship
 ```
 #### 3.6.3 请求参数
 ```json

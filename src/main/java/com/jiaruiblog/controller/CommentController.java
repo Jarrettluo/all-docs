@@ -2,6 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Comment;
+import com.jiaruiblog.entity.DTO.CommentDTO;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.utils.ApiResult;
@@ -9,10 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @ClassName CommentController
@@ -32,7 +30,11 @@ public class CommentController {
 
     @ApiOperation(value = "新增单个评论", notes = "新增单个评论")
     @PostMapping(value = "/insert")
-    public ApiResult insert(@RequestBody Comment comment){
+    public ApiResult insert(@RequestBody CommentDTO commentDTO){
+        Comment comment = new Comment();
+        comment.setContent(commentDTO.getContent());
+        comment.setDocId(commentDTO.getDocId().longValue());
+//        comment.setId(com);
         return commentService.insert(comment);
     }
 
@@ -43,21 +45,15 @@ public class CommentController {
     }
 
     @ApiOperation(value = "根据id移除某个评论", notes = "根据id移除某个评论")
-    @PostMapping(value = "/remove")
+    @DeleteMapping(value = "/remove")
     public ApiResult remove(@RequestBody Comment comment){
         return commentService.remove(comment);
     }
 
     @ApiOperation(value = "根据文档id查询相关评论", notes = "根据id查询某个评论")
-    @PostMapping(value = "/queryById")
+    @PostMapping(value = "/list")
     public ApiResult queryById(@RequestBody Comment comment){
         return commentService.queryById(comment);
-    }
-
-    @ApiOperation(value = "根据关键字检索评论", notes = "检索评论")
-    @PostMapping(value = "/search")
-    public ApiResult search(@RequestBody Comment comment){
-        return commentService.search(comment);
     }
 
 }
