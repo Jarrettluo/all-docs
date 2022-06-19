@@ -1,7 +1,9 @@
 package com.jiaruiblog.entity;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,13 +20,17 @@ import java.util.Date;
  **/
 @Document
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
     private Long id;
 
     @NotBlank(message = "非空")
-    private String username;
+    private String userName;
+
+    private String password;
 
     private String message;
 

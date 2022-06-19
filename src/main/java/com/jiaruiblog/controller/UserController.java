@@ -2,6 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.utils.JwtUtil;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -16,8 +17,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName UserController
@@ -31,6 +35,16 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/user")
 public class UserController {
+
+    static Map<Integer, User> userMap = new HashMap<>();
+
+    static {
+        //模拟数据库
+        User user1 = new User(1L,"张三","123456", "fsd", "xc", "c", "dfds", new Date(), new Date());
+        userMap.put(1, user1);
+        User user2 = new User(2L,"李四","123123", "fsd", "xc", "c", "dfds", new Date(), new Date());
+        userMap.put(2, user2);
+    }
 
     @Autowired
     private MongoTemplate template;
@@ -66,7 +80,7 @@ public class UserController {
     @ApiOperation(value = "根据用户名称查询", notes = "根据用户名称查询")
     @PostMapping(value = "/getByUsername")
     public ApiResult getByUsername(@RequestBody  User user){
-        Query query = new Query(Criteria.where("username").is(user.getUsername()));
+        Query query = new Query(Criteria.where("username").is(user.getUserName()));
         User one = template.findOne(query, User.class);
         return ApiResult.success(one);
     }
@@ -91,6 +105,34 @@ public class UserController {
         DeleteResult remove = template.remove(user);
         log.info("删除的结果==={}",remove);
         return ApiResult.success("删除成功");
+    }
+
+
+    /**
+     * 模拟用户 登录
+     */
+    @RequestMapping("/login")
+    public String login(User user)
+    {
+        for (User dbUser : userMap.values()) {
+            if (dbUser.getUserName().equals(user.getUserName()) && dbUser.getPassword().equals(user.getPassword())) {
+                log.info("登录成功！生成token！");
+                String token = JwtUtil.createToken(dbUser);
+                return token;
+            }
+        }
+        return "";
+    }
+
+    /**
+     * 查询 用户信息，登录后携带JWT才能访问
+     */
+    @RequestMapping("/secure/getUserInfo")
+    public String login(HttpServletRequest request) {
+        Integer id = (Integer) request.getAttribute("id");
+        String userName = request.getAttribute("userName").toString();
+        String password= request.getAttribute("password").toString();
+        return "当前用户信息id=" + id + ",userName=" + userName+ ",password=" + password;
     }
 
 

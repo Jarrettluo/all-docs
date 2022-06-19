@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @ClassName CollectController
  * @Description TODO
@@ -29,17 +31,19 @@ public class CollectController {
 
     @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/insert")
-    public ApiResult insert(@RequestBody CollectDTO collect){
+    public ApiResult insert(@RequestBody CollectDTO collect, HttpServletRequest request){
         CollectDocRelationship relationship = new CollectDocRelationship();
         collect.setDocId(collect.getDocId());
+        relationship.setUserId((Long) request.getAttribute("id"));
         return collectService.insert(relationship);
     }
 
     @ApiOperation(value = "根据id移除某个收藏文档", notes = "根据id移除某个文档")
     @DeleteMapping(value = "/remove")
-    public ApiResult remove(@RequestBody CollectDTO collect){
+    public ApiResult remove(@RequestBody CollectDTO collect, HttpServletRequest request){
         CollectDocRelationship relationship = new CollectDocRelationship();
         collect.setDocId(collect.getDocId());
+        relationship.setUserId((Long) request.getAttribute("id"));
         return collectService.remove(relationship);
     }
 

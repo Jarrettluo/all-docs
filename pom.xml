@@ -113,6 +113,14 @@
             <version>6.8.10</version>
         </dependency>
 
+        <!-- 用户登录 -->
+        <!-- 引入jwt-->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>3.8.2</version>
+        </dependency>
+
 
     </dependencies>
 
