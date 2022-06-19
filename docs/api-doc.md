@@ -1,5 +1,5 @@
 # Api-doc
-
+[toc]
 
 ## 1 文档信息
 |版本|日期|修订内容|修订人|审核人|
@@ -7,23 +7,31 @@
 |v1.0|2022-06-19|新建|Jarrett|Jarrett|
 
 ## 2 api 说明
-### 2.1 文档检索
+### 2.1 文档检索和文档分页列表
 #### 2.1.1 接口原型
+用于首页进行文件检索。
 
 #### 2.1.2 接口地址
 ```http request
-GET  /document/search
+GET  /document/list
 ```
-#### 2.1.2 请求参数
+#### 2.1.3 请求参数
+
 ```json
 {
-  "param": "key-word" ,
+  "param": {
+    "type": "ALL | Filter | Category | tag",
+    "filterWord": "xxx",
+    "page": 1,
+    "rows": 10,
+    "categoryId": 1,
+    "tagId": 5
+  },
   "token": "string",
   "data": "none"
 }
 ```
-
-#### 2.1.3 响应结果
+#### 2.1.4 响应结果
 
 ```json
 {
@@ -32,12 +40,25 @@ GET  /document/search
   "data": [
     {
       "id": 1,
-      "title":"",
+      "title": "",
       "abstract": "abstract",
+      "size": 23334,
+      
       "collectNum": 1,
       "commentNum": 123,
-      "category": "category",
-      "tags": ["tag1", "tag2", "tag3"]
+      "category": {
+        "id": 12,
+        "name": "name"
+      },
+      "tags": [
+        {
+          "id": 23,
+          "name": "name"
+        }
+      ],
+      "userName": "UserName",
+      "createTime": "CreateTime",
+      "updateTime": "UpdateTime"
     }
   ]
 }
@@ -45,27 +66,50 @@ GET  /document/search
 
 ### 2.2 单个文档详情
 #### 2.1.1 接口原型
+点击搜索结果的详情，查看到的结果信息
 
 #### 2.1.2 接口地址
 ```http request
-GET  /xxx/xxx
+GET  /document/detail
 ```
-#### 2.1.2 请求参数
+#### 2.1.3 请求参数
+
 ```json
 {
-  "param": "key-word" ,
+  "param": {
+    "docId": 12
+  },
   "token": "string",
   "data": "none"
 }
 ```
 
-#### 2.1.3 响应结果
+#### 2.1.4 响应结果
 ```json
 {
   "code": 200,
   "timestamp": 1632302,
   "data": {
-    
+    "id": 1,
+    "title":"",
+    "abstract": "abstract",
+    "size": 23334,
+    "collectNum": 1,
+    "commentNum": 123,
+    "category": {
+      "id": 12,
+      "name": "name"
+    },
+    "tags": [
+      {
+        "id": 23,
+        "name": "name"
+      }
+    ],
+    "url": "url",
+    "userName": "UserName",
+    "createTime": "CreateTime",
+    "updateTime": "UpdateTime"
   }
 }
 ```
@@ -78,7 +122,7 @@ GET  /xxx/xxx
 ```http request
 POST  /collect/insert
 ```
-#### 2.3.2 请求参数
+#### 2.3.3 请求参数
 
 ```json
 {
@@ -90,7 +134,7 @@ POST  /collect/insert
 }
 ```
 
-#### 2.3.3 响应结果
+#### 2.3.4 响应结果
 ```json
 {
   "code": 200,
@@ -130,7 +174,6 @@ DELETE /collect/remove
 #### 2.5.1 接口原型
 对某一篇文档，增加一条评论信息。
 
-
 #### 2.1.2 接口地址
 ```http request
 POST  /comment/insert
@@ -159,6 +202,7 @@ POST  /comment/insert
 
 ### 2.5 文档修改一条评论
 #### 2.5.1 接口原型
+在文章详情页，修改某一条评论信息
 
 #### 2.5.2 接口地址
 ```http request
@@ -185,6 +229,43 @@ PUT /comment/update
 }
 ```
 
+### 2.6 首页查看分类信息【热度榜】
+#### 2.6.1 接口原型
+在搜索页面进行展示热度榜
+
+#### 2.6.2 接口地址
+```http request
+DELETE  /category/hotDoc
+```
+#### 2.6.3 请求参数
+```json
+{
+  "param": "none",
+  "token": "string",
+  "data": "none"
+}
+```
+#### 2.6.4 响应结果
+
+```json
+{
+  "code": 200,
+  "timestamp": 1632302,
+  "data": [
+    {
+      "categoryId": 12,
+      "name": 123,
+      "docList": [
+        {
+          "docName": "xxxxx",
+          "docId": 323
+        }
+      ]
+    }
+  ]
+}
+```
+
 ### 2.7 文档删除一条评论
 #### 2.7.1 接口原型
 
@@ -193,14 +274,14 @@ PUT /comment/update
 DELETE  /comment/remove
 ```
 #### 2.7.3 请求参数
+
 ```json
 {
-  "param": "key-word",
+  "param": {
+    "commentId": 3232
+  },
   "token": "string",
-  "data": {
-    "content": "content of comment",
-    "docId": 123
-  }
+  "data": "none"
 }
 ```
 
@@ -218,7 +299,7 @@ DELETE  /comment/remove
 
 #### 2.8.2 接口地址
 ```http request
-GET  /comment/queryById
+GET  /comment/list
 ```
 #### 2.9.3 请求参数
 
@@ -251,45 +332,90 @@ GET  /comment/queryById
 
 
 ## 3 管理系统界面
-### 3.1 拉取全部的文档
+### 3.1 上传文档
 #### 3.1.1 接口原型
-
+管理界面第一项，增加文档
 #### 3.1.2 接口地址
 ```http request
-GET  /xxx/xxx
+GET  /document/upload
 ```
 #### 3.1.3 请求参数
+
 ```json
 {
-  "param": "key-word" ,
+  "param": {
+    "page": 1,
+    "row": 10
+  },
   "token": "string",
   "data": "none"
 }
 ```
 
 #### 3.1.4 响应结果
+
 ```json
 {
   "code": 200,
   "timestamp": 1632302,
-  "data": {
-    
-  }
+  "data": [
+    {
+      "id": 332,
+      "name": "name",
+      "size": 23232,
+      "category": "category",
+      "userName": "ljr",
+      "createTime": "2022-08-12 32:00:22"
+    }
+  ]
 }
 ```
-### 3.2 根据分类拉取全部的文档
+
+### 3.2 管理界面通过文档id删除一篇文档
 #### 3.2.1 接口原型
 
 #### 3.2.2 接口地址
 ```http request
-GET  /xxx/xxx
+GET  /document/remove
 ```
 #### 3.2.3 请求参数
+
 ```json
 {
-  "param": "key-word" ,
+  "param": "key-word",
   "token": "string",
-  "data": "none"
+  "data": {
+    "docId": 23
+  }
+}
+```
+
+#### 3.1.3 响应结果
+```json
+{
+  "code": 200,
+  "timestamp": 1632302,
+  "data": "SUCCESS"
+}
+```
+
+### 3.2 增加一个分类/标签信息
+#### 3.2.1 接口原型
+文档分类页面，文档标签页面
+#### 3.2.2 接口地址
+```http request
+POST /category/insert
+```
+#### 3.2.3 请求参数
+
+```json
+{
+  "param": "key-word",
+  "token": "string",
+  "data": {
+    "name": "",
+    "type": "CATEGORY | TAG"
+  }
 }
 ```
 
@@ -298,129 +424,18 @@ GET  /xxx/xxx
 {
   "code": 200,
   "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-### 3.2 根据标签拉取全部的文档
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-GET  /xxx/xxx
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-### 3.4 删除一篇文档
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-GET  /xxx/xxx
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-### 3.5 读取文档的全部详细信息
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-GET  /xxx/xxx
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-### 3.6 增加一个分类信息
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-POST /category/insert
-```
-#### 3.1.2 请求参数
-
-```json
-{
-  "param": "key-word",
-  "token": "string",
-  "data": {
-    "name": ""
-  }
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
   "data": "SUCCESS"
 }
 ```
 
-### 3.7 编辑一个分类信息
-#### 3.1.1 接口原型
+### 3.3 编辑一个分类/标签信息
+#### 3.3.1 接口原型
 
-#### 3.1.2 接口地址
+#### 3.3.2 接口地址
 ```http request
 PUT  /category/update
 ```
-#### 3.1.2 请求参数
+#### 3.3.3 请求参数
 
 ```json
 {
@@ -428,12 +443,13 @@ PUT  /category/update
   "token": "string",
   "data": {
     "name": "",
-    "id":1
+    "id":1,
+    "type": "CATEGORY | TAG"
   }
 }
 ```
 
-#### 3.1.3 响应结果
+#### 3.3.4 响应结果
 ```json
 {
   "code": 200,
@@ -442,25 +458,27 @@ PUT  /category/update
 }
 ```
 
-### 3.8 删除一个分类信息
-#### 3.1.1 接口原型
+### 3.4 删除一个分类/标签信息
+#### 3.4.1 接口原型
 
-#### 3.1.2 接口地址
+#### 3.4.2 接口地址
 ```http request
 DELETE /category/remove
 ```
-#### 3.1.2 请求参数
+#### 3.4.2 请求参数
+
 ```json
 {
-  "param": "key-word" ,
+  "param": "key-word",
   "token": "string",
   "data": {
-    "id":1
+    "id": 1,
+    "type": "CATEGORY | TAG"
   }
 }
 ```
 
-#### 3.1.3 响应结果
+#### 3.4.3 响应结果
 ```json
 {
   "code": 200,
@@ -469,247 +487,100 @@ DELETE /category/remove
 }
 ```
 
-### 3.9 增加一个标签信息
-#### 3.1.1 接口原型
+### 3.5 某个分类/标签下增加文档
+#### 3.5.1 接口原型
+选中某个分类或者标签的时候，增加全部文档
 
-#### 3.1.2 接口地址
+#### 3.5.2 接口地址
 ```http request
-GET  /tag/insert
+POST /categroy/add
 ```
-#### 3.1.2 请求参数
+#### 3.5.3 请求参数
+
 ```json
 {
-  "param": "key-word" ,
+  "param": "key-word",
   "token": "string",
-  "data": "none"
+  "data": {
+    "type": "CATEGORY | TAG",
+    "id": 123,
+    "docId": 43
+  }
 }
 ```
 
-#### 3.1.3 响应结果
+#### 3.5.4 响应结果
+
 ```json
 {
   "code": 200,
   "timestamp": 1632302,
   "data": {
-    
+    "type": "category",
+    "result": "success"
   }
 }
 ```
 
-### 3.10 编辑一个标签信息
-#### 3.1.1 接口原型
+### 3.6 某个分类/标签下去除文档
+#### 3.6.1 接口原型
 
-#### 3.1.2 接口地址
+#### 3.6.2 接口地址
 ```http request
-PUT /tag/update
+DELETE /category/remove
 ```
-#### 3.1.2 请求参数
+#### 3.6.3 请求参数
 ```json
 {
   "param": "key-word" ,
   "token": "string",
-  "data": "none"
+  "data": {
+    "type": "CATEGORY | TAG",
+    "id": 123,
+    "docId": 43
+  }
 }
 ```
 
-#### 3.1.3 响应结果
+#### 3.6.4 响应结果
 ```json
 {
   "code": 200,
   "timestamp": 1632302,
   "data": {
-    
+    "type": "category",
+    "result": "success"
   }
 }
 ```
 
-### 3.11 删除一个标签信息
-#### 3.1.1 接口原型
+### 3.7 查全部的分类信息
+#### 3.7.1 接口原型
 
-#### 3.1.2 接口地址
+#### 3.7.2 接口地址
 ```http request
-DELETE /tag/remove
+GET /category/all
 ```
-#### 3.1.2 请求参数
+#### 3.7.3 请求参数
+
 ```json
 {
-  "param": "key-word" ,
+  "param": {
+    "type": "CATEGORY | TAG"
+  },
   "token": "string",
   "data": "none"
 }
 ```
 
-#### 3.1.3 响应结果
+#### 3.7.4 响应结果
 ```json
 {
   "code": 200,
   "timestamp": 1632302,
   "data": {
-    
+    "type": "category",
+    "result": "success"
   }
 }
 ```
-
-### 3.12 某个分类下增加文档
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-DELETE /tag/remove
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-### 3.13 某个分类下去除文档
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-DELETE /tag/remove
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-### 3.14 某个标签下添加文档
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-DELETE /tag/remove
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-### 3.15 某个标签下去除文档
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-DELETE /tag/remove
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-### 3.16 查全部的分类信息
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-DELETE /tag/remove
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
-
-### 3.17 查全部的标签信息
-#### 3.1.1 接口原型
-
-#### 3.1.2 接口地址
-```http request
-DELETE /tag/remove
-```
-#### 3.1.2 请求参数
-```json
-{
-  "param": "key-word" ,
-  "token": "string",
-  "data": "none"
-}
-```
-
-#### 3.1.3 响应结果
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": {
-    
-  }
-}
-```
-
