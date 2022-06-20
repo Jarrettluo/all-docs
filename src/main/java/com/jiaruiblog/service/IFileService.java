@@ -1,6 +1,11 @@
 package com.jiaruiblog.service;
 
+import com.jiaruiblog.entity.DTO.DocumentDTO;
 import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.utils.ApiResult;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -61,4 +66,28 @@ public interface IFileService {
      * @return
      */
     List<FileDocument> listFilesByPage(int pageIndex, int pageSize);
+
+    /**
+     * 分页检索目前的文档信息
+     * @param documentDTO
+     * @return
+     */
+    ApiResult list(DocumentDTO documentDTO);
+
+    /**
+     *根据文档的详情，查询该文档的详细信息
+     *
+     * @param id ->Long
+     * @return ApiResult
+     */
+    ApiResult detail(Long id);
+
+    /**
+     * 删除掉已经存在的文档
+     *
+     * @param id -> Long
+     * @return ApiResult
+     */
+    ApiResult remove(Long id);
+
 }
