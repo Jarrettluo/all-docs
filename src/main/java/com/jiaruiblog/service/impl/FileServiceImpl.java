@@ -1,7 +1,11 @@
-package com.jiaruiblog.service;
+package com.jiaruiblog.service.impl;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
+import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.entity.DTO.DocumentDTO;
+import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -181,5 +185,44 @@ public class FileServiceImpl implements IFileService {
         field.exclude("content");
         List<FileDocument> files = mongoTemplate.find(query, FileDocument.class, collectionName);
         return files;
+    }
+
+    @Override
+    public ApiResult list(DocumentDTO documentDTO) {
+        switch (documentDTO.getType()) {
+            case ALL:
+                break;
+            case TAG:
+                break;
+            case FILTER:
+                break;
+            case CATEGORY:
+                break;
+            default:
+                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
+    }
+
+    @Override
+    public ApiResult detail(Long id) {
+        FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
+        if( fileDocument == null ) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
+        }
+        // 查询评论信息，查询分类信息，查询分类关系，查询标签信息，查询标签关系信息
+
+        return null;
+    }
+
+    @Override
+    public ApiResult remove(Long id) {
+        FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
+        if( fileDocument == null ) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
+        }
+        // 删除评论信息，删除分类关系，删除标签关系
+
+        removeFile(id.toString(), true);
+        return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
     }
 }
