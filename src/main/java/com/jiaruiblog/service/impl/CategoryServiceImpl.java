@@ -141,4 +141,27 @@ public class CategoryServiceImpl implements CategoryService {
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
+    /**
+     * 根据category的id，查询相关连的文件id列表
+     * @param categoryDb
+     * @return
+     */
+    public List<Long> queryDocListByCategory(Category categoryDb) {
+        Query query = new Query(Criteria.where("categoryId").is(categoryDb.getId()));
+        List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
+        if(result.isEmpty()) {
+            return null;
+        }
+        return result.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据分类的id查询分类信息
+     * @param id
+     * @return
+     */
+    public Category queryById(Long id) {
+        return mongoTemplate.findById(id, Category.class, COLLECTION_NAME);
+    }
+
 }

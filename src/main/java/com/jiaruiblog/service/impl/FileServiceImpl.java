@@ -3,7 +3,9 @@ package com.jiaruiblog.service.impl;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.DTO.DocumentDTO;
+import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -39,6 +41,9 @@ public class FileServiceImpl implements IFileService {
     private GridFsTemplate gridFsTemplate;
     @Autowired
     private GridFSBucket gridFSBucket;
+
+    @Autowired
+    private CategoryServiceImpl categoryServiceImpl;
 
     /**
      * js文件流上传附件
@@ -197,6 +202,13 @@ public class FileServiceImpl implements IFileService {
             case FILTER:
                 break;
             case CATEGORY:
+                Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
+                if(category == null ) {
+                    System.out.println("直接进行返回空");
+                }
+                List<Long> fileListId = categoryServiceImpl.queryDocListByCategory(category);
+                List<FileDocument> fileDocuments = mongoTemplate.findById(fileListId.get(0));
+
                 break;
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
