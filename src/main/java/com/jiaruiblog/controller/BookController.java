@@ -32,15 +32,15 @@ public class BookController {
 
     @PostMapping("/book")
     public Map<String,String> addBook(@RequestBody Book book){
-        bookService.addBook(book);
+//        bookService.addBook(book);
         Map<String,String> map = new HashMap<>();
-        map.put("msg","ok");
+//        map.put("msg","ok");
         return map;
     }
 
-    @GetMapping("/book/search")
-    public SearchHits<com.gyb.elasticsearch.demo.entity.es.Book> search(String key){
-        return bookService.searchBook1(key);
-    }
+//    @GetMapping("/book/search")
+//    public SearchHits<com.gyb.elasticsearch.demo.entity.es.Book> search(String key){
+//        return bookService.searchBook1(key);
+//    }
 }
 

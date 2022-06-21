@@ -2,6 +2,7 @@ package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.service.FileDocumentService;
 import com.jiaruiblog.utils.ApiResult;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
  * @Date 2022/6/9 16:07
  * @Version 1.0
  */
+@Service
 public class FileDocumentServiceImpl implements FileDocumentService {
 
     @Override

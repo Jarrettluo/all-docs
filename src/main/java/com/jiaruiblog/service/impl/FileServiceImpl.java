@@ -5,7 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.DTO.DocumentDTO;
-import com.jiaruiblog.service.CategoryService;
+import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -13,6 +13,9 @@ import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.result.DeleteResult;
 import com.jiaruiblog.entity.FileDocument;
+
+
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -26,9 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class FileServiceImpl implements IFileService {
@@ -194,8 +195,12 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public ApiResult list(DocumentDTO documentDTO) {
+        List<DocumentVO> documentVOS = Lists.newArrayList();
+        DocumentVO documentVO = new DocumentVO();
         switch (documentDTO.getType()) {
             case ALL:
+                List<FileDocument> fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
+                documentVOS = convertDocuments(fileDocuments);
                 break;
             case TAG:
                 break;
@@ -206,13 +211,18 @@ public class FileServiceImpl implements IFileService {
                 if(category == null ) {
                     System.out.println("直接进行返回空");
                 }
-                List<Long> fileListId = categoryServiceImpl.queryDocListByCategory(category);
-                List<FileDocument> fileDocuments = mongoTemplate.findById(fileListId.get(0));
+                List<Long> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
+
+                List<FileDocument> fileDocuments1 = new ArrayList<>();
+                for(Long id : fileIdList) {
+                    fileDocuments1.add(mongoTemplate.findById(id, FileDocument.class, collectionName));
+                }
 
                 break;
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
+        return ApiResult.success(documentVOS);
     }
 
     @Override
@@ -236,5 +246,46 @@ public class FileServiceImpl implements IFileService {
 
         removeFile(id.toString(), true);
         return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description //TODO
+     * @Date 10:16 下午 2022/6/21
+     * @Param fileDocuments
+     * @return java.util.List<com.jiaruiblog.entity.vo.DocumentVO>
+     **/
+    private List<DocumentVO> convertDocuments(List<FileDocument> fileDocuments) {
+        if( fileDocuments == null) {
+            return null;
+        }
+        List<DocumentVO> documentVOS = Lists.newArrayList();
+        DocumentVO documentVO = new DocumentVO();
+        for(FileDocument fileDocument : fileDocuments) {
+            documentVO = convertDocument(documentVO, fileDocument);
+            documentVOS.add(documentVO);
+        }
+        return documentVOS;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description //TODO
+     * @Date 10:24 下午 2022/6/21
+     * @Param [documentVO, fileDocument]
+     * @return com.jiaruiblog.entity.vo.DocumentVO
+     **/
+    private DocumentVO convertDocument(DocumentVO documentVO, FileDocument fileDocument) {
+        if(documentVO == null || fileDocument == null ){
+            return documentVO;
+        }
+        documentVO.setId(Long.parseLong(fileDocument.getId()));
+        documentVO.setSize((fileDocument.getSize()));
+        documentVO.setTitle(fileDocument.getName());
+        documentVO.setDescription(fileDocument.getMd5());
+        documentVO.setUserName("luojiarui");
+        documentVO.setCreateTime(fileDocument.getUploadDate());
+        // TODO 在这里进行查询 评论， 收藏，分类， 标签
+        return documentVO;
     }
 }
