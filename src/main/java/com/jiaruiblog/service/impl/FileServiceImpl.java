@@ -6,6 +6,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.DTO.DocumentDTO;
 import com.jiaruiblog.entity.vo.DocumentVO;
+import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -195,12 +196,8 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public ApiResult list(DocumentDTO documentDTO) {
-        List<DocumentVO> documentVOS = Lists.newArrayList();
-        DocumentVO documentVO = new DocumentVO();
         switch (documentDTO.getType()) {
             case ALL:
-                List<FileDocument> fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
-                documentVOS = convertDocuments(fileDocuments);
                 break;
             case TAG:
                 break;
@@ -222,7 +219,6 @@ public class FileServiceImpl implements IFileService {
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        return ApiResult.success(documentVOS);
     }
 
     @Override
