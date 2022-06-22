@@ -1,10 +1,8 @@
 package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.entity.CateDocRelationship;
-import com.jiaruiblog.entity.Tag;
-import com.jiaruiblog.entity.TagDocRelationship;
-import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.*;
+import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.result.UpdateResult;
@@ -15,6 +13,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @Author Jarrett Luo
  * @Date 2022/6/7 11:40
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TagServiceImpl implements TagService {
+
+    private static String COLLECTION_NAME = "fileDatas";
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -71,6 +75,16 @@ public class TagServiceImpl implements TagService {
         return null;
     }
 
+    /**
+     * @Author luojiarui
+     * @Description // 根据id进行检索
+     * @Date 11:15 下午 2022/6/22
+     * @Param [id]
+     * @return com.jiaruiblog.entity.Tag
+     **/
+    public Tag queryByTagId(Long id) {
+        return mongoTemplate.findById(id, Tag.class, COLLECTION_NAME);
+    }
 
     /**
      *
@@ -87,6 +101,44 @@ public class TagServiceImpl implements TagService {
     public ApiResult cancleTagRelationship(TagDocRelationship relationship) {
         mongoTemplate.remove(relationship);
         return ApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 根据文档的信息找到全部的tag信息
+     * @Date 11:05 下午 2022/6/22
+     * @Param [id]
+     * @return java.util.List<com.jiaruiblog.entity.vo.TagVO>
+     **/
+    public List<TagVO> queryByDocId(Long id) {
+        Query query = new Query().addCriteria(Criteria.where("docId").is(id));
+        List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
+
+        List<TagVO> tagVOList = new ArrayList<>();
+
+        for (TagDocRelationship relationship : relationships) {
+            // Query query1 = new Query().addCriteria(Criteria.where("_id").is(relationship.getTagId()));
+            Tag tag = mongoTemplate.findById(relationship.getTagId(), Tag.class, COLLECTION_NAME);
+            TagVO tagVO = new TagVO();
+            tagVO.setId(tag.getId());
+            tagVO.setName(tag.getName());
+            tagVO.setRelationshipId(relationship.getTagId());
+            tagVOList.add(tagVO);
+        }
+        return tagVOList;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 根据tag的id 查询所有的相关的文档id列表
+     * @Date 11:19 下午 2022/6/22
+     * @Param [tagId]
+     * @return java.util.List<java.lang.Long>
+     **/
+    public List<Long> queryDocIdListByTagId(Long tagId) {
+        Query query = new Query().addCriteria(Criteria.where("tagId").is(tagId));
+        List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
+        return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
     }
 
 }

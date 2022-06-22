@@ -23,9 +23,9 @@ public class DocumentVO {
 
     private Long size;
 
-    private Integer collectNum;
+    private Long collectNum;
 
-    private Integer commentNum;
+    private Long commentNum;
 
     private CategoryVO categoryVO;
 

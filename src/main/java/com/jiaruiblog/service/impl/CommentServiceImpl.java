@@ -25,6 +25,9 @@ import java.util.Date;
 @Service
 public class CommentServiceImpl implements ICommentService {
 
+
+    private static String collectionName = "fileDatas";
+
     @Autowired
     MongoTemplate template;
 
@@ -60,5 +63,17 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     public ApiResult search(Comment comment) {
         return ApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description //根据文档的id 查询评论的数量
+     * @Date 10:47 下午 2022/6/22
+     * @Param [docId]
+     * @return java.lang.Long
+     **/
+    public Long commentNum(Long docId) {
+        Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
+        return template.count(query, collectionName);
     }
 }

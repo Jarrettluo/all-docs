@@ -35,6 +35,6 @@ public class DocumentDTO {
     private Long categoryId;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Integer tagId;
+    private Long tagId;
 
 }

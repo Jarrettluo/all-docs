@@ -5,6 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.DTO.DocumentDTO;
+import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.IFileService;
@@ -46,6 +47,13 @@ public class FileServiceImpl implements IFileService {
 
     @Autowired
     private CategoryServiceImpl categoryServiceImpl;
+
+    @Autowired
+    private CommentServiceImpl commentServiceImpl;
+
+    @Autowired
+    private TagServiceImpl tagServiceImpl;
+
 
     /**
      * js文件流上传附件
@@ -194,31 +202,63 @@ public class FileServiceImpl implements IFileService {
         return files;
     }
 
+    /**
+     * @Author luojiarui
+     * @Description // 增加过滤条件的分页功能
+     * @Date 11:12 下午 2022/6/22
+     * @Param [pageIndex, pageSize, ids]
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
+     **/
+    private List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, List<Long> ids) {
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        long skip = (pageIndex - 1) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        // 增加过滤条件
+        query.addCriteria(Criteria.where("_id").in(ids));
+
+        Field field = query.fields();
+        field.exclude("content");
+        List<FileDocument> files = mongoTemplate.find(query, FileDocument.class, collectionName);
+        return files;
+    }
+
     @Override
     public ApiResult list(DocumentDTO documentDTO) {
+        List<DocumentVO> documentVOS = Lists.newArrayList();
+        DocumentVO documentVO = new DocumentVO();
         switch (documentDTO.getType()) {
             case ALL:
-                break;
+                List<FileDocument> fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
+                documentVOS = convertDocuments(fileDocuments);
             case TAG:
+                Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
+                List<Long> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
+                List<FileDocument> fileDocuments2 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
+                documentVOS = convertDocuments(fileDocuments2);
                 break;
             case FILTER:
+                // 模糊查询 分类
+
+                // 模糊查询 标签
+
+                // 模糊查询 文件标题
+
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
                 if(category == null ) {
                     System.out.println("直接进行返回空");
+                    break;
                 }
                 List<Long> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
-
-                List<FileDocument> fileDocuments1 = new ArrayList<>();
-                for(Long id : fileIdList) {
-                    fileDocuments1.add(mongoTemplate.findById(id, FileDocument.class, collectionName));
-                }
-
+                List<FileDocument> fileDocuments1 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
+                documentVOS = convertDocuments(fileDocuments1);
                 break;
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
+        return ApiResult.success(documentVOS);
     }
 
     @Override
@@ -281,7 +321,15 @@ public class FileServiceImpl implements IFileService {
         documentVO.setDescription(fileDocument.getMd5());
         documentVO.setUserName("luojiarui");
         documentVO.setCreateTime(fileDocument.getUploadDate());
-        // TODO 在这里进行查询 评论， 收藏，分类， 标签
+        // 根据文档的id进行查询 评论， 收藏，分类， 标签
+        Long docId = Long.parseLong(fileDocument.getId());
+        documentVO.setCommentNum(commentServiceImpl.commentNum(docId));
+        documentVO.setCollectNum(commentServiceImpl.commentNum(docId));
+        documentVO.setCategoryVO(categoryServiceImpl.queryByDocId(docId));
+        documentVO.setTagVOList(tagServiceImpl.queryByDocId(docId));
         return documentVO;
     }
+
+    //Pattern pattern=Pattern.compile("^.*"+pattern_name+".*$", Pattern.CASE_INSENSITIVE);
+    //query.addCriteria(Criteria.where("name").regex(pattern))；
 }

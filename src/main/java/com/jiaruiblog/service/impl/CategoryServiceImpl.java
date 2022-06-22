@@ -4,6 +4,7 @@ import com.jiaruiblog.common.MessageConstant;
 
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
+import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.FileDocumentService;
 
@@ -162,6 +163,27 @@ public class CategoryServiceImpl implements CategoryService {
      */
     public Category queryById(Long id) {
         return mongoTemplate.findById(id, Category.class, COLLECTION_NAME);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description //根据文档的信息返回分类信息
+     * @Date 10:52 下午 2022/6/22
+     * @Param [docId]
+     * @return com.jiaruiblog.entity.Category
+     **/
+    public CategoryVO queryByDocId(Long docId) {
+        Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
+        Category category = mongoTemplate.findOne(query, Category.class, COLLECTION_NAME);
+
+        Query query1 = new Query().addCriteria(Criteria.where("docId").is(docId)
+        .and("cateId").is(category.getId()));
+        CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, COLLECTION_NAME);
+        CategoryVO categoryVO = new CategoryVO();
+        categoryVO.setId(category.getId());
+        categoryVO.setName(category.getName());
+        categoryVO.setRelationShipId(relationship.getId());
+        return categoryVO;
     }
 
 }
