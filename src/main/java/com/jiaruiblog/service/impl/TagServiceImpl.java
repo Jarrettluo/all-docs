@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 public class TagServiceImpl implements TagService {
 
-    private static String COLLECTION_NAME = "fileDatas";
+    private static String COLLECTION_NAME = "tagCollection";
 
     @Autowired
     MongoTemplate mongoTemplate;

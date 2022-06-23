@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements ICommentService {
 
 
-    private static String collectionName = "fileDatas";
+    private static String collectionName = "commentCollection";
 
     @Autowired
     MongoTemplate template;

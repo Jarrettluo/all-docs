@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-    private final static String COLLECTION_NAME = "";
+    private final static String COLLECTION_NAME = "categoryCollection";
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -53,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
             ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         log.info("=================准备插入：" + category);
-        mongoTemplate.save(category, "category");
+        mongoTemplate.save(category, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -81,7 +81,10 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public ApiResult remove(Category category) {
-        mongoTemplate.remove(category, "category");
+        mongoTemplate.remove(category, COLLECTION_NAME);
+        // TODO 删除掉相关的分类关系
+        Query query = new Query().addCriteria(new Criteria());
+        mongoTemplate.remove(query, CateDocRelationship.class, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 

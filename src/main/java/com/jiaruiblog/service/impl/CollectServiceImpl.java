@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CollectServiceImpl implements CollectService {
 
-    private static String collectionName = "fileDatas";
+    private static String collectionName = "collectCollection";
 
     @Autowired
     MongoTemplate mongoTemplate;
