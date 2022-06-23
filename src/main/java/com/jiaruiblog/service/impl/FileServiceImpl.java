@@ -270,6 +270,13 @@ public class FileServiceImpl implements IFileService {
         return ApiResult.success(documentVOS);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description // 查询文档的详细信息
+     * @Date 9:27 下午 2022/6/23
+     * @Param [id]
+     * @return com.jiaruiblog.utils.ApiResult
+     **/
     @Override
     public ApiResult detail(Long id) {
         FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
@@ -277,8 +284,7 @@ public class FileServiceImpl implements IFileService {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
         }
         // 查询评论信息，查询分类信息，查询分类关系，查询标签信息，查询标签关系信息
-
-        return null;
+        return ApiResult.success(convertDocument(null, fileDocument));
     }
 
     @Override
@@ -288,7 +294,6 @@ public class FileServiceImpl implements IFileService {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
         }
         // 删除评论信息，删除分类关系，删除标签关系
-
         removeFile(id.toString(), true);
         return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
     }
@@ -321,7 +326,8 @@ public class FileServiceImpl implements IFileService {
      * @return com.jiaruiblog.entity.vo.DocumentVO
      **/
     private DocumentVO convertDocument(DocumentVO documentVO, FileDocument fileDocument) {
-        if(documentVO == null || fileDocument == null ){
+        documentVO = Optional.ofNullable(documentVO).orElse(new DocumentVO());
+        if(fileDocument == null ){
             return documentVO;
         }
         documentVO.setId(Long.parseLong(fileDocument.getId()));

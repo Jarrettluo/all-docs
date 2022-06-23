@@ -42,7 +42,7 @@ public class CategoryController {
     @Autowired
     TagService tagService;
 
-    @ApiOperation(value = "新增单个分类", notes = "新增单个分类")
+    @ApiOperation(value = "3.2 新增单个分类", notes = "新增单个分类")
     @PostMapping(value = "/insert")
     public ApiResult insert(@RequestBody CategoryDTO categoryDTO){
         switch (categoryDTO.getType()) {
@@ -58,7 +58,7 @@ public class CategoryController {
         }
     }
 
-    @ApiOperation(value = "更新分类", notes = "更新分类")
+    @ApiOperation(value = "3.3 更新分类", notes = "更新分类")
     @PutMapping(value = "/update")
     public ApiResult update(@RequestBody CategoryDTO categoryDTO){
         switch (categoryDTO.getType()) {
@@ -77,7 +77,7 @@ public class CategoryController {
         }
     }
 
-    @ApiOperation(value = "根据id移除某个分类", notes = "根据id移除某个分类")
+    @ApiOperation(value = "3.4 根据id移除某个分类", notes = "根据id移除某个分类")
     @DeleteMapping(value = "/remove")
     public ApiResult remove(@RequestBody CategoryDTO categoryDTO, HttpServletRequest request){
         Long userId = (Long) request.getAttribute("id");
@@ -95,7 +95,7 @@ public class CategoryController {
         }
     }
 
-    @ApiOperation(value = "查询所有的分类或者是标签", notes = "查询列表")
+    @ApiOperation(value = "3.7 查询所有的分类或者是标签", notes = "查询列表")
     @GetMapping(value = "/all")
     public ApiResult list(@RequestParam Type type){
         switch (type) {
@@ -108,7 +108,7 @@ public class CategoryController {
         }
     }
 
-    @ApiOperation(value = "根据关键字检索分类", notes = "检索分类")
+    @ApiOperation(value = "3.5 增加关系", notes = "检索分类")
     @PostMapping(value = "/addRelationship")
     public ApiResult addRealationship(@RequestBody RelationDTO relationDTO) {
         switch (relationDTO.getType()) {
@@ -126,7 +126,7 @@ public class CategoryController {
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
-    @ApiOperation(value = "断开连接关系s", notes = "检索分类")
+    @ApiOperation(value = "3.6 断开连接关系", notes = "检索分类")
     @DeleteMapping(value = "/removeRelationship")
     public ApiResult removeRelationship(@RequestBody RelationDTO relationDTO) {
         switch (relationDTO.getType()) {

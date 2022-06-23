@@ -15,5 +15,8 @@ public class MessageConstant {
     public final static String PARAMS_IS_NOT_NULL = "参数是必需的！";
     public final static String PARAMS_LENGTH_REQUIRED = "参数的长度必需符合要求！";
     public final static String PARAMS_FORMAT_ERROR = "参数格式错误！";
+
+    public final static String OPERATE_FAILED = "操作失败！";
+
     public final static String SUCCESS = "SUCCESS";
 }

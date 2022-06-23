@@ -29,19 +29,19 @@ public class DocumentController {
     @Autowired
     IFileService iFileService;
 
-    @ApiOperation(value = "查询文档的分页列表页", notes = "根据参数查询文档列表")
+    @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
     @GetMapping(value = "/list")
     public ApiResult list(@RequestParam DocumentDTO documentDTO){
         return iFileService.list(documentDTO);
     }
 
-    @ApiOperation(value = "查询文档的详细信息", notes = "查询文档的详细信息")
+    @ApiOperation(value = "2.2 查询文档的详细信息", notes = "查询文档的详细信息")
     @GetMapping(value = "/detail")
-    public ApiResult detail(@RequestParam(value = "docId") Integer id){
-        return iFileService.detail(id.longValue());
+    public ApiResult detail(@RequestParam(value = "docId") Long id){
+        return iFileService.detail(id);
     }
 
-    @ApiOperation(value = "删除某个文档", notes = "删除某个文档")
+    @ApiOperation(value = "3.2 删除某个文档", notes = "删除某个文档")
     @DeleteMapping(value = "/remove")
     public ApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO){
         return iFileService.remove(removeObjectDTO.getId());

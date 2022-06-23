@@ -29,22 +29,30 @@ public class CollectController {
     @Autowired
     CollectService collectService;
 
-    @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
+    @ApiOperation(value = "2.3 新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/insert")
     public ApiResult insert(@RequestBody CollectDTO collect, HttpServletRequest request){
-        CollectDocRelationship relationship = new CollectDocRelationship();
-        collect.setDocId(collect.getDocId());
-        relationship.setUserId((Long) request.getAttribute("id"));
-        return collectService.insert(relationship);
+        return collectService.insert(setRelationshipValue(collect, request));
     }
 
-    @ApiOperation(value = "根据id移除某个收藏文档", notes = "根据id移除某个文档")
+    @ApiOperation(value = "2.4 根据id移除某个收藏文档", notes = "根据id移除某个文档")
     @DeleteMapping(value = "/remove")
     public ApiResult remove(@RequestBody CollectDTO collect, HttpServletRequest request){
+        return collectService.remove(setRelationshipValue(collect, request));
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 创建一个关系实体
+     * @Date 9:36 下午 2022/6/23
+     * @Param [collect, request]
+     * @return com.jiaruiblog.entity.CollectDocRelationship
+     **/
+    private CollectDocRelationship setRelationshipValue(CollectDTO collect, HttpServletRequest request) {
         CollectDocRelationship relationship = new CollectDocRelationship();
         collect.setDocId(collect.getDocId());
         relationship.setUserId((Long) request.getAttribute("id"));
-        return collectService.remove(relationship);
+        return relationship;
     }
 
 }
