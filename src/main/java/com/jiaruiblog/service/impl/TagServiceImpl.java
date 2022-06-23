@@ -6,6 +6,8 @@ import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.result.UpdateResult;
+import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
  * @Date 2022/6/7 11:40
  * @Version 1.0
  */
+@Slf4j
 @Service
 public class TagServiceImpl implements TagService {
 
@@ -73,7 +76,9 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public ApiResult list() {
-        return null;
+        List<Tag> tags = mongoTemplate.findAll(Tag.class, COLLECTION_NAME);
+        log.info(">>>>>>>" + tags.toString());
+        return ApiResult.success(tags);
     }
 
     /**

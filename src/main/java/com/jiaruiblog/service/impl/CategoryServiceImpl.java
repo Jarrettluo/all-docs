@@ -10,6 +10,7 @@ import com.jiaruiblog.service.FileDocumentService;
 
 import com.jiaruiblog.utils.ApiResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -52,8 +53,10 @@ public class CategoryServiceImpl implements CategoryService {
         if(!categories.isEmpty()) {
             ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        log.info("=================准备插入：" + category);
-        mongoTemplate.save(category, COLLECTION_NAME);
+//        category.setId(3L);
+        log.info("=================准备插入========" + category);
+        mongoTemplate.save(category);
+        log.info(">>>>>>>插入成功>>>>>>");
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -112,7 +115,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResult list() {
-        return null;
+        log.info(">>>>>>返回结果>>>>>>>");
+        // TODO 需要查询全部的信息
+        List<Category> categories = mongoTemplate.findAll(Category.class);
+        return ApiResult.success(categories);
     }
 
     /**
@@ -187,7 +193,7 @@ public class CategoryServiceImpl implements CategoryService {
         category = Optional.ofNullable(category).orElse(new Category());
 
         CategoryVO categoryVO = new CategoryVO();
-        categoryVO.setId(category.getId());
+        categoryVO.setId(Long.parseLong(category.getId()));
         categoryVO.setName(category.getName());
         categoryVO.setRelationShipId(relationship.getId());
         return categoryVO;
@@ -207,8 +213,8 @@ public class CategoryServiceImpl implements CategoryService {
         query.addCriteria(Criteria.where("name").regex(pattern));
 
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        List<Long> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
-
+//        List<Long> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
+        List<Long> ids = Lists.newArrayList();
         Query query1 = new Query().addCriteria(Criteria.where("cateId").in(ids));
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
         return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());

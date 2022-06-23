@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 import java.util.List;
 
-public interface ESBookRepository extends ElasticsearchRepository<Book, String> {
+//public interface ESBookRepository extends ElasticsearchRepository<Book, String> {
 
 //    List<Book> findByTitleOrAuthor(String title, String author);
 //
@@ -21,4 +21,7 @@ public interface ESBookRepository extends ElasticsearchRepository<Book, String> 
 //    @Query("{\"match\":{\"title\":\"?0\"}}")
 //    SearchHits<Book> find(String keyword);
 
+//}
+
+public interface ESBookRepository {
 }

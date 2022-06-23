@@ -22,13 +22,13 @@ import java.util.Map;
  * @author geng
  * 2020/12/20
  */
-@RestController
+//@RestController
 public class BookController {
-    private final BookService bookService;
+//    private final BookService bookService;
 
-    public BookController(BookService bookService) {
-        this.bookService = bookService;
-    }
+//    public BookController(BookService bookService) {
+//        this.bookService = bookService;
+//    }
 
     @PostMapping("/book")
     public Map<String,String> addBook(@RequestBody Book book){

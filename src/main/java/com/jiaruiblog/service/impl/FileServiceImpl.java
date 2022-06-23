@@ -75,6 +75,7 @@ public class FileServiceImpl implements IFileService {
 
         String gridfsId = uploadFileToGridFS(inputStream, fileDocument.getContentType());
         fileDocument.setGridfsId(gridfsId);
+        System.out.println(fileDocument);
         fileDocument = mongoTemplate.save(fileDocument, collectionName);
         return fileDocument;
     }

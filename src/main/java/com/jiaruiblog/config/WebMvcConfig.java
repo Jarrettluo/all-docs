@@ -13,15 +13,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @Date 2022/6/19 5:09 下午
  * @Version 1.0
  **/
-@Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
-
-    /**
-     * 枚举类的转换器工厂 addConverterFactory
-     */
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addConverterFactory(new IntegerCodeToEnumConverterFactory());
-        registry.addConverterFactory(new StringCodeToEnumConverterFactory());
-    }
-}
+//@Configuration
+//public class WebMvcConfig implements WebMvcConfigurer {
+//
+//    /**
+//     * 枚举类的转换器工厂 addConverterFactory
+//     */
+//    @Override
+//    public void addFormatters(FormatterRegistry registry) {
+//        registry.addConverterFactory(new IntegerCodeToEnumConverterFactory());
+//        registry.addConverterFactory(new StringCodeToEnumConverterFactory());
+//    }
+//}

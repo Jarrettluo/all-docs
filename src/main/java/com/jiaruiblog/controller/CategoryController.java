@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * @ClassName CategoryController
@@ -48,10 +49,15 @@ public class CategoryController {
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
+                category.setName(categoryDTO.getName());
+                category.setCreateDate(new Date());
+                category.setUpdateDate(new Date());
                 return categoryService.insert(category);
             case TAG:
                 Tag tag = new Tag();
                 tag.setName(categoryDTO.getName());
+                tag.setCreateDate(new Date());
+                tag.setUpdateDate(new Date());
                 return tagService.insert(tag);
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
@@ -65,7 +71,7 @@ public class CategoryController {
             case CATEGORY:
                 Category category = new Category();
                 category.setName(categoryDTO.getName());
-                category.setId(categoryDTO.getId());
+                category.setId(categoryDTO.getId().toString());
                 return categoryService.update(category);
             case TAG:
                 Tag tag = new Tag();
@@ -84,7 +90,7 @@ public class CategoryController {
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
-                category.setId(categoryDTO.getId());
+                category.setId(categoryDTO.getId().toString());
                 return categoryService.remove(category);
             case TAG:
                 Tag tag = new Tag();

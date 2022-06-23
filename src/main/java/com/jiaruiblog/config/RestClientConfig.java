@@ -14,14 +14,16 @@ import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfig
  * @Date 2022/6/5 10:28 下午
  * @Version 1.0
  **/
-@Configuration
-public class RestClientConfig extends AbstractElasticsearchConfiguration {
-    @Override
-    @Bean
-    public RestHighLevelClient elasticsearchClient() {
-        final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
-                .connectedTo("42.192.121.179:9200")
-                .build();
-        return RestClients.create(clientConfiguration).rest();
-    }
+//@Configuration
+//public class RestClientConfig extends AbstractElasticsearchConfiguration {
+//    @Override
+//    @Bean
+//    public RestHighLevelClient elasticsearchClient() {
+//        final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+//                .connectedTo("42.192.121.179:9200")
+//                .build();
+//        return RestClients.create(clientConfiguration).rest();
+//    }
+//}
+public class RestClientConfig {
 }
