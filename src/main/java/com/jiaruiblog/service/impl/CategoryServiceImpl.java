@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -173,17 +175,40 @@ public class CategoryServiceImpl implements CategoryService {
      * @return com.jiaruiblog.entity.Category
      **/
     public CategoryVO queryByDocId(Long docId) {
-        Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
-        Category category = mongoTemplate.findOne(query, Category.class, COLLECTION_NAME);
 
-        Query query1 = new Query().addCriteria(Criteria.where("docId").is(docId)
-        .and("cateId").is(category.getId()));
+        Query query1 = new Query().addCriteria(Criteria.where("docId").is(docId));
         CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, COLLECTION_NAME);
+        Category category = mongoTemplate.findById(relationship.getCategoryId(), Category.class, COLLECTION_NAME);
+
+        relationship = Optional.ofNullable(relationship).orElse(new CateDocRelationship());
+        category = Optional.ofNullable(category).orElse(new Category());
+
         CategoryVO categoryVO = new CategoryVO();
         categoryVO.setId(category.getId());
         categoryVO.setName(category.getName());
         categoryVO.setRelationShipId(relationship.getId());
         return categoryVO;
+    }
+
+    /**
+     * 根据关键字模糊搜索相关的文档id
+     * @param keyWord 关键字
+     * @return 文档的id信息
+     */
+    public List<Long> fuzzySearchDoc(String keyWord) {
+        if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
+        Query query = new Query();
+        query.addCriteria(Criteria.where("name").regex(pattern));
+
+        List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
+        List<Long> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
+
+        Query query1 = new Query().addCriteria(Criteria.where("cateId").in(ids));
+        List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
+        return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
     }
 
 }

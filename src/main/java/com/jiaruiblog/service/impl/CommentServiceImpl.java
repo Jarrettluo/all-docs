@@ -1,6 +1,7 @@
 package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.common.MessageConstant;
+
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.service.ICommentService;
@@ -14,6 +15,9 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName CommentServiceImpl
@@ -76,4 +80,23 @@ public class CommentServiceImpl implements ICommentService {
         Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
         return template.count(query, collectionName);
     }
+
+    /**
+     * 根据关键字模糊搜索相关的文档id
+     * @param keyWord 关键字
+     * @return 文档的id信息
+     */
+    public List<Long> fuzzySearchDoc(String keyWord) {
+        if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
+        Query query = new Query();
+        query.addCriteria(Criteria.where("name").regex(pattern));
+
+        List<Comment> comments = template.find(query, Comment.class, collectionName);
+        return comments.stream().map(Comment::getDocId).collect(Collectors.toList());
+
+    }
+
 }

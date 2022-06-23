@@ -7,7 +7,6 @@ import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.DTO.DocumentDTO;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.vo.DocumentVO;
-import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -32,6 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class FileServiceImpl implements IFileService {
@@ -231,6 +232,7 @@ public class FileServiceImpl implements IFileService {
             case ALL:
                 List<FileDocument> fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
                 documentVOS = convertDocuments(fileDocuments);
+                break;
             case TAG:
                 Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
                 List<Long> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
@@ -238,12 +240,19 @@ public class FileServiceImpl implements IFileService {
                 documentVOS = convertDocuments(fileDocuments2);
                 break;
             case FILTER:
+                Set<Long> docIdSet = new HashSet<>();
+                String keyWord = Optional.ofNullable(documentDTO).map(DocumentDTO::getFilterWord).orElse("");
+
                 // 模糊查询 分类
-
+                docIdSet.addAll(categoryServiceImpl.fuzzySearchDoc(keyWord));
                 // 模糊查询 标签
-
+                docIdSet.addAll(tagServiceImpl.fuzzySearchDoc(keyWord));
                 // 模糊查询 文件标题
-
+                docIdSet.addAll(fuzzySearchDoc(keyWord));
+                // 模糊查询 评论内容
+                docIdSet.addAll(commentServiceImpl.fuzzySearchDoc(keyWord));
+                List<FileDocument> fileDocuments3 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), (List<Long>) docIdSet);
+                documentVOS = convertDocuments(fileDocuments3);
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
@@ -330,6 +339,32 @@ public class FileServiceImpl implements IFileService {
         return documentVO;
     }
 
+    /**
+     * 模糊搜索
+     * @param docId
+     * @return
+     */
+    public List<Long> fuzzySearchDoc(String keyWord) {
+        if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
+        Query query = new Query();
+        query.addCriteria(Criteria.where("name").regex(pattern));
+
+        List<FileDocument> documents = mongoTemplate.find(query, FileDocument.class, collectionName);
+        return documents.stream().map(FileDocument::getId).map(item -> Long.parseLong(item)).collect(Collectors.toList());
+    }
+
     //Pattern pattern=Pattern.compile("^.*"+pattern_name+".*$", Pattern.CASE_INSENSITIVE);
     //query.addCriteria(Criteria.where("name").regex(pattern))；
+
+    public static void main(String[] args) {
+        // DocumentDTO documentDTO = new DocumentDTO();
+
+        DocumentDTO documentDTO = null;
+        String keyWord = documentDTO.getFilterWord();
+        // String keyWord = Optional.ofNullable(documentDTO).map(item -> item.getFilterWord()).orElse(null);
+        System.out.println(keyWord);
+    }
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -139,6 +140,28 @@ public class TagServiceImpl implements TagService {
         Query query = new Query().addCriteria(Criteria.where("tagId").is(tagId));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
         return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据关键字模糊搜索相关的文档id
+     * @param keyWord 关键字
+     * @return 文档的id信息
+     */
+    public List<Long> fuzzySearchDoc(String keyWord) {
+        if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
+        Query query = new Query();
+        query.addCriteria(Criteria.where("name").regex(pattern));
+
+        List<Tag> categories = mongoTemplate.find(query, Tag.class, COLLECTION_NAME);
+        List<Long> ids = categories.stream().map(Tag::getId).collect(Collectors.toList());
+
+        Query query1 = new Query().addCriteria(Criteria.where("cateId").in(ids));
+        List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
+        return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
+
     }
 
 }
