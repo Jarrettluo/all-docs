@@ -40,13 +40,18 @@ public class CommentServiceImpl implements ICommentService {
     public ApiResult insert(Comment comment) {
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
-        Comment savedComment = template.save(comment);
+        template.save(comment, collectionName);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
     public ApiResult update(Comment comment) {
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
+        Comment commentDb = template.findById(comment.getId(), Comment.class, collectionName);
+        if( !commentDb.getUserId().equals(comment.getUserId())) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+
         Update update  = new Update();
         update.set("content", comment.getContent());
         update.set("updateDate", new Date());
@@ -55,7 +60,13 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public ApiResult remove(Comment comment) {
+    public ApiResult remove(Comment comment, Long userId) {
+        Query query = new Query(Criteria.where("_id").is(comment.getId()));
+        Comment commentDb = template.findById(comment.getId(), Comment.class, collectionName);
+        if( !commentDb.getUserId().equals(comment.getUserId())) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        template.remove(query, Comment.class, collectionName);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 

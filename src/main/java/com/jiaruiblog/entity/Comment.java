@@ -25,6 +25,8 @@ public class Comment {
     @NotNull
     private Long createUser;
 
+    private Long userId;
+
     private String userName;
 
     @NotBlank(message = "content" + MessageConstant.PARAMS_IS_NOT_NULL)

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
 /**
  * @ClassName CommentController
@@ -33,24 +34,20 @@ public class CommentController {
     @ApiOperation(value = "2.5 新增单个评论", notes = "新增单个评论")
     @PostMapping(value = "/insert")
     public ApiResult insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request){
-        Comment comment = new Comment();
-        comment.setContent(commentDTO.getContent());
-        comment.setDocId(commentDTO.getDocId().longValue());
-//        comment.setId(com);
-        request.getAttribute("id");
-        return commentService.insert(comment);
+        return commentService.insert(getComment(commentDTO, request));
     }
 
     @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
     @PostMapping(value = "/update")
-    public ApiResult update(@RequestBody Comment comment, HttpServletRequest request){
-        return commentService.update(comment);
+    public ApiResult update(@RequestBody CommentDTO commentDTO, HttpServletRequest request){
+        return commentService.update(getComment(commentDTO, request));
     }
 
     @ApiOperation(value = "2.7 根据id移除某个评论", notes = "根据id移除某个评论")
     @DeleteMapping(value = "/remove")
     public ApiResult remove(@RequestBody Comment comment, HttpServletRequest request){
-        return commentService.remove(comment);
+        Long userId = (Long) request.getAttribute("id");
+        return commentService.remove(comment, userId);
     }
 
     @ApiOperation(value = "2.8 根据文档id查询相关评论", notes = "根据id查询某个评论")
@@ -59,4 +56,20 @@ public class CommentController {
         return commentService.queryById(comment);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description // 类型转换
+     * @Date 10:18 下午 2022/6/23
+     * @Param [commentDTO, request]
+     * @return com.jiaruiblog.entity.Comment
+     **/
+    private Comment getComment(CommentDTO commentDTO, HttpServletRequest request) {
+        commentDTO = Optional.ofNullable(commentDTO).orElse(new CommentDTO());
+        Comment comment = new Comment();
+        comment.setContent(commentDTO.getContent());
+        comment.setDocId(commentDTO.getDocId().longValue());
+        comment.setUserName((String) request.getAttribute("userName"));
+        comment.setUserId((Long) request.getAttribute("id"));
+        return comment;
+    }
 }
