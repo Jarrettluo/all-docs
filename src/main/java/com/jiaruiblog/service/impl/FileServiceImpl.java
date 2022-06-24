@@ -16,6 +16,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.jiaruiblog.entity.FileDocument;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -30,10 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class FileServiceImpl implements IFileService {
 
@@ -211,7 +214,7 @@ public class FileServiceImpl implements IFileService {
      * @Param [pageIndex, pageSize, ids]
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
-    private List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, List<Long> ids) {
+    private List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         long skip = (pageIndex - 1) * pageSize;
         query.skip(skip);
@@ -227,21 +230,25 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public ApiResult list(DocumentDTO documentDTO) {
+        log.info(MessageFormat.format(">>>>>>>检索文档>>>>>>检索参数{0}", documentDTO.toString()));
         List<DocumentVO> documentVOS = Lists.newArrayList();
         DocumentVO documentVO = new DocumentVO();
+        log.info(documentDTO.getType().toString());
         switch (documentDTO.getType()) {
             case ALL:
+                log.info("xxxxx");
                 List<FileDocument> fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
                 documentVOS = convertDocuments(fileDocuments);
+                log.info(MessageFormat.format(">>>>>>>检索全部文档>>>>>>总数：{0}", documentVOS.size()));
                 break;
             case TAG:
                 Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
-                List<Long> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
+                List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
                 List<FileDocument> fileDocuments2 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
                 documentVOS = convertDocuments(fileDocuments2);
                 break;
             case FILTER:
-                Set<Long> docIdSet = new HashSet<>();
+                Set<String> docIdSet = new HashSet<>();
                 String keyWord = Optional.ofNullable(documentDTO).map(DocumentDTO::getFilterWord).orElse("");
 
                 // 模糊查询 分类
@@ -252,22 +259,23 @@ public class FileServiceImpl implements IFileService {
                 docIdSet.addAll(fuzzySearchDoc(keyWord));
                 // 模糊查询 评论内容
                 docIdSet.addAll(commentServiceImpl.fuzzySearchDoc(keyWord));
-                List<FileDocument> fileDocuments3 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), (List<Long>) docIdSet);
+                List<FileDocument> fileDocuments3 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), docIdSet);
                 documentVOS = convertDocuments(fileDocuments3);
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
+                log.info(MessageFormat.format(">>>>>>>根据文档分类进行检索>>>>>>{0}", category));
                 if(category == null ) {
-                    System.out.println("直接进行返回空");
                     break;
                 }
-                List<Long> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
+                List<String> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
                 List<FileDocument> fileDocuments1 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
                 documentVOS = convertDocuments(fileDocuments1);
                 break;
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
+        log.info(documentVOS.toString());
         return ApiResult.success(documentVOS);
     }
 
@@ -279,7 +287,7 @@ public class FileServiceImpl implements IFileService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult detail(Long id) {
+    public ApiResult detail(String id) {
         FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
         if( fileDocument == null ) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
@@ -289,7 +297,7 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public ApiResult remove(Long id) {
+    public ApiResult remove(String id) {
         FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
         if( fileDocument == null ) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
@@ -331,7 +339,7 @@ public class FileServiceImpl implements IFileService {
         if(fileDocument == null ){
             return documentVO;
         }
-        documentVO.setId(Long.parseLong(fileDocument.getId()));
+        documentVO.setId(fileDocument.getId());
         documentVO.setSize((fileDocument.getSize()));
         documentVO.setTitle(fileDocument.getName());
         documentVO.setDescription(fileDocument.getMd5());
@@ -348,10 +356,10 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * 模糊搜索
-     * @param docId
+     * @param keyWord
      * @return
      */
-    public List<Long> fuzzySearchDoc(String keyWord) {
+    public List<String> fuzzySearchDoc(String keyWord) {
         if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return null;
         }
@@ -360,7 +368,7 @@ public class FileServiceImpl implements IFileService {
         query.addCriteria(Criteria.where("name").regex(pattern));
 
         List<FileDocument> documents = mongoTemplate.find(query, FileDocument.class, collectionName);
-        return documents.stream().map(FileDocument::getId).map(item -> Long.parseLong(item)).collect(Collectors.toList());
+        return documents.stream().map(FileDocument::getId).collect(Collectors.toList());
     }
 
     //Pattern pattern=Pattern.compile("^.*"+pattern_name+".*$", Pattern.CASE_INSENSITIVE);

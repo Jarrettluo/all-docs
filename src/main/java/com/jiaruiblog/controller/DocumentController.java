@@ -30,14 +30,14 @@ public class DocumentController {
     IFileService iFileService;
 
     @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
-    @GetMapping(value = "/list")
-    public ApiResult list(@RequestParam DocumentDTO documentDTO){
+    @PostMapping(value = "/list")
+    public ApiResult list(@RequestBody DocumentDTO documentDTO){
         return iFileService.list(documentDTO);
     }
 
     @ApiOperation(value = "2.2 查询文档的详细信息", notes = "查询文档的详细信息")
     @GetMapping(value = "/detail")
-    public ApiResult detail(@RequestParam(value = "docId") Long id){
+    public ApiResult detail(@RequestParam(value = "docId") String id){
         return iFileService.detail(id);
     }
 

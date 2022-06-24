@@ -17,12 +17,12 @@ import javax.validation.constraints.NotNull;
 public class RelationDTO {
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Long docId;
+    private String docId;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private Type type;
 
-    private Long id;
+    private String id;
 
 
 }

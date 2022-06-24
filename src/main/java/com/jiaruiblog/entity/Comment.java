@@ -20,12 +20,12 @@ import java.util.Date;
 public class Comment {
 
     @Id
-    private Long id;
+    private String id;
 
     @NotNull
     private Long createUser;
 
-    private Long userId;
+    private String userId;
 
     private String userName;
 
@@ -34,7 +34,7 @@ public class Comment {
     private String content;
 
     @NotNull
-    private Long docId;
+    private String docId;
 
     private Date createDate;
 

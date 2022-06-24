@@ -25,7 +25,7 @@ import java.util.Date;
 public class User {
 
     @Id
-    private Long id;
+    private String id;
 
     @NotBlank(message = "非空")
     private String userName;

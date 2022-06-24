@@ -51,7 +51,7 @@ public class CollectController {
     private CollectDocRelationship setRelationshipValue(CollectDTO collect, HttpServletRequest request) {
         CollectDocRelationship relationship = new CollectDocRelationship();
         collect.setDocId(collect.getDocId());
-        relationship.setUserId((Long) request.getAttribute("id"));
+        relationship.setUserId((String) request.getAttribute("id"));
         return relationship;
     }
 

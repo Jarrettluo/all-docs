@@ -16,5 +16,5 @@ import javax.validation.constraints.NotNull;
 public class CollectDTO {
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Integer docId;
+    private String docId;
 }

@@ -12,6 +12,7 @@ import com.jiaruiblog.utils.ApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -38,9 +39,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     MongoTemplate mongoTemplate;
 
-    @Autowired
-    FileDocumentService fileDocumentService;
-
     /**
      * 新增一条分类记录
      * @param category -> Category 实体
@@ -53,9 +51,8 @@ public class CategoryServiceImpl implements CategoryService {
         if(!categories.isEmpty()) {
             ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-//        category.setId(3L);
         log.info("=================准备插入========" + category);
-        mongoTemplate.save(category);
+        mongoTemplate.save(category, COLLECTION_NAME);
         log.info(">>>>>>>插入成功>>>>>>");
         return ApiResult.success(MessageConstant.SUCCESS);
     }
@@ -67,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public ApiResult update(Category category) {
-        log.info("=================准备更新：" + category);
+        log.info("=================准备更新>>>>>>>>" + category);
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(category.getId()));
         Update update = new Update();
@@ -84,10 +81,12 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public ApiResult remove(Category category) {
-        mongoTemplate.remove(category, COLLECTION_NAME);
-        // TODO 删除掉相关的分类关系
-        Query query = new Query().addCriteria(new Criteria());
-        mongoTemplate.remove(query, CateDocRelationship.class, COLLECTION_NAME);
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(category.getId()));
+        mongoTemplate.remove(query, Category.class, COLLECTION_NAME);
+        // 删除掉相关的分类关系
+        Query query1 = new Query().addCriteria(Criteria.where("categoryId").is(category.getId()));
+        mongoTemplate.remove(query1, CateDocRelationship.class, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -115,9 +114,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResult list() {
-        log.info(">>>>>>返回结果>>>>>>>");
-        // TODO 需要查询全部的信息
-        List<Category> categories = mongoTemplate.findAll(Category.class);
+        // 需要查询全部的信息
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
+        log.info(">>>>>>查询分类的列表，返回结果>>>>>>>");
         return ApiResult.success(categories);
     }
 
@@ -136,7 +136,7 @@ public class CategoryServiceImpl implements CategoryService {
         if(result.isEmpty()) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        mongoTemplate.save(relationship);
+        mongoTemplate.save(relationship, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -158,7 +158,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @param categoryDb
      * @return
      */
-    public List<Long> queryDocListByCategory(Category categoryDb) {
+    public List<String> queryDocListByCategory(Category categoryDb) {
         Query query = new Query(Criteria.where("categoryId").is(categoryDb.getId()));
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
         if(result.isEmpty()) {
@@ -172,7 +172,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @param id
      * @return
      */
-    public Category queryById(Long id) {
+    public Category queryById(String id) {
         return mongoTemplate.findById(id, Category.class, COLLECTION_NAME);
     }
 
@@ -193,7 +193,7 @@ public class CategoryServiceImpl implements CategoryService {
         category = Optional.ofNullable(category).orElse(new Category());
 
         CategoryVO categoryVO = new CategoryVO();
-        categoryVO.setId(Long.parseLong(category.getId()));
+        categoryVO.setId(category.getId());
         categoryVO.setName(category.getName());
         categoryVO.setRelationShipId(relationship.getId());
         return categoryVO;
@@ -204,19 +204,19 @@ public class CategoryServiceImpl implements CategoryService {
      * @param keyWord 关键字
      * @return 文档的id信息
      */
-    public List<Long> fuzzySearchDoc(String keyWord) {
+    public List<String> fuzzySearchDoc(String keyWord) {
         if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return null;
         }
         Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
         query.addCriteria(Criteria.where("name").regex(pattern));
-
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-//        List<Long> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
-        List<Long> ids = Lists.newArrayList();
-        Query query1 = new Query().addCriteria(Criteria.where("cateId").in(ids));
+
+        List<String> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
+        Query query1 = new Query().addCriteria(Criteria.where("categoryId").in(ids));
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
+
         return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
     }
 

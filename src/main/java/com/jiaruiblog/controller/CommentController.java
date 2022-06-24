@@ -67,9 +67,9 @@ public class CommentController {
         commentDTO = Optional.ofNullable(commentDTO).orElse(new CommentDTO());
         Comment comment = new Comment();
         comment.setContent(commentDTO.getContent());
-        comment.setDocId(commentDTO.getDocId().longValue());
+        comment.setDocId(commentDTO.getDocId());
         comment.setUserName((String) request.getAttribute("userName"));
-        comment.setUserId((Long) request.getAttribute("id"));
+        comment.setUserId((String) request.getAttribute("id"));
         return comment;
     }
 }

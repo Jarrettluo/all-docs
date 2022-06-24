@@ -16,11 +16,11 @@ import java.util.Date;
 public class CollectDocRelationship {
 
     @Id
-    private Long id;
+    private String id;
 
-    private Long userId;
+    private String userId;
 
-    private Long docId;
+    private String docId;
 
     private Date createDate;
 

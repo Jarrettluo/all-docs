@@ -19,6 +19,6 @@ public class CommentDTO {
     private String content;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Integer docId;
+    private String docId;
 
 }

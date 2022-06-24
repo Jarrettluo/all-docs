@@ -17,15 +17,19 @@ import java.util.Date;
 @Data
 public class CateDocRelationship {
 
-    // 主键ID
+    /**
+     * 主键ID
+     */
     @Id
-    Long id;
+    String id;
 
-    // 分类id
-    Long categoryId;
+    /**
+     * 分类id
+     */
+    String categoryId;
 
     // 文件id
-    Long fileId;
+    String fileId;
 
     // 创建时间
     Date createDate;

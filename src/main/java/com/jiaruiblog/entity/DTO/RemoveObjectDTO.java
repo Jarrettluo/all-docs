@@ -13,6 +13,6 @@ public class RemoveObjectDTO {
     /**
      * requestbody 请求对象中只具有单一参数id
      */
-    private Long id;
+    private String id;
 
 }

@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class DocumentVO {
 
-    private Long id;
+    private String id;
 
     private String title;
 

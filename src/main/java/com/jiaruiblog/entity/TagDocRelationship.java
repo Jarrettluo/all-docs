@@ -16,13 +16,13 @@ import java.util.Date;
 public class TagDocRelationship {
 
     @Id
-    private Long id;
+    private String id;
 
     // 分类id
-    Long tagId;
+    String tagId;
 
     // 文件id
-    Long fileId;
+    String fileId;
 
     private Date createDate;
 

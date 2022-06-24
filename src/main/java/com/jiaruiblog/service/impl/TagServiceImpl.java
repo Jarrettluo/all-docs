@@ -88,7 +88,7 @@ public class TagServiceImpl implements TagService {
      * @Param [id]
      * @return com.jiaruiblog.entity.Tag
      **/
-    public Tag queryByTagId(Long id) {
+    public Tag queryByTagId(String id) {
         return mongoTemplate.findById(id, Tag.class, COLLECTION_NAME);
     }
 
@@ -141,7 +141,7 @@ public class TagServiceImpl implements TagService {
      * @Param [tagId]
      * @return java.util.List<java.lang.Long>
      **/
-    public List<Long> queryDocIdListByTagId(Long tagId) {
+    public List<String> queryDocIdListByTagId(String tagId) {
         Query query = new Query().addCriteria(Criteria.where("tagId").is(tagId));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
         return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
@@ -152,7 +152,7 @@ public class TagServiceImpl implements TagService {
      * @param keyWord 关键字
      * @return 文档的id信息
      */
-    public List<Long> fuzzySearchDoc(String keyWord) {
+    public List<String> fuzzySearchDoc(String keyWord) {
         if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return null;
         }
@@ -161,7 +161,7 @@ public class TagServiceImpl implements TagService {
         query.addCriteria(Criteria.where("name").regex(pattern));
 
         List<Tag> categories = mongoTemplate.find(query, Tag.class, COLLECTION_NAME);
-        List<Long> ids = categories.stream().map(Tag::getId).collect(Collectors.toList());
+        List<String> ids = categories.stream().map(Tag::getId).collect(Collectors.toList());
 
         Query query1 = new Query().addCriteria(Criteria.where("cateId").in(ids));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);

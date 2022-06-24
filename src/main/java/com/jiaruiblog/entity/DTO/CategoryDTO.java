@@ -23,6 +23,6 @@ public class CategoryDTO {
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private Type type;
 
-    private Long id;
+    private String id;
 
 }

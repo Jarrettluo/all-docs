@@ -32,9 +32,9 @@ public class DocumentDTO {
     private Integer rows;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Long categoryId;
+    private String categoryId;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Long tagId;
+    private String tagId;
 
 }

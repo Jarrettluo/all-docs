@@ -80,7 +80,7 @@ public interface IFileService {
      * @param id ->Long
      * @return ApiResult
      */
-    ApiResult detail(Long id);
+    ApiResult detail(String id);
 
     /**
      * 删除掉已经存在的文档
@@ -88,6 +88,6 @@ public interface IFileService {
      * @param id -> Long
      * @return ApiResult
      */
-    ApiResult remove(Long id);
+    ApiResult remove(String id);
 
 }

@@ -71,12 +71,14 @@ public class CategoryController {
             case CATEGORY:
                 Category category = new Category();
                 category.setName(categoryDTO.getName());
-                category.setId(categoryDTO.getId().toString());
+                category.setId(categoryDTO.getId());
+                category.setUpdateDate(new Date());
                 return categoryService.update(category);
             case TAG:
                 Tag tag = new Tag();
                 tag.setName(categoryDTO.getName());
                 tag.setId(categoryDTO.getId());
+                tag.setUpdateDate(new Date());
                 return tagService.update(tag);
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
@@ -90,7 +92,7 @@ public class CategoryController {
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
-                category.setId(categoryDTO.getId().toString());
+                category.setId(categoryDTO.getId());
                 return categoryService.remove(category);
             case TAG:
                 Tag tag = new Tag();

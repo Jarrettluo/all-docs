@@ -74,24 +74,15 @@ public class CollectServiceImpl implements CollectService {
      **/
     private CollectDocRelationship getExistRelationship(CollectDocRelationship collect) {
         collect = Optional.ofNullable(collect).orElse(new CollectDocRelationship());
+
         Query query = new Query()
                 .addCriteria(Criteria.where("docId").is(collect.getDocId())
                         .and("tagId").is(collect.getUserId()));
+
         CollectDocRelationship relationship = mongoTemplate.findOne(
                 query, CollectDocRelationship.class, collectionName
         );
         return relationship;
     }
 
-    /**
-     * @Author luojiarui
-     * @Description //根据文档的id 查询评论的数量
-     * @Date 10:47 下午 2022/6/22
-     * @Param [docId]
-     * @return java.lang.Long
-     **/
-    public Long collectionNum(Long docId) {
-        Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
-        return mongoTemplate.count(query, collectionName);
-    }
 }

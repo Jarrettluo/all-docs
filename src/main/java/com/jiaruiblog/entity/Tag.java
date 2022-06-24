@@ -18,7 +18,7 @@ import java.util.Date;
 public class Tag {
 
     @Id
-    private Long id;
+    private String id;
 
     @NotBlank(message = "")
     private String name;

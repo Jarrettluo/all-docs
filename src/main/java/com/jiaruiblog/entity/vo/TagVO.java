@@ -12,10 +12,10 @@ import lombok.Data;
 @Data
 public class TagVO {
 
-    private Long id;
+    private String id;
 
     private String name;
 
-    private Long relationshipId;
+    private String relationshipId;
 
 }

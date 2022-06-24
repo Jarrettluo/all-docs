@@ -97,7 +97,7 @@ public class CommentServiceImpl implements ICommentService {
      * @param keyWord 关键字
      * @return 文档的id信息
      */
-    public List<Long> fuzzySearchDoc(String keyWord) {
+    public List<String> fuzzySearchDoc(String keyWord) {
         if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return null;
         }
