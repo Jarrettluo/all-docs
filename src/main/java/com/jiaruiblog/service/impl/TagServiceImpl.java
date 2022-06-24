@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public ApiResult insert(Tag tag) {
-        // 必须经过查重啊！！！
+        // 必须经过查重啊
+        if(isTagExist(tag.getName())) {
+            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         mongoTemplate.save(tag, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
@@ -53,7 +57,15 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public ApiResult remove(Tag tag) {
-        return null;
+        if(isTagExist(tag.getName())) {
+            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        mongoTemplate.remove(tag, COLLECTION_NAME);
+
+        // 同时去除掉各种关系的数据
+        Query query = new Query(Criteria.where("tagId").is(tag.getId()));
+        mongoTemplate.remove(query, TagDocRelationship.class, COLLECTION_NAME);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -170,6 +182,57 @@ public class TagServiceImpl implements TagService {
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
         return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
 
+    }
+
+    /**
+     * 判断某个tag名字是否已经存在？
+     * @param tagName
+     * @return
+     */
+    private boolean isTagExist(String tagName) {
+        List<Tag> tags = queryTagByName(tagName);
+        if(tags == null || tags.isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 根据tag的名字检索tag信息
+     * @param name
+     * @return
+     */
+    private List<Tag> queryTagByName(String name) {
+        if(name == null || "".equals(name)) {
+            return null;
+        }
+        Query query = new Query().addCriteria(Criteria.where("name").is(name));
+        return mongoTemplate.find(query, Tag.class, COLLECTION_NAME);
+    }
+
+    /**
+     * 查询关系是否存在
+     * @param relationship
+     * @return
+     */
+    private boolean isRelateExist(TagDocRelationship relationship) {
+        List<TagDocRelationship> tagDocRelationships = tagDocRelationships(relationship);
+        if(tagDocRelationships == null || tagDocRelationships.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     *
+     * @param tagDocRelationship
+     * @return
+     */
+    private List<TagDocRelationship> tagDocRelationships(TagDocRelationship tagDocRelationship) {
+        tagDocRelationship = Optional.ofNullable(tagDocRelationship).orElse(new TagDocRelationship());
+        Query query = new Query().addCriteria(Criteria.where("tagId").is(tagDocRelationship.getTagId())
+        .and("fileId").is(tagDocRelationship.getFileId()));
+        return mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
     }
 
 }
