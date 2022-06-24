@@ -2,6 +2,7 @@ package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CollectDocRelationship;
+import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.service.CollectService;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
@@ -43,7 +44,7 @@ public class CollectServiceImpl implements CollectService {
         if(collect != null){
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        mongoTemplate.save(collect, "collectDocRelationship");
+        mongoTemplate.save(collect, collectionName);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -59,7 +60,7 @@ public class CollectServiceImpl implements CollectService {
         log.info("=====取消关注=====");
         collect = getExistRelationship(collect);
         while (collect != null ){
-            mongoTemplate.remove(collect);
+            mongoTemplate.remove(collect, collectionName);
             collect = getExistRelationship(collect);
         }
         return ApiResult.success(MessageConstant.SUCCESS);
@@ -83,6 +84,11 @@ public class CollectServiceImpl implements CollectService {
                 query, CollectDocRelationship.class, collectionName
         );
         return relationship;
+    }
+
+    public Long collectNum(String docId) {
+        Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
+        return mongoTemplate.count(query, CollectDocRelationship.class, collectionName);
     }
 
 }

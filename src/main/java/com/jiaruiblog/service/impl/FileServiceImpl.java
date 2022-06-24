@@ -56,6 +56,9 @@ public class FileServiceImpl implements IFileService {
     private CommentServiceImpl commentServiceImpl;
 
     @Autowired
+    private CollectServiceImpl collectServiceImpl;
+
+    @Autowired
     private TagServiceImpl tagServiceImpl;
 
 
@@ -197,6 +200,8 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
+        log.info("xxx" + pageIndex);
+        log.info("yyy" +pageSize);
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         long skip = (pageIndex - 1) * pageSize;
         query.skip(skip);
@@ -238,6 +243,7 @@ public class FileServiceImpl implements IFileService {
             case ALL:
                 log.info("xxxxx");
                 List<FileDocument> fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
+                log.info("dfdsf" + fileDocuments);
                 documentVOS = convertDocuments(fileDocuments);
                 log.info(MessageFormat.format(">>>>>>>检索全部文档>>>>>>总数：{0}", documentVOS.size()));
                 break;
@@ -340,15 +346,16 @@ public class FileServiceImpl implements IFileService {
             return documentVO;
         }
         documentVO.setId(fileDocument.getId());
-        documentVO.setSize((fileDocument.getSize()));
+        documentVO.setSize(fileDocument.getSize());
         documentVO.setTitle(fileDocument.getName());
         documentVO.setDescription(fileDocument.getMd5());
         documentVO.setUserName("luojiarui");
         documentVO.setCreateTime(fileDocument.getUploadDate());
         // 根据文档的id进行查询 评论， 收藏，分类， 标签
-        Long docId = Long.parseLong(fileDocument.getId());
+        String docId = fileDocument.getId();
+        log.info(MessageFormat.format(">>>>>>>> 查询的文档id是 {0}>>>>>>>", docId));
         documentVO.setCommentNum(commentServiceImpl.commentNum(docId));
-        documentVO.setCollectNum(commentServiceImpl.commentNum(docId));
+        documentVO.setCollectNum(collectServiceImpl.collectNum(docId));
         documentVO.setCategoryVO(categoryServiceImpl.queryByDocId(docId));
         documentVO.setTagVOList(tagServiceImpl.queryByDocId(docId));
         return documentVO;

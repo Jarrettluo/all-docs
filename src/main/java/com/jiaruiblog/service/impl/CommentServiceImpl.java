@@ -87,9 +87,9 @@ public class CommentServiceImpl implements ICommentService {
      * @Param [docId]
      * @return java.lang.Long
      **/
-    public Long commentNum(Long docId) {
+    public Long commentNum(String docId) {
         Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
-        return template.count(query, collectionName);
+        return template.count(query, Comment.class, collectionName);
     }
 
     /**

@@ -183,10 +183,14 @@ public class CategoryServiceImpl implements CategoryService {
      * @Param [docId]
      * @return com.jiaruiblog.entity.Category
      **/
-    public CategoryVO queryByDocId(Long docId) {
+    public CategoryVO queryByDocId(String docId) {
 
         Query query1 = new Query().addCriteria(Criteria.where("docId").is(docId));
         CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, COLLECTION_NAME);
+
+        if(relationship == null) {
+            return null;
+        }
         Category category = mongoTemplate.findById(relationship.getCategoryId(), Category.class, COLLECTION_NAME);
 
         relationship = Optional.ofNullable(relationship).orElse(new CateDocRelationship());

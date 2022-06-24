@@ -116,11 +116,13 @@ public class TagServiceImpl implements TagService {
      * @Param [id]
      * @return java.util.List<com.jiaruiblog.entity.vo.TagVO>
      **/
-    public List<TagVO> queryByDocId(Long id) {
+    public List<TagVO> queryByDocId(String id) {
+        List<TagVO> tagVOList = new ArrayList<>();
         Query query = new Query().addCriteria(Criteria.where("docId").is(id));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
-
-        List<TagVO> tagVOList = new ArrayList<>();
+        if(relationships == null ) {
+            return tagVOList;
+        }
 
         for (TagDocRelationship relationship : relationships) {
             // Query query1 = new Query().addCriteria(Criteria.where("_id").is(relationship.getTagId()));
