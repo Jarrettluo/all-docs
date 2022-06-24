@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
 import java.util.Optional;
 
 /**
@@ -29,6 +30,12 @@ public class CollectServiceImpl implements CollectService {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    @Autowired
+    UserServiceImpl userServiceImpl;
+
+    @Autowired
+    FileServiceImpl fileServiceImpl;
+
     /**
      * @Author luojiarui
      * @Description // 对某个文档进行关注
@@ -38,13 +45,19 @@ public class CollectServiceImpl implements CollectService {
      **/
     @Override
     public ApiResult insert(CollectDocRelationship collect) {
-        log.info("======开始关注=====");
-        collect = getExistRelationship(collect);
+        log.info("======开始关注=====" + collect);
+        // 必须经过userId和docId的校验，否则不予关注
+        if( !userServiceImpl.isExist(collect.getUserId()) || !fileServiceImpl.isExist(collect.getDocId())) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
 
-        if(collect != null){
+        CollectDocRelationship collectDb = getExistRelationship(collect);
+        log.info(">>>>>>>>>传入的参数>>>>>>>" + collect);
+        if(collectDb != null){
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(collect, collectionName);
+        log.info(MessageFormat.format("{0}用户添加了关注{1}", collect.getUserId(), collect.getDocId()));
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -78,7 +91,7 @@ public class CollectServiceImpl implements CollectService {
 
         Query query = new Query()
                 .addCriteria(Criteria.where("docId").is(collect.getDocId())
-                        .and("tagId").is(collect.getUserId()));
+                        .and("userId").is(collect.getUserId()));
 
         CollectDocRelationship relationship = mongoTemplate.findOne(
                 query, CollectDocRelationship.class, collectionName

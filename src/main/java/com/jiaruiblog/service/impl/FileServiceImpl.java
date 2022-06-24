@@ -6,6 +6,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.DTO.DocumentDTO;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
@@ -29,6 +30,7 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
@@ -236,27 +238,23 @@ public class FileServiceImpl implements IFileService {
     @Override
     public ApiResult list(DocumentDTO documentDTO) {
         log.info(MessageFormat.format(">>>>>>>检索文档>>>>>>检索参数{0}", documentDTO.toString()));
-        List<DocumentVO> documentVOS = Lists.newArrayList();
+
+        List<DocumentVO> documentVOS;
         DocumentVO documentVO = new DocumentVO();
-        log.info(documentDTO.getType().toString());
+        List<FileDocument> fileDocuments = Lists.newArrayList();
+
         switch (documentDTO.getType()) {
             case ALL:
-                log.info("xxxxx");
-                List<FileDocument> fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
-                log.info("dfdsf" + fileDocuments);
-                documentVOS = convertDocuments(fileDocuments);
-                log.info(MessageFormat.format(">>>>>>>检索全部文档>>>>>>总数：{0}", documentVOS.size()));
+                fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
                 break;
             case TAG:
                 Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
                 List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
-                List<FileDocument> fileDocuments2 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
-                documentVOS = convertDocuments(fileDocuments2);
+                fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
                 break;
             case FILTER:
                 Set<String> docIdSet = new HashSet<>();
                 String keyWord = Optional.ofNullable(documentDTO).map(DocumentDTO::getFilterWord).orElse("");
-
                 // 模糊查询 分类
                 docIdSet.addAll(categoryServiceImpl.fuzzySearchDoc(keyWord));
                 // 模糊查询 标签
@@ -265,23 +263,21 @@ public class FileServiceImpl implements IFileService {
                 docIdSet.addAll(fuzzySearchDoc(keyWord));
                 // 模糊查询 评论内容
                 docIdSet.addAll(commentServiceImpl.fuzzySearchDoc(keyWord));
-                List<FileDocument> fileDocuments3 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), docIdSet);
-                documentVOS = convertDocuments(fileDocuments3);
+                fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), docIdSet);
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
-                log.info(MessageFormat.format(">>>>>>>根据文档分类进行检索>>>>>>{0}", category));
                 if(category == null ) {
                     break;
                 }
                 List<String> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
-                List<FileDocument> fileDocuments1 = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
-                documentVOS = convertDocuments(fileDocuments1);
+                fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
                 break;
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        log.info(documentVOS.toString());
+        documentVOS = convertDocuments(fileDocuments);
+        log.info(MessageFormat.format(">>>>>>>检索全部文档>>>>>>总数：{0}", documentVOS.size()));
         return ApiResult.success(documentVOS);
     }
 
@@ -294,7 +290,7 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public ApiResult detail(String id) {
-        FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
+        FileDocument fileDocument = queryById(id);
         if( fileDocument == null ) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
         }
@@ -304,12 +300,11 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public ApiResult remove(String id) {
-        FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
-        if( fileDocument == null ) {
+        if( isExist(id) ) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
         }
         // 删除评论信息，删除分类关系，删除标签关系
-        removeFile(id.toString(), true);
+        removeFile(id, true);
         return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
     }
 
@@ -380,6 +375,32 @@ public class FileServiceImpl implements IFileService {
 
     //Pattern pattern=Pattern.compile("^.*"+pattern_name+".*$", Pattern.CASE_INSENSITIVE);
     //query.addCriteria(Criteria.where("name").regex(pattern))；
+
+
+    /**
+     * 根据用户的主键id查询用户信息
+     * @param docId
+     * @return
+     */
+    public boolean isExist(String docId) {
+        if(docId == null || "".equals(docId)) {
+            return false;
+        }
+        FileDocument fileDocument = queryById(docId);
+        if(fileDocument == null) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 检索已经存在的user
+     * @param docId
+     * @return
+     */
+    public FileDocument queryById(String docId) {
+        return mongoTemplate.findById(docId, FileDocument.class, collectionName);
+    }
 
     public static void main(String[] args) {
         // DocumentDTO documentDTO = new DocumentDTO();

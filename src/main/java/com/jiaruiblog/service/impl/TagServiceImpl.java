@@ -36,7 +36,8 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public ApiResult insert(Tag tag) {
-        mongoTemplate.save(tag, "tag");
+        // 必须经过查重啊！！！
+        mongoTemplate.save(tag, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
