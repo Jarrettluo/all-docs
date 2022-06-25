@@ -73,7 +73,7 @@ public class CategoryServiceImpl implements CategoryService {
         Update update = new Update();
         update.set("name", category.getName());
         update.set("updateTime", category.getUpdateDate());
-        mongoTemplate.updateFirst(query, update, Category.class);
+        mongoTemplate.updateFirst(query, update, Category.class, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -87,7 +87,7 @@ public class CategoryServiceImpl implements CategoryService {
     private boolean isNameExist(String name) {
         Query query = new Query(Criteria.where("name").is(name));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        if(categories.isEmpty()) {
+        if(categories == null || categories.isEmpty()) {
             return false;
         }
         return true;
@@ -192,6 +192,9 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     public Category queryById(String id) {
+        if(id == null || "".equals(id)) {
+            return null;
+        }
         return mongoTemplate.findById(id, Category.class, COLLECTION_NAME);
     }
 

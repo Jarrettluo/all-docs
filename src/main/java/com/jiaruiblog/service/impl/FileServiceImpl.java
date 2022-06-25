@@ -222,6 +222,9 @@ public class FileServiceImpl implements IFileService {
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
     private List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
+        if(ids == null || ids.isEmpty()) {
+            return null;
+        }
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         long skip = (pageIndex - 1) * pageSize;
         query.skip(skip);
@@ -249,6 +252,9 @@ public class FileServiceImpl implements IFileService {
                 break;
             case TAG:
                 Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
+                if(tag == null) {
+                    break;
+                }
                 List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
                 break;
@@ -277,7 +283,9 @@ public class FileServiceImpl implements IFileService {
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         documentVOS = convertDocuments(fileDocuments);
-        log.info(MessageFormat.format(">>>>>>>检索全部文档>>>>>>总数：{0}", documentVOS.size()));
+        if(documentVOS != null && !documentVOS.isEmpty()) {
+            log.info(MessageFormat.format(">>>>>>>检索全部文档>>>>>>总数：{0}", documentVOS.size()));
+        }
         return ApiResult.success(documentVOS);
     }
 

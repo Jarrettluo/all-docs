@@ -53,11 +53,13 @@ public class TagServiceImpl implements TagService {
         if(isTagExist(tag.getName())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
+        log.info(MessageFormat.format("准备更新Tag信息>>>>>>>>>{0}", tag));
         Query query = new Query(Criteria.where("_id").is(tag.getId()));
         Update update  = new Update();
-        update.set("hobby", tag.getName());
+        update.set("name", tag.getName());
         update.set("updateTime",tag.getUpdateDate());
-        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Tag.class);
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Tag.class, COLLECTION_NAME);
+        log.info(MessageFormat.format(">>>>>>>更新结果>>>>>>>{0}", updateResult));
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -108,6 +110,9 @@ public class TagServiceImpl implements TagService {
      * @return com.jiaruiblog.entity.Tag
      **/
     public Tag queryByTagId(String id) {
+        if(id == null || "".equals(id)) {
+            return null;
+        }
         return mongoTemplate.findById(id, Tag.class, COLLECTION_NAME);
     }
 
