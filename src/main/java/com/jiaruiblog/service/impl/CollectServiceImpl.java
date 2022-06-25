@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -103,5 +104,20 @@ public class CollectServiceImpl implements CollectService {
         Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
         return mongoTemplate.count(query, CollectDocRelationship.class, collectionName);
     }
+
+    /**
+     * @Author luojiarui
+     * @Description // 根据文档的id删除掉点赞的关系
+     * @Date 11:17 上午 2022/6/25
+     * @Param [docId]
+     * @return void
+     **/
+    public void removeRelateByDocId(String docId) {
+        Query query = new Query(Criteria.where("docId").is(docId));
+        List<CollectDocRelationship> relationships = mongoTemplate.find(query, CollectDocRelationship.class,
+                collectionName);
+        relationships.forEach(item -> this.remove(item));
+    }
+
 
 }

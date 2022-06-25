@@ -300,12 +300,18 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public ApiResult remove(String id) {
-        if( isExist(id) ) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
+        if( !isExist(id) ) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 删除评论信息，删除分类关系，删除标签关系
+        log.info(MessageFormat.format(">>>>>准备删除{0}>>>>>>>", id));
         removeFile(id, true);
-        return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
+        commentServiceImpl.removeByDocId(id);
+        categoryServiceImpl.removeRelateByDocId(id);
+        collectServiceImpl.removeRelateByDocId(id);
+        tagServiceImpl.removeRelateByDocId(id);
+
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

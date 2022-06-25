@@ -235,4 +235,18 @@ public class TagServiceImpl implements TagService {
         return mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description // 根据文档的id解除掉标签和文档的关系
+     * @Date 11:22 上午 2022/6/25
+     * @Param [docId]
+     * @return void
+     **/
+    public void removeRelateByDocId(String docId) {
+        Query query = new Query(Criteria.where("docId").is(docId));
+        List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class,
+                COLLECTION_NAME);
+        relationships.forEach(item -> this.cancleTagRelationship(item));
+    }
+
 }

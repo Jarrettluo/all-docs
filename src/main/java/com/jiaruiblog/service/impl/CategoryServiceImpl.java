@@ -4,6 +4,7 @@ import com.jiaruiblog.common.MessageConstant;
 
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
+import com.jiaruiblog.entity.CollectDocRelationship;
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.FileDocumentService;
@@ -222,6 +223,20 @@ public class CategoryServiceImpl implements CategoryService {
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
 
         return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 根据文档的id进行分类和文档的关系删除
+     * @Date 11:20 上午 2022/6/25
+     * @Param [docId]
+     * @return void
+     **/
+    public void removeRelateByDocId(String docId) {
+        Query query = new Query(Criteria.where("docId").is(docId));
+        List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class,
+                COLLECTION_NAME);
+        relationships.forEach(item -> this.cancleCategoryRelationship(item));
     }
 
 }
