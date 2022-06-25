@@ -152,7 +152,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .and("fileId").is(relationship.getFileId()));
         List<Map> result = mongoTemplate.find(query, Map.class, COLLECTION_NAME);
 
-        if(result.isEmpty()) {
+        if(!result.isEmpty()) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         mongoTemplate.save(relationship, COLLECTION_NAME);
@@ -204,7 +204,7 @@ public class CategoryServiceImpl implements CategoryService {
      **/
     public CategoryVO queryByDocId(String docId) {
 
-        Query query1 = new Query().addCriteria(Criteria.where("docId").is(docId));
+        Query query1 = new Query().addCriteria(Criteria.where("fileId").is(docId));
         CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, COLLECTION_NAME);
 
         if(relationship == null) {

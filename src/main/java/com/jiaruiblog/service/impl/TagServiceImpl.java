@@ -15,8 +15,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -39,7 +41,7 @@ public class TagServiceImpl implements TagService {
     public ApiResult insert(Tag tag) {
         // 必须经过查重啊
         if(isTagExist(tag.getName())) {
-            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(tag, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
@@ -49,7 +51,7 @@ public class TagServiceImpl implements TagService {
     public ApiResult update(Tag tag) {
         // 必须经过查重啊
         if(isTagExist(tag.getName())) {
-            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query(Criteria.where("_id").is(tag.getId()));
         Update update  = new Update();
@@ -94,7 +96,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public ApiResult list() {
         List<Tag> tags = mongoTemplate.findAll(Tag.class, COLLECTION_NAME);
-        log.info(">>>>>>>" + tags.toString());
+        log.info("查询全部的标签列表>>>>>>>" + tags.toString());
         return ApiResult.success(tags);
     }
 
@@ -116,7 +118,15 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     public ApiResult addRelationShip(TagDocRelationship relationship) {
-        mongoTemplate.save(relationship);
+        // 判断以下是否存在这个关系
+        Query query = new Query(Criteria.where("tagId").is(relationship.getTagId())
+                .and("fileId").is(relationship.getFileId()));
+        List<Map> result = mongoTemplate.find(query, Map.class, COLLECTION_NAME);
+        if(!result.isEmpty()) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
+        log.info(MessageFormat.format("存入的关系是>>>>{0}", relationship));
+        mongoTemplate.save(relationship, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -135,9 +145,10 @@ public class TagServiceImpl implements TagService {
      **/
     public List<TagVO> queryByDocId(String id) {
         List<TagVO> tagVOList = new ArrayList<>();
-        Query query = new Query().addCriteria(Criteria.where("docId").is(id));
+        Query query = new Query().addCriteria(Criteria.where("fileId").is(id));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
-        if(relationships == null ) {
+        log.info(MessageFormat.format("查询到的关系>>>>>{0}", relationships));
+        if(relationships == null || relationships.isEmpty()) {
             return tagVOList;
         }
 
@@ -195,6 +206,7 @@ public class TagServiceImpl implements TagService {
      */
     private boolean isTagExist(String tagName) {
         List<Tag> tags = queryTagByName(tagName);
+        log.info(MessageFormat.format("查询已存在的tag到的结果是>>>>> {0}", tags));
         if(tags == null || tags.isEmpty()){
             return false;
         }
