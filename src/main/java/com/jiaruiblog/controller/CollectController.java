@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 @Api(tags = "用户收藏模块")
 @RestController
 @Slf4j
+@CrossOrigin
 @RequestMapping("/collect")
 public class CollectController {
 

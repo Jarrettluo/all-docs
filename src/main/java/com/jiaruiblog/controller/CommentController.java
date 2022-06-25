@@ -25,6 +25,7 @@ import java.util.Optional;
 @Api(tags = "评论模块")
 @RestController
 @Slf4j
+@CrossOrigin
 @RequestMapping("/comment")
 public class CommentController {
 

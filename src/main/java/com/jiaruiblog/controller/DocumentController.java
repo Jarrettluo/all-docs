@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "文档模块")
 @RestController
 @Slf4j
+@CrossOrigin
 @RequestMapping("/document")
 public class DocumentController {
 

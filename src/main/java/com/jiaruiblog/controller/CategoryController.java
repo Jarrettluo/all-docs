@@ -31,6 +31,7 @@ import java.util.Date;
 @RestController
 @Slf4j
 @RequestMapping("/category")
+@CrossOrigin
 public class CategoryController {
 
     // 一个文章只能有一个分类项目

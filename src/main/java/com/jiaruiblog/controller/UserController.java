@@ -34,6 +34,7 @@ import java.util.Map;
 @Api(tags = "用户模块")
 @RestController
 @Slf4j
+@CrossOrigin
 @RequestMapping("/user")
 public class UserController {
 
