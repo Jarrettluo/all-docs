@@ -326,8 +326,8 @@ public class FileServiceImpl implements IFileService {
             return null;
         }
         List<DocumentVO> documentVOS = Lists.newArrayList();
-        DocumentVO documentVO = new DocumentVO();
         for(FileDocument fileDocument : fileDocuments) {
+            DocumentVO documentVO = new DocumentVO();
             documentVO = convertDocument(documentVO, fileDocument);
             documentVOS.add(documentVO);
         }

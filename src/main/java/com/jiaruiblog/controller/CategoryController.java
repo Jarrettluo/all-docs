@@ -46,6 +46,8 @@ public class CategoryController {
     @ApiOperation(value = "3.2 新增单个分类", notes = "新增单个分类")
     @PostMapping(value = "/insert")
     public ApiResult insert(@RequestBody CategoryDTO categoryDTO){
+        // 插入进来的参数必需经过清洗
+        categoryDTO.setId(null);
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();

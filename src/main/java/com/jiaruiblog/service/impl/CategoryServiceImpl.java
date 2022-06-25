@@ -20,6 +20,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,10 +48,8 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public ApiResult insert(Category category) {
-        Query query = new Query(Criteria.where("name").is(category.getName()));
-        List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        if(!categories.isEmpty()) {
-            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        if(isNameExist(category.getName())) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         log.info("=================准备插入========" + category);
         mongoTemplate.save(category, COLLECTION_NAME);
@@ -66,6 +65,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public ApiResult update(Category category) {
         log.info("=================准备更新>>>>>>>>" + category);
+        if(isNameExist(category.getName())) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(category.getId()));
         Update update = new Update();
@@ -73,6 +75,22 @@ public class CategoryServiceImpl implements CategoryService {
         update.set("updateTime", category.getUpdateDate());
         mongoTemplate.updateFirst(query, update, Category.class);
         return ApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 判断该名字是否存在，如果是存在的则返回true，否则返回false
+     * @Date 11:47 上午 2022/6/25
+     * @Param [name]
+     * @return boolean
+     **/
+    private boolean isNameExist(String name) {
+        Query query = new Query(Criteria.where("name").is(name));
+        List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
+        if(categories.isEmpty()) {
+            return false;
+        }
+        return true;
     }
 
     /**

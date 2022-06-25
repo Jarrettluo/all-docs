@@ -47,6 +47,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public ApiResult update(Tag tag) {
+        // 必须经过查重啊
+        if(isTagExist(tag.getName())) {
+            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         Query query = new Query(Criteria.where("_id").is(tag.getId()));
         Update update  = new Update();
         update.set("hobby", tag.getName());
