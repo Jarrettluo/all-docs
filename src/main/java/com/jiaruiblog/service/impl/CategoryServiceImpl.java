@@ -241,7 +241,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         List<String> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
         Query query1 = new Query().addCriteria(Criteria.where("categoryId").in(ids));
-        List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
+        List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class, COLLECTION_NAME);
 
         return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
     }

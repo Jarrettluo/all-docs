@@ -199,7 +199,7 @@ public class TagServiceImpl implements TagService {
         List<String> ids = categories.stream().map(Tag::getId).collect(Collectors.toList());
 
         Query query1 = new Query().addCriteria(Criteria.where("cateId").in(ids));
-        List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME);
+        List<TagDocRelationship> relationships = mongoTemplate.find(query1, TagDocRelationship.class, COLLECTION_NAME);
         return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
 
     }
