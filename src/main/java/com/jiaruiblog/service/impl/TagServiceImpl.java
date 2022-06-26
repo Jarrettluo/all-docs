@@ -272,4 +272,15 @@ public class TagServiceImpl implements TagService {
         relationships.forEach(item -> this.cancleTagRelationship(item));
     }
 
+    /**
+     * @Author luojiarui
+     * @Description // 统计总数
+     * @Date 4:40 下午 2022/6/26
+     * @Param []
+     * @return java.lang.Integer
+     **/
+    public long countAllFile() {
+        return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
+    }
+
 }

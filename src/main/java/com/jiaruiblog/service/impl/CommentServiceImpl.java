@@ -126,6 +126,17 @@ public class CommentServiceImpl implements ICommentService {
 
     }
 
+    /**
+     * @Author luojiarui
+     * @Description // 统计总数
+     * @Date 4:40 下午 2022/6/26
+     * @Param []
+     * @return java.lang.Integer
+     **/
+    public long countAllFile() {
+        return template.getCollection(collectionName).estimatedDocumentCount();
+    }
+
 
 
 }

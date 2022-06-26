@@ -5,6 +5,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.CollectDocRelationship;
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.FileDocumentService;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -258,6 +261,53 @@ public class CategoryServiceImpl implements CategoryService {
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class,
                 COLLECTION_NAME);
         relationships.forEach(item -> this.cancleCategoryRelationship(item));
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description //热度随机产生
+     * @Date 4:58 下午 2022/6/26
+     * @Param []
+     * @return java.util.List<com.jiaruiblog.entity.Category>
+     **/
+    public List<Category> getRandom() {
+        Integer pageIndex = 0;
+        Integer pageSize = 3;
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        long skip = (pageIndex - 1) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        List<Category> files = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
+        return files;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 根据总类查询关系
+     * @Date 5:00 下午 2022/6/26
+     * @Param [cateId]
+     * @return java.util.List<com.jiaruiblog.entity.CateDocRelationship>
+     **/
+    public List<CateDocRelationship> getRelateByCateId(String cateId) {
+        Integer pageIndex = 0;
+        Integer pageSize = 7;
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        long skip = (pageIndex - 1) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        query.addCriteria(Criteria.where("categoryId").is(cateId));
+        return mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 统计总数
+     * @Date 4:40 下午 2022/6/26
+     * @Param []
+     * @return java.lang.Integer
+     **/
+    public long countAllFile() {
+        return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
     }
 
 }

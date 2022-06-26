@@ -6,7 +6,6 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.DTO.DocumentDTO;
 import com.jiaruiblog.entity.Tag;
-import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
@@ -30,7 +29,6 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
@@ -83,7 +81,7 @@ public class FileServiceImpl implements IFileService {
 
         String gridfsId = uploadFileToGridFS(inputStream, fileDocument.getContentType());
         fileDocument.setGridfsId(gridfsId);
-        System.out.println(fileDocument);
+
         fileDocument = mongoTemplate.save(fileDocument, collectionName);
         return fileDocument;
     }
@@ -148,8 +146,6 @@ public class FileServiceImpl implements IFileService {
         if (fileDocument != null) {
             Query query = new Query().addCriteria(Criteria.where("_id").is(id));
             DeleteResult result = mongoTemplate.remove(query, collectionName);
-            System.out.println("result:" + result.getDeletedCount());
-
             if (isDeleteFile) {
                 Query deleteQuery = new Query().addCriteria(Criteria.where("filename").is(fileDocument.getGridfsId()));
                 gridFsTemplate.delete(deleteQuery);
@@ -221,7 +217,7 @@ public class FileServiceImpl implements IFileService {
      * @Param [pageIndex, pageSize, ids]
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
-    private List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
+    public List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
         if(ids == null || ids.isEmpty()) {
             return null;
         }
@@ -415,6 +411,19 @@ public class FileServiceImpl implements IFileService {
     public FileDocument queryById(String docId) {
         return mongoTemplate.findById(docId, FileDocument.class, collectionName);
     }
+
+    /**
+     * @Author luojiarui
+     * @Description // 统计总数
+     * @Date 4:40 下午 2022/6/26
+     * @Param []
+     * @return java.lang.Integer
+     **/
+    public long countAllFile() {
+        return mongoTemplate.getCollection(collectionName).estimatedDocumentCount();
+    }
+
+
 
     public static void main(String[] args) {
         // DocumentDTO documentDTO = new DocumentDTO();
