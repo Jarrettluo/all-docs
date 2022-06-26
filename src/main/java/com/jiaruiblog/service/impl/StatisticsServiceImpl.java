@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -52,19 +53,27 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<TrendVO> trendVOS = new ArrayList<>(3);
 
         for (Category category : categoryList) {
+            category = Optional.ofNullable(category).orElse(new Category());
             TrendVO trendVO = new TrendVO();
             trendVO.setId(category.getId());
             trendVO.setName(category.getName());
-            List<CateDocRelationship> relationships = categoryServiceImpl.getRelateByCateId(category.getId());
-            List<String> ids = relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
-            List<FileDocument> documents = fileServiceImpl.listAndFilterByPage(0, 7, ids);
             List<DocVO> docVOS = new ArrayList<>();
-            for (FileDocument document : documents) {
-                DocVO docVO = new DocVO();
-                docVO.setId(document.getId());
-                docVO.setName(document.getName());
-                docVOS.add(docVO);
+
+            if(category.getId() != null) {
+                List<FileDocument> documents;
+                List<CateDocRelationship> relationships = categoryServiceImpl.getRelateByCateId(category.getId());
+                List<String> ids = relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
+                documents = fileServiceImpl.listAndFilterByPage(1, 4, ids);
+                documents = Optional.ofNullable(documents).orElse(new ArrayList<>(8));
+                for (FileDocument document : documents) {
+                    document = Optional.ofNullable(document).orElse(new FileDocument());
+                    DocVO docVO = new DocVO();
+                    docVO.setId(document.getId());
+                    docVO.setName(document.getName());
+                    docVOS.add(docVO);
+                }
             }
+
             trendVO.setDocList(docVOS);
             trendVOS.add(trendVO);
         }

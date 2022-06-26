@@ -148,8 +148,12 @@ public class CategoryServiceImpl implements CategoryService {
      * @param relationship
      * @return
      */
+    // TODO 一个关系只能在同一个分类中，不能再次分类
     @Override
     public ApiResult addRelationShip(CateDocRelationship relationship) {
+        if(relationship.getCategoryId() == null || relationship.getFileId() == null){
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         // 先排查是否具有该链接关系，否则不予进行关联
         Query query = new Query(Criteria.where("categoryId").is(relationship.getCategoryId())
                 .and("fileId").is(relationship.getFileId()));
@@ -213,7 +217,7 @@ public class CategoryServiceImpl implements CategoryService {
         Query query1 = new Query().addCriteria(Criteria.where("fileId").is(docId));
         CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, COLLECTION_NAME);
 
-        if(relationship == null) {
+        if(relationship == null || relationship.getCategoryId()==null) {
             return null;
         }
         Category category = mongoTemplate.findById(relationship.getCategoryId(), Category.class, COLLECTION_NAME);
@@ -271,7 +275,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @return java.util.List<com.jiaruiblog.entity.Category>
      **/
     public List<Category> getRandom() {
-        Integer pageIndex = 0;
+        Integer pageIndex = 1;
         Integer pageSize = 3;
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         long skip = (pageIndex - 1) * pageSize;

@@ -2,10 +2,13 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.enums.Type;
+import com.jiaruiblog.service.StatisticsService;
+import com.jiaruiblog.service.impl.StatisticsServiceImpl;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -22,15 +25,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/statistics")
 public class Statistics {
 
+    @Autowired
+    StatisticsService statisticsService;
+
     @ApiOperation(value = "4.1 查询热度榜", notes = "查询列表")
     @GetMapping(value = "/trend")
     public ApiResult trend(){
-        return ApiResult.success();
+        return statisticsService.trend();
     }
 
     @ApiOperation(value = "4.2 查询统计数据", notes = "查询列表")
     @GetMapping(value = "/all")
     public ApiResult all(){
-        return ApiResult.success();
+        return statisticsService.all();
     }
 }
