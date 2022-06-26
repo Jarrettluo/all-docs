@@ -137,6 +137,7 @@ public class CategoryController {
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
+
     @ApiOperation(value = "3.6 断开连接关系", notes = "检索分类")
     @DeleteMapping(value = "/removeRelationship")
     public ApiResult removeRelationship(@RequestBody RelationDTO relationDTO) {

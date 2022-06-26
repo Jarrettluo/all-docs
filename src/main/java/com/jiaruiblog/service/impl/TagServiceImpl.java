@@ -65,10 +65,12 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public ApiResult remove(Tag tag) {
-        if(isTagExist(tag.getName())) {
-            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-        }
-        mongoTemplate.remove(tag, COLLECTION_NAME);
+//        if(isTagExist(tag.getName())) {
+//            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//        }
+        Query query1 = new Query();
+        query1.addCriteria(Criteria.where("_id").is(tag.getId()));
+        mongoTemplate.remove(query1, Tag.class, COLLECTION_NAME);
 
         // 同时去除掉各种关系的数据
         Query query = new Query(Criteria.where("tagId").is(tag.getId()));

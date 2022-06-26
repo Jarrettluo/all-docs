@@ -107,7 +107,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
         </dependency>
-        <dependency>
+<!--        <dependency>-->
 <!--            <groupId>org.elasticsearch</groupId>-->
 <!--            <artifactId>elasticsearch</artifactId>-->
 <!--            <version>6.8.10</version>-->
@@ -129,6 +129,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.jiaruiblog.DocumentSharingSiteApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

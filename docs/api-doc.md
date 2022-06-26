@@ -5,6 +5,8 @@
 |版本|日期|修订内容|修订人|审核人|
 |----|----|----|----|----|
 |v1.0|2022-06-19|新建|Jarrett|Jarrett|
+|v2.0|2022-06-26|修改了统计的内容|Jarrett|Jarrett|
+
 
 ## 2 api 说明
 ### 2.1 文档检索和文档分页列表
@@ -200,15 +202,15 @@ POST  /comment/insert
 }
 ```
 
-### 2.5 文档修改一条评论
-#### 2.5.1 接口原型
+### 2.6 文档修改一条评论
+#### 2.6.1 接口原型
 在文章详情页，修改某一条评论信息
 
-#### 2.5.2 接口地址
+#### 2.6.2 接口地址
 ```http request
 PUT /comment/update
 ```
-#### 2.5.3 请求参数
+#### 2.6.3 请求参数
 ```json
 {
   "param": "key-word",
@@ -220,49 +222,12 @@ PUT /comment/update
 }
 ```
 
-#### 2.5.4 响应结果
+#### 2.6.4 响应结果
 ```json
 {
   "code": 200,
   "timestamp": 1632302,
   "data": "SUCCESS"
-}
-```
-
-### 2.6 首页查看分类信息【热度榜】
-#### 2.6.1 接口原型
-在搜索页面进行展示热度榜
-
-#### 2.6.2 接口地址
-```http request
-DELETE  /category/hotDoc
-```
-#### 2.6.3 请求参数
-```json
-{
-  "param": "none",
-  "token": "string",
-  "data": "none"
-}
-```
-#### 2.6.4 响应结果
-
-```json
-{
-  "code": 200,
-  "timestamp": 1632302,
-  "data": [
-    {
-      "categoryId": 12,
-      "name": 123,
-      "docList": [
-        {
-          "docName": "xxxxx",
-          "docId": 323
-        }
-      ]
-    }
-  ]
 }
 ```
 
@@ -581,6 +546,74 @@ GET /category/all
   "data": {
     "type": "category",
     "result": "success"
+  }
+}
+```
+
+4 其他特殊请求
+### 4.1 首页查看分类信息【热度榜】
+#### 4.1.1 接口原型
+查询最热的三条结果
+
+#### 4.1.2 接口地址
+```http request
+GET  /statistics/trend
+```
+#### 4.1.3 请求参数
+```json
+{
+  "param": "none",
+  "token": "string",
+  "data": "none"
+}
+```
+#### 4.1.4 响应结果
+```json
+{
+  "code": 200,
+  "timestamp": 1632302,
+  "data": [
+    {
+      "id": 12,
+      "name": 123,
+      "docList": [
+        {
+          "docName": "xxxxx",
+          "id": 323
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 4.2 统计总数【热度榜】
+#### 4.2.1 接口原型
+统计文档总数，统计分类总数，统计标签总数，统计评论量
+
+#### 4.2.2 接口地址
+```http request
+GET /statistics/all
+```
+#### 4.2.3 请求参数
+```json
+{
+  "param": "none",
+  "token": "string",
+  "data": "none"
+}
+```
+#### 4.3.4 响应结果
+
+```json
+{
+  "code": 200,
+  "timestamp": 1632302,
+  "data": {
+    "docNum": 122,
+    "categoryNum": 232,
+    "tagNum": 232,
+    "commentNum": 332
   }
 }
 ```
