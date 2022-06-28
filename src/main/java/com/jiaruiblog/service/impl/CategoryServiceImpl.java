@@ -4,29 +4,22 @@ import com.jiaruiblog.common.MessageConstant;
 
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
-import com.jiaruiblog.entity.CollectDocRelationship;
-import com.jiaruiblog.entity.FileDocument;
+
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.service.CategoryService;
-import com.jiaruiblog.service.FileDocumentService;
-
 import com.jiaruiblog.utils.ApiResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -40,6 +33,8 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final static String COLLECTION_NAME = "categoryCollection";
+
+    private final static String RELATE_COLLECTION_NAME = "relateCateCollection";
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -108,7 +103,7 @@ public class CategoryServiceImpl implements CategoryService {
         mongoTemplate.remove(query, Category.class, COLLECTION_NAME);
         // 删除掉相关的分类关系
         Query query1 = new Query().addCriteria(Criteria.where("categoryId").is(category.getId()));
-        mongoTemplate.remove(query1, CateDocRelationship.class, COLLECTION_NAME);
+        mongoTemplate.remove(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -124,7 +119,7 @@ public class CategoryServiceImpl implements CategoryService {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         Query query = new Query(Criteria.where("categoryId").is(categoryDb.getId()));
-        List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
+        List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 //        List<Long> ids = relationships.stream().map(CateDocRelationship::getFileid).collect(Collectors.toList());
         return null;
     }
@@ -157,12 +152,12 @@ public class CategoryServiceImpl implements CategoryService {
         // 先排查是否具有该链接关系，否则不予进行关联
         Query query = new Query(Criteria.where("categoryId").is(relationship.getCategoryId())
                 .and("fileId").is(relationship.getFileId()));
-        List<Map> result = mongoTemplate.find(query, Map.class, COLLECTION_NAME);
+        List<Map> result = mongoTemplate.find(query, Map.class, RELATE_COLLECTION_NAME);
 
         if(!result.isEmpty()) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        mongoTemplate.save(relationship, COLLECTION_NAME);
+        mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -175,7 +170,7 @@ public class CategoryServiceImpl implements CategoryService {
     public ApiResult cancleCategoryRelationship(CateDocRelationship relationship) {
         Query query = new Query(Criteria.where("categoryId").is(relationship.getCategoryId())
                 .and("fileId").is(relationship.getFileId()));
-        mongoTemplate.remove(query, CateDocRelationship.class);
+        mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -186,7 +181,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     public List<String> queryDocListByCategory(Category categoryDb) {
         Query query = new Query(Criteria.where("categoryId").is(categoryDb.getId()));
-        List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
+        List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
         if(result.isEmpty()) {
             return null;
         }
@@ -215,7 +210,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryVO queryByDocId(String docId) {
 
         Query query1 = new Query().addCriteria(Criteria.where("fileId").is(docId));
-        CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, COLLECTION_NAME);
+        CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         if(relationship == null || relationship.getCategoryId()==null) {
             return null;
@@ -248,7 +243,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         List<String> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
         Query query1 = new Query().addCriteria(Criteria.where("categoryId").in(ids));
-        List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class, COLLECTION_NAME);
+        List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
     }
@@ -263,7 +258,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void removeRelateByDocId(String docId) {
         Query query = new Query(Criteria.where("docId").is(docId));
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class,
-                COLLECTION_NAME);
+                RELATE_COLLECTION_NAME);
         relationships.forEach(item -> this.cancleCategoryRelationship(item));
     }
 
@@ -300,7 +295,7 @@ public class CategoryServiceImpl implements CategoryService {
         query.skip(skip);
         query.limit(pageSize);
         query.addCriteria(Criteria.where("categoryId").is(cateId));
-        return mongoTemplate.find(query, CateDocRelationship.class, COLLECTION_NAME);
+        return mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
     }
 
     /**

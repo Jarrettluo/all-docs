@@ -90,8 +90,9 @@ public class CategoryController {
 
     @ApiOperation(value = "3.4 根据id移除某个分类", notes = "根据id移除某个分类")
     @DeleteMapping(value = "/remove")
-    public ApiResult remove(@RequestBody CategoryDTO categoryDTO, HttpServletRequest request){
-        Long userId = (Long) request.getAttribute("id");
+    public ApiResult remove(@RequestBody CategoryDTO categoryDTO){
+//         HttpServletRequest request
+//        Long userId = (Long) request.getAttribute("id");
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
