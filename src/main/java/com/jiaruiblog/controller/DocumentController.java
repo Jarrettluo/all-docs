@@ -1,13 +1,14 @@
 package com.jiaruiblog.controller;
 
-import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.DTO.DocumentDTO;
 import com.jiaruiblog.entity.DTO.RemoveObjectDTO;
+
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.auth.In;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,9 @@ public class DocumentController {
     @Autowired
     IFileService iFileService;
 
+//    @Autowired
+//    ESFileObjRepository esFileObjRepository;
+
     @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
     @PostMapping(value = "/list")
     public ApiResult list(@RequestBody DocumentDTO documentDTO){
@@ -46,6 +50,12 @@ public class DocumentController {
     @DeleteMapping(value = "/remove")
     public ApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO){
         return iFileService.remove(removeObjectDTO.getId());
+    }
+
+    @GetMapping("test")
+    public ApiResult test() {
+//        Iterable<FileObj> fileObjs = esFileObjRepository.findAll();
+        return ApiResult.success("fileObjs");
     }
 
 }

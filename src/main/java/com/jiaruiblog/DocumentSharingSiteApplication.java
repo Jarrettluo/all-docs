@@ -11,6 +11,8 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.MongoDbFactory;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @ClassName DocumentSharingSiteApplication
  * @Description TODO
@@ -21,6 +23,14 @@ import org.springframework.data.mongodb.MongoDbFactory;
 @ServletComponentScan(basePackages = "com.jiaruiblog.filter")
 @SpringBootApplication
 public class DocumentSharingSiteApplication {
+
+
+    @PostConstruct
+    public void init() {
+        // 解决netty启动冲突的问题（主要体现在启动redis和elasticsearch）
+        // 可以看Netty4Util.setAvailableProcessors(..)
+        System.setProperty("es.set.netty.runtime.available.processors", "false");
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(DocumentSharingSiteApplication.class, args);
