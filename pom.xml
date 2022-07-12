@@ -132,16 +132,12 @@
             <artifactId>junit</artifactId>
             <scope>4.12</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.data</groupId>-->
-<!--            <artifactId>spring-data-mongodb</artifactId>-->
-<!--&lt;!&ndash;            <version>3.2.6</version>&ndash;&gt;-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.mongodb</groupId>-->
-<!--            <artifactId>mongodb-driver-sync</artifactId>-->
-<!--&lt;!&ndash;            <version>4.2.3</version>&ndash;&gt;-->
-<!--        </dependency>-->
+        <!-- 使用高级的api -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.10.2</version>
+        </dependency>
 
 
     </dependencies>

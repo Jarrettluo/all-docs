@@ -8,3 +8,8 @@ spring:
       database: test
       host: 81.69.247.172
       port: 27017
+
+cloud:
+  elasticsearch:
+    host: 81.69.247.172
+    port: 8888
