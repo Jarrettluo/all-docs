@@ -46,6 +46,7 @@ public class FileServiceImpl implements IFileService {
     private MongoTemplate mongoTemplate;
     @Autowired
     private GridFsTemplate gridFsTemplate;
+
     @Autowired
     private GridFSBucket gridFSBucket;
 

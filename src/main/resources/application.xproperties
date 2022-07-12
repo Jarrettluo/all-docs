@@ -33,6 +33,8 @@ spring.servlet.multipart.max-file-size=30MB
 spring.servlet.multipart.max-request-size=50MB
 
 
-spring.data.elasticsearch.cluster-nodes=localhost:9200
+#spring.data.elasticsearch.cluster-nodes=localhost:9200
+#spring.data.elasticsearch.cluster-name=elasticsearch
+
 
 spring.main.allow-bean-definition-overriding=true

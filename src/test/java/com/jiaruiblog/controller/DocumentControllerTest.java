@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,7 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 //SpringBoot1.4版本之前用的是@SpringApplicationConfiguration(classes = Application.class)
 //测试环境使用，用来表示测试环境使用的ApplicationContext将是WebApplicationContext类型的
 @WebAppConfiguration
-@PropertySource(value = "classpath:application.properties")
+@PropertySource(value = "classpath:application.xproperties")
 @SpringBootTest(classes = {DocumentSharingSiteApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class DocumentControllerTest {
 
