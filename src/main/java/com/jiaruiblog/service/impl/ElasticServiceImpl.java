@@ -140,7 +140,7 @@ public class ElasticServiceImpl implements ElasticService {
     public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
 
         String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
-
+        System.out.println(textFilePath);
         try {
             PDFUtil.readPDFText(is, textFilePath);
             FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
@@ -152,10 +152,10 @@ public class ElasticServiceImpl implements ElasticService {
             e.printStackTrace();
 
         } finally {
-            File file = new File(textFilePath);
-            if(file.exists()) {
-                file.delete();
-            }
+//            File file = new File(textFilePath);
+//            if(file.exists()) {
+//                file.delete();
+//            }
         }
 
     }
