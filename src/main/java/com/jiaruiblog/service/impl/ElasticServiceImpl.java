@@ -150,9 +150,11 @@ public class ElasticServiceImpl implements ElasticService {
 
             if(sourceAsMap.containsKey("id")){
                 String id = (String) sourceAsMap.get("id");
-                FileDocument fileDocument = iFileService.getByMd5(id);
-                fileDocument.setDescription(abstractString);
-                fileDocumentList.add(fileDocument);
+                if(id != null) {
+                    FileDocument fileDocument = iFileService.getByMd5(id);
+                    fileDocument.setDescription(abstractString);
+                    fileDocumentList.add(fileDocument);
+                }
             }
 
 //            Map<String, Object> sourceAsMap2 = hit.getSourceAsMap();

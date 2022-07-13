@@ -6,7 +6,7 @@ spring:
   data:
     mongodb:
       database: test
-      host: 81.69.247.172
+      host: localhost
       port: 27017
       threads-allowed-to-block-for-connection-multiplier: 20
       connect-timeout: 10000
@@ -26,5 +26,7 @@ spring:
 
 cloud:
   elasticsearch:
-    host: 81.69.247.172
-    port: 8888
+    host: localhost
+    port: 9200
+#    host: 81.69.247.172
+#    port: 8888

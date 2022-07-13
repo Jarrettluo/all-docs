@@ -281,7 +281,12 @@ public class FileServiceImpl implements IFileService {
                     e.printStackTrace();
                 }
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), docIdSet);
-                fileDocuments.addAll(esDoc);
+                if(esDoc != null){
+                    fileDocuments = Optional.ofNullable(fileDocuments).orElse(new ArrayList<>());
+                    System.out.println(fileDocuments);
+                    System.out.println(esDoc);
+                    fileDocuments.addAll(esDoc);
+                }
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
