@@ -1,8 +1,10 @@
 package com.jiaruiblog.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.service.ElasticService;
+import com.jiaruiblog.utils.PDFUtil;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -17,9 +19,12 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -35,6 +40,9 @@ public class ElasticServiceImpl implements ElasticService {
 
     @Autowired
     private RestHighLevelClient client;
+
+    @Autowired
+    private FileOperationServiceImpl fileOperationServiceImpl;
 
 
     /**
@@ -125,6 +133,30 @@ public class ElasticServiceImpl implements ElasticService {
         System.out.println("查询到" + count + "条记录");
         stringBuilder.append("查询到" + count + "条记录");
         return stringBuilder.toString();
+    }
+
+    @Async
+    public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
+
+        String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
+
+        try {
+            PDFUtil.readPDFText(is, textFilePath);
+            FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
+            fileObj.setId(fileDocument.getId());
+            fileObj.setName(fileDocument.getName());
+            fileObj.setType(fileDocument.getContentType());
+            this.upload(fileObj);
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        } finally {
+            File file = new File(textFilePath);
+            if(file.exists()) {
+                file.delete();
+            }
+        }
+
     }
 
 }

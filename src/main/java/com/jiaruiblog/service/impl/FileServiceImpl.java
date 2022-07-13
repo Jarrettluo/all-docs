@@ -84,6 +84,9 @@ public class FileServiceImpl implements IFileService {
         fileDocument.setGridfsId(gridfsId);
 
         fileDocument = mongoTemplate.save(fileDocument, collectionName);
+
+        // TODO 在这里进行异步操作
+
         return fileDocument;
     }
 
@@ -423,6 +426,7 @@ public class FileServiceImpl implements IFileService {
     public long countAllFile() {
         return mongoTemplate.getCollection(collectionName).estimatedDocumentCount();
     }
+
 
 
 
