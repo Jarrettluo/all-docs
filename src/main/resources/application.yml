@@ -1,6 +1,6 @@
 
 server:
-  port: 8650
+  port: 8082
 
 spring:
   data:
@@ -8,6 +8,21 @@ spring:
       database: test
       host: 81.69.247.172
       port: 27017
+      threads-allowed-to-block-for-connection-multiplier: 20
+      connect-timeout: 10000
+      socket-timeout: 10000
+      max-wait-time: 5000
+      connections-per-host: 20
+
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 50MB
+
+
+  thymeleaf:
+    mode: HTML
+    cache: false
 
 cloud:
   elasticsearch:
