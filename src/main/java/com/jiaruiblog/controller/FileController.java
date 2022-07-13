@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
+import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.FileContentTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class FileController {
 
     @Autowired
     private IFileService fileService;
+
+    @Autowired
+    private ElasticService elasticService;
 
 
     /**
@@ -153,6 +157,9 @@ public class FileController {
             if (file != null && !file.isEmpty()) {
                 String fileMd5 = SecureUtil.md5(file.getInputStream());
                 FileDocument fileDocument = fileService.saveFile(fileMd5, file);
+
+                // TODO 在这里进行上传
+                elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
 
                 System.out.println(fileDocument);
                 model.setData(fileDocument.getId());

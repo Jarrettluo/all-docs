@@ -62,6 +62,9 @@ public class FileServiceImpl implements IFileService {
     @Autowired
     private TagServiceImpl tagServiceImpl;
 
+    @Autowired
+    private ElasticServiceImpl elasticServiceImpl;
+
 
     /**
      * js文件流上传附件
@@ -269,7 +272,16 @@ public class FileServiceImpl implements IFileService {
                 docIdSet.addAll(fuzzySearchDoc(keyWord));
                 // 模糊查询 评论内容
                 docIdSet.addAll(commentServiceImpl.fuzzySearchDoc(keyWord));
+                List<FileDocument> esDoc = null;
+                try {
+                     esDoc = elasticServiceImpl.search(keyWord);
+                    Set<String> existIds = esDoc.stream().map(FileDocument::getId).collect(Collectors.toSet());
+                    docIdSet.removeAll(existIds);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), docIdSet);
+                fileDocuments.addAll(esDoc);
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
@@ -349,7 +361,7 @@ public class FileServiceImpl implements IFileService {
      * @Param [documentVO, fileDocument]
      * @return com.jiaruiblog.entity.vo.DocumentVO
      **/
-    private DocumentVO convertDocument(DocumentVO documentVO, FileDocument fileDocument) {
+    public DocumentVO convertDocument(DocumentVO documentVO, FileDocument fileDocument) {
         documentVO = Optional.ofNullable(documentVO).orElse(new DocumentVO());
         if(fileDocument == null ){
             return documentVO;
@@ -357,7 +369,7 @@ public class FileServiceImpl implements IFileService {
         documentVO.setId(fileDocument.getId());
         documentVO.setSize(fileDocument.getSize());
         documentVO.setTitle(fileDocument.getName());
-        documentVO.setDescription(fileDocument.getMd5());
+        documentVO.setDescription(fileDocument.getDescription());
         documentVO.setUserName("luojiarui");
         documentVO.setCreateTime(fileDocument.getUploadDate());
         // 根据文档的id进行查询 评论， 收藏，分类， 标签

@@ -3,7 +3,9 @@ package com.jiaruiblog.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
+import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.ElasticService;
+import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.PDFUtil;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -25,7 +27,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,6 +47,9 @@ public class ElasticServiceImpl implements ElasticService {
 
     @Autowired
     private FileOperationServiceImpl fileOperationServiceImpl;
+
+    @Autowired
+    private IFileService iFileService;
 
 
     /**
@@ -73,7 +80,10 @@ public class ElasticServiceImpl implements ElasticService {
      * @return
      */
     @Override
-    public String search(String keyword) throws IOException {
+    public List<FileDocument> search(String keyword) throws IOException {
+
+        List<FileDocument> fileDocumentList = new ArrayList<>();
+
         SearchRequest searchRequest = new SearchRequest("docwrite");
 
         //默认会search出所有的东西来
@@ -82,6 +92,11 @@ public class ElasticServiceImpl implements ElasticService {
         //使用lk分词器查询，会把插入的字段分词，然后进行处理
         SearchSourceBuilder srb = new SearchSourceBuilder();
         srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
+
+        // 每页10个数据
+        srb.size(10);
+        // 起始位置从0开始
+        srb.from(0);
 
         //设置highlighting
         HighlightBuilder highlightBuilder = new HighlightBuilder();
@@ -92,7 +107,7 @@ public class ElasticServiceImpl implements ElasticService {
         highlightBuilder.postTags("</em>");
 
         //highlighting会自动返回匹配到的文本，所以就不需要再次返回文本了
-        String[] includeFields = new String[]{"name"};
+        String[] includeFields = new String[]{"name", "id"};
         String[] excludeFields = new String[]{"attachment.content"};
         srb.fetchSource(includeFields, excludeFields);
 
@@ -114,7 +129,10 @@ public class ElasticServiceImpl implements ElasticService {
 
             //获取返回的字段
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            System.out.println(sourceAsMap);
+
             System.out.println(sourceAsMap.get("name"));
+
 
             //统计找到了几条
             count++;
@@ -122,6 +140,20 @@ public class ElasticServiceImpl implements ElasticService {
             //这个就会把匹配到的文本返回，而且只返回匹配到的部分文本
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             System.out.println(highlightFields);
+
+            System.out.println(highlightFields.get("attachment.content"));
+
+            HighlightField highlightField = highlightFields.get("attachment.content");
+
+
+            String abstractString = highlightField.getFragments()[0].toString();
+
+            if(sourceAsMap.containsKey("id")){
+                String id = (String) sourceAsMap.get("id");
+                FileDocument fileDocument = iFileService.getByMd5(id);
+                fileDocument.setDescription(abstractString);
+                fileDocumentList.add(fileDocument);
+            }
 
 //            Map<String, Object> sourceAsMap2 = hit.getSourceAsMap();
 //            System.out.println(sourceAsMap2);
@@ -132,7 +164,7 @@ public class ElasticServiceImpl implements ElasticService {
 
         System.out.println("查询到" + count + "条记录");
         stringBuilder.append("查询到" + count + "条记录");
-        return stringBuilder.toString();
+        return fileDocumentList;
     }
 
     @Async

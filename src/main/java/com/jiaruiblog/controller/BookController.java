@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,7 +46,7 @@ public class BookController {
     }
 
     @GetMapping("/es/search")
-    public String search(String key) throws IOException {
+    public List<FileDocument> search(String key) throws IOException {
         return elasticService.search(key);
     }
 
