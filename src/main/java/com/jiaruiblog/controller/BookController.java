@@ -8,14 +8,14 @@ package com.jiaruiblog.controller;
  * @Version 1.0
  **/
 
+import cn.hutool.crypto.SecureUtil;
 import com.jiaruiblog.entity.Book;
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.service.BookService;
 import com.jiaruiblog.service.ElasticService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -47,6 +47,21 @@ public class BookController {
     @GetMapping("/es/search")
     public String search(String key) throws IOException {
         return elasticService.search(key);
+    }
+
+    @PostMapping("/es/upload")
+    public long upload(@RequestParam("file") MultipartFile file) throws IOException {
+        FileDocument fileDocument = new FileDocument();
+
+        String name = file.getName();
+        String fileMd5 = SecureUtil.md5(file.getInputStream());
+        fileDocument.setName(name);
+        fileDocument.setMd5(fileMd5);
+        fileDocument.setContentType(file.getContentType());
+        long startTime = System.currentTimeMillis();
+        elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
+        long endTime = System.currentTimeMillis();
+        return endTime - startTime;
     }
 }
 

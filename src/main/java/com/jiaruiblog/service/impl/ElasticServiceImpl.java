@@ -136,6 +136,7 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     @Async
+    @Override
     public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
 
         String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
@@ -143,7 +144,7 @@ public class ElasticServiceImpl implements ElasticService {
         try {
             PDFUtil.readPDFText(is, textFilePath);
             FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
-            fileObj.setId(fileDocument.getId());
+            fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());
             fileObj.setType(fileDocument.getContentType());
             this.upload(fileObj);
