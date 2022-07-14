@@ -142,7 +142,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public ApiResult cancleTagRelationship(TagDocRelationship relationship) {
-        mongoTemplate.remove(relationship, RELATE_COLLECTION_NAME);
+
+        Query query = new Query(Criteria.where("categoryId").is(relationship.getTagId())
+                .and("fileId").is(relationship.getFileId()));
+        mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
