@@ -34,10 +34,11 @@ import org.xml.sax.SAXException;
  **/
 public class PdfParse {
 
-    private final static String filePath = "/Users/molly/Downloads/软件开发云服务白皮书.pdf";
+//    private final static String filePath = "/Users/molly/Downloads/软件开发云服务白皮书.pdf";
+
+    private final static String filePath = "/Users/molly/Desktop/test.pdf/习近平在厦门的副本.pdf";
 
     public static void main(final String[] args) throws IOException, TikaException, SAXException {
-
 
 
         BodyContentHandler handler = new BodyContentHandler();

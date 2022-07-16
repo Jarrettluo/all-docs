@@ -2,10 +2,15 @@ package com.jiaruiblog.utils;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @ClassName PDFUtil
@@ -23,7 +28,7 @@ public class PDFUtil {
     }
 
     public static void readPDFText(InputStream file, String textPath) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
+
         try (PDDocument document = PDDocument.load(file)) {
             AccessPermission ap = document.getCurrentAccessPermission();
             if (!ap.canExtractContent()) {
@@ -72,14 +77,61 @@ public class PDFUtil {
         System.out.println(endTime - startTime);
     }
 
-    public static void main(String[] args) throws IOException {
-        String filePath = "/Users/molly/Desktop/test.pdf/测试专用.pdf";
-//        readPDFText(filePath);
-        File file = new File(filePath);
-        InputStream is = new FileInputStream(file);
+    /**
+     * @Author luojiarui
+     * @Description //TODO
+     * @Date 10:01 下午 2022/7/16
+     * @Param [pdfPath]
+     * @return void
+     **/
+    public static void transPDF2png(String pdfPath) {
+        try {
+            File invoiceFile = new File(pdfPath);   //根据pdf文件路径取得pdf文件
+            String path = "test";   // 新建pdf文件的路径
+            PDDocument doc = PDDocument.load(invoiceFile);
+            PDFRenderer renderer = new PDFRenderer(doc);
+            int pageCount = doc.getNumberOfPages();
+            for (int i = 0; i < pageCount; i++) {
+                BufferedImage image = renderer.renderImage(i, 2.5f);// 第二个参数是设置缩放比(即像素)
+                ImageIO.write(image,"PNG", new File(path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        String tempPath = "xxxxxx.txt";
-        handlePDF(is, tempPath);
+    }
+
+    public static void pdfThumbnail (String pdfPath) {
+        try {
+            File invoiceFile = new File(pdfPath);   //根据pdf文件路径取得pdf文件
+            String path = "thumbnail";   // 新建pdf文件的路径
+            PDDocument doc = PDDocument.load(invoiceFile);
+            PDFRenderer renderer = new PDFRenderer(doc);
+            int pageCount = doc.getNumberOfPages();
+            BufferedImage image = renderer.renderImage(0, 0.3f);// 第二个参数是设置缩放比(即像素)
+            ImageIO.write(image,"PNG", new File(path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+
+    public static void main(String[] args) throws IOException {
+//        String filePath = "/Users/molly/Desktop/test.pdf/测试专用.pdf";
+////        readPDFText(filePath);
+//        File file = new File(filePath);
+//        InputStream is = new FileInputStream(file);
+//
+//        String tempPath = "xxxxxx.txt";
+//        handlePDF(is, tempPath);
+
+        String pdfPath = "/Users/molly/Desktop/test.pdf/习近平在厦门的副本.pdf";
+//        transPDF2png(pdfPath);
+
+        pdfThumbnail(pdfPath);
 
     }
 
