@@ -139,6 +139,13 @@
             <version>7.10.2</version>
         </dependency>
 
+        <!-- tess4j识别 -->
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+
 
     </dependencies>
 
