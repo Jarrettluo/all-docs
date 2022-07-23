@@ -158,8 +158,15 @@ public class FileController {
                 String fileMd5 = SecureUtil.md5(file.getInputStream());
                 FileDocument fileDocument = fileService.saveFile(fileMd5, file);
 
-                // TODO 在这里进行上传
-                elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
+                String originalFilename = file.getOriginalFilename();
+                //获取文件后缀名
+                String fileSuffix = originalFilename.substring(originalFilename.lastIndexOf("."),
+                        originalFilename.length());
+
+                if(fileSuffix != null && "pdf".equals(fileSuffix) ) {
+                    // TODO 在这里进行上传
+                    elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
+                }
 
                 System.out.println(fileDocument);
                 model.setData(fileDocument.getId());

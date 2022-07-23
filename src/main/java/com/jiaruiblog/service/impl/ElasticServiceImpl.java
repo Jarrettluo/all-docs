@@ -184,12 +184,12 @@ public class ElasticServiceImpl implements ElasticService {
             this.upload(fileObj);
         } catch (IOException e) {
             e.printStackTrace();
-
         } finally {
-//            File file = new File(textFilePath);
-//            if(file.exists()) {
-//                file.delete();
-//            }
+            // 删除临时的txt文件
+            File file = new File(textFilePath);
+            if(file.exists()) {
+                file.delete();
+            }
         }
 
     }
