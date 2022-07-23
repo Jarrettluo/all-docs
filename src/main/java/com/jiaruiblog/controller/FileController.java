@@ -166,6 +166,8 @@ public class FileController {
                 if(fileSuffix != null && "pdf".equals(fileSuffix) ) {
                     // TODO 在这里进行上传
                     elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
+                    // 异步进行缩略图的制作
+
                 }
 
                 System.out.println(fileDocument);

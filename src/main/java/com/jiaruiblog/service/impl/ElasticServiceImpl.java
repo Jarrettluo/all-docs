@@ -191,7 +191,6 @@ public class ElasticServiceImpl implements ElasticService {
                 file.delete();
             }
         }
-
     }
 
 }
