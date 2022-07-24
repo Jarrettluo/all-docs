@@ -463,7 +463,7 @@ public class FileServiceImpl implements IFileService {
         String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
         String gridfsId = IdUtil.simpleUUID();
         log.info("====制作缩略图中====");
-        if(fileDocument.getSuffix().equals("pdf")) {
+        if(fileDocument.getSuffix().equals(".pdf")) {
             // 将pdf输入流转换为图片并临时保存下来
             PDFUtil.pdfThumbnail(inputStream, picPath);
 
@@ -492,16 +492,17 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public InputStream getFileThumb(String thumbId) {
-        if ( !StringUtils.hasText(thumbId)) {
+        log.info("thumid====准备预览" + thumbId);
+        if ( StringUtils.hasText(thumbId)) {
             Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(thumbId));
             try {
                 GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+                log.info("=====查找到的文件=====" + fsFile.toString());
                 GridFSDownloadStream in = gridFSBucket.openDownloadStream(fsFile.getObjectId());
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
                     return resource.getInputStream();
                 } else {
-
                     return null;
                 }
             } catch (IOException ex) {

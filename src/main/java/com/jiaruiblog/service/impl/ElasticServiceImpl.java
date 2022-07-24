@@ -13,6 +13,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -145,8 +146,14 @@ public class ElasticServiceImpl implements ElasticService {
 
             HighlightField highlightField = highlightFields.get("attachment.content");
 
-
-            String abstractString = highlightField.getFragments()[0].toString();
+            StringBuilder stringBuilder1 = new StringBuilder();
+            for (Text fragment : highlightField.getFragments()) {
+                stringBuilder1.append(fragment.toString());
+            }
+            String abstractString = stringBuilder1.toString();
+            if(abstractString.length() > 500) {
+                abstractString = abstractString.substring(0, 500);
+            }
 
             if(sourceAsMap.containsKey("id")){
                 String id = (String) sourceAsMap.get("id");

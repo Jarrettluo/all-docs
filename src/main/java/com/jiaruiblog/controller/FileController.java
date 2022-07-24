@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.jiaruiblog.entity.FileDocument;
@@ -7,12 +8,14 @@ import com.jiaruiblog.entity.ResponseModel;
 import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.FileContentTypeUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -163,7 +166,7 @@ public class FileController {
                 //获取文件后缀名
                 String fileSuffix = fileDocument.getSuffix();
                 log.info("======文件上传中======" + fileSuffix);
-                if(fileSuffix != null && "pdf".equals(fileSuffix) ) {
+                if(fileSuffix != null && ".pdf".equals(fileSuffix) ) {
                     // TODO 在这里进行上传
                     elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
                     // 异步进行缩略图的制作
@@ -230,12 +233,58 @@ public class FileController {
      * @Param [thumbid]
      * @return byte[]
      **/
-    @GetMapping(value = "/image/{thumbid}",produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/image/{thumbid}",produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public byte[] previewThumb(@PathVariable String thumbid) throws Exception {
         InputStream inputStream = fileService.getFileThumb(thumbid);
+        System.out.println(inputStream);
+        FileInputStream fileInputStream = (FileInputStream) (inputStream);
+        System.out.println(fileInputStream);
+        if(inputStream == null) {
+            return null;
+        }
+        log.info("====返回预览结果啦！！！====");
+        byte[] bytes = new byte[fileInputStream.available()];
+        fileInputStream.read(bytes, 0, fileInputStream.available());
+        return bytes;
+    }
+
+    @GetMapping(value = "/image",produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public byte[] test() throws Exception {
+
+        File file = new File("thumbnail20220724194018003.png");
+        FileInputStream inputStream = new FileInputStream(file);
         byte[] bytes = new byte[inputStream.available()];
         inputStream.read(bytes, 0, inputStream.available());
         return bytes;
+
+    }
+
+
+    @GetMapping("/thumb/{id}")
+    public ResponseEntity<Object> previewThumb1(@PathVariable String id) {
+
+        if (StringUtils.hasText(id)) {
+            InputStream inputStream = fileService.getFileThumb(id);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + id)
+                    .header(HttpHeaders.CONTENT_TYPE, "image/png")
+                    .header(HttpHeaders.CONTENT_LENGTH, "123")
+                    .body(IoUtil.readBytes(inputStream));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File was not found");
+        }
+    }
+
+    @GetMapping(value = "/image2/{thumbid}",produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public byte[] previewThumb2(@PathVariable String thumbid) throws Exception {
+        InputStream inputStream = fileService.getFileThumb(thumbid);
+        System.out.println(inputStream);
+        if(inputStream == null) {
+            return null;
+        }
+        return IoUtil.readBytes(inputStream);
     }
 }
