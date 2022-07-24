@@ -7,6 +7,7 @@ import com.jiaruiblog.entity.ResponseModel;
 import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.FileContentTypeUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+
+@Slf4j
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("files")
@@ -159,6 +162,7 @@ public class FileController {
 
                 //获取文件后缀名
                 String fileSuffix = fileDocument.getSuffix();
+                log.info("======文件上传中======" + fileSuffix);
                 if(fileSuffix != null && "pdf".equals(fileSuffix) ) {
                     // TODO 在这里进行上传
                     elasticService.uploadFileToEs(file.getInputStream(), fileDocument);

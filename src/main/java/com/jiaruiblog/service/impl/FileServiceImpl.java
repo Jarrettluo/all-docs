@@ -462,6 +462,7 @@ public class FileServiceImpl implements IFileService {
         String path = "thumbnail";   // 新建pdf文件的路径
         String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
         String gridfsId = IdUtil.simpleUUID();
+        log.info("====制作缩略图中====");
         if(fileDocument.getSuffix().equals("pdf")) {
             // 将pdf输入流转换为图片并临时保存下来
             PDFUtil.pdfThumbnail(inputStream, picPath);
@@ -477,7 +478,9 @@ public class FileServiceImpl implements IFileService {
 
         Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocument.getId()));;
         Update update = new Update().set("thumbId", gridfsId);
-        mongoTemplate.updateFirst(query, update, Category.class, collectionName);
+        mongoTemplate.updateFirst(query, update, FileDocument.class, collectionName);
+        log.info(String.valueOf(fileDocument));
+        log.info("====缩略图的id====" + gridfsId);
     }
 
     /**
