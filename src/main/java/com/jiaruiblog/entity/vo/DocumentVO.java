@@ -33,6 +33,8 @@ public class DocumentVO {
 
     private String userName;
 
+    private String thumbId;
+
     private Date createTime;
 
 }

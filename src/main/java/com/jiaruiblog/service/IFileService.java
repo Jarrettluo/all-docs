@@ -100,5 +100,12 @@ public interface IFileService {
      **/
     void updateFileThumb(InputStream inputStream, FileDocument fileDocument) throws FileNotFoundException;
 
-
+    /**
+     * @Author luojiarui
+     * @Description // 查询缩略图信息
+     * @Date 8:00 下午 2022/7/24
+     * @Param [thumbId]
+     * @return java.io.InputStream
+     **/
+    InputStream getFileThumb(String thumbId);
 }

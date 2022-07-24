@@ -137,8 +137,9 @@ public class PDFUtil {
             PDDocument doc = PDDocument.load(inputStream);
             PDFRenderer renderer = new PDFRenderer(doc);
 //            int pageCount = doc.getNumberOfPages();
-            BufferedImage image = renderer.renderImage(0, 0.3f);// 第二个参数是设置缩放比(即像素)
+            BufferedImage image = renderer.renderImage(0, 2.0f);// 第二个参数是设置缩放比(即像素)
             ImageIO.write(image,"PNG", new File(picPath));
+            doc.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

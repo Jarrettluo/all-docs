@@ -10,15 +10,13 @@ import com.jiaruiblog.utils.FileContentTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
@@ -151,17 +149,16 @@ public class FileController {
      * @return
      */
     @PostMapping("/upload")
-    public ResponseModel formUpload(@RequestParam("file") MultipartFile file) {
+    public ResponseModel formUpload(@RequestParam("file") MultipartFile file) throws IOException {
+
         ResponseModel model = ResponseModel.getInstance();
         try {
             if (file != null && !file.isEmpty()) {
                 String fileMd5 = SecureUtil.md5(file.getInputStream());
                 FileDocument fileDocument = fileService.saveFile(fileMd5, file);
 
-                String originalFilename = file.getOriginalFilename();
                 //获取文件后缀名
                 String fileSuffix = fileDocument.getSuffix();
-
                 if(fileSuffix != null && "pdf".equals(fileSuffix) ) {
                     // TODO 在这里进行上传
                     elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
@@ -169,7 +166,6 @@ public class FileController {
                     fileService.updateFileThumb(file.getInputStream(), fileDocument);
                 }
 
-                System.out.println(fileDocument);
                 model.setData(fileDocument.getId());
                 model.setCode(ResponseModel.Success);
                 model.setMessage("上传成功");
@@ -221,5 +217,21 @@ public class FileController {
             model.setMessage("请传入文件id");
         }
         return model;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description //TODO
+     * @Date 8:02 下午 2022/7/24
+     * @Param [thumbid]
+     * @return byte[]
+     **/
+    @GetMapping(value = "/image/{thumbid}",produces = MediaType.IMAGE_JPEG_VALUE)
+    @ResponseBody
+    public byte[] previewThumb(@PathVariable String thumbid) throws Exception {
+        InputStream inputStream = fileService.getFileThumb(thumbid);
+        byte[] bytes = new byte[inputStream.available()];
+        inputStream.read(bytes, 0, inputStream.available());
+        return bytes;
     }
 }

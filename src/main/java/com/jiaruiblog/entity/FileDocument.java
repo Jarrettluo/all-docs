@@ -1,10 +1,13 @@
 package com.jiaruiblog.entity;
 
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
+
+@Data
 @Document
 public class FileDocument {
 
@@ -19,6 +22,8 @@ public class FileDocument {
     private String suffix;      // 文件后缀名
     private String description; // 文件描述
     private String gridfsId;    // 大文件管理GridFS的ID
+
+    private String thumbId;     // 预览图的GridFS的ID
 
     public String getId() {
         return id;
@@ -99,6 +104,7 @@ public class FileDocument {
     public void setGridfsId(String gridfsId) {
         this.gridfsId = gridfsId;
     }
+
 
     public FileDocument() {
     }

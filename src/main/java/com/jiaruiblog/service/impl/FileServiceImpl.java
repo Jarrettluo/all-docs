@@ -25,10 +25,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -379,6 +381,7 @@ public class FileServiceImpl implements IFileService {
         documentVO.setDescription(fileDocument.getDescription());
         documentVO.setUserName("luojiarui");
         documentVO.setCreateTime(fileDocument.getUploadDate());
+        documentVO.setThumbId(fileDocument.getThumbId());
         // 根据文档的id进行查询 评论， 收藏，分类， 标签
         String docId = fileDocument.getId();
         log.info(MessageFormat.format(">>>>>>>> 查询的文档id是 {0}>>>>>>>", docId));
@@ -446,6 +449,13 @@ public class FileServiceImpl implements IFileService {
         return mongoTemplate.getCollection(collectionName).estimatedDocumentCount();
     }
 
+    /**
+     * @Author luojiarui
+     * @Description //转换pdf文档的图片，然后保存
+     * @Date 7:49 下午 2022/7/24
+     * @Param [inputStream, fileDocument]
+     * @return void
+     **/
     @Async
     @Override
     public void updateFileThumb(InputStream inputStream, FileDocument fileDocument) throws FileNotFoundException {
@@ -460,11 +470,42 @@ public class FileServiceImpl implements IFileService {
                 String contentType = "image/png";
                 FileInputStream in = new FileInputStream(picPath);
                 //文件，存储在GridFS
-//                gridFsTemplate.store(in, gridfsId, contentType);
-//                new File(picPath).delete();
+                gridFsTemplate.store(in, gridfsId, contentType);
+                new File(picPath).delete();
             }
         }
-        
+
+        Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocument.getId()));;
+        Update update = new Update().set("thumbId", gridfsId);
+        mongoTemplate.updateFirst(query, update, Category.class, collectionName);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description //根据缩略图id返回图片信息
+     * @Date 7:59 下午 2022/7/24
+     * @Param [thumbId]
+     * @return java.io.InputStream
+     **/
+    @Override
+    public InputStream getFileThumb(String thumbId) {
+        if ( !StringUtils.hasText(thumbId)) {
+            Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(thumbId));
+            try {
+                GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+                GridFSDownloadStream in = gridFSBucket.openDownloadStream(fsFile.getObjectId());
+                if (in.getGridFSFile().getLength() > 0) {
+                    GridFsResource resource = new GridFsResource(fsFile, in);
+                    return resource.getInputStream();
+                } else {
+
+                    return null;
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public static void main(String[] args) {
