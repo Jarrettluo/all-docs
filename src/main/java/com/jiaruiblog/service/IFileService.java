@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
@@ -89,5 +90,15 @@ public interface IFileService {
      * @return ApiResult
      */
     ApiResult remove(String id);
+
+    /**
+     * @Author luojiarui
+     * @Description  保存文档的缩略图
+     * @Date 7:15 下午 2022/7/24
+     * @Param [fileDocument]
+     * @return void
+     **/
+    void updateFileThumb(InputStream inputStream, FileDocument fileDocument) throws FileNotFoundException;
+
 
 }

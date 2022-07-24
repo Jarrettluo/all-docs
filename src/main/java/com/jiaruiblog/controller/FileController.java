@@ -160,14 +160,13 @@ public class FileController {
 
                 String originalFilename = file.getOriginalFilename();
                 //获取文件后缀名
-                String fileSuffix = originalFilename.substring(originalFilename.lastIndexOf("."),
-                        originalFilename.length());
+                String fileSuffix = fileDocument.getSuffix();
 
                 if(fileSuffix != null && "pdf".equals(fileSuffix) ) {
                     // TODO 在这里进行上传
                     elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
                     // 异步进行缩略图的制作
-
+                    fileService.updateFileThumb(file.getInputStream(), fileDocument);
                 }
 
                 System.out.println(fileDocument);

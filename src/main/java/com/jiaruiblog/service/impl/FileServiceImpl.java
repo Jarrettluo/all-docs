@@ -9,6 +9,7 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.utils.PDFUtil;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -26,12 +27,13 @@ import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -444,8 +446,26 @@ public class FileServiceImpl implements IFileService {
         return mongoTemplate.getCollection(collectionName).estimatedDocumentCount();
     }
 
+    @Async
+    @Override
+    public void updateFileThumb(InputStream inputStream, FileDocument fileDocument) throws FileNotFoundException {
+        String path = "thumbnail";   // 新建pdf文件的路径
+        String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
+        String gridfsId = IdUtil.simpleUUID();
+        if(fileDocument.getSuffix().equals("pdf")) {
+            // 将pdf输入流转换为图片并临时保存下来
+            PDFUtil.pdfThumbnail(inputStream, picPath);
 
-
+            if(new File(picPath).exists()) {
+                String contentType = "image/png";
+                FileInputStream in = new FileInputStream(picPath);
+                //文件，存储在GridFS
+//                gridFsTemplate.store(in, gridfsId, contentType);
+//                new File(picPath).delete();
+            }
+        }
+        
+    }
 
     public static void main(String[] args) {
         // DocumentDTO documentDTO = new DocumentDTO();

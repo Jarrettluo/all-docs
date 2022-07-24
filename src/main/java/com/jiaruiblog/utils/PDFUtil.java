@@ -101,20 +101,47 @@ public class PDFUtil {
 
     }
 
-    public static void pdfThumbnail (String pdfPath) {
-        try {
-            File invoiceFile = new File(pdfPath);   //根据pdf文件路径取得pdf文件
-            String path = "thumbnail";   // 新建pdf文件的路径
-            PDDocument doc = PDDocument.load(invoiceFile);
-            PDFRenderer renderer = new PDFRenderer(doc);
-            int pageCount = doc.getNumberOfPages();
-            BufferedImage image = renderer.renderImage(0, 0.3f);// 第二个参数是设置缩放比(即像素)
-            ImageIO.write(image,"PNG", new File(path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png"));
+    /**
+     * @Author luojiarui
+     * @Description //根据文件路径保存pdf的缩略图
+     * @Date 7:21 下午 2022/7/24
+     * @Param [pdfPath]
+     * @return void
+     **/
+    public static void pdfThumbnail (String pdfPath) throws FileNotFoundException {
+        pdfThumbnail(new FileInputStream(pdfPath));
+    }
 
+    /**
+     * @Author luojiarui
+     * @Description //根据文件输入流保存pdf缩略图
+     * @Date 7:21 下午 2022/7/24
+     * @Param [inputStream]
+     * @return void
+     **/
+    public static void pdfThumbnail(InputStream inputStream) {
+        String path = "thumbnail";   // 新建pdf文件的路径
+        String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
+        pdfThumbnail(inputStream, picPath);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description //根据文件输入流和图片地址保存缩略图
+     * @Date 7:22 下午 2022/7/24
+     * @Param [inputStream, picPath]
+     * @return void
+     **/
+    public static void pdfThumbnail(InputStream inputStream, String picPath) {
+        try {
+            PDDocument doc = PDDocument.load(inputStream);
+            PDFRenderer renderer = new PDFRenderer(doc);
+//            int pageCount = doc.getNumberOfPages();
+            BufferedImage image = renderer.renderImage(0, 0.3f);// 第二个参数是设置缩放比(即像素)
+            ImageIO.write(image,"PNG", new File(picPath));
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
 
