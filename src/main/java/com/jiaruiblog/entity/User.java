@@ -28,7 +28,7 @@ public class User {
     private String id;
 
     @NotBlank(message = "非空")
-    private String userName;
+    private String username;
 
     private String password;
 

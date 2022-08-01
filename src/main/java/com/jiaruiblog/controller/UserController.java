@@ -19,10 +19,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName UserController
@@ -84,7 +81,7 @@ public class UserController {
     @ApiOperation(value = "根据用户名称查询", notes = "根据用户名称查询")
     @PostMapping(value = "/getByUsername")
     public ApiResult getByUsername(@RequestBody  User user){
-        Query query = new Query(Criteria.where("username").is(user.getUserName()));
+        Query query = new Query(Criteria.where("username").is(user.getUsername()));
         User one = template.findOne(query, User.class, COLLECTION_NAME);
         return ApiResult.success(one);
     }
@@ -115,16 +112,25 @@ public class UserController {
     /**
      * 模拟用户 登录
      */
-    @RequestMapping("/login")
-    public ApiResult login(User user) {
-        Query query = new Query(Criteria.where("username").is(user.getUserName()));
+    @PostMapping("/login")
+    public ApiResult login(@RequestBody User user) {
+        Query query = new Query(Criteria.where("username").is(user.getUsername()));
         User dbUser = template.findOne(query, User.class, COLLECTION_NAME);
-        if (dbUser.getUserName().equals(user.getUserName()) && dbUser.getPassword().equals(user.getPassword())) {
+        dbUser = Optional.ofNullable(dbUser).orElse(new User());
+        System.out.println(dbUser);
+        System.out.println(user);
+        if (dbUser.getUsername().equals(user.getUsername()) && dbUser.getPassword().equals(user.getPassword())) {
             log.info("登录成功！生成token！");
             String token = JwtUtil.createToken(dbUser);
             return ApiResult.success(token);
         }
         return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+    }
+
+    @RequestMapping("/allUsers")
+    public ApiResult allUsers() {
+        List<User> users = template.findAll(User.class);
+        return ApiResult.success(users);
     }
 
     /**
