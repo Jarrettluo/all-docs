@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -38,6 +39,9 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public ApiResult insert(Comment comment) {
+        if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
         template.save(comment, collectionName);
@@ -46,6 +50,11 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public ApiResult update(Comment comment) {
+
+        if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
+
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
         Comment commentDb = template.findById(comment.getId(), Comment.class, collectionName);
         if( !commentDb.getUserId().equals(comment.getUserId())) {
@@ -60,7 +69,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public ApiResult remove(Comment comment, Long userId) {
+    public ApiResult remove(Comment comment, String userId) {
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
         Comment commentDb = template.findById(comment.getId(), Comment.class, collectionName);
         if( !commentDb.getUserId().equals(comment.getUserId())) {
@@ -72,7 +81,9 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public ApiResult queryById(Comment comment) {
-        return ApiResult.success(MessageConstant.SUCCESS);
+        Query query = new Query(Criteria.where("doc_id").is(comment.getDocId()));
+        List<Comment> comments = template.find(query, Comment.class, collectionName);
+        return ApiResult.success(comments);
     }
 
     @Override

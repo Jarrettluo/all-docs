@@ -122,7 +122,10 @@ public class UserController {
         if (dbUser.getUsername().equals(user.getUsername()) && dbUser.getPassword().equals(user.getPassword())) {
             log.info("登录成功！生成token！");
             String token = JwtUtil.createToken(dbUser);
-            return ApiResult.success(token);
+            Map<String, String> result = new HashMap<>();
+            result.put("token", token);
+            result.put("userId", dbUser.getId());
+            return ApiResult.success(result);
         }
         return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
     }
@@ -139,7 +142,7 @@ public class UserController {
     @RequestMapping("/secure/getUserInfo")
     public String login(HttpServletRequest request) {
         Integer id = (Integer) request.getAttribute("id");
-        String userName = request.getAttribute("userName").toString();
+        String userName = request.getAttribute("username").toString();
         String password= request.getAttribute("password").toString();
         return "当前用户信息id=" + id + ",userName=" + userName+ ",password=" + password;
     }

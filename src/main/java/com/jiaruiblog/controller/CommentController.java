@@ -1,9 +1,7 @@
 package com.jiaruiblog.controller;
 
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.DTO.CommentDTO;
-import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
@@ -47,7 +45,7 @@ public class CommentController {
     @ApiOperation(value = "2.7 根据id移除某个评论", notes = "根据id移除某个评论")
     @DeleteMapping(value = "/remove")
     public ApiResult remove(@RequestBody Comment comment, HttpServletRequest request){
-        Long userId = (Long) request.getAttribute("id");
+        String userId = (String) request.getAttribute("id");
         return commentService.remove(comment, userId);
     }
 
@@ -69,7 +67,7 @@ public class CommentController {
         Comment comment = new Comment();
         comment.setContent(commentDTO.getContent());
         comment.setDocId(commentDTO.getDocId());
-        comment.setUserName((String) request.getAttribute("userName"));
+        comment.setUserName((String) request.getAttribute("username"));
         comment.setUserId((String) request.getAttribute("id"));
         return comment;
     }
