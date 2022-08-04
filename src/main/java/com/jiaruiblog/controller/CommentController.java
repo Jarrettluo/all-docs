@@ -31,19 +31,21 @@ public class CommentController {
     ICommentService commentService;
 
     @ApiOperation(value = "2.5 新增单个评论", notes = "新增单个评论")
-    @PostMapping(value = "/insert")
+    @PostMapping(value = "/auth/insert")
     public ApiResult insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request){
+        System.out.println(request);
+        System.out.println(commentDTO);
         return commentService.insert(getComment(commentDTO, request));
     }
 
     @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
-    @PostMapping(value = "/update")
+    @PostMapping(value = "/auth/update")
     public ApiResult update(@RequestBody CommentDTO commentDTO, HttpServletRequest request){
         return commentService.update(getComment(commentDTO, request));
     }
 
     @ApiOperation(value = "2.7 根据id移除某个评论", notes = "根据id移除某个评论")
-    @DeleteMapping(value = "/remove")
+    @DeleteMapping(value = "/auth/remove")
     public ApiResult remove(@RequestBody Comment comment, HttpServletRequest request){
         String userId = (String) request.getAttribute("id");
         return commentService.remove(comment, userId);

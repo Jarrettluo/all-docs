@@ -17,7 +17,8 @@ import java.util.Map;
  * 参考地址：https://blog.csdn.net/CSDN2497242041/article/details/115605626
  */
 @Slf4j
-@WebFilter(filterName = "JwtFilter", urlPatterns = "/secure/*")
+//@WebFilter(filterName = "JwtFilter", urlPatterns = "/secure/*")
+@WebFilter(filterName = "JwtFilter", urlPatterns = {"/comment/auth/*", "/secure/*"})
 public class JwtFilter implements Filter
 {
 
@@ -66,12 +67,15 @@ public class JwtFilter implements Filter
                 response.getWriter().write("token不合法！");
                 return;
             }
-            Integer id = userData.get("id").asInt();
-            String userName = userData.get("userName").asString();
+            System.out.println(userData.toString());
+            System.out.println("========");
+
+            String id = userData.get("id").asString();
+            String userName = userData.get("username").asString();
             String password= userData.get("password").asString();
             //拦截器 拿到用户信息，放到request中
             request.setAttribute("id", id);
-            request.setAttribute("userName", userName);
+            request.setAttribute("username", userName);
             request.setAttribute("password", password);
             chain.doFilter(req, res);
         }

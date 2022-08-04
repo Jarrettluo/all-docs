@@ -39,6 +39,8 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public ApiResult insert(Comment comment) {
+        System.out.println(comment);
+        System.out.println("======");
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
@@ -81,7 +83,7 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public ApiResult queryById(Comment comment) {
-        Query query = new Query(Criteria.where("doc_id").is(comment.getDocId()));
+        Query query = new Query(Criteria.where("docId").is(comment.getDocId()));
         List<Comment> comments = template.find(query, Comment.class, collectionName);
         return ApiResult.success(comments);
     }
