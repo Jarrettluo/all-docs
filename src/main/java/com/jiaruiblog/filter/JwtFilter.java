@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @Slf4j
 //@WebFilter(filterName = "JwtFilter", urlPatterns = "/secure/*")
-@WebFilter(filterName = "JwtFilter", urlPatterns = {"/comment/auth/*", "/secure/*"})
+@WebFilter(filterName = "JwtFilter", urlPatterns = {"/comment/auth/*", "*/auth/*"})
 public class JwtFilter implements Filter
 {
 
@@ -31,6 +31,7 @@ public class JwtFilter implements Filter
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // do nothing
     }
 
     @Override
@@ -39,9 +40,7 @@ public class JwtFilter implements Filter
         final HttpServletResponse response = (HttpServletResponse) res;
 
         response.setCharacterEncoding("UTF-8");
-
         String url = request.getRequestURI().substring(request.getContextPath().length());
-        System.out.println(url);
         // 登录和注册等请求不需要令牌
         if (SAFE_URL_LIST.contains(url)) {
             return;
@@ -58,25 +57,20 @@ public class JwtFilter implements Filter
         else {
 
             if (token == null) {
-                response.getWriter().write("没有token！");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
 
             Map<String, Claim> userData = JwtUtil.verifyToken(token);
             if (userData == null) {
-                response.getWriter().write("token不合法！");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-            System.out.println(userData.toString());
-            System.out.println("========");
 
-            String id = userData.get("id").asString();
-            String userName = userData.get("username").asString();
-            String password= userData.get("password").asString();
             //拦截器 拿到用户信息，放到request中
-            request.setAttribute("id", id);
-            request.setAttribute("username", userName);
-            request.setAttribute("password", password);
+            request.setAttribute("id", userData.get("id").asString());
+            request.setAttribute("username", userData.get("username").asString());
+            request.setAttribute("password", userData.get("password").asString());
             chain.doFilter(req, res);
         }
     }

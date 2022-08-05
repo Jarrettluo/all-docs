@@ -31,8 +31,6 @@ public class DocumentController {
     @Autowired
     IFileService iFileService;
 
-//    @Autowired
-//    ESFileObjRepository esFileObjRepository;
 
     @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
     @PostMapping(value = "/list")
@@ -47,15 +45,9 @@ public class DocumentController {
     }
 
     @ApiOperation(value = "3.2 删除某个文档", notes = "删除某个文档")
-    @DeleteMapping(value = "/remove")
+    @DeleteMapping(value = "/auth/remove")
     public ApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO){
         return iFileService.remove(removeObjectDTO.getId());
-    }
-
-    @GetMapping("test")
-    public ApiResult test() {
-//        Iterable<FileObj> fileObjs = esFileObjRepository.findAll();
-        return ApiResult.success("fileObjs");
     }
 
 }
