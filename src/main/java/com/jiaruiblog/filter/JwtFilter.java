@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @Slf4j
 //@WebFilter(filterName = "JwtFilter", urlPatterns = "/secure/*")
-@WebFilter(filterName = "JwtFilter", urlPatterns = {"/comment/auth/*", "*/auth/*"})
+@WebFilter(filterName = "JwtFilter", urlPatterns = {"/comment/auth/*", "/collect/auth/*", "/document/auth/*"})
 public class JwtFilter implements Filter
 {
 
