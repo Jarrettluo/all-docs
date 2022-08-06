@@ -115,9 +115,9 @@ public class TagServiceImpl implements TagService {
      * @return com.jiaruiblog.entity.Tag
      **/
     public Tag queryByTagId(String id) {
-        if(id == null || "".equals(id)) {
-            return null;
-        }
+//        if(id == null || "".equals(id)) {
+//            return null;
+//        }
         return mongoTemplate.findById(id, Tag.class, COLLECTION_NAME);
     }
 

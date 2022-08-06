@@ -20,6 +20,8 @@ import com.jiaruiblog.entity.FileDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -30,6 +32,7 @@ import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -209,8 +212,6 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
-        log.info("xxx" + pageIndex);
-        log.info("yyy" +pageSize);
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         long skip = (pageIndex - 1) * pageSize;
         query.skip(skip);
@@ -229,15 +230,16 @@ public class FileServiceImpl implements IFileService {
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
     public List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
-        if(ids == null || ids.isEmpty()) {
+        if( CollectionUtils.isEmpty(ids)) {
             return null;
         }
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        long skip = (pageIndex - 1) * pageSize;
-        query.skip(skip);
-        query.limit(pageSize);
         // 增加过滤条件
         query.addCriteria(Criteria.where("_id").in(ids));
+        // 设置起始页和每页查询条数
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        query.with(pageable);
+
 
         Field field = query.fields();
         field.exclude("content");
@@ -245,17 +247,26 @@ public class FileServiceImpl implements IFileService {
         return files;
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 列表；过滤；检索等
+     * @Date 11:49 2022/8/6
+     * @Param [documentDTO]
+     * @return com.jiaruiblog.utils.ApiResult
+     **/
     @Override
     public ApiResult list(DocumentDTO documentDTO) {
         log.info(MessageFormat.format(">>>>>>>检索文档>>>>>>检索参数{0}", documentDTO.toString()));
 
         List<DocumentVO> documentVOS;
-        DocumentVO documentVO = new DocumentVO();
         List<FileDocument> fileDocuments = Lists.newArrayList();
+
+        long totalNum = 0L;
 
         switch (documentDTO.getType()) {
             case ALL:
                 fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
+                totalNum = countAllFile();
                 break;
             case TAG:
                 Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
@@ -264,6 +275,9 @@ public class FileServiceImpl implements IFileService {
                 }
                 List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
+
+                Query query = new Query().addCriteria(Criteria.where("_id").in(fileIdList1));
+                totalNum = countFileByQuery(query);
                 break;
             case FILTER:
                 Set<String> docIdSet = new HashSet<>();
@@ -287,10 +301,9 @@ public class FileServiceImpl implements IFileService {
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), docIdSet);
                 if(esDoc != null){
                     fileDocuments = Optional.ofNullable(fileDocuments).orElse(new ArrayList<>());
-                    System.out.println(fileDocuments);
-                    System.out.println(esDoc);
                     fileDocuments.addAll(esDoc);
                 }
+                totalNum = fileDocuments.size();
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
@@ -299,6 +312,9 @@ public class FileServiceImpl implements IFileService {
                 }
                 List<String> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
+
+                Query query1 = new Query().addCriteria(Criteria.where("_id").in(fileIdList));
+                totalNum = countFileByQuery(query1);
                 break;
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
@@ -307,7 +323,10 @@ public class FileServiceImpl implements IFileService {
         if(documentVOS != null && !documentVOS.isEmpty()) {
             log.info(MessageFormat.format(">>>>>>>检索全部文档>>>>>>总数：{0}", documentVOS.size()));
         }
-        return ApiResult.success(documentVOS);
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalNum", totalNum);
+        result.put("documents", documentVOS);
+        return ApiResult.success(result);
     }
 
     /**
@@ -510,6 +529,17 @@ public class FileServiceImpl implements IFileService {
             }
         }
         return null;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 根据查询条件查询总数量
+     * @Date 12:09 2022/8/6
+     * @Param [query]
+     * @return long
+     **/
+    public long countFileByQuery(Query query) {
+        return mongoTemplate.count(query, FileDocument.class, collectionName);
     }
 
     public static void main(String[] args) {

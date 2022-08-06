@@ -39,8 +39,6 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public ApiResult insert(Comment comment) {
-        System.out.println(comment);
-        System.out.println("======");
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
@@ -116,7 +114,7 @@ public class CommentServiceImpl implements ICommentService {
         }
         Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
-        query.addCriteria(Criteria.where("name").regex(pattern));
+        query.addCriteria(Criteria.where("content").regex(pattern));
 
         List<Comment> comments = template.find(query, Comment.class, collectionName);
         return comments.stream().map(Comment::getDocId).collect(Collectors.toList());
@@ -149,7 +147,4 @@ public class CommentServiceImpl implements ICommentService {
     public long countAllFile() {
         return template.getCollection(collectionName).estimatedDocumentCount();
     }
-
-
-
 }
