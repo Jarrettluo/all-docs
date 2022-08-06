@@ -1,8 +1,7 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.entity.CollectDocRelationship;
-import com.jiaruiblog.entity.DTO.CollectDTO;
-import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.dto.CollectDTO;
 import com.jiaruiblog.service.CollectService;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
@@ -31,13 +30,13 @@ public class CollectController {
     CollectService collectService;
 
     @ApiOperation(value = "2.3 新增一个收藏文档", notes = "新增单个收藏文档")
-    @PostMapping(value = "/insert")
+    @PostMapping(value = "/auth/insert")
     public ApiResult insert(@RequestBody CollectDTO collect, HttpServletRequest request){
         return collectService.insert(setRelationshipValue(collect, request));
     }
 
     @ApiOperation(value = "2.4 根据id移除某个收藏文档", notes = "根据id移除某个文档")
-    @DeleteMapping(value = "/remove")
+    @DeleteMapping(value = "/auth/remove")
     public ApiResult remove(@RequestBody CollectDTO collect, HttpServletRequest request){
         return collectService.remove(setRelationshipValue(collect, request));
     }

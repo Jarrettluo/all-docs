@@ -1,4 +1,4 @@
-package com.jiaruiblog.entity.DTO;
+package com.jiaruiblog.entity.dto;
 
 import lombok.Data;
 

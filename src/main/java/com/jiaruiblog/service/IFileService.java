@@ -1,11 +1,8 @@
 package com.jiaruiblog.service;
 
-import com.jiaruiblog.entity.DTO.DocumentDTO;
+import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.utils.ApiResult;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;

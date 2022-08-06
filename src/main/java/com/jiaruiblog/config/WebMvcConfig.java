@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * @ClassName WebMvcConfig
- * @Description TODO
+ * @Description 把传入的参数自动转换为枚举量
  * @Author luojiarui
  * @Date 2022/6/19 5:09 下午
  * @Version 1.0

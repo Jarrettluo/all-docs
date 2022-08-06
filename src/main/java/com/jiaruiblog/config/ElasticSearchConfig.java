@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @ClassName ElasticSearchConfig
- * @Description TODO
+ * @Description ES的配置信息
  * @Author luojiarui
  * @Date 2022/7/12 10:50 下午
  * @Version 1.0
@@ -25,7 +25,10 @@ public class ElasticSearchConfig {
 
     @Bean
     public RestHighLevelClient restClient() {
-        RestHighLevelClient restClient = new RestHighLevelClient(RestClient.builder(new HttpHost(esHost, esPort)));
-        return restClient;
+        return new RestHighLevelClient(
+                RestClient.builder(
+                        new HttpHost(esHost, esPort)
+                )
+        );
     }
 }

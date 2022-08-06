@@ -1,9 +1,6 @@
 package com.jiaruiblog.controller;
 
-import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.enums.Type;
 import com.jiaruiblog.service.StatisticsService;
-import com.jiaruiblog.service.impl.StatisticsServiceImpl;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * @ClassName Statistics
- * @Description TODO
+ * @ClassName StatisticsController
+ * @Description 统计模块
  * @Author luojiarui
  * @Date 2022/6/26 2:24 下午
  * @Version 1.0
@@ -23,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @CrossOrigin
 @RequestMapping("/statistics")
-public class Statistics {
+public class StatisticsController {
 
     @Autowired
     StatisticsService statisticsService;

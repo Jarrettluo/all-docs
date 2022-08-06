@@ -1,7 +1,7 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.entity.Comment;
-import com.jiaruiblog.entity.DTO.CommentDTO;
+import com.jiaruiblog.entity.dto.CommentDTO;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
@@ -15,7 +15,7 @@ import java.util.Optional;
 
 /**
  * @ClassName CommentController
- * @Description TODO
+ * @Description 评论系统的控制器
  * @Author luojiarui
  * @Date 2022/6/4 3:11 下午
  * @Version 1.0
@@ -33,8 +33,6 @@ public class CommentController {
     @ApiOperation(value = "2.5 新增单个评论", notes = "新增单个评论")
     @PostMapping(value = "/auth/insert")
     public ApiResult insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request){
-        System.out.println(request);
-        System.out.println(commentDTO);
         return commentService.insert(getComment(commentDTO, request));
     }
 

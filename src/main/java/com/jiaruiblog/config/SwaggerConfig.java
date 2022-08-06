@@ -13,7 +13,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * @ClassName SwaggerConfig
- * @Description TODO
+ * @Description swagger 配置
  * @Author luojiarui
  * @Date 2022/6/4 9:39 上午
  * @Version 1.0
@@ -47,8 +47,6 @@ public class SwaggerConfig {
                 .title("文档分享网站")
                 // 接口描述
                 .description("document sharing site")
-                // 联系方式
-                .contact("罗佳瑞 luojiarui2@gmail.com")
                 // 版本信息
                 .version("1.0")
                 // 构建

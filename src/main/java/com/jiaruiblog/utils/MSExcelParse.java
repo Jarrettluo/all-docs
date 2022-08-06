@@ -21,10 +21,7 @@ import java.io.IOException;
 public class MSExcelParse {
 
 
-
-    public static void main(final String[] args) throws IOException, TikaException, SAXException {
-
-
+    public static void parseExcel(String filePath) throws IOException, TikaException, SAXException {
 
         //detecting the file type
 
@@ -32,7 +29,7 @@ public class MSExcelParse {
 
         Metadata metadata = new Metadata();
 
-        FileInputStream inputstream = new FileInputStream(new File("example_msExcel.xlsx"));
+        FileInputStream inputstream = new FileInputStream(filePath);
 
         ParseContext pcontext = new ParseContext();
 
@@ -46,17 +43,25 @@ public class MSExcelParse {
 
         System.out.println("Contents of the document:" + handler.toString());
 
-        System.out.println("Metadata of the document:");
+//        System.out.println("Metadata of the document:");
+//
+//        String[] metadataNames = metadata.names();
+//
+//
+//
+//        for(String name : metadataNames) {
+//
+//            System.out.println(name + ": " + metadata.get(name));
+//
+//        }
+    }
 
-        String[] metadataNames = metadata.names();
 
 
-
-        for(String name : metadataNames) {
-
-            System.out.println(name + ": " + metadata.get(name));
-
-        }
+    public static void main(final String[] args) throws IOException, TikaException, SAXException {
+        String tempPath = "/Users/molly/Desktop/test.pdf";
+        String path = tempPath + File.separator + "实践大作业-202111.pdf";
+        parseExcel(path);
 
     }
 

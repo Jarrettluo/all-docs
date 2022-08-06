@@ -9,14 +9,17 @@ package com.jiaruiblog.common;
  **/
 public class MessageConstant {
 
-    public final static Integer PARAMS_ERROR_CODE = 1201;
-    public final static Integer PROCESS_ERROR_CODE = 1202;
+    private MessageConstant() {
+        throw new IllegalStateException("MessageConstant class");
+    }
 
-    public final static String PARAMS_IS_NOT_NULL = "参数是必需的！";
-    public final static String PARAMS_LENGTH_REQUIRED = "参数的长度必需符合要求！";
-    public final static String PARAMS_FORMAT_ERROR = "参数格式错误！";
+    public static final Integer PARAMS_ERROR_CODE = 1201;
+    public static final Integer PROCESS_ERROR_CODE = 1202;
 
-    public final static String OPERATE_FAILED = "操作失败！";
+    public static final String PARAMS_IS_NOT_NULL = "参数是必需的！";
+    public static final String PARAMS_LENGTH_REQUIRED = "参数的长度必需符合要求！";
+    public static final String PARAMS_FORMAT_ERROR = "参数格式错误！";
 
-    public final static String SUCCESS = "SUCCESS";
+    public static final String OPERATE_FAILED = "操作失败！";
+    public static final String SUCCESS = "SUCCESS";
 }

@@ -17,12 +17,11 @@ public class CommonExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public ResponseModel handle(Exception e) {
         ResponseModel model = ResponseModel.getInstance();
-//        System.out.println(e.getStackTrace());
         e.printStackTrace();
         if (e instanceof MaxUploadSizeExceededException) {
             model.setMessage("上传的文件超过大小限制");
         } else {
-            model.setMessage("上传失败");
+            model.setMessage("操作失败");
         }
         return model;
     }

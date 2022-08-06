@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @ClassName MongoConfig
- * @Description TODO
+ * @Description mongodb 配置
  * @Author luojiarui
  * @Date 2022/7/12 10:30 下午
  * @Version 1.0
@@ -22,12 +22,11 @@ public class MongoConfig {
     @Value("${spring.data.mongodb.database}")
     String db;
 
-    ////GridFSBucket用于打开下载流
+    //GridFSBucket用于打开下载流
     @Bean
     public GridFSBucket getGridFSBucket(MongoClient mongoClient){
         MongoDatabase mongoDatabase = mongoClient.getDatabase(db);
-        GridFSBucket bucket = GridFSBuckets.create(mongoDatabase);
-        return bucket;
+        return GridFSBuckets.create(mongoDatabase);
     }
 
 }

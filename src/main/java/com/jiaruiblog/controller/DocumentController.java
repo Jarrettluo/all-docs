@@ -1,7 +1,7 @@
 package com.jiaruiblog.controller;
 
-import com.jiaruiblog.entity.DTO.DocumentDTO;
-import com.jiaruiblog.entity.DTO.RemoveObjectDTO;
+import com.jiaruiblog.entity.dto.DocumentDTO;
+import com.jiaruiblog.entity.dto.RemoveObjectDTO;
 
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @ClassName DocumentController
- * @Description TODO
+ * @Description 文档查询删除控制器
  * @Author luojiarui
  * @Date 2022/6/19 5:18 下午
  * @Version 1.0

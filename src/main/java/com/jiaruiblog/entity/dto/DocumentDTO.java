@@ -1,4 +1,4 @@
-package com.jiaruiblog.entity.DTO;
+package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.enums.Type;
@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * @ClassName documentDTO
- * @Description TODO
+ * @Description 文档的dto
  * @Author luojiarui
  * @Date 2022/6/19 5:15 下午
  * @Version 1.0

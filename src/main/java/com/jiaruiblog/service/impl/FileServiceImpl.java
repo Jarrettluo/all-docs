@@ -4,7 +4,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Category;
-import com.jiaruiblog.entity.DTO.DocumentDTO;
+import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;

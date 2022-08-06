@@ -3,8 +3,8 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
-import com.jiaruiblog.entity.DTO.CategoryDTO;
-import com.jiaruiblog.entity.DTO.RelationDTO;
+import com.jiaruiblog.entity.dto.CategoryDTO;
+import com.jiaruiblog.entity.dto.RelationDTO;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.enums.Type;
@@ -16,13 +16,11 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
  * @ClassName CategoryController
- * @Description TODO
+ * @Description 分类的控制器
  * @Author luojiarui
  * @Date 2022/6/4 3:10 下午
  * @Version 1.0
@@ -36,7 +34,6 @@ public class CategoryController {
 
     // 一个文章只能有一个分类项目
     // 一个文章下可能有多个列表
-
 
     @Autowired
     CategoryService categoryService;
@@ -91,8 +88,6 @@ public class CategoryController {
     @ApiOperation(value = "3.4 根据id移除某个分类", notes = "根据id移除某个分类")
     @DeleteMapping(value = "/remove")
     public ApiResult remove(@RequestBody CategoryDTO categoryDTO){
-//         HttpServletRequest request
-//        Long userId = (Long) request.getAttribute("id");
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
