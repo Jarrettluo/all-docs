@@ -213,7 +213,7 @@ public class FileServiceImpl implements IFileService {
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        long skip = (pageIndex - 1) * pageSize;
+        long skip = (pageIndex) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
         Field field = query.fields();

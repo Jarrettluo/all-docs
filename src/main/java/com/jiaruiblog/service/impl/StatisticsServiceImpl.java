@@ -63,7 +63,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 List<FileDocument> documents;
                 List<CateDocRelationship> relationships = categoryServiceImpl.getRelateByCateId(category.getId());
                 List<String> ids = relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
-                documents = fileServiceImpl.listAndFilterByPage(1, 4, ids);
+                documents = fileServiceImpl.listAndFilterByPage(0, 4, ids);
                 documents = Optional.ofNullable(documents).orElse(new ArrayList<>(8));
                 for (FileDocument document : documents) {
                     document = Optional.ofNullable(document).orElse(new FileDocument());
