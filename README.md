@@ -27,7 +27,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/Jarrettluo/document-sharing-site">
-    <img src="https://github.com/Jarrettluo/document-sharing-site/raw/master/images/banner.png" alt="Logo" width="80" height="80">
+    <img src="https://github.com/Jarrettluo/document-sharing-site/blob/master/images/banner.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">document sharing site</h3>
