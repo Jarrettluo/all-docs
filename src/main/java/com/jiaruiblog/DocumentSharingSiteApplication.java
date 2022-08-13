@@ -3,6 +3,7 @@ package com.jiaruiblog;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 
 /**
@@ -12,6 +13,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * @Date 2022/6/2 10:58 下午
  * @Version 1.0
  **/
+@EnableAsync
 @ServletComponentScan(basePackages = "com.jiaruiblog.filter")
 @SpringBootApplication
 public class DocumentSharingSiteApplication {

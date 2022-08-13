@@ -3,6 +3,7 @@ package com.jiaruiblog.controller;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.google.common.collect.Lists;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
 import com.jiaruiblog.service.ElasticService;
@@ -156,10 +157,15 @@ public class FileController {
      */
     @PostMapping("/upload")
     public ResponseModel formUpload(@RequestParam("file") MultipartFile file) throws IOException {
-
+        List<String> availableSuffixs = Lists.newArrayList("pdf", "png");
         ResponseModel model = ResponseModel.getInstance();
         try {
             if (file != null && !file.isEmpty()) {
+                String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+                if( !availableSuffixs.contains(suffix)) {
+                    model.setMessage("格式不支持！");
+                    return model;
+                }
                 String fileMd5 = SecureUtil.md5(file.getInputStream());
                 FileDocument fileDocument = fileService.saveFile(fileMd5, file);
 

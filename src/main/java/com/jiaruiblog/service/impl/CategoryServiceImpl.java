@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -143,12 +144,19 @@ public class CategoryServiceImpl implements CategoryService {
      * @param relationship
      * @return
      */
-    // TODO 一个关系只能在同一个分类中，不能再次分类
     @Override
     public ApiResult addRelationShip(CateDocRelationship relationship) {
         if(relationship.getCategoryId() == null || relationship.getFileId() == null){
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
+        // 先排查一个文章只能有一个分类关系，不能有多个分类信息
+        Query query1 = new Query(Criteria.where("fileId").is(relationship.getFileId()));
+        List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class,
+                RELATE_COLLECTION_NAME);
+        if( !CollectionUtils.isEmpty(relationships)) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+
         // 先排查是否具有该链接关系，否则不予进行关联
         Query query = new Query(Criteria.where("categoryId").is(relationship.getCategoryId())
                 .and("fileId").is(relationship.getFileId()));

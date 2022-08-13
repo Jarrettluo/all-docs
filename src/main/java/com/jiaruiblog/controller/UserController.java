@@ -91,8 +91,14 @@ public class UserController {
     }
 
     @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
-    @DeleteMapping(value = "/deleteByID")
-    public ApiResult deleteByID(@RequestBody User user) {
+    @DeleteMapping(value = "/auth/deleteByID")
+    public ApiResult deleteByID(@RequestBody User user, HttpServletRequest request) {
+//        String username = (String) request.getAttribute("username");
+        // 用户只能删除自己，不能删除其他人的信息
+        String userId = (String) request.getAttribute("id");
+        if( !userId.equals(user.getId())) {
+            return ApiResult.error(1201, MessageConstant.OPERATE_FAILED);
+        }
         log.info("根据id删除用户请求==={}", user.toString());
         DeleteResult remove = template.remove(user, COLLECTION_NAME);
         log.info("删除的结果==={}", remove);

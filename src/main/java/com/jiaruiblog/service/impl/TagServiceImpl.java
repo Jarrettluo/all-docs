@@ -13,7 +13,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -287,6 +289,21 @@ public class TagServiceImpl implements TagService {
      **/
     public long countAllFile() {
         return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
+    }
+
+    @Async
+    public void saveTagWhenSaveDoc(FileDocument fileDocument) {
+        String suffix = fileDocument.getSuffix();
+        String tagName = suffix.substring(suffix.lastIndexOf(".") + 1);
+        List<Tag> tags = queryTagByName(tagName);
+        if(CollectionUtils.isEmpty(tags)) {
+            return;
+        }
+        Tag tag = tags.get(0);
+        TagDocRelationship tagDocRelationship = new TagDocRelationship();
+        tagDocRelationship.setTagId(tag.getId());
+        tagDocRelationship.setFileId(fileDocument.getId());
+        addRelationShip(tagDocRelationship);
     }
 
 }
