@@ -50,7 +50,7 @@ public class ElasticServiceImpl implements ElasticService {
     private FileOperationServiceImpl fileOperationServiceImpl;
 
     @Autowired
-    private IFileService iFileService;
+    private FileServiceImpl fileServiceImpl;
 
 
     /**
@@ -158,7 +158,7 @@ public class ElasticServiceImpl implements ElasticService {
             if(sourceAsMap.containsKey("id")){
                 String id = (String) sourceAsMap.get("id");
                 if(id != null) {
-                    FileDocument fileDocument = iFileService.getByMd5(id);
+                    FileDocument fileDocument = fileServiceImpl.getByMd5(id);
                     fileDocument.setDescription(abstractString);
                     fileDocumentList.add(fileDocument);
                 }

@@ -73,6 +73,8 @@ public class FileServiceImpl implements IFileService {
     private ElasticServiceImpl elasticServiceImpl;
 
 
+
+
     /**
      * js文件流上传附件
      *
@@ -132,6 +134,7 @@ public class FileServiceImpl implements IFileService {
             ex.printStackTrace();
         }
         // 异步保存数据标签
+        tagServiceImpl.saveTagWhenSaveDoc(fileDocument);
 
         return fileDocument;
     }
@@ -277,7 +280,9 @@ public class FileServiceImpl implements IFileService {
                 }
                 List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
-
+                if(CollectionUtils.isEmpty(fileIdList1)) {
+                    break;
+                }
                 Query query = new Query().addCriteria(Criteria.where("_id").in(fileIdList1));
                 totalNum = countFileByQuery(query);
                 break;
@@ -314,7 +319,9 @@ public class FileServiceImpl implements IFileService {
                 }
                 List<String> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
-
+                if(CollectionUtils.isEmpty(fileIdList)) {
+                    break;
+                }
                 Query query1 = new Query().addCriteria(Criteria.where("_id").in(fileIdList));
                 totalNum = countFileByQuery(query1);
                 break;

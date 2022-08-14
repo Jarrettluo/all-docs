@@ -3,6 +3,7 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.RemoveObjectDTO;
 
+import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.utils.ApiResult;
 
@@ -11,7 +12,10 @@ import io.swagger.annotations.ApiOperation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 /**
  * @ClassName DocumentController
@@ -34,7 +38,16 @@ public class DocumentController {
 
     @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
     @PostMapping(value = "/list")
-    public ApiResult list(@RequestBody DocumentDTO documentDTO){
+    public ApiResult list(@RequestBody DocumentDTO documentDTO) throws IOException {
+        if(StringUtils.hasText(documentDTO.getFilterWord())) {
+            String filterWord = documentDTO.getFilterWord();
+            //非法敏感词汇判断
+            SensitiveFilter filter = SensitiveFilter.getInstance();
+            int n = filter.CheckSensitiveWord( filterWord,0,1);
+            if(n > 0){ //存在非法字符
+                log.info("这个人输入了非法字符--> {},不知道他到底要查什么~",filterWord);
+            }
+        }
         return iFileService.list(documentDTO);
     }
 

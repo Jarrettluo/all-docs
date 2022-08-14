@@ -6,7 +6,6 @@ import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.result.UpdateResult;
-import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -16,12 +15,10 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -117,9 +114,9 @@ public class TagServiceImpl implements TagService {
      * @return com.jiaruiblog.entity.Tag
      **/
     public Tag queryByTagId(String id) {
-//        if(id == null || "".equals(id)) {
-//            return null;
-//        }
+        if( !StringUtils.hasText(id)) {
+            return null;
+        }
         return mongoTemplate.findById(id, Tag.class, COLLECTION_NAME);
     }
 
@@ -297,7 +294,10 @@ public class TagServiceImpl implements TagService {
         String tagName = suffix.substring(suffix.lastIndexOf(".") + 1);
         List<Tag> tags = queryTagByName(tagName);
         if(CollectionUtils.isEmpty(tags)) {
-            return;
+            Tag tag = new Tag();
+            tag.setName(tagName.toUpperCase(Locale.ROOT));
+            insert(tag);
+            saveTagWhenSaveDoc(fileDocument);
         }
         Tag tag = tags.get(0);
         TagDocRelationship tagDocRelationship = new TagDocRelationship();
