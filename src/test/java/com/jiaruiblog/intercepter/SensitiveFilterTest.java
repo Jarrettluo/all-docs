@@ -1,6 +1,7 @@
 package com.jiaruiblog.intercepter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.ansj.splitWord.analysis.IndexAnalysis;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -54,4 +55,46 @@ public class SensitiveFilterTest {
         log.info("这个人输入了非法字符--> \"{}\",不知道他到底要查什么~",filterWord);
 
     }
+
+    /**
+     * 测试使用Ansj 的索引分词
+     * ansjseg的官方文档： https://github.com/NLPchina/ansj_seg
+     */
+    @Test
+    public void wordSegmentTest1() {
+        long startTime = System.currentTimeMillis();
+        String text = "20个左边的卡罗拉倒车镜! ";
+        String analysisedText = IndexAnalysis.parse(text).toStringWithOutNature();
+        long endTime = System.currentTimeMillis();
+        long time = endTime - startTime;
+        System.out.println("面向索引的分词: " + analysisedText + "(" + time + "ms)");
+    }
+    /**
+     * 测试使用Ansj 的索引分词
+     * ansjseg的官方文档： https://github.com/NLPchina/ansj_seg
+     */
+    @Test
+    public void wordSegmentTest2() {
+        long startTime = System.currentTimeMillis();
+        String text = "我这句话里面包含了敏感信息! ";
+        String analysisedText = IndexAnalysis.parse(text).toStringWithOutNature();
+        long endTime = System.currentTimeMillis();
+        long time = endTime - startTime;
+        System.out.println("面向索引的分词: " + analysisedText + "(" + time + "ms)");
+    }
+
+    /**
+     * 测试使用Ansj 的索引分词
+     * ansjseg的官方文档： https://github.com/NLPchina/ansj_seg
+     */
+    @Test
+    public void wordSegmentTest3() {
+        long startTime = System.currentTimeMillis();
+        String text = "电子 单晶 张开盛! ";
+        String analysisedText = IndexAnalysis.parse(text).toStringWithOutNature();
+        long endTime = System.currentTimeMillis();
+        long time = endTime - startTime;
+        System.out.println("面向索引的分词: " + analysisedText + "(" + time + "ms)");
+    }
+
 }

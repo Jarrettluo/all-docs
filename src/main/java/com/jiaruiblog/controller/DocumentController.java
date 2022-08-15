@@ -44,7 +44,8 @@ public class DocumentController {
             //非法敏感词汇判断
             SensitiveFilter filter = SensitiveFilter.getInstance();
             int n = filter.CheckSensitiveWord( filterWord,0,1);
-            if(n > 0){ //存在非法字符
+            //存在非法字符
+            if( n > 0 ){
                 log.info("这个人输入了非法字符--> {},不知道他到底要查什么~",filterWord);
             }
         }
