@@ -6,6 +6,7 @@ import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.utils.MSExcelParse;
 import com.jiaruiblog.utils.PDFUtil;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -184,6 +185,34 @@ public class ElasticServiceImpl implements ElasticService {
         System.out.println(textFilePath);
         try {
             PDFUtil.readPDFText(is, textFilePath);
+            FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
+            fileObj.setId(fileDocument.getMd5());
+            fileObj.setName(fileDocument.getName());
+            fileObj.setType(fileDocument.getContentType());
+            this.upload(fileObj);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // 删除临时的txt文件
+            File file = new File(textFilePath);
+            if(file.exists()) {
+                file.delete();
+            }
+        }
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 转换各类office文档到es中
+     * @Date 23:00 2022/8/28
+     * @Param [is, fileDocument]
+     * @return void
+     **/
+    @Override
+    public void uploadFileToEsDocx(InputStream is, FileDocument fileDocument) {
+        String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
+        try {
+            MSExcelParse.readPDFText(is, textFilePath);
             FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());

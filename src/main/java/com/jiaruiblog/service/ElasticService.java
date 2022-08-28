@@ -11,4 +11,7 @@ public interface ElasticService {
     List<FileDocument> search(String keyword) throws IOException;
 
     void uploadFileToEs(InputStream is, FileDocument fileDocument);
+
+    void uploadFileToEsDocx(InputStream is, FileDocument fileDocument);
+
 }

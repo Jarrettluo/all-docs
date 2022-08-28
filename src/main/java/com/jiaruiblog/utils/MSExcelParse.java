@@ -1,5 +1,6 @@
 package com.jiaruiblog.utils;
 
+import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
@@ -7,9 +8,7 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * @ClassName MSExcelParser
@@ -20,8 +19,33 @@ import java.io.IOException;
  **/
 public class MSExcelParse {
 
+    /**
+     * @Author luojiarui
+     * @Description //TODO 
+     * @Date 22:59 2022/8/28
+     * @Param [file, textPath]
+     * @return void
+     **/
+    public static void readPDFText(InputStream file, String textPath) throws IOException {
+        FileWriter fileWriter = new FileWriter(textPath, true);
+        try {
+            fileWriter.write(textPath);
+            fileWriter.write(parseExcel(file));
+        } catch (Exception e) {
+            fileWriter.write("error");
+        } finally {
+            fileWriter.close();
+        }
+    }
 
-    public static void parseExcel(String filePath) throws IOException, TikaException, SAXException {
+    /**
+     * @Author luojiarui
+     * @Description //TODO
+     * @Date 22:59 2022/8/28
+     * @Param [inputStream]
+     * @return java.lang.String
+     **/
+    public static String parseExcel(InputStream inputStream) throws IOException, TikaException, SAXException {
 
         //detecting the file type
 
@@ -29,39 +53,49 @@ public class MSExcelParse {
 
         Metadata metadata = new Metadata();
 
-        FileInputStream inputstream = new FileInputStream(filePath);
-
         ParseContext pcontext = new ParseContext();
-
-
 
         //OOXml parser
 
         OOXMLParser  msofficeparser = new OOXMLParser ();
 
-        msofficeparser.parse(inputstream, handler, metadata,pcontext);
+        msofficeparser.parse(inputStream, handler, metadata,pcontext);
 
         System.out.println("Contents of the document:" + handler.toString());
+        return handler.toString();
 
-//        System.out.println("Metadata of the document:");
-//
-//        String[] metadataNames = metadata.names();
-//
-//
-//
-//        for(String name : metadataNames) {
-//
-//            System.out.println(name + ": " + metadata.get(name));
-//
-//        }
     }
 
+    public static String tikaTool(File f){
+        Tika tika=new Tika();
+        try
+        {
+            return tika.parseToString(f);
+        }
+        catch (IOException e)
+        {
+
+            e.printStackTrace();
+        }
+        catch (TikaException e)
+        {
+
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
     public static void main(final String[] args) throws IOException, TikaException, SAXException {
         String tempPath = "/Users/molly/Desktop/test.pdf";
-        String path = tempPath + File.separator + "实践大作业-202111.pdf";
-        parseExcel(path);
+//        String path = tempPath + File.separator + "AD here部署要求的副本.docx";
+////        parseExcel(path);
+//        FileInputStream fileInputStream = new FileInputStream(path);
+//        readPDFText(fileInputStream, "xxx.txt");
+
+        String path = tempPath + File.separator + "WechatIMG26的副本.jpeg";
+        System.out.println(tikaTool(new File(path)));
+
 
     }
 
