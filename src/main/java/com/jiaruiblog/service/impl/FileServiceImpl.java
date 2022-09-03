@@ -303,6 +303,7 @@ public class FileServiceImpl implements IFileService {
                 List<FileDocument> esDoc = null;
                 try {
                     esDoc = elasticServiceImpl.search(keyWord);
+                    System.out.println(esDoc);
                     if( !CollectionUtils.isEmpty(esDoc)) {
                         Set<String> existIds = esDoc.stream().map(FileDocument::getId).collect(Collectors.toSet());
                         docIdSet.removeAll(existIds);
@@ -527,9 +528,13 @@ public class FileServiceImpl implements IFileService {
     public InputStream getFileThumb(String thumbId) {
         log.info("thumid====准备预览" + thumbId);
         if ( StringUtils.hasText(thumbId)) {
+//            Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(fileDocument.getGridfsId()));
             Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(thumbId));
             try {
                 GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+                if(fsFile == null) {
+                    return null;
+                }
                 log.info("=====查找到的文件=====" + fsFile.toString());
                 GridFSDownloadStream in = gridFSBucket.openDownloadStream(fsFile.getObjectId());
                 if (in.getGridFSFile().getLength() > 0) {

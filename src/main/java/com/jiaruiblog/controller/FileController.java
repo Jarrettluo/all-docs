@@ -251,13 +251,10 @@ public class FileController {
     @ResponseBody
     public byte[] previewThumb(@PathVariable String thumbid) throws Exception {
         InputStream inputStream = fileService.getFileThumb(thumbid);
-        System.out.println(inputStream);
         FileInputStream fileInputStream = (FileInputStream) (inputStream);
-        System.out.println(fileInputStream);
         if(inputStream == null) {
             return null;
         }
-        log.info("====返回预览结果啦！！！====");
         byte[] bytes = new byte[fileInputStream.available()];
         fileInputStream.read(bytes, 0, fileInputStream.available());
         return bytes;

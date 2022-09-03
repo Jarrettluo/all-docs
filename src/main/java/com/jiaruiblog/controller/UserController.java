@@ -1,7 +1,11 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.service.ElasticService;
+import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.utils.ApiResult;
 import com.jiaruiblog.utils.JwtUtil;
 import com.mongodb.client.result.DeleteResult;
@@ -19,6 +23,9 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -40,6 +47,12 @@ public class UserController {
 
     @Autowired
     private MongoTemplate template;
+
+    @Autowired
+    private IFileService fileService;
+
+    @Autowired
+    private ElasticService elasticService;
 
     @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")

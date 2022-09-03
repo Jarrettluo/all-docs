@@ -89,14 +89,16 @@ public class ElasticServiceImpl implements ElasticService {
         SearchRequest searchRequest = new SearchRequest("docwrite");
 
         //默认会search出所有的东西来
-        //SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+//        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+//        System.out.println(response);
 
         //使用lk分词器查询，会把插入的字段分词，然后进行处理
         SearchSourceBuilder srb = new SearchSourceBuilder();
-        srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
+//        srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
+        srb.query(QueryBuilders.matchQuery("attachment.content", keyword));
 
         // 每页10个数据
-        srb.size(10);
+        srb.size(100);
         // 起始位置从0开始
         srb.from(0);
 
@@ -131,19 +133,12 @@ public class ElasticServiceImpl implements ElasticService {
 
             //获取返回的字段
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-            System.out.println(sourceAsMap);
-
-            System.out.println(sourceAsMap.get("name"));
-
 
             //统计找到了几条
             count++;
 
             //这个就会把匹配到的文本返回，而且只返回匹配到的部分文本
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-            System.out.println(highlightFields);
-
-            System.out.println(highlightFields.get("attachment.content"));
 
             HighlightField highlightField = highlightFields.get("attachment.content");
 
@@ -165,9 +160,6 @@ public class ElasticServiceImpl implements ElasticService {
                 }
             }
 
-//            Map<String, Object> sourceAsMap2 = hit.getSourceAsMap();
-//            System.out.println(sourceAsMap2);
-
             stringBuilder.append(highlightFields);
         }
 
@@ -182,7 +174,7 @@ public class ElasticServiceImpl implements ElasticService {
     public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
 
         String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
-        System.out.println(textFilePath);
+
         try {
             PDFUtil.readPDFText(is, textFilePath);
             FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
