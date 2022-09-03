@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -35,7 +34,6 @@ public class TagServiceImpl implements TagService {
 
     private final static String RELATE_COLLECTION_NAME = "relateTagCollection";
 
-
     @Autowired
     MongoTemplate mongoTemplate;
 
@@ -48,28 +46,40 @@ public class TagServiceImpl implements TagService {
         mongoTemplate.save(tag, COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
-
+    
+    /**
+     * @Author luojiarui
+     * @Description 更新tag的信息
+     * @Date 16:55 2022/9/3
+     * @Param [tag]
+     * @return com.jiaruiblog.utils.ApiResult
+     **/
     @Override
     public ApiResult update(Tag tag) {
         // 必须经过查重啊
         if(isTagExist(tag.getName())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        log.info(MessageFormat.format("准备更新Tag信息>>>>>>>>>{0}", tag));
         Query query = new Query(Criteria.where("_id").is(tag.getId()));
         Update update  = new Update();
         update.set("name", tag.getName());
         update.set("updateTime",tag.getUpdateDate());
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Tag.class, COLLECTION_NAME);
-        log.info(MessageFormat.format(">>>>>>>更新结果>>>>>>>{0}", updateResult));
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 删除某个已经存在的tag信息
+     * @Date 16:55 2022/9/3
+     * @Param [tag]
+     * @return com.jiaruiblog.utils.ApiResult
+     **/
     @Override
     public ApiResult remove(Tag tag) {
-//        if(isTagExist(tag.getName())) {
-//            ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-//        }
+        if(tag == null || !StringUtils.hasText(tag.getId())) {
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
         Query query1 = new Query();
         query1.addCriteria(Criteria.where("_id").is(tag.getId()));
         mongoTemplate.remove(query1, Tag.class, COLLECTION_NAME);
@@ -89,7 +99,6 @@ public class TagServiceImpl implements TagService {
     public ApiResult queryById(Tag tag) {
         Query query = new Query(Criteria.where("_").is("1"));
         mongoTemplate.count(query, Tag.class);
-
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -102,7 +111,6 @@ public class TagServiceImpl implements TagService {
     @Override
     public ApiResult list() {
         List<Tag> tags = mongoTemplate.findAll(Tag.class, COLLECTION_NAME);
-        log.info("查询全部的标签列表>>>>>>>" + tags.toString());
         return ApiResult.success(tags);
     }
 
@@ -137,6 +145,7 @@ public class TagServiceImpl implements TagService {
         if(!result.isEmpty()) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
+        System.out.println("增加的关系"+relationship.toString());
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
@@ -161,7 +170,7 @@ public class TagServiceImpl implements TagService {
         List<TagVO> tagVOList = new ArrayList<>();
         Query query = new Query().addCriteria(Criteria.where("fileId").is(id));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
-        log.info(MessageFormat.format("查询到的关系>>>>>{0}", relationships));
+
         if(relationships == null || relationships.isEmpty()) {
             return tagVOList;
         }
@@ -197,7 +206,7 @@ public class TagServiceImpl implements TagService {
      * @return 文档的id信息
      */
     public List<String> fuzzySearchDoc(String keyWord) {
-        if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
+        if( keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return null;
         }
         Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
@@ -220,7 +229,6 @@ public class TagServiceImpl implements TagService {
      */
     private boolean isTagExist(String tagName) {
         List<Tag> tags = queryTagByName(tagName);
-        log.info(MessageFormat.format("查询已存在的tag到的结果是>>>>> {0}", tags));
         if(tags == null || tags.isEmpty()){
             return false;
         }
@@ -233,7 +241,7 @@ public class TagServiceImpl implements TagService {
      * @return 查询回来的tag列表
      */
     private List<Tag> queryTagByName(String name) {
-        if(name == null || "".equals(name)) {
+        if( !StringUtils.hasText(name) ) {
             return null;
         }
         Query query = new Query().addCriteria(Criteria.where("name").is(name));
@@ -298,23 +306,28 @@ public class TagServiceImpl implements TagService {
         String suffix = fileDocument.getSuffix();
         String tagName = suffix.substring(suffix.lastIndexOf(".") + 1);
 
-        List<Tag> tags = queryTagByName(tagName);
+        if ( tagName == null || tagName.length() == 0) {
+            return;
+        }
 
+        List<Tag> tags = queryTagByName(tagName.toUpperCase(Locale.ROOT));
         Tag tag;
+
         if(CollectionUtils.isEmpty(tags)) {
             tag = new Tag();
             tag.setName(tagName.toUpperCase(Locale.ROOT));
-            insert(tag);
-            // 递归保存tag信息
-            saveTagWhenSaveDoc(fileDocument);
+            tag.setCreateDate(new Date());
+            tag.setUpdateDate(new Date());
+            tag = mongoTemplate.save(tag, COLLECTION_NAME);
         } else {
             tag = tags.get(0);
         }
-
-        TagDocRelationship tagDocRelationship = new TagDocRelationship();
-        tagDocRelationship.setTagId(tag.getId());
-        tagDocRelationship.setFileId(fileDocument.getId());
-        addRelationShip(tagDocRelationship);
+        if (tag.getId() != null) {
+            TagDocRelationship tagDocRelationship = new TagDocRelationship();
+            tagDocRelationship.setTagId(tag.getId());
+            tagDocRelationship.setFileId(fileDocument.getId());
+            addRelationShip(tagDocRelationship);
+        }
     }
 
 }

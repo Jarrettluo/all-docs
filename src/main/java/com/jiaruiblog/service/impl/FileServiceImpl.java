@@ -553,13 +553,4 @@ public class FileServiceImpl implements IFileService {
     public long countFileByQuery(Query query) {
         return mongoTemplate.count(query, FileDocument.class, collectionName);
     }
-
-    public static void main(String[] args) {
-        // DocumentDTO documentDTO = new DocumentDTO();
-
-        DocumentDTO documentDTO = null;
-        String keyWord = documentDTO.getFilterWord();
-        // String keyWord = Optional.ofNullable(documentDTO).map(item -> item.getFilterWord()).orElse(null);
-        System.out.println(keyWord);
-    }
 }
