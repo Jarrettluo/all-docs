@@ -157,13 +157,14 @@ public class FileController {
      */
     @PostMapping("/upload")
     public ResponseModel formUpload(@RequestParam("file") MultipartFile file) throws IOException {
-        List<String> availableSuffixs = Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");
+        List<String> availableSuffixList = Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");
         ResponseModel model = ResponseModel.getInstance();
         try {
             if (file != null && !file.isEmpty()) {
                 //获取文件后缀名
-                String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
-                if( !availableSuffixs.contains(suffix)) {
+                String suffix = file.getOriginalFilename()
+                        .substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+                if( !availableSuffixList.contains(suffix)) {
                     model.setMessage("格式不支持！");
                     return model;
                 }
@@ -197,16 +198,6 @@ public class FileController {
             model.setMessage(ex.getMessage());
         }
         return model;
-    }
-
-    public static void main(String[] args) {
-        List<String> stringList = Lists.newArrayList("a", "b", "c");
-        String aa = null;
-        if(stringList.contains(aa)) {
-            System.out.println("===");
-        }else {
-            System.out.println("12");
-        }
     }
 
 

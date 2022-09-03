@@ -113,7 +113,7 @@ public class FileServiceImpl implements IFileService {
     public FileDocument saveFile(String md5, MultipartFile file) {
         //已存在该文件，则实现秒传
         FileDocument fileDocument = getByMd5(md5);
-        if (fileDocument != null) {
+        if ( fileDocument != null) {
             return fileDocument;
         }
 
@@ -210,6 +210,9 @@ public class FileServiceImpl implements IFileService {
      */
     @Override
     public FileDocument getByMd5(String md5) {
+        if (md5 == null) {
+            return null;
+        }
         Query query = new Query().addCriteria(Criteria.where("md5").is(md5));
         FileDocument fileDocument = mongoTemplate.findOne(query, FileDocument.class, collectionName);
         return fileDocument;

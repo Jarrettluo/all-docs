@@ -20,9 +20,9 @@ import org.springframework.data.redis.support.collections.RedisProperties;
  * @Date 2022/8/14 17:11
  * @Version 1.0
  **/
-@Configuration
-@ConditionalOnClass(RedisOperations.class)
-@EnableConfigurationProperties(RedisProperties.class)
+//@Configuration
+//@ConditionalOnClass(RedisOperations.class)
+//@EnableConfigurationProperties(RedisProperties.class)
 public class RedisConfig {
 
     @Bean

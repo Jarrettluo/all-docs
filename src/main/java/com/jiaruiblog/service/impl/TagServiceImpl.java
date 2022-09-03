@@ -127,6 +127,9 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     public ApiResult addRelationShip(TagDocRelationship relationship) {
+        if( relationship == null || !StringUtils.hasText(relationship.getTagId())) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
         // 判断以下是否存在这个关系
         Query query = new Query(Criteria.where("tagId").is(relationship.getTagId())
                 .and("fileId").is(relationship.getFileId()));
@@ -134,7 +137,6 @@ public class TagServiceImpl implements TagService {
         if(!result.isEmpty()) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        log.info(MessageFormat.format("存入的关系是>>>>{0}", relationship));
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
@@ -227,8 +229,8 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 根据tag的名字检索tag信息
-     * @param name
-     * @return
+     * @param name tag 名称
+     * @return 查询回来的tag列表
      */
     private List<Tag> queryTagByName(String name) {
         if(name == null || "".equals(name)) {
@@ -290,16 +292,25 @@ public class TagServiceImpl implements TagService {
 
     @Async
     public void saveTagWhenSaveDoc(FileDocument fileDocument) {
+        if(fileDocument == null || !StringUtils.hasText(fileDocument.getSuffix())) {
+            return;
+        }
         String suffix = fileDocument.getSuffix();
         String tagName = suffix.substring(suffix.lastIndexOf(".") + 1);
+
         List<Tag> tags = queryTagByName(tagName);
+
+        Tag tag;
         if(CollectionUtils.isEmpty(tags)) {
-            Tag tag = new Tag();
+            tag = new Tag();
             tag.setName(tagName.toUpperCase(Locale.ROOT));
             insert(tag);
+            // 递归保存tag信息
             saveTagWhenSaveDoc(fileDocument);
+        } else {
+            tag = tags.get(0);
         }
-        Tag tag = tags.get(0);
+
         TagDocRelationship tagDocRelationship = new TagDocRelationship();
         tagDocRelationship.setTagId(tag.getId());
         tagDocRelationship.setFileId(fileDocument.getId());
