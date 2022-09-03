@@ -302,9 +302,11 @@ public class FileServiceImpl implements IFileService {
                 docIdSet.addAll(commentServiceImpl.fuzzySearchDoc(keyWord));
                 List<FileDocument> esDoc = null;
                 try {
-                     esDoc = elasticServiceImpl.search(keyWord);
-                    Set<String> existIds = esDoc.stream().map(FileDocument::getId).collect(Collectors.toSet());
-                    docIdSet.removeAll(existIds);
+                    esDoc = elasticServiceImpl.search(keyWord);
+                    if( !CollectionUtils.isEmpty(esDoc)) {
+                        Set<String> existIds = esDoc.stream().map(FileDocument::getId).collect(Collectors.toSet());
+                        docIdSet.removeAll(existIds);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -415,7 +417,7 @@ public class FileServiceImpl implements IFileService {
         documentVO.setThumbId(fileDocument.getThumbId());
         // 根据文档的id进行查询 评论， 收藏，分类， 标签
         String docId = fileDocument.getId();
-        log.info(MessageFormat.format(">>>>>>>> 查询的文档id是 {0}>>>>>>>", docId));
+
         documentVO.setCommentNum(commentServiceImpl.commentNum(docId));
         documentVO.setCollectNum(collectServiceImpl.collectNum(docId));
         documentVO.setCategoryVO(categoryServiceImpl.queryByDocId(docId));

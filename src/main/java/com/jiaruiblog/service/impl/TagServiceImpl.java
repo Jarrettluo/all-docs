@@ -7,6 +7,7 @@ import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -212,12 +213,14 @@ public class TagServiceImpl implements TagService {
         Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
         query.addCriteria(Criteria.where("name").regex(pattern));
-
         List<Tag> categories = mongoTemplate.find(query, Tag.class, COLLECTION_NAME);
+        if (CollectionUtils.isEmpty(categories)) {
+            return Lists.newArrayList();
+        }
         List<String> ids = categories.stream().map(Tag::getId).collect(Collectors.toList());
-
-        Query query1 = new Query().addCriteria(Criteria.where("cateId").in(ids));
+        Query query1 = new Query().addCriteria(Criteria.where("tagId").in(ids));
         List<TagDocRelationship> relationships = mongoTemplate.find(query1, TagDocRelationship.class, RELATE_COLLECTION_NAME);
+
         return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
 
     }

@@ -248,6 +248,7 @@ public class CategoryServiceImpl implements CategoryService {
         Query query = new Query();
         query.addCriteria(Criteria.where("name").regex(pattern));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
+        log.info("模糊搜索的内容{}", categories);
 
         List<String> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
         Query query1 = new Query().addCriteria(Criteria.where("categoryId").in(ids));
