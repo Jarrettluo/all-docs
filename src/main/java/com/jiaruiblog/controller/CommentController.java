@@ -2,6 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.dto.CommentDTO;
+import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.utils.ApiResult;
 import io.swagger.annotations.Api;
@@ -51,7 +52,7 @@ public class CommentController {
 
     @ApiOperation(value = "2.8 根据文档id查询相关评论", notes = "根据id查询某个评论")
     @PostMapping(value = "/list")
-    public ApiResult queryById(@RequestBody Comment comment){
+    public ApiResult queryById(@RequestBody CommentListDTO comment){
         return commentService.queryById(comment);
     }
 

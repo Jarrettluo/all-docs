@@ -292,7 +292,6 @@ public class FileController {
     @ResponseBody
     public byte[] previewThumb2(@PathVariable String thumbid) throws Exception {
         InputStream inputStream = fileService.getFileThumb(thumbid);
-        System.out.println(inputStream);
         if(inputStream == null) {
             return null;
         }

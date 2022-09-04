@@ -5,10 +5,6 @@ import java.util.Map;
 
 public class FileContentTypeUtils {
 
-    public static void main(String[] args) {
-        System.out.println(getContentType(".PPTx"));
-    }
-
     /**
      * 根据文件后缀类型获取文件Content-Type
      *

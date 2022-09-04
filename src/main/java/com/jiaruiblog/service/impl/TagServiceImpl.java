@@ -146,7 +146,6 @@ public class TagServiceImpl implements TagService {
         if(!result.isEmpty()) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        System.out.println("增加的关系"+relationship.toString());
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }

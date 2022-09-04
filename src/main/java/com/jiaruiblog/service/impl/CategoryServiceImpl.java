@@ -50,9 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
         if(isNameExist(category.getName())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        log.info("=================准备插入========" + category);
         mongoTemplate.save(category, COLLECTION_NAME);
-        log.info(">>>>>>>插入成功>>>>>>");
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -63,7 +61,6 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public ApiResult update(Category category) {
-        log.info("=================准备更新>>>>>>>>" + category);
         if(isNameExist(category.getName())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
@@ -135,7 +132,6 @@ public class CategoryServiceImpl implements CategoryService {
         // 需要查询全部的信息
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        log.info(">>>>>>查询分类的列表，返回结果>>>>>>>");
         return ApiResult.success(categories);
     }
 
@@ -248,7 +244,6 @@ public class CategoryServiceImpl implements CategoryService {
         Query query = new Query();
         query.addCriteria(Criteria.where("name").regex(pattern));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        log.info("模糊搜索的内容{}", categories);
 
         List<String> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
         Query query1 = new Query().addCriteria(Criteria.where("categoryId").in(ids));

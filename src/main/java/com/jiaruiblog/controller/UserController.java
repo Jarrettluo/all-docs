@@ -57,10 +57,8 @@ public class UserController {
     @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")
     public ApiResult insertObj(@RequestBody User user) {
-        log.info("新增用户入参=={}", user.toString());
         user.setCreateDate(new Date());
         User save = template.save(user, COLLECTION_NAME);
-        log.info("插入数据==={}", save.toString());
         return ApiResult.success("新增成功");
     }
 
@@ -129,7 +127,6 @@ public class UserController {
         dbUser = Optional.ofNullable(dbUser).orElse(new User());
 
         if (dbUser.getUsername().equals(user.getUsername()) && dbUser.getPassword().equals(user.getPassword())) {
-            log.info("登录成功！生成token！");
             String token = JwtUtil.createToken(dbUser);
             Map<String, String> result = new HashMap<>();
             result.put("token", token);

@@ -1,13 +1,16 @@
 package com.jiaruiblog.service.impl;
 
+import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
 
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -17,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -79,11 +83,31 @@ public class CommentServiceImpl implements ICommentService {
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 根据文档的id查询相关的评论列表
+     * @Date 11:57 2022/9/4
+     * @Param [comment]
+     * @return com.jiaruiblog.utils.ApiResult
+     **/
     @Override
-    public ApiResult queryById(Comment comment) {
-        Query query = new Query(Criteria.where("docId").is(comment.getDocId()));
+    public ApiResult queryById(CommentListDTO comment) {
+        if (comment == null || comment.getDocId() == null) {
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+        Query query = new Query(Criteria.where("docId").is(comment.getDocId()))
+                .with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        Long totalNum = template.count(query, Comment.class, collectionName);
+        long skip = (comment.getPage()) * comment.getRows();
+        query.skip(skip);
+        query.limit(comment.getRows());
         List<Comment> comments = template.find(query, Comment.class, collectionName);
-        return ApiResult.success(comments);
+
+        Map<String, Object> result = Maps.newHashMap();
+        result.put("totalNum", totalNum);
+        result.put("comments", comments);
+
+        return ApiResult.success(result);
     }
 
     @Override

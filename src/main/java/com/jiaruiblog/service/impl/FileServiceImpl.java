@@ -265,7 +265,6 @@ public class FileServiceImpl implements IFileService {
     @Override
     public ApiResult list(DocumentDTO documentDTO) {
         log.info(MessageFormat.format(">>>>>>>检索文档>>>>>>检索参数{0}", documentDTO.toString()));
-
         List<DocumentVO> documentVOS;
         List<FileDocument> fileDocuments = Lists.newArrayList();
 
@@ -303,7 +302,6 @@ public class FileServiceImpl implements IFileService {
                 List<FileDocument> esDoc = null;
                 try {
                     esDoc = elasticServiceImpl.search(keyWord);
-                    System.out.println(esDoc);
                     if( !CollectionUtils.isEmpty(esDoc)) {
                         Set<String> existIds = esDoc.stream().map(FileDocument::getId).collect(Collectors.toSet());
                         docIdSet.removeAll(existIds);
@@ -335,9 +333,6 @@ public class FileServiceImpl implements IFileService {
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         documentVOS = convertDocuments(fileDocuments);
-        if(documentVOS != null && !documentVOS.isEmpty()) {
-            log.info(MessageFormat.format(">>>>>>>检索全部文档>>>>>>总数：{0}", documentVOS.size()));
-        }
         Map<String, Object> result = new HashMap<>();
         result.put("totalNum", totalNum);
         result.put("documents", documentVOS);
@@ -367,7 +362,6 @@ public class FileServiceImpl implements IFileService {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 删除评论信息，删除分类关系，删除标签关系
-        log.info(MessageFormat.format(">>>>>准备删除{0}>>>>>>>", id));
         removeFile(id, true);
         commentServiceImpl.removeByDocId(id);
         categoryServiceImpl.removeRelateByDocId(id);
@@ -496,7 +490,6 @@ public class FileServiceImpl implements IFileService {
         String path = "thumbnail";   // 新建pdf文件的路径
         String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
         String gridfsId = IdUtil.simpleUUID();
-        log.info("====制作缩略图中====");
         if(fileDocument.getSuffix().equals(".pdf")) {
             // 将pdf输入流转换为图片并临时保存下来
             PDFUtil.pdfThumbnail(inputStream, picPath);
@@ -513,8 +506,7 @@ public class FileServiceImpl implements IFileService {
         Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocument.getId()));;
         Update update = new Update().set("thumbId", gridfsId);
         mongoTemplate.updateFirst(query, update, FileDocument.class, collectionName);
-        log.info(String.valueOf(fileDocument));
-        log.info("====缩略图的id====" + gridfsId);
+
     }
 
     /**
@@ -526,16 +518,13 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public InputStream getFileThumb(String thumbId) {
-        log.info("thumid====准备预览" + thumbId);
         if ( StringUtils.hasText(thumbId)) {
-//            Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(fileDocument.getGridfsId()));
             Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(thumbId));
             try {
                 GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
                 if(fsFile == null) {
                     return null;
                 }
-                log.info("=====查找到的文件=====" + fsFile.toString());
                 GridFSDownloadStream in = gridFSBucket.openDownloadStream(fsFile.getObjectId());
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);

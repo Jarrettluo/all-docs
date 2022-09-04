@@ -22,7 +22,7 @@ import java.util.List;
 public class FileOperationServiceImpl implements FileOperationService {
 
     public FileObj readFile(String path) throws IOException {
-        System.out.println(path);
+
         //读文件
         File file = new File(path);
         FileObj fileObj = new FileObj();

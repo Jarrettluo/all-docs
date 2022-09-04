@@ -1,6 +1,7 @@
 package com.jiaruiblog.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Sets;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.entity.vo.DocumentVO;
@@ -29,10 +30,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName ElasticServiceImpl
@@ -69,7 +67,6 @@ public class ElasticServiceImpl implements ElasticService {
         indexRequest.setPipeline("attachment");
         IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
 
-        System.out.println(indexResponse);
     }
 
 
@@ -98,7 +95,7 @@ public class ElasticServiceImpl implements ElasticService {
         srb.query(QueryBuilders.matchQuery("attachment.content", keyword));
 
         // 每页10个数据
-        srb.size(100);
+        srb.size(10);
         // 起始位置从0开始
         srb.from(0);
 
@@ -120,6 +117,9 @@ public class ElasticServiceImpl implements ElasticService {
         searchRequest.source(srb);
         SearchResponse res = client.search(searchRequest, RequestOptions.DEFAULT);
 
+        if ( res== null || res.getHits() == null ) {
+            return null;
+        }
         //获取hits，这样就可以获取查询到的记录了
         SearchHits hits = res.getHits();
 
@@ -128,6 +128,9 @@ public class ElasticServiceImpl implements ElasticService {
         int count = 0;
 
         StringBuilder stringBuilder = new StringBuilder();
+
+        Set<String> idSet = Sets.newHashSet();
+
         while (iterator.hasNext()) {
             SearchHit hit = iterator.next();
 
@@ -153,7 +156,8 @@ public class ElasticServiceImpl implements ElasticService {
 
             if(sourceAsMap.containsKey("id")){
                 String id = (String) sourceAsMap.get("id");
-                if(id != null) {
+                if ( id != null && !idSet.contains(id)) {
+                    idSet.add(id);
                     FileDocument fileDocument = fileServiceImpl.getByMd5(id);
                     fileDocument.setDescription(abstractString);
                     fileDocumentList.add(fileDocument);
@@ -163,8 +167,6 @@ public class ElasticServiceImpl implements ElasticService {
             stringBuilder.append(highlightFields);
         }
 
-
-        System.out.println("查询到" + count + "条记录");
         stringBuilder.append("查询到" + count + "条记录");
         return fileDocumentList;
     }
