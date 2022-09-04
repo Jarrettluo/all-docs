@@ -5,6 +5,7 @@ import com.jiaruiblog.entity.dto.RemoveObjectDTO;
 
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.utils.ApiResult;
 
 import io.swagger.annotations.Api;
@@ -16,6 +17,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @ClassName DocumentController
@@ -34,6 +36,9 @@ public class DocumentController {
 
     @Autowired
     IFileService iFileService;
+
+    @Autowired
+    RedisService redisService;
 
 
     @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
@@ -62,6 +67,19 @@ public class DocumentController {
     @DeleteMapping(value = "/auth/remove")
     public ApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO){
         return iFileService.remove(removeObjectDTO.getId());
+    }
+
+    @GetMapping("/addKey")
+    public ApiResult addKey(@RequestParam("key") String key) {
+
+        redisService.addSearchHistoryByUserId("ljr", key);
+        return ApiResult.success(key);
+    }
+
+    @GetMapping("/keyList")
+    public ApiResult keyList() {
+        List<String> keyList = redisService.getSearchHistoryByUserId("ljr");
+        return ApiResult.success(keyList);
     }
 
 }

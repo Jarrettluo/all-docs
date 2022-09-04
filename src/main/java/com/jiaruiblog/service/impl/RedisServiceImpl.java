@@ -3,6 +3,7 @@ package com.jiaruiblog.service.impl;
 import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.utils.RedisKeyUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.redis.core.*;
@@ -27,6 +28,8 @@ public class RedisServiceImpl implements RedisService {
 
     //导入数据源
 //    @Resource(name = "redisSearchTemplate")
+
+    @Autowired
     private StringRedisTemplate redisSearchTemplate;
 
 
