@@ -2,12 +2,13 @@ package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.utils.RedisKeyUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.redis.core.*;
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import java.util.Set;
  * @Date 2022/8/14 17:03
  * @Version 1.0
  **/
+@Slf4j
 @Transactional
 @Service
 public class RedisServiceImpl implements RedisService {
@@ -62,7 +64,7 @@ public class RedisServiceImpl implements RedisService {
     //获取个人历史数据列表
     @Override
     public List<String> getSearchHistoryByUserId(String userid) {
-        List<String> stringList = null;
+        List<String> stringList = Lists.newArrayList();
         String shistory = RedisKeyUtils.getSearchHistoryKey(userid);
         boolean b = redisSearchTemplate.hasKey(shistory);
         if(b){
@@ -71,6 +73,11 @@ public class RedisServiceImpl implements RedisService {
                 Map.Entry<Object, Object> map = cursor.next();
                 String key = map.getKey().toString();
                 stringList.add(key);
+            }
+            try {
+                cursor.close();
+            } catch (Exception e) {
+                log.error("游标关闭异常");
             }
             return stringList;
         }

@@ -73,6 +73,7 @@ public class DocumentController {
     public ApiResult addKey(@RequestParam("key") String key) {
 
         redisService.addSearchHistoryByUserId("ljr", key);
+        redisService.incrementScoreByUserId(key);
         return ApiResult.success(key);
     }
 
@@ -82,4 +83,10 @@ public class DocumentController {
         return ApiResult.success(keyList);
     }
 
+
+    @GetMapping("/hot")
+    public ApiResult hot() {
+        List<String> keyList = redisService.getHotList(null);
+        return ApiResult.success(keyList);
+    }
 }

@@ -23,3 +23,9 @@ https://cloud.tencent.com/developer/article/1938468#:~:text=CentOS%20%E5%AE%89%E
 
 // redisTemplate的使用方法
 https://www.cnblogs.com/caizhaokai/p/11037610.html
+
+// 存储用户经常搜索的内容
+
+// 存储最热点击的文档
+
+// 存储热搜榜单
