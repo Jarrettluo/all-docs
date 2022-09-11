@@ -6,6 +6,7 @@ import com.jiaruiblog.entity.dto.RemoveObjectDTO;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
+import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.utils.ApiResult;
 
 import io.swagger.annotations.Api;
@@ -73,7 +74,7 @@ public class DocumentController {
     public ApiResult addKey(@RequestParam("key") String key) {
 
         redisService.addSearchHistoryByUserId("ljr", key);
-        redisService.incrementScoreByUserId(key);
+        redisService.incrementScoreByUserId(key, RedisServiceImpl.SEARCH_KEY);
         return ApiResult.success(key);
     }
 
@@ -86,7 +87,7 @@ public class DocumentController {
 
     @GetMapping("/hot")
     public ApiResult hot() {
-        List<String> keyList = redisService.getHotList(null);
+        List<String> keyList = redisService.getHotList(null, RedisServiceImpl.SEARCH_KEY);
         return ApiResult.success(keyList);
     }
 }

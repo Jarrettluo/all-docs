@@ -31,6 +31,12 @@ public class RedisServiceImpl implements RedisService {
     //导入数据源
 //    @Resource(name = "redisSearchTemplate")
 
+    // 用户存储用户的搜索关键字
+    public static final String SEARCH_KEY = "search_key";
+
+    // 用于存储文档的检索关键字
+    public static final String DOC_KEY = "doc_key";
+
     @Autowired
     private StringRedisTemplate redisSearchTemplate;
 
@@ -86,7 +92,7 @@ public class RedisServiceImpl implements RedisService {
 
     //新增一条热词搜索记录，将用户输入的热词存储下来
     @Override
-    public int incrementScoreByUserId(String searchkey) {
+    public int incrementScoreByUserId(String searchkey, String key_value) {
         Long now = System.currentTimeMillis();
         ZSetOperations zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
@@ -95,12 +101,16 @@ public class RedisServiceImpl implements RedisService {
         for (int i = 0, lengh = title.size(); i < lengh; i++) {
             String tle = title.get(i);
             try {
-                if (zSetOperations.score("title", tle) <= 0) {
-                    zSetOperations.add("title", tle, 0);
+                // 如果没找到相应的key，则返回null
+                if (zSetOperations.score(key_value, tle) == null) {
+                    zSetOperations.add(key_value, tle, 0);
                     valueOperations.set(tle, String.valueOf(now));
+                } else {
+                    zSetOperations.incrementScore(key_value, tle, 1);
+                    valueOperations.getAndSet(tle, String.valueOf(now));
                 }
             } catch (Exception e) {
-                zSetOperations.add("title", tle, 0);
+                zSetOperations.add(key_value, tle, 0);
                 valueOperations.set(tle, String.valueOf(now));
             }
         }
@@ -109,13 +119,13 @@ public class RedisServiceImpl implements RedisService {
 
     //根据searchkey搜索其相关最热的前十名 (如果searchkey为null空，则返回redis存储的前十最热词条)
     @Override
-    public List<String> getHotList(String searchkey) {
+    public List<String> getHotList(String searchkey, String keyValue) {
         String key = searchkey;
         Long now = System.currentTimeMillis();
         List<String> result = new ArrayList<>();
         ZSetOperations zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
-        Set<String> value = zSetOperations.reverseRangeByScore("title", 0, Double.MAX_VALUE);
+        Set<String> value = zSetOperations.reverseRangeByScore(keyValue, 0, Double.MAX_VALUE);
         //key不为空的时候 推荐相关的最热前十名
         if(StringUtils.isNotEmpty(searchkey)){
             for (String val : value) {
@@ -127,7 +137,7 @@ public class RedisServiceImpl implements RedisService {
                     if ((now - time) < 2592000000L) {//返回最近一个月的数据
                         result.add(val);
                     } else {//时间超过一个月没搜索就把这个词热度归0
-                        zSetOperations.add("title", val, 0);
+                        zSetOperations.add(keyValue, val, 0);
                     }
                 }
             }
@@ -140,7 +150,7 @@ public class RedisServiceImpl implements RedisService {
                 if ((now - time) < 2592000000L) {//返回最近一个月的数据
                     result.add(val);
                 } else {//时间超过一个月没搜索就把这个词热度归0
-                    zSetOperations.add("title", val, 0);
+                    zSetOperations.add(keyValue, val, 0);
                 }
             }
         }
@@ -149,6 +159,7 @@ public class RedisServiceImpl implements RedisService {
 
     //每次点击给相关词searchkey热度 +1
     @Override
+    @Deprecated
     public int incrementScore(String searchkey) {
         String key = searchkey;
         Long now = System.currentTimeMillis();

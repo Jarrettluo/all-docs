@@ -17,9 +17,9 @@ public interface RedisService {
 
     List<String> getSearchHistoryByUserId(String userid);
 
-    int incrementScoreByUserId(String searchkey);
+    int incrementScoreByUserId(String searchkey, String keyValue);
 
-    List<String> getHotList(String searchkey);
+    List<String> getHotList(String searchkey, String keyValue);
 
     int incrementScore(String searchkey);
 
