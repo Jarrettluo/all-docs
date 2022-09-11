@@ -104,9 +104,9 @@ public class StatisticsController {
         Map<String, Object> top1 = Maps.newHashMap();
         top1.put("name", topFileDocument.getName());
         top1.put("id", topFileDocument.getId());
-        top1.put("commentNum", documentVO.getCommentNum());
-        top1.put("collectNUm", documentVO.getCollectNum());
-        top1.put("likeNum", redisService.score(topFileDocument.getId(), RedisServiceImpl.DOC_KEY));
+        top1.put("commentNum", documentVO.getCommentNum().toString());
+        top1.put("collectNUm", documentVO.getCollectNum().toString());
+        top1.put("likeNum", (redisService.score(RedisServiceImpl.DOC_KEY, topFileDocument.getId())).toString());
 
 
         List<Object> others = new ArrayList<>();

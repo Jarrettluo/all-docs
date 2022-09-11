@@ -165,7 +165,6 @@ public class RedisServiceImpl implements RedisService {
      * @return java.lang.Double
      **/
     @Override
-    @Autowired
     public Double score(String key, Object value) {
         return redisSearchTemplate.opsForZSet().score(key, value);
     }
