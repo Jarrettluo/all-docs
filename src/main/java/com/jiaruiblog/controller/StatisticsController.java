@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -92,10 +93,19 @@ public class StatisticsController {
     @GetMapping("getHotTrend")
     public ApiResult getHotTrend() {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
+
         if (CollectionUtils.isEmpty(docIdList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        List<FileDocument> fileDocumentList = fileService.listAndFilterByPageNotSort(0, docIdList.size(), docIdList);
+        // todo 优化一下，按照指定的顺序进行提取，先无脑取回来，然后再进行排序
+//        List<FileDocument> fileDocumentList = fileService.listAndFilterByPageNotSort(0, docIdList.size(), docIdList);
+        List<FileDocument> fileDocumentList = Lists.newArrayList();
+        for (String s : docIdList) {
+            FileDocument fileDocument = fileService.queryById(s);
+            if ( fileDocument != null) {
+                fileDocumentList.add(fileDocument);
+            }
+        }
         if ( CollectionUtils.isEmpty(fileDocumentList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
@@ -104,9 +114,9 @@ public class StatisticsController {
         Map<String, Object> top1 = Maps.newHashMap();
         top1.put("name", topFileDocument.getName());
         top1.put("id", topFileDocument.getId());
-        top1.put("commentNum", documentVO.getCommentNum().toString());
-        top1.put("collectNUm", documentVO.getCollectNum().toString());
-        top1.put("likeNum", (redisService.score(RedisServiceImpl.DOC_KEY, topFileDocument.getId())).toString());
+        top1.put("commentNum", documentVO.getCommentNum());
+        top1.put("collectNum", documentVO.getCollectNum());
+        top1.put("likeNum", (int) Math.round(redisService.score(RedisServiceImpl.DOC_KEY, topFileDocument.getId())));
 
 
         List<Object> others = new ArrayList<>();
@@ -126,4 +136,5 @@ public class StatisticsController {
 
         return ApiResult.success(result);
     }
+
 }

@@ -57,6 +57,8 @@ public interface IFileService {
      */
     FileDocument getByMd5(String md5);
 
+    FileDocument queryById(String docId);
+
     /**
      * 分页查询，按上传时间降序
      *
@@ -68,8 +70,7 @@ public interface IFileService {
 
     List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids);
 
-
-    List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, Collection<String> ids);
+    List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, List<String> ids);
 
     /**
      * 分页检索目前的文档信息

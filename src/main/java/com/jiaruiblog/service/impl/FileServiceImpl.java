@@ -21,6 +21,7 @@ import com.jiaruiblog.entity.FileDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -259,11 +260,13 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, Collection<String> ids) {
+    public List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, List<String> ids) {
         if( CollectionUtils.isEmpty(ids)) {
             return null;
         }
         Query query = new Query();
+
+        query.with(Sort.unsorted());
         // 增加过滤条件
         query.addCriteria(Criteria.where("_id").in(ids));
         // 设置起始页和每页查询条数
@@ -486,6 +489,7 @@ public class FileServiceImpl implements IFileService {
      * @param docId
      * @return
      */
+    @Override
     public FileDocument queryById(String docId) {
         return mongoTemplate.findById(docId, FileDocument.class, collectionName);
     }
