@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,6 +65,8 @@ public interface IFileService {
      * @return
      */
     List<FileDocument> listFilesByPage(int pageIndex, int pageSize);
+
+    List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids);
 
     /**
      * 分页检索目前的文档信息

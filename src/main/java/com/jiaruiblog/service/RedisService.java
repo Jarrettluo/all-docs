@@ -21,6 +21,8 @@ public interface RedisService {
 
     List<String> getHotList(String searchkey, String keyValue);
 
+    Double score(String key, Object value);
+
     int incrementScore(String searchkey);
 
 

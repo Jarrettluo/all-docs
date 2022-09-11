@@ -157,6 +157,19 @@ public class RedisServiceImpl implements RedisService {
         return result;
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 查询某个value的分数
+     * @Date 15:38 2022/9/11
+     * @Param [key, value]
+     * @return java.lang.Double
+     **/
+    @Override
+    @Autowired
+    public Double score(String key, Object value) {
+        return redisSearchTemplate.opsForZSet().score(key, value);
+    }
+
     //每次点击给相关词searchkey热度 +1
     @Override
     @Deprecated

@@ -8,6 +8,7 @@ import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.utils.ApiResult;
 import com.jiaruiblog.utils.PDFUtil;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -72,7 +73,8 @@ public class FileServiceImpl implements IFileService {
     @Autowired
     private ElasticServiceImpl elasticServiceImpl;
 
-
+    @Autowired
+    private RedisService redisService;
 
 
     /**
@@ -237,6 +239,7 @@ public class FileServiceImpl implements IFileService {
      * @Param [pageIndex, pageSize, ids]
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
+    @Override
     public List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
         if( CollectionUtils.isEmpty(ids)) {
             return null;
@@ -351,6 +354,8 @@ public class FileServiceImpl implements IFileService {
         FileDocument fileDocument = queryById(id);
         if( fileDocument == null ) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
+        } else {
+            redisService.incrementScoreByUserId(id, RedisServiceImpl.DOC_KEY);
         }
         // 查询评论信息，查询分类信息，查询分类关系，查询标签信息，查询标签关系信息
         return ApiResult.success(convertDocument(null, fileDocument));
@@ -465,6 +470,7 @@ public class FileServiceImpl implements IFileService {
     public FileDocument queryById(String docId) {
         return mongoTemplate.findById(docId, FileDocument.class, collectionName);
     }
+
 
     /**
      * @Author luojiarui
