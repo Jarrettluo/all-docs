@@ -95,7 +95,7 @@ public class StatisticsController {
         if (CollectionUtils.isEmpty(docIdList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        List<FileDocument> fileDocumentList = fileService.listAndFilterByPage(0, docIdList.size(), docIdList);
+        List<FileDocument> fileDocumentList = fileService.listAndFilterByPageNotSort(0, docIdList.size(), docIdList);
         if ( CollectionUtils.isEmpty(fileDocumentList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }

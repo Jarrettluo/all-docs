@@ -68,6 +68,9 @@ public interface IFileService {
 
     List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids);
 
+
+    List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, Collection<String> ids);
+
     /**
      * 分页检索目前的文档信息
      * @param documentDTO

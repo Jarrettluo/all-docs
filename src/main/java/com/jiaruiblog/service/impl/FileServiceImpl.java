@@ -258,6 +258,25 @@ public class FileServiceImpl implements IFileService {
         return files;
     }
 
+    @Override
+    public List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, Collection<String> ids) {
+        if( CollectionUtils.isEmpty(ids)) {
+            return null;
+        }
+        Query query = new Query();
+        // 增加过滤条件
+        query.addCriteria(Criteria.where("_id").in(ids));
+        // 设置起始页和每页查询条数
+        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        query.with(pageable);
+
+
+        Field field = query.fields();
+        field.exclude("content");
+        List<FileDocument> files = mongoTemplate.find(query, FileDocument.class, collectionName);
+        return files;
+    }
+
     /**
      * @Author luojiarui
      * @Description 列表；过滤；检索等
