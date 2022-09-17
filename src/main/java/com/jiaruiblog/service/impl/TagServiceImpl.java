@@ -1,5 +1,6 @@
 package com.jiaruiblog.service.impl;
 
+import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.*;
 import com.jiaruiblog.entity.vo.TagVO;
@@ -7,10 +8,13 @@ import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.scheduling.annotation.Async;
@@ -103,6 +107,18 @@ public class TagServiceImpl implements TagService {
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 根据tag的id查询全部的tag列表
+     * @Date 22:13 2022/9/17
+     * @Param [tagIds]
+     * @return java.util.List<com.jiaruiblog.entity.Tag>
+     **/
+    public List<Tag> queryByIds(List<String> tagIds) {
+        Query query = new Query(Criteria.where("_id").in(tagIds));
+        return Optional.ofNullable(mongoTemplate.find(query, Tag.class, COLLECTION_NAME)).orElse(Lists.newArrayList());
+    }
+
     @Override
     public ApiResult search(Tag tag) {
         return null;
@@ -185,6 +201,57 @@ public class TagServiceImpl implements TagService {
             tagVOList.add(tagVO);
         }
         return tagVOList;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 查询最近的tag分页
+     * @Date 22:23 2022/9/17
+     * @Param []
+     * @return java.util.Map<com.jiaruiblog.entity.Tag,java.util.List<com.jiaruiblog.entity.TagDocRelationship>>
+     **/
+    public Map<Tag, List<TagDocRelationship>> getRecentTagRelationship(Integer tagNum) {
+        Map<Tag, List<TagDocRelationship>> result = Maps.newHashMap();
+        List<TagDocRelationship> files = getTagRelationshipByPage(0, tagNum, null);
+        if( CollectionUtils.isEmpty(files)) {
+            return result;
+        }
+        List<String> tagIds = files.stream().map(TagDocRelationship::getTagId).collect(Collectors.toList());
+        List<Tag> tags = queryByIds(tagIds);
+        for (Tag tag : tags) {
+            result.put(tag, getTagRelationshipByPage(0, 12, tag.getId()));
+        }
+        return result;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 默认查询两个最近的tag
+     * @Date 22:24 2022/9/17
+     * @Param []
+     * @return java.util.Map<com.jiaruiblog.entity.Tag,java.util.List<com.jiaruiblog.entity.TagDocRelationship>>
+     **/
+    @Override
+    public Map<Tag, List<TagDocRelationship>> getRecentTagRelationship() {
+        return getRecentTagRelationship(2);
+    }
+    /**
+     * @Author luojiarui
+     * @Description 分页查询相关的关系列表
+     * 1、tagId 为null 的时候不进行tag相关检索；2、page和size 进行分页
+     * @Date 22:22 2022/9/17
+     * @Param [pageIndex, pageSize, tagId]
+     * @return java.util.List<com.jiaruiblog.entity.TagDocRelationship>
+     **/
+    public List<TagDocRelationship> getTagRelationshipByPage(int pageIndex, int pageSize,  String tagId) {
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        long skip = (pageIndex) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        if ( tagId != null) {
+            query.addCriteria(Criteria.where("tagId").is(tagId));
+        }
+        return Optional.ofNullable(mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME)).orElse(Lists.newArrayList());
     }
 
     /**

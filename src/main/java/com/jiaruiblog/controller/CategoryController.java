@@ -118,7 +118,7 @@ public class CategoryController {
     // 同步动作，一个文档只能有一个分类关系，不能出现一对多
     @ApiOperation(value = "3.5 增加关系", notes = "检索分类")
     @PostMapping(value = "/addRelationship")
-    public synchronized ApiResult addRealationship(@RequestBody RelationDTO relationDTO) {
+    public synchronized ApiResult addRelationship(@RequestBody RelationDTO relationDTO) {
         switch (relationDTO.getType()) {
             case CATEGORY:
                 CateDocRelationship category = new CateDocRelationship();
@@ -129,6 +129,8 @@ public class CategoryController {
                 TagDocRelationship tag = new TagDocRelationship();
                 tag.setTagId(relationDTO.getId());
                 tag.setFileId(relationDTO.getDocId());
+                tag.setCreateDate(new Date());
+                tag.setUpdateDate(new Date());
                 return tagService.addRelationShip(tag);
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);

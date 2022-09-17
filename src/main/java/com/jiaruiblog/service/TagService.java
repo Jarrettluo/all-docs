@@ -4,6 +4,9 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.utils.ApiResult;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @Author Jarrett Luo
  * @Date 2022/6/7 11:39
@@ -26,5 +29,7 @@ public interface TagService {
     ApiResult addRelationShip(TagDocRelationship relationship);
 
     ApiResult cancleTagRelationship(TagDocRelationship relationship);
+
+    Map<Tag, List<TagDocRelationship>> getRecentTagRelationship();
 
 }

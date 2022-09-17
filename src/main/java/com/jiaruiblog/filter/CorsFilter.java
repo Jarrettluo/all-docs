@@ -45,7 +45,12 @@ public class CorsFilter implements Filter {
         response.setHeader("Access-Control-Allow-Headers", "x-requested-with, access-control-allow-origin, authorization, id, username, content-type, version-info,");
         // 指⽰的请求的响应是否可以暴露于该页⾯。当true值返回时它可以被暴露
         response.setHeader("Access-Control-Allow-Credentials","true");
-        filterChain.doFilter(servletRequest, servletResponse);
+        try {
+            filterChain.doFilter(servletRequest, servletResponse);
+        } catch (Exception e) {
+            return;
+        }
+
     }
 
     @Override

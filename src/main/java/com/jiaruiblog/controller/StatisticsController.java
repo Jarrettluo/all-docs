@@ -3,10 +3,13 @@ package com.jiaruiblog.controller;
 import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.service.StatisticsService;
+import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.utils.ApiResult;
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName StatisticsController
@@ -49,6 +53,9 @@ public class StatisticsController {
 
     @Autowired
     FileServiceImpl fileServiceImpl;
+
+    @Autowired
+    TagService tagService;
 
     @ApiOperation(value = "4.1 查询热度榜", notes = "查询列表")
     @GetMapping(value = "/trend")
@@ -137,4 +144,74 @@ public class StatisticsController {
         return ApiResult.success(result);
     }
 
+
+    /**
+     * @Author luojiarui
+     * @Description 获取首页最近的数据
+     * 展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档；
+     * @Date 21:58 2022/9/17
+     * @Param []
+     * @return com.jiaruiblog.utils.ApiResult
+     **/
+    @GetMapping("/recentDocs")
+    public ApiResult getRecentDocs() {
+        List<Map<String, Object>> result = Lists.newArrayList();
+
+        List<FileDocument> recentFileDocuments = fileService.listFilesByPage(0, 12);
+        List<Map<String, Object>> recentMap = doc2Map(recentFileDocuments);
+        result.add(getTagMap("最近的文档", "tagId", recentMap));
+
+        Map<Tag, List<TagDocRelationship>> tagDocMap = tagService.getRecentTagRelationship();
+
+        for (Map.Entry<Tag, List<TagDocRelationship>> tagListEntry : tagDocMap.entrySet()) {
+            Tag tag = tagListEntry.getKey();
+            List<String> docIdList = tagListEntry.getValue()
+                    .stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
+            List<FileDocument> tagFileDocument = fileService.listAndFilterByPage(0, 12, docIdList);
+            List<Map<String, Object>> map = doc2Map(tagFileDocument);
+            result.add(getTagMap(tag.getName(), tag.getId(), map));
+        }
+
+        return ApiResult.success(result);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 文档列表转向为map
+     * @Date 22:47 2022/9/17
+     * @Param [fileDocuments]
+     * @return java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
+     **/
+    private List<Map<String, Object>> doc2Map(List<FileDocument> fileDocuments) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        if(CollectionUtils.isEmpty(fileDocuments)) {
+            return result;
+        }
+
+        for (FileDocument fileDocument : fileDocuments) {
+            Map<String, Object> map = Maps.newHashMap();
+            map.put("name", fileDocument.getName());
+            map.put("id", fileDocument.getId());
+            result.add(map);
+        }
+        return result;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 生成返回的数据
+     * @Date 23:07 2022/9/17
+     * @Param [name, tagId, docList]
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     **/
+    private Map<String, Object> getTagMap(String name, String tagId, Object docList){
+        Map<String, Object> tagMap = Maps.newHashMap();
+        if ( name == null || tagId == null || docList == null) {
+            return tagMap;
+        }
+        tagMap.put("name", name);
+        tagMap.put("tagId", tagId);
+        tagMap.put("docList", docList);
+        return tagMap;
+    }
 }
