@@ -150,7 +150,7 @@ public class CategoryController {
                 TagDocRelationship tag = new TagDocRelationship();
                 tag.setTagId(relationDTO.getId());
                 tag.setFileId(relationDTO.getDocId());
-                return tagService.cancleTagRelationship(tag);
+                return tagService.cancelTagRelationship(tag);
             default:
                 return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }

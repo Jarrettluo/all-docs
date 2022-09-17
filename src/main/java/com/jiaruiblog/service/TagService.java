@@ -28,7 +28,7 @@ public interface TagService {
 
     ApiResult addRelationShip(TagDocRelationship relationship);
 
-    ApiResult cancleTagRelationship(TagDocRelationship relationship);
+    ApiResult cancelTagRelationship(TagDocRelationship relationship);
 
     Map<Tag, List<TagDocRelationship>> getRecentTagRelationship();
 

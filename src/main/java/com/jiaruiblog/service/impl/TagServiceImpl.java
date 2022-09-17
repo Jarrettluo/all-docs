@@ -8,13 +8,11 @@ import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.utils.ApiResult;
 import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.scheduling.annotation.Async;
@@ -158,8 +156,8 @@ public class TagServiceImpl implements TagService {
         // 判断以下是否存在这个关系
         Query query = new Query(Criteria.where("tagId").is(relationship.getTagId())
                 .and("fileId").is(relationship.getFileId()));
-        List<Map> result = mongoTemplate.find(query, Map.class, RELATE_COLLECTION_NAME);
-        if(!result.isEmpty()) {
+        List<TagDocRelationship> result = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
+        if( !result.isEmpty() ) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
@@ -167,11 +165,10 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public ApiResult cancleTagRelationship(TagDocRelationship relationship) {
-
-        Query query = new Query(Criteria.where("categoryId").is(relationship.getTagId())
+    public ApiResult cancelTagRelationship(TagDocRelationship relationship) {
+        Query query = new Query(Criteria.where("tagId").is(relationship.getTagId())
                 .and("fileId").is(relationship.getFileId()));
-        mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
+        mongoTemplate.remove(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -213,6 +210,7 @@ public class TagServiceImpl implements TagService {
     public Map<Tag, List<TagDocRelationship>> getRecentTagRelationship(Integer tagNum) {
         Map<Tag, List<TagDocRelationship>> result = Maps.newHashMap();
         List<TagDocRelationship> files = getTagRelationshipByPage(0, tagNum, null);
+        System.out.println(files);
         if( CollectionUtils.isEmpty(files)) {
             return result;
         }
@@ -244,14 +242,14 @@ public class TagServiceImpl implements TagService {
      * @return java.util.List<com.jiaruiblog.entity.TagDocRelationship>
      **/
     public List<TagDocRelationship> getTagRelationshipByPage(int pageIndex, int pageSize,  String tagId) {
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "createDate"));
         long skip = (pageIndex) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
         if ( tagId != null) {
             query.addCriteria(Criteria.where("tagId").is(tagId));
         }
-        return Optional.ofNullable(mongoTemplate.find(query, TagDocRelationship.class, COLLECTION_NAME)).orElse(Lists.newArrayList());
+        return Optional.ofNullable(mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME)).orElse(Lists.newArrayList());
     }
 
     /**
@@ -353,7 +351,7 @@ public class TagServiceImpl implements TagService {
         Query query = new Query(Criteria.where("docId").is(docId));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class,
                 RELATE_COLLECTION_NAME);
-        relationships.forEach(item -> this.cancleTagRelationship(item));
+        relationships.forEach(item -> this.cancelTagRelationship(item));
     }
 
     /**
