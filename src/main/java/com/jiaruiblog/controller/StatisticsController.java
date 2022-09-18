@@ -192,6 +192,7 @@ public class StatisticsController {
             Map<String, Object> map = Maps.newHashMap();
             map.put("name", fileDocument.getName());
             map.put("id", fileDocument.getId());
+            map.put("thumbId", fileDocument.getThumbId());
             result.add(map);
         }
         return result;

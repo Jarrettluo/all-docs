@@ -11,15 +11,15 @@ import java.util.List;
  **/
 public interface RedisService {
 
-    int addSearchHistoryByUserId(String userid, String searchkey);
+    int addSearchHistoryByUserId(String userid, String searchKey);
 
-    Long delSearchHistoryByUserId(String userid, String searchkey);
+    Long delSearchHistoryByUserId(String userid, String searchKey);
 
     List<String> getSearchHistoryByUserId(String userid);
 
-    int incrementScoreByUserId(String searchkey, String keyValue);
+    int incrementScoreByUserId(String searchKey, String keyValue);
 
-    List<String> getHotList(String searchkey, String keyValue);
+    List<String> getHotList(String searchKey, String keyValue);
 
     Double score(String key, Object value);
 
