@@ -115,8 +115,8 @@ public class StatisticsController {
                 fileDocumentList.add(fileDocument);
             } else {
                 // todo 批量从redis中删除
-//                invalidDocs.add(fileDocument.getId());
-                redisService.delKey(fileDocument.getId(), RedisServiceImpl.DOC_KEY);
+//                invalidDocs.add(s);
+                redisService.delKey(s, RedisServiceImpl.DOC_KEY);
             }
         }
         // 从redis中删除无效id

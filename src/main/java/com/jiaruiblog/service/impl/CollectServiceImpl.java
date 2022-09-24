@@ -55,6 +55,7 @@ public class CollectServiceImpl implements CollectService {
         if(collectDb != null){
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
+        System.out.println(collect);
         mongoTemplate.save(collect, collectionName);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
@@ -96,8 +97,17 @@ public class CollectServiceImpl implements CollectService {
         return relationship;
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 查询某个文档下面的点赞数量
+     * @Date 22:35 2022/9/24
+     * @Param [docId]
+     * @return java.lang.Long
+     **/
     public Long collectNum(String docId) {
         Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
+        List<CollectDocRelationship> relationships = mongoTemplate.find(query, CollectDocRelationship.class, collectionName);
+        System.out.println(relationships);
         return mongoTemplate.count(query, CollectDocRelationship.class, collectionName);
     }
 

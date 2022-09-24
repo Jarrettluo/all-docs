@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * @ClassName CollectController
@@ -53,6 +54,8 @@ public class CollectController {
         CollectDocRelationship relationship = new CollectDocRelationship();
         relationship.setDocId(collect.getDocId());
         relationship.setUserId((String) request.getAttribute("id"));
+        relationship.setCreateDate(new Date());
+        relationship.setUpdateDate(new Date());
         return relationship;
     }
 

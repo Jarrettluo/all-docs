@@ -434,12 +434,11 @@ public class FileServiceImpl implements IFileService {
         documentVO.setSize(fileDocument.getSize());
         documentVO.setTitle(fileDocument.getName());
         documentVO.setDescription(fileDocument.getDescription());
-        documentVO.setUserName("luojiarui");
+        documentVO.setUserName("admin");
         documentVO.setCreateTime(fileDocument.getUploadDate());
         documentVO.setThumbId(fileDocument.getThumbId());
         // 根据文档的id进行查询 评论， 收藏，分类， 标签
         String docId = fileDocument.getId();
-
         documentVO.setCommentNum(commentServiceImpl.commentNum(docId));
         documentVO.setCollectNum(collectServiceImpl.collectNum(docId));
         documentVO.setCategoryVO(categoryServiceImpl.queryByDocId(docId));
