@@ -393,6 +393,8 @@ public class TagServiceImpl implements TagService {
             TagDocRelationship tagDocRelationship = new TagDocRelationship();
             tagDocRelationship.setTagId(tag.getId());
             tagDocRelationship.setFileId(fileDocument.getId());
+            tagDocRelationship.setCreateDate(new Date());
+            tagDocRelationship.setUpdateDate(new Date());
             addRelationShip(tagDocRelationship);
         }
     }

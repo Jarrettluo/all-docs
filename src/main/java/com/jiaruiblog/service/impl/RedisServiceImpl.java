@@ -117,6 +117,13 @@ public class RedisServiceImpl implements RedisService {
         return 1;
     }
 
+    @Override
+    public void delKey(String searchKey, String keyValue){
+        redisSearchTemplate.opsForZSet().remove(keyValue, searchKey);
+    }
+
+
+
     //根据searchkey搜索其相关最热的前十名 (如果searchkey为null空，则返回redis存储的前十最热词条)
     @Override
     public List<String> getHotList(String searchkey, String keyValue) {

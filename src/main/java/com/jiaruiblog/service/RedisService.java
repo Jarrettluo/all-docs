@@ -19,6 +19,8 @@ public interface RedisService {
 
     int incrementScoreByUserId(String searchKey, String keyValue);
 
+    void delKey(String searchKey, String keyValue);
+
     List<String> getHotList(String searchKey, String keyValue);
 
     Double score(String key, Object value);

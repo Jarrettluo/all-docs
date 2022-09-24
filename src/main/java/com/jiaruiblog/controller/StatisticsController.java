@@ -104,6 +104,8 @@ public class StatisticsController {
         if (CollectionUtils.isEmpty(docIdList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
+        // 存储无效的redis id
+        List<String> invalidDocs = Lists.newArrayList();
         // todo 优化一下，按照指定的顺序进行提取，先无脑取回来，然后再进行排序
 //        List<FileDocument> fileDocumentList = fileService.listAndFilterByPageNotSort(0, docIdList.size(), docIdList);
         List<FileDocument> fileDocumentList = Lists.newArrayList();
@@ -111,8 +113,14 @@ public class StatisticsController {
             FileDocument fileDocument = fileService.queryById(s);
             if ( fileDocument != null) {
                 fileDocumentList.add(fileDocument);
+            } else {
+                // todo 批量从redis中删除
+//                invalidDocs.add(fileDocument.getId());
+                redisService.delKey(fileDocument.getId(), RedisServiceImpl.DOC_KEY);
             }
         }
+        // 从redis中删除无效id
+
         if ( CollectionUtils.isEmpty(fileDocumentList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
