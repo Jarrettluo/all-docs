@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements IUserService {
 
-    private static String collectionName = "fileDatas";
+    private static String collectionName = "user";
 
     @Autowired
     MongoTemplate mongoTemplate;

@@ -55,7 +55,6 @@ public class CollectServiceImpl implements CollectService {
         if(collectDb != null){
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        System.out.println(collect);
         mongoTemplate.save(collect, collectionName);
         return ApiResult.success(MessageConstant.SUCCESS);
     }
@@ -106,8 +105,6 @@ public class CollectServiceImpl implements CollectService {
      **/
     public Long collectNum(String docId) {
         Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
-        List<CollectDocRelationship> relationships = mongoTemplate.find(query, CollectDocRelationship.class, collectionName);
-        System.out.println(relationships);
         return mongoTemplate.count(query, CollectDocRelationship.class, collectionName);
     }
 
