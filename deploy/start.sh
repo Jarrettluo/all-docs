@@ -3,9 +3,9 @@
 source /etc/profile
 
 #部署的地址，将jar包上传到deploy
-deploy_path="/opt/sh/project/"
+deploy_path="/root/all-docs/"
 #日志名称
-log_name="alldocs-$(date +%Y-%m-%d).log"
+log_name="all-docs-$(date +%Y-%m-%d).log"
 #运行环境
 environment=""
 

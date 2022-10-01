@@ -14,7 +14,7 @@
     <groupId>com.jiaruiblog</groupId>
     <artifactId>document-sharing-site</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>mongo-upload</name>
+    <name>all-docs</name>
     <description>使用Mongodb作为文件上传服务器</description>
 
     <properties>
