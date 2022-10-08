@@ -22,6 +22,8 @@ import java.util.Set;
  **/
 public class SensitiveFilter {
 
+    private static final int MATCH_FLAG = 2;
+
     /**
      * 敏感词过滤器：利用DFA算法  进行敏感词过滤
      */
@@ -125,13 +127,13 @@ public class SensitiveFilter {
         }
         if (SensitiveFilter.maxMatchType == matchType){
             //长度必须大于等于1，为词
-            if(matchFlag < 2 || !flag){
+            if(matchFlag < MATCH_FLAG || !flag){
                 matchFlag = 0;
             }
         }
         if (SensitiveFilter.minMatchType == matchType){
             //长度必须大于等于1，为词
-            if(matchFlag < 2 && !flag){
+            if(matchFlag < MATCH_FLAG && !flag){
                 matchFlag = 0;
             }
         }

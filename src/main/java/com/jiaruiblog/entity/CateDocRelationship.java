@@ -8,7 +8,7 @@ import java.util.Date;
 
 /**
  * @ClassName CateDocRelationship
- * @Description TODO
+ * @Description CateDocRelationship
  * @Author luojiarui
  * @Date 2022/6/4 10:30 上午
  * @Version 1.0

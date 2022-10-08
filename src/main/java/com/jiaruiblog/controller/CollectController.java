@@ -15,7 +15,7 @@ import java.util.Date;
 
 /**
  * @ClassName CollectController
- * @Description TODO
+ * @Description user collection module
  * @Author luojiarui
  * @Date 2022/6/4 3:11 下午
  * @Version 1.0

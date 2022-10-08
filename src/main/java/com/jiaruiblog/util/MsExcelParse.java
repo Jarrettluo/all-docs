@@ -26,7 +26,7 @@ public class MsExcelParse {
      * @Param [file, textPath]
      * @return void
      **/
-    public static void readPDFText(InputStream file, String textPath) throws IOException {
+    public static void readPdfText(InputStream file, String textPath) throws IOException {
         FileWriter fileWriter = new FileWriter(textPath, true);
         try {
             fileWriter.write(textPath);

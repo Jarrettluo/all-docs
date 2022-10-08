@@ -61,6 +61,11 @@ public interface IFileService {
      */
     FileDocument getByMd5(String md5);
 
+    /**
+     * queryById
+     * @param docId String
+     * @return result
+     */
     FileDocument queryById(String docId);
 
     /**
@@ -72,14 +77,28 @@ public interface IFileService {
      */
     List<FileDocument> listFilesByPage(int pageIndex, int pageSize);
 
+    /**
+     * listAndFilterByPage
+     * @param pageIndex int
+     * @param pageSize int
+     * @param ids Collection
+     * @return result
+     */
     List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids);
 
+    /**
+     * listAndFilterByPageNotSort
+     * @param pageIndex int
+     * @param pageSize int
+     * @param ids List
+     * @return result
+     */
     List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, List<String> ids);
 
     /**
      * 分页检索目前的文档信息
-     * @param documentDTO
-     * @return
+     * @param documentDTO DocumentDTO
+     * @return result
      */
     BaseApiResult list(DocumentDTO documentDTO);
 
@@ -101,12 +120,10 @@ public interface IFileService {
 
     /**
      * update file thumb
-     * @Author luojiarui
-     * @Description  保存文档的缩略图
-     * @Date 7:15 下午 2022/7/24
-     * @Param [fileDocument]
-     * @return void
-     **/
+     * @param inputStream FileDocument
+     * @param fileDocument InputStream
+     * @throws FileNotFoundException file not found
+     */
     void updateFileThumb(InputStream inputStream, FileDocument fileDocument) throws FileNotFoundException;
 
     /**
@@ -114,7 +131,7 @@ public interface IFileService {
      * @Author luojiarui
      * @Description // 查询缩略图信息
      * @Date 8:00 下午 2022/7/24
-     * @Param [thumbId]
+     * @param thumbId String
      * @return java.io.InputStream
      **/
     InputStream getFileThumb(String thumbId);

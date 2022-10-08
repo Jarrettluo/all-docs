@@ -111,11 +111,11 @@ public class RedisServiceImpl implements RedisService {
     /**
      * 新增一条热词搜索记录，将用户输入的热词存储下来
      * @param searchkey String
-     * @param key_value String
+     * @param value String
      * @return int
      */
     @Override
-    public int incrementScoreByUserId(String searchkey, String key_value) {
+    public int incrementScoreByUserId(String searchkey, String value) {
         Long now = System.currentTimeMillis();
         ZSetOperations zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
@@ -125,15 +125,15 @@ public class RedisServiceImpl implements RedisService {
             String tle = title.get(i);
             try {
                 // 如果没找到相应的key，则返回null
-                if (zSetOperations.score(key_value, tle) == null) {
-                    zSetOperations.add(key_value, tle, 0);
+                if (zSetOperations.score(value, tle) == null) {
+                    zSetOperations.add(value, tle, 0);
                     valueOperations.set(tle, String.valueOf(now));
                 } else {
-                    zSetOperations.incrementScore(key_value, tle, 1);
+                    zSetOperations.incrementScore(value, tle, 1);
                     valueOperations.getAndSet(tle, String.valueOf(now));
                 }
             } catch (Exception e) {
-                zSetOperations.add(key_value, tle, 0);
+                zSetOperations.add(value, tle, 0);
                 valueOperations.set(tle, String.valueOf(now));
             }
         }
@@ -163,11 +163,13 @@ public class RedisServiceImpl implements RedisService {
         if(StringUtils.isNotEmpty(searchkey)){
             for (String val : value) {
                 if (StringUtils.containsIgnoreCase(val, key)) {
-                    if (result.size() > 9) {//只返回最热的前十名
+                    //只返回最热的前十名
+                    if (result.size() > 9) {
                         break;
                     }
                     Long time = Long.valueOf(valueOperations.get(val));
-                    if ((now - time) < 2592000000L) {//返回最近一个月的数据
+                    //返回最近一个月的数据
+                    if ((now - time) < 2592000000L) {
                         result.add(val);
                     } else {//时间超过一个月没搜索就把这个词热度归0
                         zSetOperations.add(keyValue, val, 0);
@@ -176,13 +178,16 @@ public class RedisServiceImpl implements RedisService {
             }
         }else{
             for (String val : value) {
-                if (result.size() > 9) {//只返回最热的前十名
+                //只返回最热的前十名
+                if (result.size() > 9) {
                     break;
                 }
                 Long time = Long.valueOf(valueOperations.get(val));
-                if ((now - time) < 2592000000L) {//返回最近一个月的数据
+                //返回最近一个月的数据
+                if ((now - time) < 2592000000L) {
                     result.add(val);
-                } else {//时间超过一个月没搜索就把这个词热度归0
+                } else {
+                    //时间超过一个月没搜索就把这个词热度归0
                     zSetOperations.add(keyValue, val, 0);
                 }
             }

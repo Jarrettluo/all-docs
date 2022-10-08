@@ -1,5 +1,6 @@
 package com.jiaruiblog.filter;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
@@ -20,10 +21,22 @@ import java.io.IOException;
 @WebFilter(filterName = "CORSFilter", urlPatterns = {"/*"})
 @Order(value = 1)
 @Configuration
+@Slf4j
 public class CorsFilter implements Filter {
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {    }
 
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException { /* TODO document why this method is empty */ }
+
+
+    /**
+     * 响应标头指定 指定可以访问资源的URI路径
+     * response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+     * @param servletRequest ServletRequest
+     * @param servletResponse ServletResponse
+     * @param filterChain FilterChain
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)throws IOException, ServletException {
 
@@ -33,9 +46,6 @@ public class CorsFilter implements Filter {
 
         String curOrigin = request.getHeader("Origin");
         response.setHeader("Access-Control-Allow-Origin", curOrigin == null ? "true" : curOrigin);
-
-        // 响应标头指定 指定可以访问资源的URI路径
-//        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
         //响应标头指定响应访问所述资源到时允许的⼀种或多种⽅法
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
         //设置 缓存可以⽣存的最⼤秒数
@@ -48,6 +58,7 @@ public class CorsFilter implements Filter {
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (Exception e) {
+            log.error("过滤器报错", e);
             return;
         }
 

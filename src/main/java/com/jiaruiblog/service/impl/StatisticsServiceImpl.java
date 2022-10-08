@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 /**
  * @ClassName StatisticsServiceImpl
- * @Description TODO
+ * @Description StatisticsServiceImpl
  * @Author luojiarui
  * @Date 2022/6/26 2:28 下午
  * @Version 1.0
@@ -49,14 +49,14 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public BaseApiResult trend() {
         List<Category> categoryList = categoryServiceImpl.getRandom();
-        List<TrendVO> trendVOs = new ArrayList<>(3);
+        List<TrendVO> trendVos = new ArrayList<>(3);
 
         for (Category category : categoryList) {
             category = Optional.ofNullable(category).orElse(new Category());
             TrendVO trendVO = new TrendVO();
             trendVO.setId(category.getId());
             trendVO.setName(category.getName());
-            List<DocVO> docVOs = new ArrayList<>();
+            List<DocVO> docVos = new ArrayList<>();
 
             if(category.getId() != null) {
                 List<FileDocument> documents;
@@ -69,14 +69,14 @@ public class StatisticsServiceImpl implements StatisticsService {
                     DocVO docVO = new DocVO();
                     docVO.setId(document.getId());
                     docVO.setName(document.getName());
-                    docVOs.add(docVO);
+                    docVos.add(docVO);
                 }
             }
 
-            trendVO.setDocList(docVOs);
-            trendVOs.add(trendVO);
+            trendVO.setDocList(docVos);
+            trendVos.add(trendVO);
         }
-        return BaseApiResult.success(trendVOs);
+        return BaseApiResult.success(trendVos);
     }
 
     /**

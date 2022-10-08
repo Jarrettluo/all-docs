@@ -54,6 +54,8 @@ public class FileServiceImpl implements IFileService {
 
     private static String collectionName = "fileDatas";
 
+    private static final String PDF_SUFFIX = ".pdf";
+
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
@@ -293,7 +295,7 @@ public class FileServiceImpl implements IFileService {
     @Override
     public BaseApiResult list(DocumentDTO documentDTO) {
         log.info(MessageFormat.format(">>>>>>>检索文档>>>>>>检索参数{0}", documentDTO.toString()));
-        List<DocumentVO> documentVOs;
+        List<DocumentVO> documentVos;
         List<FileDocument> fileDocuments = Lists.newArrayList();
 
         long totalNum = 0L;
@@ -360,10 +362,10 @@ public class FileServiceImpl implements IFileService {
             default:
                 return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        documentVOs = convertDocuments(fileDocuments);
+        documentVos = convertDocuments(fileDocuments);
         Map<String, Object> result = new HashMap<>(8);
         result.put("totalNum", totalNum);
-        result.put("documents", documentVOs);
+        result.put("documents", documentVos);
         return BaseApiResult.success(result);
     }
 
@@ -412,13 +414,13 @@ public class FileServiceImpl implements IFileService {
         if( fileDocuments == null) {
             return null;
         }
-        List<DocumentVO> documentVOs = Lists.newArrayList();
+        List<DocumentVO> documentVos = Lists.newArrayList();
         for(FileDocument fileDocument : fileDocuments) {
             DocumentVO documentVO = new DocumentVO();
             documentVO = convertDocument(documentVO, fileDocument);
-            documentVOs.add(documentVO);
+            documentVos.add(documentVO);
         }
-        return documentVOs;
+        return documentVos;
     }
 
     /**
@@ -518,10 +520,11 @@ public class FileServiceImpl implements IFileService {
     @Async
     @Override
     public void updateFileThumb(InputStream inputStream, FileDocument fileDocument) throws FileNotFoundException {
-        String path = "thumbnail";   // 新建pdf文件的路径
+        // 新建pdf文件的路径
+        String path = "thumbnail";
         String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
         String gridfsId = IdUtil.simpleUUID();
-        if((".pdf").equals(fileDocument.getSuffix())) {
+        if(PDF_SUFFIX.equals(fileDocument.getSuffix())) {
             // 将pdf输入流转换为图片并临时保存下来
             PdfUtil.pdfThumbnail(inputStream, picPath);
 

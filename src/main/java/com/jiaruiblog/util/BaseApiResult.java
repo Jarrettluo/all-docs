@@ -15,12 +15,12 @@ public abstract class BaseApiResult implements Serializable {
     /**
      * 当前时间戳
      */
-    public Long timestamp;
+    protected Long timestamp;
 
     /**
      * 状态码,0-成功，其他-失败
      */
-    public Integer code;
+    protected Integer code;
 
     /**
      * 创建成功返回体，无数据

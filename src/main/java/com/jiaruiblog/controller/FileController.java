@@ -36,6 +36,8 @@ import java.util.Optional;
 @RequestMapping("files")
 public class FileController {
 
+    private static final String DOT = ".";
+
     @Autowired
     private IFileService fileService;
 
@@ -113,8 +115,8 @@ public class FileController {
             model.setMessage("请传入文件的md5值");
             return model;
         }
-        if (!StrUtil.isEmpty(ext) && !ext.startsWith(".")) {
-            ext = "." + ext;
+        if (!StrUtil.isEmpty(ext) && !ext.startsWith(DOT)) {
+            ext = DOT + ext;
         }
         try {
 

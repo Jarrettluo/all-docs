@@ -33,13 +33,6 @@ public interface CategoryService {
      */
     BaseApiResult remove(Category category);
 
-    /**
-     * 根据分类的id进行查询
-     * @param category -> Category 实体
-     * @return -> ApiResult
-     */
-    @Deprecated
-    BaseApiResult queryById(Category category);
 
     /**
      * 根据分类的各种信息进行查询

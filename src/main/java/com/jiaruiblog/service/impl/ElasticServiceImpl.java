@@ -70,6 +70,10 @@ public class ElasticServiceImpl implements ElasticService {
     /**
      * 根据关键词，搜索对应的文件信息
      * 查询文件中的文本内容
+     * 默认会search出所有的东西来
+     * SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+     *
+     * // srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
      * @param keyword
      * @throws IOException
      * @return
@@ -78,15 +82,9 @@ public class ElasticServiceImpl implements ElasticService {
     public List<FileDocument> search(String keyword) throws IOException {
 
         List<FileDocument> fileDocumentList = new ArrayList<>();
-
         SearchRequest searchRequest = new SearchRequest("docwrite");
-
-        //默认会search出所有的东西来
-        // SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-
-        //使用lk分词器查询，会把插入的字段分词，然后进行处理
+        // 使用lk分词器查询，会把插入的字段分词，然后进行处理
         SearchSourceBuilder srb = new SearchSourceBuilder();
-        // srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
         srb.query(QueryBuilders.matchQuery("attachment.content", keyword));
 
         // 每页10个数据
@@ -205,7 +203,7 @@ public class ElasticServiceImpl implements ElasticService {
     public void uploadFileToEsDocx(InputStream is, FileDocument fileDocument) {
         String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
         try {
-            MsExcelParse.readPDFText(is, textFilePath);
+            MsExcelParse.readPdfText(is, textFilePath);
             FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());

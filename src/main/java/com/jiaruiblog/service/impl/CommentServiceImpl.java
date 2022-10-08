@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 /**
  * @ClassName CommentServiceImpl
- * @Description TODO
+ * @Description comment service impl
  * @Author luojiarui
  * @Date 2022/6/4 5:23 下午
  * @Version 1.0
@@ -155,9 +155,7 @@ public class CommentServiceImpl implements ICommentService {
     public void removeByDocId(String docId) {
         Query query = new Query(Criteria.where("docId").is(docId));
         List<Comment> commentDb = template.find(query, Comment.class, collectionName);
-        commentDb.forEach(item -> {
-            template.remove(item, collectionName);
-        });
+        commentDb.forEach(item -> template.remove(item, collectionName));
 
     }
 

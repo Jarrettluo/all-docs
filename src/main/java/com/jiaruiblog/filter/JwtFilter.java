@@ -27,6 +27,8 @@ import java.util.Map;
 public class JwtFilter implements Filter
 {
 
+    private static final String OPTIONS = "OPTIONS";
+
     /**
      * 安全的url，不需要令牌
      */
@@ -54,7 +56,7 @@ public class JwtFilter implements Filter
         //获取 header里的token
         final String token = request.getHeader("authorization");
 
-        if ("OPTIONS".equals(request.getMethod())) {
+        if (OPTIONS.equals(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             chain.doFilter(request, response);
         }

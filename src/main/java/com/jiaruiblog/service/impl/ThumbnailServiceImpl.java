@@ -11,7 +11,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * @ClassName ThumbnailServiceImpl
- * @Description TODO
+ * @Description ThumbnailServiceImpl
  * @Author luojiarui
  * @Date 2022/7/23 6:06 下午
  * @Version 1.0
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 @Service
 public class ThumbnailServiceImpl implements ThumbnailService {
 
-    private static String THUMB_COLLECTION_NAME = "thumbCollection";
+    private static final String THUMB_COLLECTION_NAME = "thumbCollection";
 
     @Autowired
     MongoTemplate mongoTemplate;

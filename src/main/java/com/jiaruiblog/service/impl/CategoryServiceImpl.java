@@ -105,22 +105,6 @@ public class CategoryServiceImpl implements CategoryService {
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
-    /**
-     * 根据已知的种类的id反向检索文档信息
-     * @param category -> Category 实体
-     * @return
-     */
-    @Override
-    public BaseApiResult queryById(Category category) {
-        Category categoryDb = mongoTemplate.findById(category.getId(), Category.class, COLLECTION_NAME);
-        if(category == null || category.getId() == null) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
-        }
-        Query query = new Query(Criteria.where("categoryId").is(categoryDb.getId()));
-        List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-//        List<Long> ids = relationships.stream().map(CateDocRelationship::getFileid).collect(Collectors.toList());
-        return null;
-    }
 
     @Override
     public BaseApiResult search(Category category) {

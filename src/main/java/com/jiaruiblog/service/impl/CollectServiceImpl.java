@@ -87,10 +87,9 @@ public class CollectServiceImpl implements CollectService {
                 .addCriteria(Criteria.where("docId").is(collect.getDocId())
                         .and("userId").is(collect.getUserId()));
 
-        CollectDocRelationship relationship = mongoTemplate.findOne(
+        return mongoTemplate.findOne(
                 query, CollectDocRelationship.class, collectionName
         );
-        return relationship;
     }
 
     /**
@@ -116,7 +115,7 @@ public class CollectServiceImpl implements CollectService {
         Query query = new Query(Criteria.where("docId").is(docId));
         List<CollectDocRelationship> relationships = mongoTemplate.find(query, CollectDocRelationship.class,
                 collectionName);
-        relationships.forEach(item -> this.remove(item));
+        relationships.forEach(this::remove);
     }
 
 
