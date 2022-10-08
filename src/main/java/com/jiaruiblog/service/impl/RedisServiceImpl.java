@@ -117,7 +117,7 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public int incrementScoreByUserId(String searchkey, String value) {
         Long now = System.currentTimeMillis();
-        ZSetOperations zSetOperations = redisSearchTemplate.opsForZSet();
+        ZSetOperations<String, String> zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
         List<String> title = new ArrayList<>();
         title.add(searchkey);
@@ -156,7 +156,7 @@ public class RedisServiceImpl implements RedisService {
         String key = searchkey;
         Long now = System.currentTimeMillis();
         List<String> result = new ArrayList<>();
-        ZSetOperations zSetOperations = redisSearchTemplate.opsForZSet();
+        ZSetOperations<String, String> zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
         Set<String> value = zSetOperations.reverseRangeByScore(keyValue, 0, Double.MAX_VALUE);
         //key不为空的时候 推荐相关的最热前十名
@@ -217,7 +217,7 @@ public class RedisServiceImpl implements RedisService {
     public int incrementScore(String searchkey) {
         String key = searchkey;
         Long now = System.currentTimeMillis();
-        ZSetOperations zSetOperations = redisSearchTemplate.opsForZSet();
+        ZSetOperations<String, String> zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
         zSetOperations.incrementScore("title", key, 1);
         valueOperations.getAndSet(key, String.valueOf(now));

@@ -74,17 +74,11 @@ public class MsExcelParse {
         {
             return tika.parseToString(f);
         }
-        catch (IOException e)
+        catch (IOException | TikaException e)
         {
-
             e.printStackTrace();
+            return null;
         }
-        catch (TikaException e)
-        {
-
-            e.printStackTrace();
-        }
-        return null;
     }
 
 

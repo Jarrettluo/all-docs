@@ -67,8 +67,7 @@ public class ElasticServiceImpl implements ElasticService {
         //上传同时，使用attachment pipline进行提取文件
         indexRequest.source(JSON.toJSONString(file), XContentType.JSON);
         indexRequest.setPipeline("attachment");
-        IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
-
+        client.index(indexRequest, RequestOptions.DEFAULT);
     }
 
 

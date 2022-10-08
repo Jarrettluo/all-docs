@@ -58,6 +58,10 @@ public class FileServiceImpl implements IFileService {
 
     private static final String PDF_SUFFIX = ".pdf";
 
+    private static final String FILE_NAME = "filename";
+
+    private static final String CONTENT = "content";
+
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
@@ -126,15 +130,18 @@ public class FileServiceImpl implements IFileService {
         if ( fileDocument != null) {
             return fileDocument;
         }
-
+        String originFilename = file.getOriginalFilename();
         fileDocument = new FileDocument();
-        fileDocument.setName(file.getOriginalFilename());
+        fileDocument.setName(originFilename);
         fileDocument.setSize(file.getSize());
         fileDocument.setContentType(file.getContentType());
         fileDocument.setUploadDate(new Date());
         fileDocument.setMd5(md5);
-        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-        fileDocument.setSuffix(suffix);
+
+        if ( StringUtils.hasText(originFilename)) {
+            String suffix = originFilename.substring(originFilename.lastIndexOf("."));
+            fileDocument.setSuffix(suffix);
+        }
 
         try {
             String gridfsId = uploadFileToGridFs(file.getInputStream(), file.getContentType());
@@ -174,9 +181,9 @@ public class FileServiceImpl implements IFileService {
         FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
         if (fileDocument != null) {
             Query query = new Query().addCriteria(Criteria.where("_id").is(id));
-            DeleteResult result = mongoTemplate.remove(query, collectionName);
+            mongoTemplate.remove(query, collectionName);
             if (isDeleteFile) {
-                Query deleteQuery = new Query().addCriteria(Criteria.where("filename").is(fileDocument.getGridfsId()));
+                Query deleteQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(fileDocument.getGridfsId()));
                 gridFsTemplate.delete(deleteQuery);
             }
         }
@@ -193,16 +200,14 @@ public class FileServiceImpl implements IFileService {
     public Optional<FileDocument> getById(String id) {
         FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, collectionName);
         if (fileDocument != null) {
-            Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(fileDocument.getGridfsId()));
-            try {
-                GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
-                GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());
+            Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(fileDocument.getGridfsId()));
+            GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());) {
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
                     fileDocument.setContent(IoUtil.readBytes(resource.getInputStream()));
                     return Optional.of(fileDocument);
                 } else {
-                    fileDocument = null;
                     return Optional.empty();
                 }
             } catch (IOException ex) {
@@ -230,11 +235,11 @@ public class FileServiceImpl implements IFileService {
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        long skip = (pageIndex) * pageSize;
+        long skip = (long) (pageIndex) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
         Field field = query.fields();
-        field.exclude("content");
+        field.exclude(CONTENT);
         return mongoTemplate.find(query, FileDocument.class, collectionName);
     }
 
@@ -259,7 +264,7 @@ public class FileServiceImpl implements IFileService {
 
 
         Field field = query.fields();
-        field.exclude("content");
+        field.exclude(CONTENT);
         return mongoTemplate.find(query, FileDocument.class, collectionName);
     }
 
@@ -279,7 +284,7 @@ public class FileServiceImpl implements IFileService {
 
 
         Field field = query.fields();
-        field.exclude("content");
+        field.exclude(CONTENT);
         return mongoTemplate.find(query, FileDocument.class, collectionName);
     }
 
@@ -538,7 +543,7 @@ public class FileServiceImpl implements IFileService {
             }
         }
 
-        Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocument.getId()));;
+        Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocument.getId()));
         Update update = new Update().set("thumbId", gridfsId);
         mongoTemplate.updateFirst(query, update, FileDocument.class, collectionName);
 
@@ -554,13 +559,12 @@ public class FileServiceImpl implements IFileService {
     @Override
     public InputStream getFileThumb(String thumbId) {
         if ( StringUtils.hasText(thumbId)) {
-            Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(thumbId));
-            try {
-                GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
-                if(fsFile == null) {
-                    return null;
-                }
-                GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());
+            Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(thumbId));
+            GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+            if(fsFile == null) {
+                return null;
+            }
+            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());){
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
                     return resource.getInputStream();

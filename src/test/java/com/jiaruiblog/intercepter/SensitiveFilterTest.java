@@ -39,10 +39,12 @@ public class SensitiveFilterTest {
 
     @Test
     public void getSensitiveWord() {
+        assertEquals(1, 0);
     }
 
     @Test
     public void checkSensitiveWord() {
+        assertEquals(1, 0);
     }
 
     @Test
@@ -53,7 +55,7 @@ public class SensitiveFilterTest {
         SensitiveFilter filter = SensitiveFilter.getInstance();
         filterWord = filter.replaceSensitiveWord(filterWord, 1, "*");
         log.info("这个人输入了非法字符--> \"{}\",不知道他到底要查什么~",filterWord);
-
+        assertEquals(1, 0);
     }
 
     /**
@@ -68,6 +70,8 @@ public class SensitiveFilterTest {
         long endTime = System.currentTimeMillis();
         long time = endTime - startTime;
         System.out.println("面向索引的分词: " + analysisedText + "(" + time + "ms)");
+
+        assertEquals(1, 0);
     }
     /**
      * 测试使用Ansj 的索引分词
@@ -81,6 +85,8 @@ public class SensitiveFilterTest {
         long endTime = System.currentTimeMillis();
         long time = endTime - startTime;
         System.out.println("面向索引的分词: " + analysisedText + "(" + time + "ms)");
+
+        assertEquals(1, 0);
     }
 
     /**
@@ -95,6 +101,8 @@ public class SensitiveFilterTest {
         long endTime = System.currentTimeMillis();
         long time = endTime - startTime;
         System.out.println("面向索引的分词: " + analysisedText + "(" + time + "ms)");
+
+        assertEquals(1, 0);
     }
 
 }

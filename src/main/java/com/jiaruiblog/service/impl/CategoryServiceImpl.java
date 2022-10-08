@@ -9,6 +9,7 @@ import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -17,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -33,9 +35,15 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-    private final static String COLLECTION_NAME = "categoryCollection";
+    private static final String COLLECTION_NAME = "categoryCollection";
 
-    private final static String RELATE_COLLECTION_NAME = "relateCateCollection";
+    private static final String RELATE_COLLECTION_NAME = "relateCateCollection";
+
+    private static final String CATEGORY_ID = "categoryId";
+
+    private static final String UPDATE_DATE = "uploadDate";
+
+    private static final String FILE_ID = "fileId";
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -100,7 +108,7 @@ public class CategoryServiceImpl implements CategoryService {
         query.addCriteria(Criteria.where("_id").is(category.getId()));
         mongoTemplate.remove(query, Category.class, COLLECTION_NAME);
         // 删除掉相关的分类关系
-        Query query1 = new Query().addCriteria(Criteria.where("categoryId").is(category.getId()));
+        Query query1 = new Query().addCriteria(Criteria.where(CATEGORY_ID).is(category.getId()));
         mongoTemplate.remove(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
@@ -114,7 +122,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public BaseApiResult list() {
         // 需要查询全部的信息
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, UPDATE_DATE));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
         return BaseApiResult.success(categories);
     }
@@ -130,7 +138,7 @@ public class CategoryServiceImpl implements CategoryService {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 先排查一个文章只能有一个分类关系，不能有多个分类信息
-        Query query1 = new Query(Criteria.where("fileId").is(relationship.getFileId()));
+        Query query1 = new Query(Criteria.where(FILE_ID).is(relationship.getFileId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
         if( !CollectionUtils.isEmpty(relationships)) {
@@ -138,8 +146,8 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         // 先排查是否具有该链接关系，否则不予进行关联
-        Query query = new Query(Criteria.where("categoryId").is(relationship.getCategoryId())
-                .and("fileId").is(relationship.getFileId()));
+        Query query = new Query(Criteria.where(CATEGORY_ID).is(relationship.getCategoryId())
+                .and(FILE_ID).is(relationship.getFileId()));
         List<Map> result = mongoTemplate.find(query, Map.class, RELATE_COLLECTION_NAME);
 
         if(!result.isEmpty()) {
@@ -156,8 +164,8 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public BaseApiResult cancleCategoryRelationship(CateDocRelationship relationship) {
-        Query query = new Query(Criteria.where("categoryId").is(relationship.getCategoryId())
-                .and("fileId").is(relationship.getFileId()));
+        Query query = new Query(Criteria.where(CATEGORY_ID).is(relationship.getCategoryId())
+                .and(FILE_ID).is(relationship.getFileId()));
         mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
@@ -168,7 +176,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     public List<String> queryDocListByCategory(Category categoryDb) {
-        Query query = new Query(Criteria.where("categoryId").is(categoryDb.getId()));
+        Query query = new Query(Criteria.where(CATEGORY_ID).is(categoryDb.getId()));
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
         if(result.isEmpty()) {
             return null;
@@ -197,15 +205,13 @@ public class CategoryServiceImpl implements CategoryService {
      **/
     public CategoryVO queryByDocId(String docId) {
 
-        Query query1 = new Query().addCriteria(Criteria.where("fileId").is(docId));
+        Query query1 = new Query().addCriteria(Criteria.where(FILE_ID).is(docId));
         CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         if(relationship == null || relationship.getCategoryId()==null) {
             return null;
         }
         Category category = mongoTemplate.findById(relationship.getCategoryId(), Category.class, COLLECTION_NAME);
-
-        relationship = Optional.ofNullable(relationship).orElse(new CateDocRelationship());
         category = Optional.ofNullable(category).orElse(new Category());
 
         CategoryVO categoryVO = new CategoryVO();
@@ -221,8 +227,8 @@ public class CategoryServiceImpl implements CategoryService {
      * @return 文档的id信息
      */
     public List<String> fuzzySearchDoc(String keyWord) {
-        if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
-            return null;
+        if (!StringUtils.hasText(keyWord)) {
+            return Lists.newArrayList();
         }
         Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
@@ -230,7 +236,7 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
 
         List<String> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
-        Query query1 = new Query().addCriteria(Criteria.where("categoryId").in(ids));
+        Query query1 = new Query().addCriteria(Criteria.where(CATEGORY_ID).in(ids));
         List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
@@ -247,7 +253,7 @@ public class CategoryServiceImpl implements CategoryService {
         Query query = new Query(Criteria.where("docId").is(docId));
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
-        relationships.forEach(item -> this.cancleCategoryRelationship(item));
+        relationships.forEach(this::cancleCategoryRelationship);
     }
 
     /**
@@ -258,14 +264,13 @@ public class CategoryServiceImpl implements CategoryService {
      * @return java.util.List<com.jiaruiblog.entity.Category>
      **/
     public List<Category> getRandom() {
-        Integer pageIndex = 1;
-        Integer pageSize = 3;
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        long skip = (pageIndex - 1) * pageSize;
+        int pageIndex = 1;
+        int pageSize = 3;
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, UPDATE_DATE));
+        long skip = (long) (pageIndex - 1) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
-        List<Category> files = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        return files;
+        return  mongoTemplate.find(query, Category.class, COLLECTION_NAME);
     }
 
     /**
@@ -278,11 +283,11 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CateDocRelationship> getRelateByCateId(String cateId) {
         Integer pageIndex = 0;
         Integer pageSize = 7;
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        long skip = (pageIndex - 1) * pageSize;
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, UPDATE_DATE));
+        long skip = (long) (pageIndex - 1) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
-        query.addCriteria(Criteria.where("categoryId").is(cateId));
+        query.addCriteria(Criteria.where(CATEGORY_ID).is(cateId));
         return mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
     }
 
