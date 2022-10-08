@@ -1,0 +1,11 @@
+bootstrap.memory_lock: false
+cluster.name: "es-server"
+node.name: node-1
+node.master: true
+node.data: true
+network.host: 0.0.0.0
+http.port: 9200
+path.logs: /usr/share/elasticsearch/logs
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+xpack.security.audit.enabled: true

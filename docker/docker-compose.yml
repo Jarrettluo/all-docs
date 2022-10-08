@@ -1,0 +1,31 @@
+version: '2'
+services:
+  mongodb:
+    image: mongo
+    container_name: all-docs-mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - "./data/configdb:/data/configdb"
+      - "./data/db:/data/db"
+    command: mongod --auth
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root       #初始化管理员用户名和密码
+      - MONGO_INITDB_ROOT_PASSWORD=123456
+    tty: true
+
+  elasticsearch:
+    image: elasticsearch:6.8.12
+    container_name: all-docs-elasticsearch
+    restart: always
+    volumes:
+      - /data/elasticsearch/data:/usr/share/elasticsearch/data:rw
+      - /data/elasticsearch/conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - /data/elasticsearch/conf/jvm.options:/usr/share/elasticsearch/config/jvm.options
+      - /data/elasticsearch/logs:/user/share/elasticsearch/logs:rw
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
