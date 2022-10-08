@@ -1,7 +1,7 @@
 package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.service.RedisService;
-import com.jiaruiblog.utils.RedisKeyUtils;
+import com.jiaruiblog.util.RedisKeyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -24,25 +24,34 @@ import java.util.Set;
  * @Version 1.0
  **/
 @Slf4j
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 @Service
 public class RedisServiceImpl implements RedisService {
 
-    //导入数据源
-//    @Resource(name = "redisSearchTemplate")
 
-    // 用户存储用户的搜索关键字
+    /**
+     * 用户存储用户的搜索关键字
+     */
     public static final String SEARCH_KEY = "search_key";
 
-    // 用于存储文档的检索关键字
+    /**
+     * 用于存储文档的检索关键字
+     */
     public static final String DOC_KEY = "doc_key";
 
+    /**
+     * StringRedisTemplate
+     */
     @Autowired
     private StringRedisTemplate redisSearchTemplate;
 
-
-    //新增一条该userid用户在搜索栏的历史记录
-    //searchkey 代表输入的关键词
+    /**
+     * 新增一条该userid用户在搜索栏的历史记录
+     * searchkey 代表输入的关键词
+     * @param userid String
+     * @param searchkey String
+     * @return int
+     */
     @Override
     public int addSearchHistoryByUserId(String userid, String searchkey) {
         String shistory = RedisKeyUtils.getSearchHistoryKey(userid);
@@ -60,14 +69,23 @@ public class RedisServiceImpl implements RedisService {
         return 1;
     }
 
-    //删除个人历史数据
+    /**
+     * 删除个人历史数据
+     * @param userid
+     * @param searchkey
+     * @return
+     */
     @Override
     public Long delSearchHistoryByUserId(String userid, String searchkey) {
         String shistory = RedisKeyUtils.getSearchHistoryKey(userid);
         return redisSearchTemplate.opsForHash().delete(shistory, searchkey);
     }
 
-    //获取个人历史数据列表
+    /**
+     * 获取个人历史数据列表
+     * @param userid String userId
+     * @return List
+     */
     @Override
     public List<String> getSearchHistoryByUserId(String userid) {
         List<String> stringList = Lists.newArrayList();
@@ -90,7 +108,12 @@ public class RedisServiceImpl implements RedisService {
         return null;
     }
 
-    //新增一条热词搜索记录，将用户输入的热词存储下来
+    /**
+     * 新增一条热词搜索记录，将用户输入的热词存储下来
+     * @param searchkey String
+     * @param key_value String
+     * @return int
+     */
     @Override
     public int incrementScoreByUserId(String searchkey, String key_value) {
         Long now = System.currentTimeMillis();
@@ -122,9 +145,12 @@ public class RedisServiceImpl implements RedisService {
         redisSearchTemplate.opsForZSet().remove(keyValue, searchKey);
     }
 
-
-
-    //根据searchkey搜索其相关最热的前十名 (如果searchkey为null空，则返回redis存储的前十最热词条)
+    /**
+     * 根据searchkey搜索其相关最热的前十名 (如果searchkey为null空，则返回redis存储的前十最热词条)
+     * @param searchkey String
+     * @param keyValue String
+     * @return List
+     */
     @Override
     public List<String> getHotList(String searchkey, String keyValue) {
         String key = searchkey;
@@ -176,7 +202,11 @@ public class RedisServiceImpl implements RedisService {
         return redisSearchTemplate.opsForZSet().score(key, value);
     }
 
-    //每次点击给相关词searchkey热度 +1
+    /**
+     * 每次点击给相关词searchkey热度 +1
+     * @param searchkey String
+     * @return int
+     */
     @Override
     @Deprecated
     public int incrementScore(String searchkey) {

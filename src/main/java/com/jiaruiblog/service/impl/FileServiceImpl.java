@@ -9,8 +9,8 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
-import com.jiaruiblog.utils.ApiResult;
-import com.jiaruiblog.utils.PDFUtil;
+import com.jiaruiblog.util.BaseApiResult;
+import com.jiaruiblog.util.PdfUtil;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -21,7 +21,6 @@ import com.jiaruiblog.entity.FileDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -45,6 +44,10 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
+/**
+ * @author jiarui.luo
+ */
 @Slf4j
 @Service
 public class FileServiceImpl implements IFileService {
@@ -57,7 +60,7 @@ public class FileServiceImpl implements IFileService {
     private GridFsTemplate gridFsTemplate;
 
     @Autowired
-    private GridFSBucket gridFSBucket;
+    private GridFSBucket gridFsBucket;
 
     @Autowired
     private CategoryServiceImpl categoryServiceImpl;
@@ -95,7 +98,7 @@ public class FileServiceImpl implements IFileService {
 
         //GridFSInputFile inputFile = gridFsTemplate
 
-        String gridfsId = uploadFileToGridFS(inputStream, fileDocument.getContentType());
+        String gridfsId = uploadFileToGridFs(inputStream, fileDocument.getContentType());
         fileDocument.setGridfsId(gridfsId);
 
         fileDocument = mongoTemplate.save(fileDocument, collectionName);
@@ -130,7 +133,7 @@ public class FileServiceImpl implements IFileService {
         fileDocument.setSuffix(suffix);
 
         try {
-            String gridfsId = uploadFileToGridFS(file.getInputStream(), file.getContentType());
+            String gridfsId = uploadFileToGridFs(file.getInputStream(), file.getContentType());
             fileDocument.setGridfsId(gridfsId);
             fileDocument = mongoTemplate.save(fileDocument, collectionName);
         } catch (IOException ex) {
@@ -149,7 +152,7 @@ public class FileServiceImpl implements IFileService {
      * @param contentType
      * @return
      */
-    private String uploadFileToGridFS(InputStream in, String contentType) {
+    private String uploadFileToGridFs(InputStream in, String contentType) {
         String gridfsId = IdUtil.simpleUUID();
         //文件，存储在GridFS中
         gridFsTemplate.store(in, gridfsId, contentType);
@@ -189,7 +192,7 @@ public class FileServiceImpl implements IFileService {
             Query gridQuery = new Query().addCriteria(Criteria.where("filename").is(fileDocument.getGridfsId()));
             try {
                 GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
-                GridFSDownloadStream in = gridFSBucket.openDownloadStream(fsFile.getObjectId());
+                GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
                     fileDocument.setContent(IoUtil.readBytes(resource.getInputStream()));
@@ -288,9 +291,9 @@ public class FileServiceImpl implements IFileService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult list(DocumentDTO documentDTO) {
+    public BaseApiResult list(DocumentDTO documentDTO) {
         log.info(MessageFormat.format(">>>>>>>检索文档>>>>>>检索参数{0}", documentDTO.toString()));
-        List<DocumentVO> documentVOS;
+        List<DocumentVO> documentVOs;
         List<FileDocument> fileDocuments = Lists.newArrayList();
 
         long totalNum = 0L;
@@ -355,13 +358,13 @@ public class FileServiceImpl implements IFileService {
                 totalNum = countFileByQuery(query1);
                 break;
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        documentVOS = convertDocuments(fileDocuments);
-        Map<String, Object> result = new HashMap<>();
+        documentVOs = convertDocuments(fileDocuments);
+        Map<String, Object> result = new HashMap<>(8);
         result.put("totalNum", totalNum);
-        result.put("documents", documentVOS);
-        return ApiResult.success(result);
+        result.put("documents", documentVOs);
+        return BaseApiResult.success(result);
     }
 
     /**
@@ -372,21 +375,21 @@ public class FileServiceImpl implements IFileService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult detail(String id) {
+    public BaseApiResult detail(String id) {
         FileDocument fileDocument = queryById(id);
         if( fileDocument == null ) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
         } else {
             redisService.incrementScoreByUserId(id, RedisServiceImpl.DOC_KEY);
         }
         // 查询评论信息，查询分类信息，查询分类关系，查询标签信息，查询标签关系信息
-        return ApiResult.success(convertDocument(null, fileDocument));
+        return BaseApiResult.success(convertDocument(null, fileDocument));
     }
 
     @Override
-    public ApiResult remove(String id) {
+    public BaseApiResult remove(String id) {
         if( !isExist(id) ) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 删除评论信息，删除分类关系，删除标签关系
         removeFile(id, true);
@@ -395,7 +398,7 @@ public class FileServiceImpl implements IFileService {
         collectServiceImpl.removeRelateByDocId(id);
         tagServiceImpl.removeRelateByDocId(id);
 
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -409,13 +412,13 @@ public class FileServiceImpl implements IFileService {
         if( fileDocuments == null) {
             return null;
         }
-        List<DocumentVO> documentVOS = Lists.newArrayList();
+        List<DocumentVO> documentVOs = Lists.newArrayList();
         for(FileDocument fileDocument : fileDocuments) {
             DocumentVO documentVO = new DocumentVO();
             documentVO = convertDocument(documentVO, fileDocument);
-            documentVOS.add(documentVO);
+            documentVOs.add(documentVO);
         }
-        return documentVOS;
+        return documentVOs;
     }
 
     /**
@@ -485,8 +488,8 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * 检索已经存在的user
-     * @param docId
-     * @return
+     * @param docId String
+     * @return FileDocument
      */
     @Override
     public FileDocument queryById(String docId) {
@@ -518,9 +521,9 @@ public class FileServiceImpl implements IFileService {
         String path = "thumbnail";   // 新建pdf文件的路径
         String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
         String gridfsId = IdUtil.simpleUUID();
-        if(fileDocument.getSuffix().equals(".pdf")) {
+        if((".pdf").equals(fileDocument.getSuffix())) {
             // 将pdf输入流转换为图片并临时保存下来
-            PDFUtil.pdfThumbnail(inputStream, picPath);
+            PdfUtil.pdfThumbnail(inputStream, picPath);
 
             if(new File(picPath).exists()) {
                 String contentType = "image/png";
@@ -553,7 +556,7 @@ public class FileServiceImpl implements IFileService {
                 if(fsFile == null) {
                     return null;
                 }
-                GridFSDownloadStream in = gridFSBucket.openDownloadStream(fsFile.getObjectId());
+                GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
                     return resource.getInputStream();

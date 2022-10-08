@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @ClassName Thumbnail
- * @Description TODO
+ * @Description 缩略图相关的类
  * @Author luojiarui
  * @Date 2022/7/23 5:57 下午
  * @Version 1.0
@@ -16,15 +16,25 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 public class Thumbnail {
 
+    /**
+     * 缩略图id
+     */
     @Id
     private String id;
 
-    // 对象的id
+    /**
+     * 对象的id
+     */
     private String objectId;
 
-    // 不同种类型
+    /**
+     * 不同种类型
+     */
     private ThumbnailEnum thumbnailEnum;
 
-    private String gridfsId;    // 大文件管理GridFS的ID
+    /**
+     * 大文件管理GridFS的ID
+     */
+    private String gridfsId;
 
 }

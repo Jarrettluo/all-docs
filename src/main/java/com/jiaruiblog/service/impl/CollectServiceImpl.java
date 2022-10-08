@@ -2,10 +2,8 @@ package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CollectDocRelationship;
-import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.service.CollectService;
-import com.jiaruiblog.utils.ApiResult;
-import io.swagger.annotations.Api;
+import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -13,7 +11,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,18 +42,18 @@ public class CollectServiceImpl implements CollectService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult insert(CollectDocRelationship collect) {
+    public BaseApiResult insert(CollectDocRelationship collect) {
         // 必须经过userId和docId的校验，否则不予关注
         if( !userServiceImpl.isExist(collect.getUserId()) || !fileServiceImpl.isExist(collect.getDocId())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
         CollectDocRelationship collectDb = getExistRelationship(collect);
         if(collectDb != null){
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(collect, collectionName);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -67,13 +64,13 @@ public class CollectServiceImpl implements CollectService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult remove(CollectDocRelationship collect) {
+    public BaseApiResult remove(CollectDocRelationship collect) {
         collect = getExistRelationship(collect);
         while (collect != null ){
             mongoTemplate.remove(collect, collectionName);
             collect = getExistRelationship(collect);
         }
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

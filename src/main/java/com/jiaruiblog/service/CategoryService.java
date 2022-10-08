@@ -3,7 +3,7 @@ package com.jiaruiblog.service;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 
 /**
  * @Author Jarrett Luo
@@ -17,21 +17,21 @@ public interface CategoryService {
      * @param category -> Category 实体
      * @return -> ApiResult
      */
-    ApiResult insert(Category category);
+    BaseApiResult insert(Category category);
 
     /**
      * 更新分类信息
      * @param category -> Category 实体
      * @return -> ApiResult
      */
-    ApiResult update(Category category);
+    BaseApiResult update(Category category);
 
     /**
      * 移除现有的分类
      * @param category -> Category 实体
      * @return -> ApiResult
      */
-    ApiResult remove(Category category);
+    BaseApiResult remove(Category category);
 
     /**
      * 根据分类的id进行查询
@@ -39,33 +39,33 @@ public interface CategoryService {
      * @return -> ApiResult
      */
     @Deprecated
-    ApiResult queryById(Category category);
+    BaseApiResult queryById(Category category);
 
     /**
      * 根据分类的各种信息进行查询
      * @param category -> Category 实体
      * @return -> ApiResult
      */
-    ApiResult search(Category category);
+    BaseApiResult search(Category category);
 
     /**
      * 查询分类的列表信息
      * @return
      */
-    ApiResult list();
+    BaseApiResult list();
 
     /**
      * 增加分类和文档的信息
      * @param relationship
      * @return
      */
-    ApiResult addRelationShip(CateDocRelationship relationship);
+    BaseApiResult addRelationShip(CateDocRelationship relationship);
 
     /**
      * 取消分类和文档的关联
      * @param relationship
      * @return
      */
-    ApiResult cancleCategoryRelationship(CateDocRelationship relationship);
+    BaseApiResult cancleCategoryRelationship(CateDocRelationship relationship);
 
 }

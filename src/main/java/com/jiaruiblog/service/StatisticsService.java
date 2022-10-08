@@ -1,11 +1,23 @@
 package com.jiaruiblog.service;
 
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 
+
+/**
+ * @author jiarui.luo
+ */
 public interface StatisticsService {
 
-    ApiResult trend();
+    /**
+     * trend
+     * @return trend
+     */
+    BaseApiResult trend();
 
-    ApiResult all();
+    /**
+     * all
+     * @return all
+     */
+    BaseApiResult all();
 
 }

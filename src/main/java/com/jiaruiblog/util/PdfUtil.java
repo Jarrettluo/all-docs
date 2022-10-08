@@ -1,4 +1,4 @@
-package com.jiaruiblog.utils;
+package com.jiaruiblog.util;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
@@ -8,26 +8,25 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * @ClassName PDFUtil
- * @Description TODO
+ * @Description pdf 准换工具
  * @Author luojiarui
  * @Date 2022/7/13 7:55 下午
  * @Version 1.0
  **/
-public class PDFUtil {
+public class PdfUtil {
 
-    public static void readPDFText(String path) throws IOException {
+    public static void readPdfText(String path) throws IOException {
         File file = new File(path);
         InputStream is = new FileInputStream(file);
-        readPDFText(is, "xxx.txt");
+        readPdfText(is, "xxx.txt");
     }
 
-    public static void readPDFText(InputStream file, String textPath) throws IOException {
+    public static void readPdfText(InputStream file, String textPath) throws IOException {
 
         try (PDDocument document = PDDocument.load(file)) {
             AccessPermission ap = document.getCurrentAccessPermission();
@@ -70,9 +69,9 @@ public class PDFUtil {
         }
     }
 
-    public static void handlePDF(InputStream inputStream, String path) throws IOException {
+    public static void handlePdf(InputStream inputStream, String path) throws IOException {
         long startTime = System.currentTimeMillis();
-        readPDFText(inputStream, "加油.txt");
+        readPdfText(inputStream, "加油.txt");
         long endTime = System.currentTimeMillis();
         System.out.println(endTime - startTime);
     }
@@ -84,15 +83,18 @@ public class PDFUtil {
      * @Param [pdfPath]
      * @return void
      **/
-    public static void transPDF2png(String pdfPath) {
+    public static void transPdf2png(String pdfPath) {
         try {
-            File invoiceFile = new File(pdfPath);   //根据pdf文件路径取得pdf文件
-            String path = "test";   // 新建pdf文件的路径
+            //根据pdf文件路径取得pdf文件
+            File invoiceFile = new File(pdfPath);
+            // 新建pdf文件的路径
+            String path = "test";
             PDDocument doc = PDDocument.load(invoiceFile);
             PDFRenderer renderer = new PDFRenderer(doc);
             int pageCount = doc.getNumberOfPages();
             for (int i = 0; i < pageCount; i++) {
-                BufferedImage image = renderer.renderImage(i, 2.5f);// 第二个参数是设置缩放比(即像素)
+                // 第二个参数是设置缩放比(即像素)
+                BufferedImage image = renderer.renderImage(i, 2.5f);
                 ImageIO.write(image,"PNG", new File(path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png"));
             }
         } catch (Exception e) {
@@ -120,7 +122,8 @@ public class PDFUtil {
      * @return void
      **/
     public static void pdfThumbnail(InputStream inputStream) {
-        String path = "thumbnail";   // 新建pdf文件的路径
+        // 新建pdf文件的路径
+        String path = "thumbnail";
         String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
         pdfThumbnail(inputStream, picPath);
     }
@@ -136,8 +139,8 @@ public class PDFUtil {
         try {
             PDDocument doc = PDDocument.load(inputStream);
             PDFRenderer renderer = new PDFRenderer(doc);
-//            int pageCount = doc.getNumberOfPages();
-            BufferedImage image = renderer.renderImage(0, 2.0f);// 第二个参数是设置缩放比(即像素)
+            // 第二个参数是设置缩放比(即像素)
+            BufferedImage image = renderer.renderImage(0, 2.0f);
             ImageIO.write(image,"PNG", new File(picPath));
             doc.close();
         } catch (Exception e) {

@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * @author jiarui.luo
+ */
 public interface ElasticService {
 
     List<FileDocument> search(String keyword) throws IOException;

@@ -10,7 +10,7 @@ import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.enums.Type;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.TagService;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class CategoryController {
 
     @ApiOperation(value = "3.2 新增单个分类", notes = "新增单个分类")
     @PostMapping(value = "/insert")
-    public ApiResult insert(@RequestBody CategoryDTO categoryDTO){
+    public BaseApiResult insert(@RequestBody CategoryDTO categoryDTO){
         // 插入进来的参数必需经过清洗
         categoryDTO.setId(null);
         switch (categoryDTO.getType()) {
@@ -60,13 +60,13 @@ public class CategoryController {
                 tag.setUpdateDate(new Date());
                 return tagService.insert(tag);
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
 
     @ApiOperation(value = "3.3 更新分类", notes = "更新分类")
     @PutMapping(value = "/update")
-    public ApiResult update(@RequestBody CategoryDTO categoryDTO){
+    public BaseApiResult update(@RequestBody CategoryDTO categoryDTO){
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
@@ -81,13 +81,13 @@ public class CategoryController {
                 tag.setUpdateDate(new Date());
                 return tagService.update(tag);
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
 
     @ApiOperation(value = "3.4 根据id移除某个分类", notes = "根据id移除某个分类")
     @DeleteMapping(value = "/remove")
-    public ApiResult remove(@RequestBody CategoryDTO categoryDTO){
+    public BaseApiResult remove(@RequestBody CategoryDTO categoryDTO){
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
@@ -98,27 +98,31 @@ public class CategoryController {
                 tag.setId(categoryDTO.getId());
                 return tagService.remove(tag);
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
 
     @ApiOperation(value = "3.7 查询所有的分类或者是标签", notes = "查询列表")
     @GetMapping(value = "/all")
-    public ApiResult list(@RequestParam Type type){
+    public BaseApiResult list(@RequestParam Type type){
         switch (type) {
             case CATEGORY:
                 return categoryService.list();
             case TAG:
                 return tagService.list();
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
 
-    // 同步动作，一个文档只能有一个分类关系，不能出现一对多
+    /**
+     * 同步动作，一个文档只能有一个分类关系，不能出现一对多
+     * @param relationDTO
+     * @return
+     */
     @ApiOperation(value = "3.5 增加关系", notes = "检索分类")
     @PostMapping(value = "/addRelationship")
-    public synchronized ApiResult addRelationship(@RequestBody RelationDTO relationDTO) {
+    public synchronized BaseApiResult addRelationship(@RequestBody RelationDTO relationDTO) {
         switch (relationDTO.getType()) {
             case CATEGORY:
                 CateDocRelationship category = new CateDocRelationship();
@@ -133,13 +137,13 @@ public class CategoryController {
                 tag.setUpdateDate(new Date());
                 return tagService.addRelationShip(tag);
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
 
     @ApiOperation(value = "3.6 断开连接关系", notes = "检索分类")
     @DeleteMapping(value = "/removeRelationship")
-    public ApiResult removeRelationship(@RequestBody RelationDTO relationDTO) {
+    public BaseApiResult removeRelationship(@RequestBody RelationDTO relationDTO) {
         switch (relationDTO.getType()) {
             case CATEGORY:
                 CateDocRelationship category = new CateDocRelationship();
@@ -152,7 +156,7 @@ public class CategoryController {
                 tag.setFileId(relationDTO.getDocId());
                 return tagService.cancelTagRelationship(tag);
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
 }

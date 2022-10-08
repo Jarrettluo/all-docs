@@ -10,14 +10,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ * //@WebFilter(filterName = "CorsFilter", urlPatterns = {"/comment/auth/*", "/secure/*"})
  * @ClassName CrosFilter
- * @Description TODO
+ * @Description filter
  * @Author luojiarui
  * @Date 2022/8/4 10:43 下午
  * @Version 1.0
  **/
 @WebFilter(filterName = "CORSFilter", urlPatterns = {"/*"})
-//@WebFilter(filterName = "CorsFilter", urlPatterns = {"/comment/auth/*", "/secure/*"})
 @Order(value = 1)
 @Configuration
 public class CorsFilter implements Filter {

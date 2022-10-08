@@ -1,6 +1,5 @@
 package com.jiaruiblog.entity.vo;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**

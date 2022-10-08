@@ -1,7 +1,6 @@
 package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.Thumbnail;
-import com.jiaruiblog.enums.ThumbnailEnum;
 
 /**
  * @ClassName ThumbnailService
@@ -12,13 +11,23 @@ import com.jiaruiblog.enums.ThumbnailEnum;
  **/
 public interface ThumbnailService {
 
-    // 保存缩略图信息
+    /**
+     * 保存缩略图信息
+     * @param thumbnail 缩略图
+     */
     void save(Thumbnail thumbnail);
 
-    // 通过对象的id进行查询
+    /**
+     * 通过对象的id进行查询
+     * @param objectId 对象id
+     * @return Thumbnail 缩略图
+     */
     Thumbnail searchByObjectId(String objectId);
 
-    // 通过对象的id进行删除
+    /**
+     * 通过对象的id进行删除
+     * @param objectId 对象id
+     */
     void removeByObjectId(String objectId);
 
 }

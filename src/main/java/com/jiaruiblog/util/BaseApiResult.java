@@ -1,4 +1,4 @@
-package com.jiaruiblog.utils;
+package com.jiaruiblog.util;
 
 import java.io.Serializable;
 
@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author KimZing - kimzing@163.com
  * @since 2019/12/4 15:04
  */
-public abstract class ApiResult implements Serializable {
+public abstract class BaseApiResult implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,7 +27,7 @@ public abstract class ApiResult implements Serializable {
      *
      * @return ApiResult
      */
-    public static ApiResult success() {
+    public static BaseApiResult success() {
         return new SuccessApiResult();
     }
 
@@ -37,7 +37,7 @@ public abstract class ApiResult implements Serializable {
      * @param data 数据体
      * @return ApiResult
      */
-    public static <T> ApiResult success(T data) {
+    public static <T> BaseApiResult success(T data) {
         return new SuccessApiResult<T>(data);
     }
 
@@ -48,7 +48,7 @@ public abstract class ApiResult implements Serializable {
      * @param message 错误信息
      * @return ApiResult
      */
-    public static ApiResult error(Integer code, String message) {
+    public static BaseApiResult error(Integer code, String message) {
         return new ErrorApiResult(code, message);
     }
 

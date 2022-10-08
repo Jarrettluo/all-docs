@@ -1,4 +1,4 @@
-package com.jiaruiblog.utils;
+package com.jiaruiblog.util;
 
 import java.io.File;
 
@@ -36,7 +36,7 @@ public class PdfParse {
 
 //    private final static String filePath = "/Users/molly/Downloads/软件开发云服务白皮书.pdf";
 
-    private final static String filePath = "/Users/molly/Desktop/test.pdf/习近平在厦门的副本.pdf";
+    private final static String FILE_PATH = "/Users/molly/Desktop/test.pdf/习近平在厦门的副本.pdf";
 
     public static void main(final String[] args) throws IOException, TikaException, SAXException {
 
@@ -45,7 +45,7 @@ public class PdfParse {
 
         Metadata metadata = new Metadata();
 
-        FileInputStream inputstream = new FileInputStream(new File(filePath));
+        FileInputStream inputstream = new FileInputStream(new File(FILE_PATH));
 
         ParseContext pcontext = new ParseContext();
 

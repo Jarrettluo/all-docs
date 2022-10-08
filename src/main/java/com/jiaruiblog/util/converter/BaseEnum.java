@@ -1,4 +1,4 @@
-package com.jiaruiblog.utils.enumsCoverterUtils;
+package com.jiaruiblog.util.converter;
 
 /**
  * @ClassName BaseEnum

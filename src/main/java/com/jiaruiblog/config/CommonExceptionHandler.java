@@ -9,6 +9,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 /**
  * 全局统一异常处理
  * 捕获异常，产生异常时，统一返回错误信息
+ *
+ * @author jiarui.luo
  */
 @ControllerAdvice
 public class CommonExceptionHandler {

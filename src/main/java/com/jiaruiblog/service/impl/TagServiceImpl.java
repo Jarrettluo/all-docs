@@ -5,7 +5,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.*;
 import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.service.TagService;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
@@ -41,13 +41,13 @@ public class TagServiceImpl implements TagService {
     MongoTemplate mongoTemplate;
 
     @Override
-    public ApiResult insert(Tag tag) {
+    public BaseApiResult insert(Tag tag) {
         // 必须经过查重啊
         if(isTagExist(tag.getName())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(tag, COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
     
     /**
@@ -58,17 +58,17 @@ public class TagServiceImpl implements TagService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult update(Tag tag) {
+    public BaseApiResult update(Tag tag) {
         // 必须经过查重啊
         if(isTagExist(tag.getName())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query(Criteria.where("_id").is(tag.getId()));
         Update update  = new Update();
         update.set("name", tag.getName());
         update.set("updateTime",tag.getUpdateDate());
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Tag.class, COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -79,9 +79,9 @@ public class TagServiceImpl implements TagService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult remove(Tag tag) {
+    public BaseApiResult remove(Tag tag) {
         if(tag == null || !StringUtils.hasText(tag.getId())) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         Query query1 = new Query();
         query1.addCriteria(Criteria.where("_id").is(tag.getId()));
@@ -90,7 +90,7 @@ public class TagServiceImpl implements TagService {
         // 同时去除掉各种关系的数据
         Query query = new Query(Criteria.where("tagId").is(tag.getId()));
         mongoTemplate.remove(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -99,10 +99,10 @@ public class TagServiceImpl implements TagService {
      * @return
      */
     @Override
-    public ApiResult queryById(Tag tag) {
+    public BaseApiResult queryById(Tag tag) {
         Query query = new Query(Criteria.where("_").is("1"));
         mongoTemplate.count(query, Tag.class);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -118,15 +118,15 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public ApiResult search(Tag tag) {
+    public BaseApiResult search(Tag tag) {
         return null;
     }
 
 
     @Override
-    public ApiResult list() {
+    public BaseApiResult list() {
         List<Tag> tags = mongoTemplate.findAll(Tag.class, COLLECTION_NAME);
-        return ApiResult.success(tags);
+        return BaseApiResult.success(tags);
     }
 
     /**
@@ -149,30 +149,31 @@ public class TagServiceImpl implements TagService {
      * @return
      */
     @Override
-    public ApiResult addRelationShip(TagDocRelationship relationship) {
+    public BaseApiResult addRelationShip(TagDocRelationship relationship) {
         if( relationship == null || !StringUtils.hasText(relationship.getTagId())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         // 判断以下是否存在这个关系
         Query query = new Query(Criteria.where("tagId").is(relationship.getTagId())
                 .and("fileId").is(relationship.getFileId()));
         List<TagDocRelationship> result = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
         if( !result.isEmpty() ) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
-    public ApiResult cancelTagRelationship(TagDocRelationship relationship) {
+    public BaseApiResult cancelTagRelationship(TagDocRelationship relationship) {
         Query query = new Query(Criteria.where("tagId").is(relationship.getTagId())
                 .and("fileId").is(relationship.getFileId()));
         mongoTemplate.remove(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
+     * 备用query 语句 // Query query1 = new Query().addCriteria(Criteria.where("_id").is(relationship.getTagId()));
      * @Author luojiarui
      * @Description // 根据文档的信息找到全部的tag信息
      * @Date 11:05 下午 2022/6/22
@@ -189,7 +190,7 @@ public class TagServiceImpl implements TagService {
         }
 
         for (TagDocRelationship relationship : relationships) {
-            // Query query1 = new Query().addCriteria(Criteria.where("_id").is(relationship.getTagId()));
+
             Tag tag = mongoTemplate.findById(relationship.getTagId(), Tag.class, COLLECTION_NAME);
             TagVO tagVO = new TagVO();
             tagVO.setId(tag.getId());

@@ -7,13 +7,8 @@ package com.jiaruiblog.service;
  * @Date 2022/6/6 11:17 下午
  * @Version 1.0
  **/
-
-import com.jiaruiblog.entity.Book;
-import com.jiaruiblog.repository.ESBookRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author geng

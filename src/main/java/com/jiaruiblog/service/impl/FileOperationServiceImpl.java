@@ -48,11 +48,12 @@ public class FileOperationServiceImpl implements FileOperationService {
         List<FileObj> fileObjs = new ArrayList<>();
         File file = new File(path);
 
-        if (!file.isDirectory()) return fileObjs;
+        if (!file.isDirectory()) {
+            return fileObjs;
+        }
 
         File[] files = file.listFiles();
         for (File f: files) {
-            //System.out.println(f.getAbsoluteFile());
             FileObj fileObj = readFile(f.getAbsolutePath());
             fileObjs.add(fileObj);
         }
@@ -85,7 +86,7 @@ public class FileOperationServiceImpl implements FileOperationService {
         return buffer;
     }
 
-    private byte[] getPDFContent(File file){
+    private byte[] getPdfContent(File file){
         long fileSize = file.length();
         if (fileSize > Integer.MAX_VALUE) {
             System.out.println("file too big...");

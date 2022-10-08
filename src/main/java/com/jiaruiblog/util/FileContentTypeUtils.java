@@ -1,8 +1,11 @@
-package com.jiaruiblog.utils;
+package com.jiaruiblog.util;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author jiarui.luo
+ */
 public class FileContentTypeUtils {
 
     /**
@@ -33,32 +36,6 @@ public class FileContentTypeUtils {
     };
 
     static {
-        /*contentType.put(".png","image/png");
-        contentType.put(".gif","image/gif");
-        contentType.put(".swf" ,"application/x-shockwave-flash");
-        contentType.put(".psd","image/vnd.adobe.photoshop");
-        contentType.put(".zip" , "application/zip");
-        contentType.put(".rar" , "application/x-rar");
-        contentType.put(".7z" , "application/x-7z-compressed");
-        contentType.put(".doc" , "application/msword");
-        contentType.put(".docx" , "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        contentType.put(".bmp" , "image/bmp");
-        contentType.put(".pdf" ,"application/pdf");
-        contentType.put(".pdf.gz" ,"application/x-gzpdf");
-        contentType.put(".pdf.bz2" ,"application/x-bzpdf");
-        contentType.put(".dwg" , "image/vnd.dwg");
-        contentType.put(".xlsx" ,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        contentType.put(".xls" ,"application/vnd.ms-excel");
-        contentType.put(".mp3" ,"audio/mpeg");
-        contentType.put(".mp4" ,"video/mp4");
-        contentType.put(".wma" ,"audio/x-ms-wma");
-        contentType.put(".wav" ,"audio/x-wav");
-        contentType.put(".ogg" ,"video/x-theora+ogg");
-        contentType.put(".avi" , "video/x-msvideo");
-        contentType.put(".ppt" ,"application/vnd.ms-powerpoint");
-        contentType.put(".pptx" ,"application/vnd.openxmlformats-officedocument.presentationml.presentation");
-        */
-
         contentType.put(".load", "text/html");
         contentType.put(".123", "application/vnd.lotus-1-2-3");
         contentType.put(".3ds", "image/x-3ds");

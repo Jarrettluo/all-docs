@@ -8,7 +8,7 @@ import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
 import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.service.IFileService;
-import com.jiaruiblog.utils.FileContentTypeUtils;
+import com.jiaruiblog.util.FileContentTypeUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-
+/**
+ * @author jiarui.luo
+ */
 @Slf4j
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -135,7 +137,7 @@ public class FileController {
 
                 System.out.println(fileDocument);
                 model.setData(fileDocument.getId());
-                model.setCode(ResponseModel.Success);
+                model.setCode(ResponseModel.SUCCESS);
                 model.setMessage("上传成功");
             } else {
                 model.setMessage("请传入文件");
@@ -188,7 +190,7 @@ public class FileController {
                 }
 
                 model.setData(fileDocument.getId());
-                model.setCode(ResponseModel.Success);
+                model.setCode(ResponseModel.SUCCESS);
                 model.setMessage("上传成功");
             } else {
                 model.setMessage("请传入文件");
@@ -212,7 +214,7 @@ public class FileController {
         ResponseModel model = ResponseModel.getInstance();
         if (!StrUtil.isEmpty(id)) {
             fileService.removeFile(id, true);
-            model.setCode(ResponseModel.Success);
+            model.setCode(ResponseModel.SUCCESS);
             model.setMessage("删除成功");
         } else {
             model.setMessage("请传入文件id");
@@ -232,7 +234,7 @@ public class FileController {
         ResponseModel model = ResponseModel.getInstance();
         if (!StrUtil.isEmpty(id)) {
             fileService.removeFile(id, true);
-            model.setCode(ResponseModel.Success);
+            model.setCode(ResponseModel.SUCCESS);
             model.setMessage("删除成功");
         } else {
             model.setMessage("请传入文件id");

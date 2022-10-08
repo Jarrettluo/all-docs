@@ -23,18 +23,30 @@ import java.util.Base64;
 @Document(indexName = "docwrite", createIndex = true)
 public class FileObj {
 
+    /**
+     * 用于存储文件id
+     */
     @Id
     @Field(type = FieldType.Keyword)
-    String id; //用于存储文件id
+    private String id;
 
+    /**
+     * 文件名
+     */
     @Field(type = FieldType.Text, analyzer="ik_max_word")
-    String name; //文件名
+    private String name;
 
+    /**
+     * 文件的type，pdf，word，or txt
+     */
     @Field(type = FieldType.Keyword)
-    String type; //文件的type，pdf，word，or txt
+    private String type;
 
+    /**
+     * 文件转化成base64编码后所有的内容。
+     */
     @Field(type = FieldType.Text, analyzer="ik_smart")
-    String content; //文件转化成base64编码后所有的内容。
+    private String content;
 
 
     public FileObj readFile(String path) throws IOException {

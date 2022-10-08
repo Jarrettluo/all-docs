@@ -4,11 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Sets;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
-import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.ElasticService;
-import com.jiaruiblog.service.IFileService;
-import com.jiaruiblog.utils.MSExcelParse;
-import com.jiaruiblog.utils.PDFUtil;
+import com.jiaruiblog.util.MsExcelParse;
+import com.jiaruiblog.util.PdfUtil;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -60,8 +58,6 @@ public class ElasticServiceImpl implements ElasticService {
      */
     public void upload(FileObj file) throws IOException {
         IndexRequest indexRequest = new IndexRequest("docwrite");
-        //indexRequest.id(file.getId());
-
         //上传同时，使用attachment pipline进行提取文件
         indexRequest.source(JSON.toJSONString(file), XContentType.JSON);
         indexRequest.setPipeline("attachment");
@@ -86,12 +82,11 @@ public class ElasticServiceImpl implements ElasticService {
         SearchRequest searchRequest = new SearchRequest("docwrite");
 
         //默认会search出所有的东西来
-//        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-//        System.out.println(response);
+        // SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
 
         //使用lk分词器查询，会把插入的字段分词，然后进行处理
         SearchSourceBuilder srb = new SearchSourceBuilder();
-//        srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
+        // srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
         srb.query(QueryBuilders.matchQuery("attachment.content", keyword));
 
         // 每页10个数据
@@ -182,7 +177,7 @@ public class ElasticServiceImpl implements ElasticService {
         String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
 
         try {
-            PDFUtil.readPDFText(is, textFilePath);
+            PdfUtil.readPdfText(is, textFilePath);
             FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());
@@ -210,7 +205,7 @@ public class ElasticServiceImpl implements ElasticService {
     public void uploadFileToEsDocx(InputStream is, FileDocument fileDocument) {
         String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
         try {
-            MSExcelParse.readPDFText(is, textFilePath);
+            MsExcelParse.readPDFText(is, textFilePath);
             FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());

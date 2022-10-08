@@ -18,13 +18,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MongoConfig {
 
-    // 获取配置文件中数据库信息
+    /**
+     * 获取配置文件中数据库信息
+     */
     @Value("${spring.data.mongodb.database}")
     String db;
 
-    //GridFSBucket用于打开下载流
+    /**
+     * GridFSBucket用于打开下载流
+     * @param mongoClient MongoClient
+     * @return GridFSBucket
+     */
     @Bean
-    public GridFSBucket getGridFSBucket(MongoClient mongoClient){
+    public GridFSBucket getGridFsBucket(MongoClient mongoClient){
         MongoDatabase mongoDatabase = mongoClient.getDatabase(db);
         return GridFSBuckets.create(mongoDatabase);
     }

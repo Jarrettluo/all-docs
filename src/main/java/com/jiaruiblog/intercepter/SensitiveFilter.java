@@ -21,24 +21,40 @@ import java.util.Set;
  * @Version 1.0
  **/
 public class SensitiveFilter {
-    //敏感词过滤器：利用DFA算法  进行敏感词过滤
+
+    /**
+     * 敏感词过滤器：利用DFA算法  进行敏感词过滤
+     */
     private Map sensitiveWordMap = null;
 
-    // 最小匹配规则
+    /**
+     * 最小匹配规则
+     */
     public static int minMatchType = 1;
 
-    // 最大匹配规则
+    /**
+     * 最大匹配规则
+     */
     public static int maxMatchType = 2;
 
-    // 单例
+    /**
+     * 单例
+     */
     private static SensitiveFilter instance = null;
 
-    // 构造函数，初始化敏感词库
+    /**
+     * 构造函数，初始化敏感词库
+     * @throws IOException io exception
+     */
     private SensitiveFilter() throws IOException {
         sensitiveWordMap = new SensitiveWordInit().initKeyWord();
     }
 
-    // 获取单例
+    /**
+     * 获取单例
+     * @return filter
+     * @throws IOException io exception
+     */
     public static SensitiveFilter getInstance() throws IOException {
         if (null == instance) {
             instance = new SensitiveFilter();
@@ -46,12 +62,17 @@ public class SensitiveFilter {
         return instance;
     }
 
-    // 获取文字中的敏感词
+    /**
+     * 获取文字中的敏感词
+     * @param txt String
+     * @param matchType int
+     * @return Set
+     */
     public Set<String> getSensitiveWord(String txt, int matchType) {
         Set<String> sensitiveWordList = new HashSet<String>();
         for (int i = 0; i < txt.length(); i++) {
             // 判断是否包含敏感字符
-            int length = CheckSensitiveWord(txt, i, matchType);
+            int length = checkSensitiveWord(txt, i, matchType);
             // 存在,加入list中
             if (length > 0) {
                 sensitiveWordList.add(txt.substring(i, i + length));
@@ -64,12 +85,12 @@ public class SensitiveFilter {
     /**
      * 检查文字中是否包含敏感字符，检查规则如下：
      * 如果存在，则返回敏感词字符的长度，不存在返回0
-     * @param txt
-     * @param beginIndex
-     * @param matchType
-     * @return
+     * @param txt String
+     * @param beginIndex int
+     * @param matchType int
+     * @return int
      */
-    public int CheckSensitiveWord(String txt, int beginIndex, int matchType) {
+    public int checkSensitiveWord(String txt, int beginIndex, int matchType) {
         // 敏感词结束标识位：用于敏感词只有1位的情况
         boolean flag = false;
         // 匹配标识数默认为0
@@ -103,21 +124,27 @@ public class SensitiveFilter {
             }
         }
         if (SensitiveFilter.maxMatchType == matchType){
-            if(matchFlag < 2 || !flag){        //长度必须大于等于1，为词
+            //长度必须大于等于1，为词
+            if(matchFlag < 2 || !flag){
                 matchFlag = 0;
             }
         }
         if (SensitiveFilter.minMatchType == matchType){
-            if(matchFlag < 2 && !flag){        //长度必须大于等于1，为词
+            //长度必须大于等于1，为词
+            if(matchFlag < 2 && !flag){
                 matchFlag = 0;
             }
         }
-
         return matchFlag;
-
     }
 
-    // 替换敏感字字符
+    /**
+     * 替换敏感字字符
+     * @param txt String
+     * @param matchType int
+     * @param replaceChar String
+     * @return String
+     */
     public String replaceSensitiveWord(String txt, int matchType,
                                        String replaceChar) {
         String resultTxt = txt;
@@ -137,9 +164,9 @@ public class SensitiveFilter {
     /**
      * 获取替换字符串
      *
-     * @param replaceChar
-     * @param length
-     * @return
+     * @param replaceChar String
+     * @param length int
+     * @return String
      */
     private String getReplaceChars(String replaceChar, int length) {
         String resultReplace = replaceChar;

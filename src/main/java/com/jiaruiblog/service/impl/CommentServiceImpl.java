@@ -7,7 +7,7 @@ import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.service.ICommentService;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -42,45 +42,45 @@ public class CommentServiceImpl implements ICommentService {
 
 
     @Override
-    public ApiResult insert(Comment comment) {
+    public BaseApiResult insert(Comment comment) {
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
         template.save(comment, collectionName);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
-    public ApiResult update(Comment comment) {
+    public BaseApiResult update(Comment comment) {
 
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
 
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
         Comment commentDb = template.findById(comment.getId(), Comment.class, collectionName);
         if( !commentDb.getUserId().equals(comment.getUserId())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
         Update update  = new Update();
         update.set("content", comment.getContent());
         update.set("updateDate", new Date());
         UpdateResult updateResult = template.updateFirst(query, update, User.class);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
-    public ApiResult remove(Comment comment, String userId) {
+    public BaseApiResult remove(Comment comment, String userId) {
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
         Comment commentDb = template.findById(comment.getId(), Comment.class, collectionName);
         if( !commentDb.getUserId().equals(comment.getUserId())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         template.remove(query, Comment.class, collectionName);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -91,9 +91,9 @@ public class CommentServiceImpl implements ICommentService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult queryById(CommentListDTO comment) {
+    public BaseApiResult queryById(CommentListDTO comment) {
         if (comment == null || comment.getDocId() == null) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         Query query = new Query(Criteria.where("docId").is(comment.getDocId()))
                 .with(Sort.by(Sort.Direction.DESC, "uploadDate"));
@@ -107,12 +107,12 @@ public class CommentServiceImpl implements ICommentService {
         result.put("totalNum", totalNum);
         result.put("comments", comments);
 
-        return ApiResult.success(result);
+        return BaseApiResult.success(result);
     }
 
     @Override
-    public ApiResult search(Comment comment) {
-        return ApiResult.success(MessageConstant.SUCCESS);
+    public BaseApiResult search(Comment comment) {
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

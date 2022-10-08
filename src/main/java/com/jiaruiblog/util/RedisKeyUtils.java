@@ -1,4 +1,4 @@
-package com.jiaruiblog.utils;
+package com.jiaruiblog.util;
 
 /**
  * @ClassName RedisKeyUtils

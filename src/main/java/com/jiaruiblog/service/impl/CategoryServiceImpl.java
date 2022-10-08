@@ -7,7 +7,7 @@ import com.jiaruiblog.entity.Category;
 
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.service.CategoryService;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -46,12 +46,12 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     @Override
-    public ApiResult insert(Category category) {
+    public BaseApiResult insert(Category category) {
         if(isNameExist(category.getName())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(category, COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -60,9 +60,9 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     @Override
-    public ApiResult update(Category category) {
+    public BaseApiResult update(Category category) {
         if(isNameExist(category.getName())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(category.getId()));
@@ -70,7 +70,7 @@ public class CategoryServiceImpl implements CategoryService {
         update.set("name", category.getName());
         update.set("updateTime", category.getUpdateDate());
         mongoTemplate.updateFirst(query, update, Category.class, COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -95,14 +95,14 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     @Override
-    public ApiResult remove(Category category) {
+    public BaseApiResult remove(Category category) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(category.getId()));
         mongoTemplate.remove(query, Category.class, COLLECTION_NAME);
         // 删除掉相关的分类关系
         Query query1 = new Query().addCriteria(Criteria.where("categoryId").is(category.getId()));
         mongoTemplate.remove(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -111,10 +111,10 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     @Override
-    public ApiResult queryById(Category category) {
+    public BaseApiResult queryById(Category category) {
         Category categoryDb = mongoTemplate.findById(category.getId(), Category.class, COLLECTION_NAME);
         if(category == null || category.getId() == null) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         Query query = new Query(Criteria.where("categoryId").is(categoryDb.getId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
@@ -123,16 +123,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ApiResult search(Category category) {
+    public BaseApiResult search(Category category) {
         return null;
     }
 
     @Override
-    public ApiResult list() {
+    public BaseApiResult list() {
         // 需要查询全部的信息
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        return ApiResult.success(categories);
+        return BaseApiResult.success(categories);
     }
 
     /**
@@ -141,16 +141,16 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     @Override
-    public ApiResult addRelationShip(CateDocRelationship relationship) {
+    public BaseApiResult addRelationShip(CateDocRelationship relationship) {
         if(relationship.getCategoryId() == null || relationship.getFileId() == null){
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 先排查一个文章只能有一个分类关系，不能有多个分类信息
         Query query1 = new Query(Criteria.where("fileId").is(relationship.getFileId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
         if( !CollectionUtils.isEmpty(relationships)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
         // 先排查是否具有该链接关系，否则不予进行关联
@@ -159,10 +159,10 @@ public class CategoryServiceImpl implements CategoryService {
         List<Map> result = mongoTemplate.find(query, Map.class, RELATE_COLLECTION_NAME);
 
         if(!result.isEmpty()) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -171,11 +171,11 @@ public class CategoryServiceImpl implements CategoryService {
      * @return
      */
     @Override
-    public ApiResult cancleCategoryRelationship(CateDocRelationship relationship) {
+    public BaseApiResult cancleCategoryRelationship(CateDocRelationship relationship) {
         Query query = new Query(Criteria.where("categoryId").is(relationship.getCategoryId())
                 .and("fileId").is(relationship.getFileId()));
         mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

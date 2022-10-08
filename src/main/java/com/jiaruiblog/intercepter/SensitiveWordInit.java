@@ -18,18 +18,25 @@ import java.util.Set;
 
 /**
  * @ClassName SensitiveWordInit
- * @Description 过滤不雅词汇，加上@Configuration在项目启动的时候加载一下
+ * @Description 过滤不雅词汇，加上@Configuration在项目启动的时候加载一下; 屏蔽敏感词初始化
  * @Author luojiarui
  * @Date 2022/8/14 16:09
  * @Version 1.0
  **/
-//屏蔽敏感词初始化
 @Configuration
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class SensitiveWordInit {
-    // 字符编码
+
+    /**
+     * 字符编码
+     */
     private static final Charset ENCODING = StandardCharsets.UTF_8;
-    // 初始化敏感字库
+
+    /**
+     * 初始化敏感字库
+     * @return Map
+     * @throws IOException exception
+     */
     public Map initKeyWord() throws IOException {
         // 读取敏感词库 ,存入Set中
         Set<String> wordSet = readSensitiveWordFile();
@@ -40,7 +47,11 @@ public class SensitiveWordInit {
         return addSensitiveWordToHashMap(wordSet);
     }
 
-    // 读取敏感词库 ,存入HashMap中
+    /**
+     * 读取敏感词库 ,存入HashMap中
+     * @return Set
+     * @throws IOException ioexception
+     */
     private Set<String> readSensitiveWordFile() throws IOException {
         Set<String> wordSet = null;
         ClassPathResource classPathResource = new ClassPathResource("static/censorword.txt");
@@ -67,7 +78,11 @@ public class SensitiveWordInit {
         return wordSet;
     }
 
-    // 将HashSet中的敏感词,存入HashMap中
+    /**
+     * 将HashSet中的敏感词,存入HashMap中
+     * @param wordSet Set
+     * @return Map
+     */
     private Map addSensitiveWordToHashMap(Set<String> wordSet) {
         // 初始化敏感词容器，减少扩容操作
         Map wordMap = new HashMap(wordSet.size());
@@ -85,7 +100,7 @@ public class SensitiveWordInit {
                 // 不存在则，则构建一个map，同时将isEnd设置为0，因为他不是最后一个
                 else {
                     // 设置标志位
-                    Map<String, String> newMap = new HashMap<>();
+                    Map<String, String> newMap = new HashMap<>(8);
                     newMap.put("isEnd", "0");
                     // 添加到集合
                     nowMap.put(keyChar, newMap);

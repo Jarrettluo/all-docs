@@ -7,11 +7,10 @@ import com.jiaruiblog.entity.vo.DocVO;
 import com.jiaruiblog.entity.vo.StatsVO;
 import com.jiaruiblog.entity.vo.TrendVO;
 import com.jiaruiblog.service.StatisticsService;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,16 +47,16 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult trend() {
+    public BaseApiResult trend() {
         List<Category> categoryList = categoryServiceImpl.getRandom();
-        List<TrendVO> trendVOS = new ArrayList<>(3);
+        List<TrendVO> trendVOs = new ArrayList<>(3);
 
         for (Category category : categoryList) {
             category = Optional.ofNullable(category).orElse(new Category());
             TrendVO trendVO = new TrendVO();
             trendVO.setId(category.getId());
             trendVO.setName(category.getName());
-            List<DocVO> docVOS = new ArrayList<>();
+            List<DocVO> docVOs = new ArrayList<>();
 
             if(category.getId() != null) {
                 List<FileDocument> documents;
@@ -70,14 +69,14 @@ public class StatisticsServiceImpl implements StatisticsService {
                     DocVO docVO = new DocVO();
                     docVO.setId(document.getId());
                     docVO.setName(document.getName());
-                    docVOS.add(docVO);
+                    docVOs.add(docVO);
                 }
             }
 
-            trendVO.setDocList(docVOS);
-            trendVOS.add(trendVO);
+            trendVO.setDocList(docVOs);
+            trendVOs.add(trendVO);
         }
-        return ApiResult.success(trendVOS);
+        return BaseApiResult.success(trendVOs);
     }
 
     /**
@@ -88,13 +87,13 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult all() {
+    public BaseApiResult all() {
         StatsVO statsVO = new StatsVO();
         statsVO.setDocNum(fileServiceImpl.countAllFile());
         statsVO.setCommentNum(commentServiceImpl.countAllFile());
         statsVO.setCategoryNum(categoryServiceImpl.countAllFile());
         statsVO.setTagNum(tagServiceImpl.countAllFile());
-        return ApiResult.success(statsVO);
+        return BaseApiResult.success(statsVO);
     }
 
 }

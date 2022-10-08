@@ -1,7 +1,7 @@
 package com.jiaruiblog.filter;
 
 import com.auth0.jwt.interfaces.Claim;
-import com.jiaruiblog.utils.JwtUtil;
+import com.jiaruiblog.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -14,10 +14,13 @@ import java.util.Map;
 
 /**
  * JWT过滤器，拦截 /secure的请求
+ * //@WebFilter(filterName = "JwtFilter", urlPatterns = "/secure/*")
  * 参考地址：https://blog.csdn.net/CSDN2497242041/article/details/115605626
+ * @author jiarui.luo
+ * @date 2022年10月8日
+ * @version v2.0
  */
 @Slf4j
-//@WebFilter(filterName = "JwtFilter", urlPatterns = "/secure/*")
 @WebFilter(filterName = "JwtFilter", urlPatterns = {
         "/comment/auth/*", "/user/auth/*", "/collect/auth/*", "/document/auth/*"
 })

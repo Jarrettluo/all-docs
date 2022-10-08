@@ -2,7 +2,7 @@ package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 
 import java.util.List;
 import java.util.Map;
@@ -14,22 +14,65 @@ import java.util.Map;
  */
 public interface TagService {
 
-    ApiResult insert(Tag tag);
+    /**
+     * insert
+     * @param tag tag
+     * @return result
+     */
+    BaseApiResult insert(Tag tag);
 
-    ApiResult update(Tag tag);
+    /**
+     * update
+     * @param tag tag
+     * @return result
+     */
+    BaseApiResult update(Tag tag);
 
-    ApiResult remove(Tag tag);
+    /**
+     * remove
+     * @param tag tag
+     * @return result
+     */
+    BaseApiResult remove(Tag tag);
 
-    ApiResult queryById(Tag tag);
+    /**
+     * query
+     * @param tag tag
+     * @return result
+     */
+    BaseApiResult queryById(Tag tag);
 
-    ApiResult search(Tag tag);
+    /**
+     * search
+     * @param tag tag
+     * @return result
+     */
+    BaseApiResult search(Tag tag);
 
-    ApiResult list();
+    /**
+     * list
+     * @return result
+     */
+    BaseApiResult list();
 
-    ApiResult addRelationShip(TagDocRelationship relationship);
+    /**
+     * add relationship
+     * @param relationship
+     * @return
+     */
+    BaseApiResult addRelationShip(TagDocRelationship relationship);
 
-    ApiResult cancelTagRelationship(TagDocRelationship relationship);
+    /**
+     * cancel relationship
+     * @param relationship TagDocRelationShip
+     * @return result
+     */
+    BaseApiResult cancelTagRelationship(TagDocRelationship relationship);
 
+    /**
+     * get all relationships
+     * @return result
+     */
     Map<Tag, List<TagDocRelationship>> getRecentTagRelationship();
 
 }

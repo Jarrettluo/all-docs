@@ -28,13 +28,19 @@ public class CateDocRelationship {
      */
     String categoryId;
 
-    // 文件id
+    /**
+     * 文件id
+     */
     String fileId;
 
-    // 创建时间
+    /**
+     * 创建时间
+     */
     Date createDate;
 
-    // 修改时间
+    /**
+     * 修改时间
+     */
     Date updateDate;
 
 }

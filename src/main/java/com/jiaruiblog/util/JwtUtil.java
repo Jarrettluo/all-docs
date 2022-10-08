@@ -1,4 +1,4 @@
-package com.jiaruiblog.utils;
+package com.jiaruiblog.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -30,8 +30,9 @@ public class JwtUtil {
 
     /**
      * 过期时间
+     * 单位为秒
      **/
-    private static final long EXPIRATION = 1800L;//单位为秒
+    private static final long EXPIRATION = 1800L;
 
     /**
      * 生成用户token,设置token超时时间
@@ -39,18 +40,22 @@ public class JwtUtil {
     public static String createToken(User user) {
         //过期时间
         Date expireDate = new Date(System.currentTimeMillis() + EXPIRATION * 1000);
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(8);
         map.put("alg", "HS256");
         map.put("typ", "JWT");
+        // 添加头部
+        //可以将基本信息放到claims中
+        //超时设置,设置过期的日期
         String token = JWT.create()
-                .withHeader(map)// 添加头部
-                //可以将基本信息放到claims中
-                .withClaim("id", user.getId())//userId
-                .withClaim("username", user.getUsername())//userName
-                .withClaim("password", user.getPassword())//password
-                .withExpiresAt(expireDate) //超时设置,设置过期的日期
-                .withIssuedAt(new Date()) //签发时间
-                .sign(Algorithm.HMAC256(SECRET)); //SECRET加密
+                .withHeader(map)
+                .withClaim("id", user.getId())
+                .withClaim("username", user.getUsername())
+                .withClaim("password", user.getPassword())
+                .withExpiresAt(expireDate)
+                //签发时间
+                .withIssuedAt(new Date())
+                //SECRET加密
+                .sign(Algorithm.HMAC256(SECRET));
         return token;
     }
 

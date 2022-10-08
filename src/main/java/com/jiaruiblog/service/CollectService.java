@@ -1,8 +1,7 @@
 package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.CollectDocRelationship;
-import com.jiaruiblog.entity.Tag;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 
 /**
  * @Author Jarrett Luo
@@ -16,12 +15,12 @@ public interface CollectService {
      * @param collect -> ColllectDocRelationship
      * @return -> ApiResult
      */
-    ApiResult insert(CollectDocRelationship collect);
+    BaseApiResult insert(CollectDocRelationship collect);
 
     /**
      * 移除文档收藏
      * @param collect -> ColllectDocRelationship
      * @return -> ApiResult
      */
-    ApiResult remove(CollectDocRelationship collect);
+    BaseApiResult remove(CollectDocRelationship collect);
 }

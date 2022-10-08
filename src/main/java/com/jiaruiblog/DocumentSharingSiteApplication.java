@@ -8,15 +8,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 
 /**
+ * //@EnableAsync(proxyTargetClass=true)
+ * //@EnableAsync
+ * //@EnableTransactionManagement(proxyTargetClass = true)
  * @ClassName DocumentSharingSiteApplication
  * @Description TODO
  * @Author luojiarui
  * @Date 2022/6/2 10:58 下午
  * @Version 1.0
  **/
-//@EnableAsync(proxyTargetClass=true)
-//@EnableAsync
-//@EnableTransactionManagement(proxyTargetClass = true)
 @ServletComponentScan(basePackages = "com.jiaruiblog.filter")
 @SpringBootApplication
 public class DocumentSharingSiteApplication {

@@ -12,7 +12,7 @@ import com.jiaruiblog.service.StatisticsService;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,13 +58,13 @@ public class StatisticsController {
 
     @ApiOperation(value = "4.1 查询热度榜", notes = "查询列表")
     @GetMapping(value = "/trend")
-    public ApiResult trend(){
+    public BaseApiResult trend(){
         return statisticsService.trend();
     }
 
     @ApiOperation(value = "4.2 查询统计数据", notes = "查询列表")
     @GetMapping(value = "/all")
-    public ApiResult all(){
+    public BaseApiResult all(){
         return statisticsService.all();
     }
 
@@ -77,7 +76,7 @@ public class StatisticsController {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @GetMapping("getSearchResult")
-    public ApiResult getSearchResult(HttpServletRequest request){
+    public BaseApiResult getSearchResult(HttpServletRequest request){
         String userId = (String) request.getAttribute("id");
         List<String> userSearchList = Lists.newArrayList();
         if ( userId != null && userId != "") {
@@ -87,7 +86,7 @@ public class StatisticsController {
         Map<String, List<String>> result = Maps.newHashMap();
         result.put("userSearch", userSearchList);
         result.put("hotSearch", hotSearchList);
-        return ApiResult.success(result);
+        return BaseApiResult.success(result);
     }
 
     /**
@@ -98,11 +97,11 @@ public class StatisticsController {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @GetMapping("getHotTrend")
-    public ApiResult getHotTrend() {
+    public BaseApiResult getHotTrend() {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
 
         if (CollectionUtils.isEmpty(docIdList)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 存储无效的redis id
         List<String> invalidDocs = Lists.newArrayList();
@@ -122,7 +121,7 @@ public class StatisticsController {
         // 从redis中删除无效id
 
         if ( CollectionUtils.isEmpty(fileDocumentList)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         FileDocument topFileDocument = fileDocumentList.remove(0);
         DocumentVO documentVO = fileServiceImpl.convertDocument(null, topFileDocument);
@@ -149,7 +148,7 @@ public class StatisticsController {
         result.put("top1", top1);
         result.put("others", others);
 
-        return ApiResult.success(result);
+        return BaseApiResult.success(result);
     }
 
 
@@ -162,7 +161,7 @@ public class StatisticsController {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @GetMapping("/recentDocs")
-    public ApiResult getRecentDocs() {
+    public BaseApiResult getRecentDocs() {
         List<Map<String, Object>> result = Lists.newArrayList();
 
         List<FileDocument> recentFileDocuments = fileService.listFilesByPage(0, 12);
@@ -180,7 +179,7 @@ public class StatisticsController {
             result.add(getTagMap(tag.getName(), tag.getId(), map));
         }
 
-        return ApiResult.success(result);
+        return BaseApiResult.success(result);
     }
 
     /**

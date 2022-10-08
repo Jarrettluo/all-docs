@@ -1,4 +1,4 @@
-package com.jiaruiblog.utils.enumsCoverterUtils;
+package com.jiaruiblog.util.converter;
 
 import com.google.common.collect.Maps;
 import org.springframework.core.convert.converter.Converter;
@@ -7,13 +7,13 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import java.util.Map;
 
 /**
- * @ClassName IntegerCodeToEnumConverterFactory
+ * @ClassName StringCodeToEnumConverter
  * @Description TODO
  * @Author luojiarui
- * @Date 2022/6/19 5:06 下午
+ * @Date 2022/6/19 5:08 下午
  * @Version 1.0
  **/
-public class IntegerCodeToEnumConverterFactory implements ConverterFactory<Integer, BaseEnum> {
+public class StringCodeToEnumConverterFactory implements ConverterFactory<String, BaseEnum> {
     private static final Map<Class, Converter> CONVERTERS = Maps.newHashMap();
 
     /**
@@ -23,10 +23,10 @@ public class IntegerCodeToEnumConverterFactory implements ConverterFactory<Integ
      * @return 返回一个转化器
      */
     @Override
-    public <T extends BaseEnum> Converter<Integer, T> getConverter(Class<T> targetType) {
-        Converter<Integer, T> converter = CONVERTERS.get(targetType);
+    public <T extends BaseEnum> Converter<String, T> getConverter(Class<T> targetType) {
+        Converter<String, T> converter = CONVERTERS.get(targetType);
         if (converter == null) {
-            converter = new IntegerToEnumConverter<>(targetType);
+            converter = new StringToEnumConverter<>(targetType);
             CONVERTERS.put(targetType, converter);
         }
         return converter;

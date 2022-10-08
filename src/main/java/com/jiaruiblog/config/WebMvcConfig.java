@@ -1,7 +1,7 @@
 package com.jiaruiblog.config;
 
-import com.jiaruiblog.utils.enumsCoverterUtils.IntegerCodeToEnumConverterFactory;
-import com.jiaruiblog.utils.enumsCoverterUtils.StringCodeToEnumConverterFactory;
+import com.jiaruiblog.util.converter.IntegerCodeToEnumConverterFactory;
+import com.jiaruiblog.util.converter.StringCodeToEnumConverterFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

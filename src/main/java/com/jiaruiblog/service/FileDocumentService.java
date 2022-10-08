@@ -1,6 +1,6 @@
 package com.jiaruiblog.service;
 
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 
 import java.util.List;
 
@@ -16,6 +16,6 @@ public interface FileDocumentService {
      * @param ids
      * @return
      */
-    ApiResult queryByIds(List<Integer> ids);
+    BaseApiResult queryByIds(List<Integer> ids);
 
 }

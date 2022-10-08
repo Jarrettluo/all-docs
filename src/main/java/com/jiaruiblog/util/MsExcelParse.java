@@ -1,4 +1,4 @@
-package com.jiaruiblog.utils;
+package com.jiaruiblog.util;
 
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
@@ -17,7 +17,7 @@ import java.io.*;
  * @Date 2022/6/4 10:04 下午
  * @Version 1.0
  **/
-public class MSExcelParse {
+public class MsExcelParse {
 
     /**
      * @Author luojiarui

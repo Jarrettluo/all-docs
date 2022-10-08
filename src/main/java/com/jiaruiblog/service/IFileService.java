@@ -2,7 +2,7 @@ package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.FileDocument;
-import com.jiaruiblog.utils.ApiResult;
+import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
@@ -11,6 +11,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+
+/**
+ * @author jiarui.luo
+ */
 public interface IFileService {
 
 
@@ -77,7 +81,7 @@ public interface IFileService {
      * @param documentDTO
      * @return
      */
-    ApiResult list(DocumentDTO documentDTO);
+    BaseApiResult list(DocumentDTO documentDTO);
 
     /**
      *根据文档的详情，查询该文档的详细信息
@@ -85,7 +89,7 @@ public interface IFileService {
      * @param id ->Long
      * @return ApiResult
      */
-    ApiResult detail(String id);
+    BaseApiResult detail(String id);
 
     /**
      * 删除掉已经存在的文档
@@ -93,9 +97,10 @@ public interface IFileService {
      * @param id -> Long
      * @return ApiResult
      */
-    ApiResult remove(String id);
+    BaseApiResult remove(String id);
 
     /**
+     * update file thumb
      * @Author luojiarui
      * @Description  保存文档的缩略图
      * @Date 7:15 下午 2022/7/24
@@ -105,6 +110,7 @@ public interface IFileService {
     void updateFileThumb(InputStream inputStream, FileDocument fileDocument) throws FileNotFoundException;
 
     /**
+     * getFileThumb
      * @Author luojiarui
      * @Description // 查询缩略图信息
      * @Date 8:00 下午 2022/7/24
