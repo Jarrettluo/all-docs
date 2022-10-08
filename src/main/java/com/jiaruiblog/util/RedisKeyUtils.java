@@ -9,6 +9,10 @@ package com.jiaruiblog.util;
  **/
 public class RedisKeyUtils {
 
+    private RedisKeyUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static String getSearchHistoryKey(String userid) {
         return userid;
     }

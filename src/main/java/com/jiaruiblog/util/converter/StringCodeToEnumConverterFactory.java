@@ -25,10 +25,12 @@ public class StringCodeToEnumConverterFactory implements ConverterFactory<String
     @Override
     public <T extends BaseEnum> Converter<String, T> getConverter(Class<T> targetType) {
         Converter<String, T> converter = CONVERTERS.get(targetType);
-        if (converter == null) {
-            converter = new StringToEnumConverter<>(targetType);
-            CONVERTERS.put(targetType, converter);
-        }
-        return converter;
+        // if (converter == null) {
+        //     converter = new StringToEnumConverter<>(targetType);
+        //     CONVERTERS.put(targetType, converter);
+        // }
+        // return converter;
+
+        return CONVERTERS.computeIfAbsent(targetType, k -> new StringToEnumConverter<>(targetType));
     }
 }

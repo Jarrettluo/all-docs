@@ -148,7 +148,7 @@ public class CategoryServiceImpl implements CategoryService {
         // 先排查是否具有该链接关系，否则不予进行关联
         Query query = new Query(Criteria.where(CATEGORY_ID).is(relationship.getCategoryId())
                 .and(FILE_ID).is(relationship.getFileId()));
-        List<Map<Object, Object>> result = mongoTemplate.find(query, Map.class, RELATE_COLLECTION_NAME);
+        List<Map> result = mongoTemplate.find(query, Map.class, RELATE_COLLECTION_NAME);
 
         if(!result.isEmpty()) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
