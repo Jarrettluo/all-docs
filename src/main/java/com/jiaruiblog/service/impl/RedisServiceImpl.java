@@ -211,6 +211,7 @@ public class RedisServiceImpl implements RedisService {
      * 每次点击给相关词searchkey热度 +1
      * @param searchkey String
      * @return int
+     * @deprecated 暂时废弃
      */
     @Override
     @Deprecated

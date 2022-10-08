@@ -1,6 +1,6 @@
 package com.jiaruiblog.entity;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.Date;
 
 /**
  * @ClassName User
- * @Description TODO
+ * @Description User
  * @Author luojiarui
  * @Date 2022/6/4 9:37 上午
  * @Version 1.0
@@ -46,6 +46,6 @@ public class User {
 
     @Override
     public String toString () {
-        return JSONObject.toJSONString(this);
+        return JSON.toJSONString(this);
     }
 }

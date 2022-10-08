@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * @ClassName TrendVO
- * @Description TODO
+ * @Description TrendVO
  * @Author luojiarui
  * @Date 2022/6/26 4:24 下午
  * @Version 1.0

@@ -33,9 +33,13 @@ import java.util.stream.Collectors;
 @Service
 public class TagServiceImpl implements TagService {
 
-    private static String COLLECTION_NAME = "tagCollection";
+    private static final String COLLECTION_NAME = "tagCollection";
 
-    private final static String RELATE_COLLECTION_NAME = "relateTagCollection";
+    private static final String RELATE_COLLECTION_NAME = "relateTagCollection";
+    
+    private static final String FILE_ID = "fileId";
+
+    private static final String TAG_ID = "tagId";
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -67,7 +71,7 @@ public class TagServiceImpl implements TagService {
         Update update  = new Update();
         update.set("name", tag.getName());
         update.set("updateTime",tag.getUpdateDate());
-        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Tag.class, COLLECTION_NAME);
+        mongoTemplate.updateFirst(query, update, Tag.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -88,7 +92,7 @@ public class TagServiceImpl implements TagService {
         mongoTemplate.remove(query1, Tag.class, COLLECTION_NAME);
 
         // 同时去除掉各种关系的数据
-        Query query = new Query(Criteria.where("tagId").is(tag.getId()));
+        Query query = new Query(Criteria.where(TAG_ID).is(tag.getId()));
         mongoTemplate.remove(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
@@ -154,8 +158,8 @@ public class TagServiceImpl implements TagService {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         // 判断以下是否存在这个关系
-        Query query = new Query(Criteria.where("tagId").is(relationship.getTagId())
-                .and("fileId").is(relationship.getFileId()));
+        Query query = new Query(Criteria.where(TAG_ID).is(relationship.getTagId())
+                .and(FILE_ID).is(relationship.getFileId()));
         List<TagDocRelationship> result = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
         if( !result.isEmpty() ) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
@@ -166,8 +170,8 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public BaseApiResult cancelTagRelationship(TagDocRelationship relationship) {
-        Query query = new Query(Criteria.where("tagId").is(relationship.getTagId())
-                .and("fileId").is(relationship.getFileId()));
+        Query query = new Query(Criteria.where(TAG_ID).is(relationship.getTagId())
+                .and(FILE_ID).is(relationship.getFileId()));
         mongoTemplate.remove(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
@@ -182,10 +186,10 @@ public class TagServiceImpl implements TagService {
      **/
     public List<TagVO> queryByDocId(String id) {
         List<TagVO> tagVOList = new ArrayList<>();
-        Query query = new Query().addCriteria(Criteria.where("fileId").is(id));
+        Query query = new Query().addCriteria(Criteria.where(FILE_ID).is(id));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
 
-        if(relationships == null || relationships.isEmpty()) {
+        if (relationships.isEmpty()) {
             return tagVOList;
         }
 
@@ -244,11 +248,11 @@ public class TagServiceImpl implements TagService {
      **/
     public List<TagDocRelationship> getTagRelationshipByPage(int pageIndex, int pageSize,  String tagId) {
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "createDate"));
-        long skip = (pageIndex) * pageSize;
+        long skip = (long) (pageIndex) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
         if ( tagId != null) {
-            query.addCriteria(Criteria.where("tagId").is(tagId));
+            query.addCriteria(Criteria.where(TAG_ID).is(tagId));
         }
         return Optional.ofNullable(mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME)).orElse(Lists.newArrayList());
     }
@@ -261,7 +265,7 @@ public class TagServiceImpl implements TagService {
      * @return java.util.List<java.lang.Long>
      **/
     public List<String> queryDocIdListByTagId(String tagId) {
-        Query query = new Query().addCriteria(Criteria.where("tagId").is(tagId));
+        Query query = new Query().addCriteria(Criteria.where(TAG_ID).is(tagId));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
         return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
     }
@@ -283,7 +287,7 @@ public class TagServiceImpl implements TagService {
             return Lists.newArrayList();
         }
         List<String> ids = categories.stream().map(Tag::getId).collect(Collectors.toList());
-        Query query1 = new Query().addCriteria(Criteria.where("tagId").in(ids));
+        Query query1 = new Query().addCriteria(Criteria.where(TAG_ID).in(ids));
         List<TagDocRelationship> relationships = mongoTemplate.find(query1, TagDocRelationship.class, RELATE_COLLECTION_NAME);
 
         return relationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
@@ -336,8 +340,8 @@ public class TagServiceImpl implements TagService {
      */
     private List<TagDocRelationship> tagDocRelationships(TagDocRelationship tagDocRelationship) {
         tagDocRelationship = Optional.ofNullable(tagDocRelationship).orElse(new TagDocRelationship());
-        Query query = new Query().addCriteria(Criteria.where("tagId").is(tagDocRelationship.getTagId())
-        .and("fileId").is(tagDocRelationship.getFileId()));
+        Query query = new Query().addCriteria(Criteria.where(TAG_ID).is(tagDocRelationship.getTagId())
+        .and(FILE_ID).is(tagDocRelationship.getFileId()));
         return mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
     }
 
@@ -352,7 +356,7 @@ public class TagServiceImpl implements TagService {
         Query query = new Query(Criteria.where("docId").is(docId));
         List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class,
                 RELATE_COLLECTION_NAME);
-        relationships.forEach(item -> this.cancelTagRelationship(item));
+        relationships.forEach(this::cancelTagRelationship);
     }
 
     /**

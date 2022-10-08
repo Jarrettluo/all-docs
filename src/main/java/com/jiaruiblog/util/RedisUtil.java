@@ -1,19 +1,18 @@
 package com.jiaruiblog.util;
 
+import com.google.common.collect.Sets;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName RedisUtil
- * @Description TODO
+ * @Description RedisUtil
  * @Author luojiarui
  * @Date 2022/8/14 17:14
  * @Version 1.0
@@ -29,7 +28,7 @@ public final class RedisUtil {
             return redisTemplate.keys(keys);
         }catch (Exception e){
             e.printStackTrace();
-            return null;
+            return Sets.newHashSet();
         }
     }
 
@@ -286,7 +285,7 @@ public final class RedisUtil {
             return redisTemplate.opsForSet().members(key);
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return Sets.newHashSet();
         }
     }
     /**
@@ -357,8 +356,7 @@ public final class RedisUtil {
      */
     public long setRemove(String key, Object... values) {
         try {
-            Long count = redisTemplate.opsForSet().remove(key, values);
-            return count;
+            return Optional.ofNullable(redisTemplate.opsForSet().remove(key, values)).orElse(0l);
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
@@ -377,7 +375,7 @@ public final class RedisUtil {
             return redisTemplate.opsForList().range(key, start, end);
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return Lists.newArrayList();
         }
     }
     /**
@@ -501,8 +499,7 @@ public final class RedisUtil {
      */
     public long lRemove(String key, long count, Object value) {
         try {
-            Long remove = redisTemplate.opsForList().remove(key, count, value);
-            return remove;
+            return Optional.ofNullable(redisTemplate.opsForList().remove(key, count, value)).orElse(0l);
         } catch (Exception e) {
             e.printStackTrace();
             return 0;

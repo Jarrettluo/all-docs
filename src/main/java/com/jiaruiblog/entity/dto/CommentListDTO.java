@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * @ClassName CommentListDTO
- * @Description TODO
+ * @Description CommentListDTO
  * @Author luojiarui
  * @Date 2022/9/4 11:45
  * @Version 1.0

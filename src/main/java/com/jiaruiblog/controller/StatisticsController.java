@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -79,7 +80,7 @@ public class StatisticsController {
     public BaseApiResult getSearchResult(HttpServletRequest request){
         String userId = (String) request.getAttribute("id");
         List<String> userSearchList = Lists.newArrayList();
-        if ( userId != null && userId != "") {
+        if (StringUtils.hasText(userId)) {
             userSearchList = redisService.getSearchHistoryByUserId("");
         }
         List<String> hotSearchList = redisService.getHotList(null, RedisServiceImpl.SEARCH_KEY);
