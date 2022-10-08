@@ -35,6 +35,6 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void cancleCategoryRelationship() {
+    public void cancelCategoryRelationship() {
     }
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.google.common.collect.Lists;
+import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
 import com.jiaruiblog.service.ElasticService;
@@ -74,7 +75,7 @@ public class FileController {
                     .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
                     .body(file.get().getContent());
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File was not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
         }
     }
 
@@ -96,7 +97,7 @@ public class FileController {
                     .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
                     .body(file.get().getContent());
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File was not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
         }
     }
 
@@ -104,8 +105,9 @@ public class FileController {
      * JS传字节流上传 - 暂时未完成
      *
      * @param md5
-     * @param file
+     * @param request
      * @return
+     * @deprecated 废弃
      */
     @Deprecated
     @PostMapping("/upload/{md5}/{ext}")
@@ -123,8 +125,8 @@ public class FileController {
             String name = request.getParameter("name");
             String description = request.getParameter("description");
             InputStream in = new ByteArrayInputStream(data);
-            System.out.println("data_string:" + StrUtil.str(data, "UTF-8"));
-            if (in != null && data.length > 0) {
+            log.info("data_string:" + StrUtil.str(data, "UTF-8"));
+            if ( data.length > 0) {
                 FileDocument fileDocument = new FileDocument();
                 fileDocument.setName(name);
                 fileDocument.setSize(data.length);
@@ -133,11 +135,11 @@ public class FileController {
                 fileDocument.setSuffix(ext);
                 String fileMd5 = SecureUtil.md5(in);
                 fileDocument.setMd5(fileMd5);
-                System.out.println(md5 + " , " + fileMd5);
+                log.info("文件的md5 ==> {} " , fileMd5);
                 fileDocument.setDescription(description);
                 fileService.saveFile(fileDocument, in);
 
-                System.out.println(fileDocument);
+                log.info("保存的fileDocument ==> {}" , fileDocument);
                 model.setData(fileDocument.getId());
                 model.setCode(ResponseModel.SUCCESS);
                 model.setMessage("上传成功");
@@ -165,9 +167,13 @@ public class FileController {
         ResponseModel model = ResponseModel.getInstance();
         try {
             if (file != null && !file.isEmpty()) {
+                String originFileName = file.getOriginalFilename();
+                if ( !StringUtils.hasText(originFileName)) {
+                    model.setMessage("格式不支持！");
+                    return model;
+                }
                 //获取文件后缀名
-                String suffix = file.getOriginalFilename()
-                        .substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+                String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
                 if( !availableSuffixList.contains(suffix)) {
                     model.setMessage("格式不支持！");
                     return model;
@@ -177,7 +183,7 @@ public class FileController {
 
                 switch (suffix) {
                     case "pdf":
-                        // TODO 在这里进行上传
+                        // 在这里进行上传
                         elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
                         // 异步进行缩略图的制作
                         fileService.updateFileThumb(file.getInputStream(), fileDocument);
@@ -246,7 +252,7 @@ public class FileController {
 
     /**
      * @Author luojiarui
-     * @Description //TODO
+     * @Description previewThumb
      * @Date 8:02 下午 2022/7/24
      * @Param [thumbid]
      * @return byte[]
@@ -257,7 +263,7 @@ public class FileController {
         InputStream inputStream = fileService.getFileThumb(thumbid);
         FileInputStream fileInputStream = (FileInputStream) (inputStream);
         if(inputStream == null) {
-            return null;
+            return new byte[0];
         }
         byte[] bytes = new byte[fileInputStream.available()];
         fileInputStream.read(bytes, 0, fileInputStream.available());
@@ -269,11 +275,14 @@ public class FileController {
     public byte[] test() throws Exception {
 
         File file = new File("thumbnail20220724194018003.png");
-        FileInputStream inputStream = new FileInputStream(file);
-        byte[] bytes = new byte[inputStream.available()];
-        inputStream.read(bytes, 0, inputStream.available());
-        return bytes;
-
+        try (FileInputStream inputStream = new FileInputStream(file);) {
+            byte[] bytes = new byte[inputStream.available()];
+            inputStream.read(bytes, 0, inputStream.available());
+            return bytes;
+        } catch (Exception e) {
+            log.error("预览文档图片报错 ==> {}", e);
+            return new byte[0];
+        }
     }
 
 
@@ -288,16 +297,16 @@ public class FileController {
                     .header(HttpHeaders.CONTENT_LENGTH, "123")
                     .body(IoUtil.readBytes(inputStream));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File was not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
         }
     }
 
     @GetMapping(value = "/image2/{thumbid}",produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public byte[] previewThumb2(@PathVariable String thumbid) throws Exception {
+    public byte[] previewThumb2(@PathVariable String thumbid) {
         InputStream inputStream = fileService.getFileThumb(thumbid);
         if(inputStream == null) {
-            return null;
+            return new byte[0];
         }
         return IoUtil.readBytes(inputStream);
     }

@@ -195,7 +195,8 @@ public class TagServiceImpl implements TagService {
 
         for (TagDocRelationship relationship : relationships) {
 
-            Tag tag = mongoTemplate.findById(relationship.getTagId(), Tag.class, COLLECTION_NAME);
+            Tag tag = Optional.ofNullable(mongoTemplate.findById(relationship.getTagId(), Tag.class, COLLECTION_NAME))
+                    .orElse(new Tag());
             TagVO tagVO = new TagVO();
             tagVO.setId(tag.getId());
             tagVO.setName(tag.getName());
@@ -215,7 +216,7 @@ public class TagServiceImpl implements TagService {
     public Map<Tag, List<TagDocRelationship>> getRecentTagRelationship(Integer tagNum) {
         Map<Tag, List<TagDocRelationship>> result = Maps.newHashMap();
         List<TagDocRelationship> files = getTagRelationshipByPage(0, tagNum, null);
-        System.out.println(files);
+        log.info("查询到最近的文档为==>{}", files);
         if( CollectionUtils.isEmpty(files)) {
             return result;
         }
@@ -277,7 +278,7 @@ public class TagServiceImpl implements TagService {
      */
     public List<String> fuzzySearchDoc(String keyWord) {
         if( keyWord == null || "".equalsIgnoreCase(keyWord)) {
-            return null;
+            return Lists.newArrayList();
         }
         Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
@@ -301,10 +302,7 @@ public class TagServiceImpl implements TagService {
      */
     private boolean isTagExist(String tagName) {
         List<Tag> tags = queryTagByName(tagName);
-        if(tags == null || tags.isEmpty()){
-            return false;
-        }
-        return true;
+        return !CollectionUtils.isEmpty(tags);
     }
 
     /**
@@ -314,7 +312,7 @@ public class TagServiceImpl implements TagService {
      */
     private List<Tag> queryTagByName(String name) {
         if( !StringUtils.hasText(name) ) {
-            return null;
+            return Lists.newArrayList();
         }
         Query query = new Query().addCriteria(Criteria.where("name").is(name));
         return mongoTemplate.find(query, Tag.class, COLLECTION_NAME);
@@ -327,10 +325,7 @@ public class TagServiceImpl implements TagService {
      */
     private boolean isRelateExist(TagDocRelationship relationship) {
         List<TagDocRelationship> tagDocRelationships = tagDocRelationships(relationship);
-        if(tagDocRelationships == null || tagDocRelationships.isEmpty()) {
-            return false;
-        }
-        return true;
+        return !CollectionUtils.isEmpty(tagDocRelationships);
     }
 
     /**

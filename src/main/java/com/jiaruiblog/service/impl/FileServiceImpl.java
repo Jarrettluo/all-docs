@@ -346,8 +346,8 @@ public class FileServiceImpl implements IFileService {
                 if(esDoc != null){
                     fileDocuments = Optional.ofNullable(fileDocuments).orElse(new ArrayList<>());
                     fileDocuments.addAll(esDoc);
+                    totalNum = fileDocuments.size();
                 }
-                totalNum = fileDocuments.size();
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
@@ -408,7 +408,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @Author luojiarui
-     * @Description //TODO
+     * @Description convertDocuments
      * @Date 10:16 下午 2022/6/21
      * @Param fileDocuments
      * @return java.util.List<com.jiaruiblog.entity.vo.DocumentVO>
@@ -428,7 +428,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @Author luojiarui
-     * @Description //TODO
+     * @Description convertDocument
      * @Date 10:24 下午 2022/6/21
      * @Param [documentVO, fileDocument]
      * @return com.jiaruiblog.entity.vo.DocumentVO
@@ -484,10 +484,7 @@ public class FileServiceImpl implements IFileService {
             return false;
         }
         FileDocument fileDocument = queryById(docId);
-        if(fileDocument == null) {
-            return false;
-        }
-        return true;
+        return fileDocument != null;
     }
 
     /**

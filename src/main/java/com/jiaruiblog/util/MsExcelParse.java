@@ -13,7 +13,7 @@ import java.io.*;
 
 /**
  * @ClassName MSExcelParser
- * @Description TODO
+ * @Description MsExcelParse
  * @Author luojiarui
  * @Date 2022/6/4 10:04 下午
  * @Version 1.0
@@ -23,26 +23,23 @@ public class MsExcelParse {
 
     /**
      * @Author luojiarui
-     * @Description //TODO 
+     * @Description readPdfText
      * @Date 22:59 2022/8/28
      * @Param [file, textPath]
      * @return void
      **/
     public static void readPdfText(InputStream file, String textPath) throws IOException {
-        FileWriter fileWriter = new FileWriter(textPath, true);
-        try {
+        try (FileWriter fileWriter = new FileWriter(textPath, true)) {
             fileWriter.write(textPath);
             fileWriter.write(parseExcel(file));
         } catch (Exception e) {
-            fileWriter.write("error");
-        } finally {
-            fileWriter.close();
+            log.error("read pdf error ==> {}", e);
         }
     }
 
     /**
      * @Author luojiarui
-     * @Description //TODO
+     * @Description parseExcel
      * @Date 22:59 2022/8/28
      * @Param [inputStream]
      * @return java.lang.String

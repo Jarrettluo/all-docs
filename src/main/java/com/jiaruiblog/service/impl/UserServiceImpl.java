@@ -29,10 +29,7 @@ public class UserServiceImpl implements IUserService {
             return false;
         }
         User user = queryById(userId);
-        if(user == null) {
-            return false;
-        }
-        return true;
+        return user != null;
     }
 
     /**

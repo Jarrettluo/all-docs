@@ -14,7 +14,7 @@ import java.util.Base64;
 
 /**
  * @ClassName FileObj
- * @Description TODO
+ * @Description FileObj
  * @Author luojiarui
  * @Date 2022/7/3 10:47 下午
  * @Version 1.0
@@ -67,29 +67,12 @@ public class FileObj {
     }
 
     private byte[] getContent(File file) {
-        FileInputStream fileInputStream = null;
-        byte[] bytesArray = null;
-
-        try {
-            bytesArray = new byte[(int) file.length()];
-
-            //read file into bytes[]
-            fileInputStream = new FileInputStream(file);
+        byte[] bytesArray = new byte[(int) file.length()];;
+        try (FileInputStream fileInputStream = new FileInputStream(file)){
             fileInputStream.read(bytesArray);
-
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
-
         return bytesArray;
     }
 

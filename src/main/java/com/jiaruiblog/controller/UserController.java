@@ -53,7 +53,7 @@ public class UserController {
     @PostMapping(value = "/insert")
     public BaseApiResult insertObj(@RequestBody User user) {
         user.setCreateDate(new Date());
-        User save = template.save(user, COLLECTION_NAME);
+        template.save(user, COLLECTION_NAME);
         return BaseApiResult.success("新增成功");
     }
 

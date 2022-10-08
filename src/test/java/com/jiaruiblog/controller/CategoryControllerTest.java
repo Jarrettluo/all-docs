@@ -2,8 +2,6 @@ package com.jiaruiblog.controller;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class CategoryControllerTest {
 
     @Test
@@ -23,7 +21,7 @@ public class CategoryControllerTest {
     }
 
     @Test
-    public void addRealationship() {
+    public void addRelationship() {
     }
 
     @Test

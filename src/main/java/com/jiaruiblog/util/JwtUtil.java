@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
+import com.google.common.collect.Maps;
 import com.jiaruiblog.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,10 @@ import java.util.Map;
  * @Version 1.0
  **/
 public class JwtUtil {
+
+    private JwtUtil() {
+        throw new IllegalStateException("jwtUtil error");
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
     /**
@@ -46,7 +51,7 @@ public class JwtUtil {
         // 添加头部
         //可以将基本信息放到claims中
         //超时设置,设置过期的日期
-        String token = JWT.create()
+        return JWT.create()
                 .withHeader(map)
                 .withClaim("id", user.getId())
                 .withClaim("username", user.getUsername())
@@ -56,7 +61,7 @@ public class JwtUtil {
                 .withIssuedAt(new Date())
                 //SECRET加密
                 .sign(Algorithm.HMAC256(SECRET));
-        return token;
+
     }
 
     /**
@@ -71,7 +76,7 @@ public class JwtUtil {
             logger.error(e.getMessage());
             logger.error("token解码异常");
             //解码异常则抛出异常
-            return null;
+            return Maps.newHashMap();
         }
         return jwt.getClaims();
     }

@@ -112,7 +112,7 @@ public class CommentServiceImpl implements ICommentService {
         Query query = new Query(Criteria.where(DOC_ID).is(comment.getDocId()))
                 .with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         Long totalNum = template.count(query, Comment.class, collectionName);
-        long skip = (comment.getPage()) * comment.getRows();
+        long skip = (long) comment.getPage() * comment.getRows();
         query.skip(skip);
         query.limit(comment.getRows());
         List<Comment> comments = template.find(query, Comment.class, collectionName);
