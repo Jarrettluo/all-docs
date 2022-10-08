@@ -25,6 +25,8 @@ public class CollectServiceImpl implements CollectService {
 
     private static String collectionName = "collectCollection";
 
+    private static final String DOC_ID = "docId";
+
     @Autowired
     MongoTemplate mongoTemplate;
 
@@ -84,7 +86,7 @@ public class CollectServiceImpl implements CollectService {
         collect = Optional.ofNullable(collect).orElse(new CollectDocRelationship());
 
         Query query = new Query()
-                .addCriteria(Criteria.where("docId").is(collect.getDocId())
+                .addCriteria(Criteria.where(DOC_ID).is(collect.getDocId())
                         .and("userId").is(collect.getUserId()));
 
         return mongoTemplate.findOne(
@@ -100,7 +102,7 @@ public class CollectServiceImpl implements CollectService {
      * @return java.lang.Long
      **/
     public Long collectNum(String docId) {
-        Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
+        Query query = new Query().addCriteria(Criteria.where(DOC_ID).is(docId));
         return mongoTemplate.count(query, CollectDocRelationship.class, collectionName);
     }
 
@@ -112,7 +114,7 @@ public class CollectServiceImpl implements CollectService {
      * @return void
      **/
     public void removeRelateByDocId(String docId) {
-        Query query = new Query(Criteria.where("docId").is(docId));
+        Query query = new Query(Criteria.where(DOC_ID).is(docId));
         List<CollectDocRelationship> relationships = mongoTemplate.find(query, CollectDocRelationship.class,
                 collectionName);
         relationships.forEach(this::remove);

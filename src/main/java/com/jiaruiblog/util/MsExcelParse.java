@@ -1,5 +1,6 @@
 package com.jiaruiblog.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -17,6 +18,7 @@ import java.io.*;
  * @Date 2022/6/4 10:04 下午
  * @Version 1.0
  **/
+@Slf4j
 public class MsExcelParse {
 
     /**
@@ -61,7 +63,7 @@ public class MsExcelParse {
 
         msofficeparser.parse(inputStream, handler, metadata,pcontext);
 
-        System.out.println("Contents of the document:" + handler.toString());
+        log.info("Contents of the document:{}", handler.toString());
         return handler.toString();
 
     }

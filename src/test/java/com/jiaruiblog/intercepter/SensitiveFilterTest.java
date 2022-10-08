@@ -17,7 +17,7 @@ public class SensitiveFilterTest {
         String filterWord = "敏感词汇";
         //非法敏感词汇判断
         SensitiveFilter filter = SensitiveFilter.getInstance();
-        int n = filter.CheckSensitiveWord( filterWord,0,1);
+        int n = filter.checkSensitiveWord( filterWord,0,1);
         if(n > 0){ //存在非法字符
             log.info("这个人输入了非法字符--> \"{}\",不知道他到底要查什么~",filterWord);
         }
@@ -30,7 +30,7 @@ public class SensitiveFilterTest {
         String filterWord = "这是一个敏感词汇";
         //非法敏感词汇判断
         SensitiveFilter filter = SensitiveFilter.getInstance();
-        int n = filter.CheckSensitiveWord( filterWord,0,1);
+        int n = filter.checkSensitiveWord( filterWord,0,1);
         if(n > 0){ //存在非法字符
             log.info("这个人输入了非法字符--> \"{}\",不知道他到底要查什么~",filterWord);
         }

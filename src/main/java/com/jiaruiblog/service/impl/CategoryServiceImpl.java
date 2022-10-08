@@ -83,7 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
     private boolean isNameExist(String name) {
         Query query = new Query(Criteria.where("name").is(name));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        if(categories == null || categories.isEmpty()) {
+        if( categories.isEmpty()) {
             return false;
         }
         return true;

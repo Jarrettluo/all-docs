@@ -8,7 +8,8 @@ import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.util.BaseApiResult;
-import com.mongodb.client.result.UpdateResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -16,11 +17,13 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,11 +34,14 @@ import java.util.stream.Collectors;
  * @Date 2022/6/4 5:23 下午
  * @Version 1.0
  **/
+@Slf4j
 @Service
 public class CommentServiceImpl implements ICommentService {
 
 
     private static String collectionName = "commentCollection";
+
+    private static final String DOC_ID = "docId";
 
     @Autowired
     MongoTemplate template;
@@ -52,6 +58,7 @@ public class CommentServiceImpl implements ICommentService {
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public BaseApiResult update(Comment comment) {
 
@@ -60,7 +67,8 @@ public class CommentServiceImpl implements ICommentService {
         }
 
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
-        Comment commentDb = template.findById(comment.getId(), Comment.class, collectionName);
+        Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, collectionName))
+                .orElse(new Comment());
         if( !commentDb.getUserId().equals(comment.getUserId())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
@@ -68,14 +76,20 @@ public class CommentServiceImpl implements ICommentService {
         Update update  = new Update();
         update.set("content", comment.getContent());
         update.set("updateDate", new Date());
-        UpdateResult updateResult = template.updateFirst(query, update, User.class);
+        try {
+            template.updateFirst(query, update, User.class);
+        } catch (Exception e) {
+            log.error("更新评论信息{}==>出错==>{}", comment, e);
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
     public BaseApiResult remove(Comment comment, String userId) {
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
-        Comment commentDb = template.findById(comment.getId(), Comment.class, collectionName);
+        Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, collectionName))
+                .orElse(new Comment());
         if( !commentDb.getUserId().equals(comment.getUserId())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
@@ -95,7 +109,7 @@ public class CommentServiceImpl implements ICommentService {
         if (comment == null || comment.getDocId() == null) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
-        Query query = new Query(Criteria.where("docId").is(comment.getDocId()))
+        Query query = new Query(Criteria.where(DOC_ID).is(comment.getDocId()))
                 .with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         Long totalNum = template.count(query, Comment.class, collectionName);
         long skip = (comment.getPage()) * comment.getRows();
@@ -123,7 +137,7 @@ public class CommentServiceImpl implements ICommentService {
      * @return java.lang.Long
      **/
     public Long commentNum(String docId) {
-        Query query = new Query().addCriteria(Criteria.where("docId").is(docId));
+        Query query = new Query().addCriteria(Criteria.where(DOC_ID).is(docId));
         return template.count(query, Comment.class, collectionName);
     }
 
@@ -134,7 +148,7 @@ public class CommentServiceImpl implements ICommentService {
      */
     public List<String> fuzzySearchDoc(String keyWord) {
         if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
-            return null;
+            return Lists.newArrayList();
         }
         Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
@@ -153,7 +167,7 @@ public class CommentServiceImpl implements ICommentService {
      * @return void
      **/
     public void removeByDocId(String docId) {
-        Query query = new Query(Criteria.where("docId").is(docId));
+        Query query = new Query(Criteria.where(DOC_ID).is(docId));
         List<Comment> commentDb = template.find(query, Comment.class, collectionName);
         commentDb.forEach(item -> template.remove(item, collectionName));
 

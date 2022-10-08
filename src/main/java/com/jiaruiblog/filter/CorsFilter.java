@@ -59,7 +59,6 @@ public class CorsFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (Exception e) {
             log.error("过滤器报错", e);
-            return;
         }
 
     }

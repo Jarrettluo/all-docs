@@ -38,6 +38,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -222,8 +224,7 @@ public class FileServiceImpl implements IFileService {
             return null;
         }
         Query query = new Query().addCriteria(Criteria.where("md5").is(md5));
-        FileDocument fileDocument = mongoTemplate.findOne(query, FileDocument.class, collectionName);
-        return fileDocument;
+        return mongoTemplate.findOne(query, FileDocument.class, collectionName);
     }
 
     @Override
@@ -234,8 +235,7 @@ public class FileServiceImpl implements IFileService {
         query.limit(pageSize);
         Field field = query.fields();
         field.exclude("content");
-        List<FileDocument> files = mongoTemplate.find(query, FileDocument.class, collectionName);
-        return files;
+        return mongoTemplate.find(query, FileDocument.class, collectionName);
     }
 
     /**
@@ -248,7 +248,7 @@ public class FileServiceImpl implements IFileService {
     @Override
     public List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
         if( CollectionUtils.isEmpty(ids)) {
-            return null;
+            return Lists.newArrayList();
         }
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         // 增加过滤条件
@@ -260,14 +260,13 @@ public class FileServiceImpl implements IFileService {
 
         Field field = query.fields();
         field.exclude("content");
-        List<FileDocument> files = mongoTemplate.find(query, FileDocument.class, collectionName);
-        return files;
+        return mongoTemplate.find(query, FileDocument.class, collectionName);
     }
 
     @Override
     public List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, List<String> ids) {
         if( CollectionUtils.isEmpty(ids)) {
-            return null;
+            return Lists.newArrayList();
         }
         Query query = new Query();
 
@@ -281,8 +280,7 @@ public class FileServiceImpl implements IFileService {
 
         Field field = query.fields();
         field.exclude("content");
-        List<FileDocument> files = mongoTemplate.find(query, FileDocument.class, collectionName);
-        return files;
+        return mongoTemplate.find(query, FileDocument.class, collectionName);
     }
 
     /**
@@ -294,7 +292,7 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public BaseApiResult list(DocumentDTO documentDTO) {
-        log.info(MessageFormat.format(">>>>>>>检索文档>>>>>>检索参数{0}", documentDTO.toString()));
+        log.info(">>>>>>>检索文档>>>>>>检索参数{}", documentDTO.toString());
         List<DocumentVO> documentVos;
         List<FileDocument> fileDocuments = Lists.newArrayList();
 
@@ -412,7 +410,7 @@ public class FileServiceImpl implements IFileService {
      **/
     private List<DocumentVO> convertDocuments(List<FileDocument> fileDocuments) {
         if( fileDocuments == null) {
-            return null;
+            return Lists.newArrayList();
         }
         List<DocumentVO> documentVos = Lists.newArrayList();
         for(FileDocument fileDocument : fileDocuments) {
@@ -458,7 +456,7 @@ public class FileServiceImpl implements IFileService {
      */
     public List<String> fuzzySearchDoc(String keyWord) {
         if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
-            return null;
+            return Lists.newArrayList();
         }
         Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
@@ -468,12 +466,11 @@ public class FileServiceImpl implements IFileService {
         return documents.stream().map(FileDocument::getId).collect(Collectors.toList());
     }
 
-    //Pattern pattern=Pattern.compile("^.*"+pattern_name+".*$", Pattern.CASE_INSENSITIVE);
-    //query.addCriteria(Criteria.where("name").regex(pattern))；
-
 
     /**
      * 根据用户的主键id查询用户信息
+     *     //Pattern pattern=Pattern.compile("^.*"+pattern_name+".*$", Pattern.CASE_INSENSITIVE);
+     *     //query.addCriteria(Criteria.where("name").regex(pattern))；
      * @param docId
      * @return
      */
@@ -533,7 +530,11 @@ public class FileServiceImpl implements IFileService {
                 FileInputStream in = new FileInputStream(picPath);
                 //文件，存储在GridFS
                 gridFsTemplate.store(in, gridfsId, contentType);
-                new File(picPath).delete();
+                try {
+                    Files.delete(Paths.get(picPath));
+                }  catch (IOException e) {
+                    log.error("删除文件路径{} ==> 失败信息{}", picPath, e);
+                }
             }
         }
 

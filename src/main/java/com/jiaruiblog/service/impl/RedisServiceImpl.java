@@ -105,7 +105,7 @@ public class RedisServiceImpl implements RedisService {
             }
             return stringList;
         }
-        return null;
+        return Lists.newArrayList();
     }
 
     /**

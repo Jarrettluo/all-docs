@@ -7,6 +7,7 @@ import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.util.MsExcelParse;
 import com.jiaruiblog.util.PdfUtil;
+import org.apache.commons.compress.utils.Lists;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -28,17 +29,22 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
  * @ClassName ElasticServiceImpl
- * @Description TODO
+ * @Description ElasticServiceImpl
  * @Author luojiarui
  * @Date 2022/7/12 10:54 下午
  * @Version 1.0
  **/
 @Service
 public class ElasticServiceImpl implements ElasticService {
+
+    private static final String INDEX_NAME = "docwrite";
+
+    private static final String PIPELINE_NAME = "attachment.content";
 
     @Autowired
     private RestHighLevelClient client;
@@ -57,7 +63,7 @@ public class ElasticServiceImpl implements ElasticService {
      * 3.文件的data 64编码
      */
     public void upload(FileObj file) throws IOException {
-        IndexRequest indexRequest = new IndexRequest("docwrite");
+        IndexRequest indexRequest = new IndexRequest(INDEX_NAME);
         //上传同时，使用attachment pipline进行提取文件
         indexRequest.source(JSON.toJSONString(file), XContentType.JSON);
         indexRequest.setPipeline("attachment");
@@ -74,18 +80,18 @@ public class ElasticServiceImpl implements ElasticService {
      * SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
      *
      * // srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
-     * @param keyword
-     * @throws IOException
-     * @return
+     * @param keyword String
+     * @throws IOException ioexception
+     * @return list
      */
     @Override
     public List<FileDocument> search(String keyword) throws IOException {
 
         List<FileDocument> fileDocumentList = new ArrayList<>();
-        SearchRequest searchRequest = new SearchRequest("docwrite");
+        SearchRequest searchRequest = new SearchRequest(INDEX_NAME);
         // 使用lk分词器查询，会把插入的字段分词，然后进行处理
         SearchSourceBuilder srb = new SearchSourceBuilder();
-        srb.query(QueryBuilders.matchQuery("attachment.content", keyword));
+        srb.query(QueryBuilders.matchQuery(PIPELINE_NAME, keyword));
 
         // 每页10个数据
         srb.size(10);
@@ -94,7 +100,7 @@ public class ElasticServiceImpl implements ElasticService {
 
         //设置highlighting
         HighlightBuilder highlightBuilder = new HighlightBuilder();
-        HighlightBuilder.Field highlightContent = new HighlightBuilder.Field("attachment.content");
+        HighlightBuilder.Field highlightContent = new HighlightBuilder.Field(PIPELINE_NAME);
         highlightContent.highlighterType();
         highlightBuilder.field(highlightContent);
         highlightBuilder.preTags("<em>");
@@ -102,7 +108,7 @@ public class ElasticServiceImpl implements ElasticService {
 
         //highlighting会自动返回匹配到的文本，所以就不需要再次返回文本了
         String[] includeFields = new String[]{"name", "id"};
-        String[] excludeFields = new String[]{"attachment.content"};
+        String[] excludeFields = new String[]{PIPELINE_NAME};
         srb.fetchSource(includeFields, excludeFields);
 
         //把刚才设置的值导入进去
@@ -111,7 +117,7 @@ public class ElasticServiceImpl implements ElasticService {
         SearchResponse res = client.search(searchRequest, RequestOptions.DEFAULT);
 
         if ( res== null || res.getHits() == null ) {
-            return null;
+            return Lists.newArrayList();
         }
         //获取hits，这样就可以获取查询到的记录了
         SearchHits hits = res.getHits();
@@ -136,7 +142,7 @@ public class ElasticServiceImpl implements ElasticService {
             //这个就会把匹配到的文本返回，而且只返回匹配到的部分文本
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
 
-            HighlightField highlightField = highlightFields.get("attachment.content");
+            HighlightField highlightField = highlightFields.get(PIPELINE_NAME);
 
             StringBuilder stringBuilder1 = new StringBuilder();
             for (Text fragment : highlightField.getFragments()) {
@@ -187,7 +193,7 @@ public class ElasticServiceImpl implements ElasticService {
             // 删除临时的txt文件
             File file = new File(textFilePath);
             if(file.exists()) {
-                file.delete();
+                file.deleteOnExit();
             }
         }
     }
@@ -215,7 +221,7 @@ public class ElasticServiceImpl implements ElasticService {
             // 删除临时的txt文件
             File file = new File(textFilePath);
             if(file.exists()) {
-                file.delete();
+                file.deleteOnExit();
             }
         }
     }
