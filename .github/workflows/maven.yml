@@ -26,13 +26,13 @@ jobs:
       run: mvn -B package --file pom.xml
 
     - name: Publish Docker
-        uses: elgohr/Publish-Docker-Github-Action@2.11
-        with:
-          # The name of the image you would like to push
-          name: ${{secrets.DOCKER_PROGRAM}}
-          # The login username for the registry
-          username: ${{secrets.DOCKER_USERNAME}}
-          # The login password for the registry
-          password: ${{secrets.DOCKER_PWD}}
-          # Use registry for pushing to a custom registry
-          registry: ${{secrets.DOCKER_REGISTRY}}
+      uses: elgohr/Publish-Docker-Github-Action@2.11
+      with:
+        # The name of the image you would like to push
+        name: ${{secrets.DOCKER_PROGRAM}}
+        # The login username for the registry
+        username: ${{secrets.DOCKER_USERNAME}}
+        # The login password for the registry
+        password: ${{secrets.DOCKER_PWD}}
+        # Use registry for pushing to a custom registry
+        registry: ${{secrets.DOCKER_REGISTRY}}
