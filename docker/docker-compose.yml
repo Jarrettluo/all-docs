@@ -12,8 +12,8 @@ services:
     command: mongod --auth
     #初始化管理员用户名和密码
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:""}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PWD:""}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PWD}
     tty: true
 
   elasticsearch:
@@ -36,7 +36,7 @@ services:
     container_name: all_docs_redis
     command: redis-server /etc/redis/redis.conf
     ports:
-      - ${REDIS_PORT:16379}:6379"
+      - ${REDIS_PORT:16379}:6379
     volumes:
       - ./data:/data
       - ./redis.conf:/etc/redis/redis.conf
