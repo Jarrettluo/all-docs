@@ -9,7 +9,7 @@ MAINTAINER luojiarui luojiarui2@163.com
 ADD ./target/document-sharing-site-1.0-SNAPSHOT.jar /app.jar
 
 # 运行过程中创建一个app.jar文件
-RUN bash -c 'touch /app.jar'
+#RUN bash -c 'touch /app.jar'
 
 # 声明服务运行在8082端口
 EXPOSE 8082
