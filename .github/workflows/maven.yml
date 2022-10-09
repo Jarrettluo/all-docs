@@ -26,7 +26,6 @@ jobs:
       run: mvn -B package --file pom.xml
 
     - name: Publish Docker
-  - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@v4
       with:
         name: jarrettluo/all-docs
