@@ -24,9 +24,6 @@ import java.io.IOException;
 @Slf4j
 public class CorsFilter implements Filter {
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException { /* TODO document why this method is empty */ }
-
 
     /**
      * 响应标头指定 指定可以访问资源的URI路径
@@ -60,11 +57,6 @@ public class CorsFilter implements Filter {
         } catch (Exception e) {
             log.error("过滤器报错", e);
         }
-
-    }
-
-    @Override
-    public void destroy() {
 
     }
 }

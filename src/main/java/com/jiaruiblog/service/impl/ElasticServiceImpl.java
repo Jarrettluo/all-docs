@@ -158,7 +158,7 @@ public class ElasticServiceImpl implements ElasticService {
                     idSet.add(id);
                     FileDocument fileDocument = fileServiceImpl.getByMd5(id);
                     if ( fileDocument == null ) {
-                        // todo 从redis中剔除该doc，并跳过循环
+                        //从redis中剔除该doc，并跳过循环
                         continue;
                     }
                     fileDocument.setDescription(abstractString);

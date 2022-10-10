@@ -318,27 +318,6 @@ public class TagServiceImpl implements TagService {
         return mongoTemplate.find(query, Tag.class, COLLECTION_NAME);
     }
 
-    /**
-     * 查询关系是否存在
-     * @param relationship
-     * @return
-     */
-    private boolean isRelateExist(TagDocRelationship relationship) {
-        List<TagDocRelationship> tagDocRelationships = tagDocRelationships(relationship);
-        return !CollectionUtils.isEmpty(tagDocRelationships);
-    }
-
-    /**
-     *
-     * @param tagDocRelationship
-     * @return
-     */
-    private List<TagDocRelationship> tagDocRelationships(TagDocRelationship tagDocRelationship) {
-        tagDocRelationship = Optional.ofNullable(tagDocRelationship).orElse(new TagDocRelationship());
-        Query query = new Query().addCriteria(Criteria.where(TAG_ID).is(tagDocRelationship.getTagId())
-        .and(FILE_ID).is(tagDocRelationship.getFileId()));
-        return mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
-    }
 
     /**
      * @Author luojiarui

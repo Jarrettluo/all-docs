@@ -18,19 +18,17 @@ public class StringCodeToEnumConverterFactory implements ConverterFactory<String
 
     /**
      * 获取一个从 Integer 转化为 T 的转换器，T 是一个泛型，有多个实现
-     *
+     * return CONVERTERS.computeIfAbsent(targetType, k -> new StringToEnumConverter<>(targetType));
      * @param targetType 转换后的类型
      * @return 返回一个转化器
      */
     @Override
     public <T extends BaseEnum> Converter<String, T> getConverter(Class<T> targetType) {
-//        Converter<String, T> converter = CONVERTERS.get(targetType);
-        // if (converter == null) {
-        //     converter = new StringToEnumConverter<>(targetType);
-        //     CONVERTERS.put(targetType, converter);
-        // }
-        // return converter;
-
-        return CONVERTERS.computeIfAbsent(targetType, k -> new StringToEnumConverter<>(targetType));
+       Converter<String, T> converter = CONVERTERS.get(targetType);
+        if (converter == null) {
+            converter = new StringToEnumConverter<>(targetType);
+            CONVERTERS.put(targetType, converter);
+        }
+        return converter;
     }
 }

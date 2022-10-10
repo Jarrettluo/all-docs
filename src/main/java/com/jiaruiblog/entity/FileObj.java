@@ -67,7 +67,7 @@ public class FileObj {
     }
 
     private byte[] getContent(File file) {
-        byte[] bytesArray = new byte[(int) file.length()];;
+        byte[] bytesArray = new byte[(int) file.length()];
         try (FileInputStream fileInputStream = new FileInputStream(file)){
             fileInputStream.read(bytesArray);
         } catch (IOException e) {

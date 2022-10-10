@@ -16,7 +16,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * //@EnableConfigurationProperties(RedisProperties.class)
  *
  * @ClassName RedisConfig
- * @Description TODO
+ * @Description RedisConfig
  * @Author luojiarui
  * @Date 2022/8/14 17:11
  * @Version 1.0

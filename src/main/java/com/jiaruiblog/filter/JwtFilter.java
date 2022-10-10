@@ -37,11 +37,6 @@ public class JwtFilter implements Filter
 
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // do nothing
-    }
-
-    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         final HttpServletRequest request = (HttpServletRequest) req;
         final HttpServletResponse response = (HttpServletResponse) res;
@@ -82,7 +77,4 @@ public class JwtFilter implements Filter
         }
     }
 
-    @Override
-    public void destroy() {
-    }
 }

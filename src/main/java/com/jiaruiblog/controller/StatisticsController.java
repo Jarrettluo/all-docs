@@ -93,6 +93,10 @@ public class StatisticsController {
     /**
      * 优化一下，按照指定的顺序进行提取，先无脑取回来，然后再进行排序
      * List<FileDocument> fileDocumentList = fileService.listAndFilterByPageNotSort(0, docIdList.size(), docIdList);
+     *
+     * 存储无效的redis id
+     * List<String> invalidDocs = Lists.newArrayList();
+     *
      * 批量从redis中删除
      * invalidDocs.add(s);
      * @Author luojiarui
@@ -108,8 +112,7 @@ public class StatisticsController {
         if (CollectionUtils.isEmpty(docIdList)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        // 存储无效的redis id
-        List<String> invalidDocs = Lists.newArrayList();
+
 
         List<FileDocument> fileDocumentList = Lists.newArrayList();
         for (String s : docIdList) {
