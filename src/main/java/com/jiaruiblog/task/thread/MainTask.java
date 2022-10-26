@@ -1,6 +1,8 @@
 package com.jiaruiblog.task.thread;
 
 import com.jiaruiblog.enums.DocType;
+import com.jiaruiblog.task.data.TaskData;
+import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.task.executor.TaskExecutor;
 import com.jiaruiblog.task.executor.TaskExecutorFactory;
 
@@ -22,12 +24,12 @@ public class MainTask implements RunnableTask{
 
     @Override
     public void success() {
-
+        // TODO document why this method is empty
     }
 
     @Override
     public void failed() {
-
+        // TODO document why this method is empty
     }
 
     @Override
@@ -39,8 +41,14 @@ public class MainTask implements RunnableTask{
 
         // 更新子任务数据
 
-        // 调用执行器执行任务
-        this.taskExecutor.execute();
+        TaskData taskData = new TaskData();
+
+        try {
+            // 调用执行器执行任务
+            this.taskExecutor.execute(taskData);
+        } catch (TaskRunException e) {
+            throw new RuntimeException();
+        }
 
     }
 }

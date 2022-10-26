@@ -1,5 +1,10 @@
 package com.jiaruiblog.task.executor;
 
+import com.jiaruiblog.util.PdfUtil;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * @Author Jarrett Luo
  * @Date 2022/10/24 11:32
@@ -13,7 +18,14 @@ public class PdfWordTaskExecutor extends TaskExecutor {
     }
 
     @Override
-    public void execute() {
-        super.execute();
+    protected void readText(InputStream is, String textFilePath) throws IOException {
+        PdfUtil.readPdfText(is, textFilePath);
+    }
+
+    @Override
+    protected void makeThumb(InputStream is, String picPath) {
+        // super.makeThumb();
+        PdfUtil.pdfThumbnail(is, picPath);
+
     }
 }

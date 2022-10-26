@@ -19,7 +19,7 @@ public class TaskThreadPool {
 
     private final ListeningExecutorService listeningExecutorService;
 
-    private static final TaskThreadPool instance = new TaskThreadPool(3, "Task_Thread_%d");
+    private static final TaskThreadPool INSTANCE = new TaskThreadPool(3, "Task_Thread_%d");
 
     private List<MainTask> mainTaskList;
 
@@ -35,16 +35,16 @@ public class TaskThreadPool {
     }
 
     public static TaskThreadPool getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
-    public void submit(MainTask mainTask) {
+    public <V> void submit(MainTask mainTask) {
         mainTaskList.add(mainTask);
         // 使用线程池执行任务工作流
-        ListenableFuture future = this.listeningExecutorService.submit(mainTask);
+        ListenableFuture<V> future = (ListenableFuture<V>) this.listeningExecutorService.submit(mainTask);
 
         // 工作流执行完成后，回调，将工作流从执行map中移除
-        FutureCallback futureCallback = new FutureCallback() {
+        FutureCallback<V> futureCallback = new FutureCallback<V>() {
             @Override
             public void onSuccess(Object o) {
 
