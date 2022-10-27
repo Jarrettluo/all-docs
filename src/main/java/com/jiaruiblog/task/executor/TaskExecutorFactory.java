@@ -39,6 +39,7 @@ public class TaskExecutorFactory {
                 break;
             case DOCX:
                 taskExecutor = new DocxExecutor();
+                break;
             default:
                 break;
         }
