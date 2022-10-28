@@ -31,3 +31,10 @@ https://www.cnblogs.com/caizhaokai/p/11037610.html
 // 存储热搜榜单
 
 // https://blog.csdn.net/weixin_41725792/article/details/110928066
+
+
+
+启动mongodb
+
+./mongod --dbpath=/data/mongo --logpath=/usr/local/mongodb4/db.log
+
