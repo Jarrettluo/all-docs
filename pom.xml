@@ -27,13 +27,6 @@
         <maven.test.skip>true</maven.test.skip>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>aspose-maven-repository</id>
-            <url>https://releases.aspose.com/java/repo/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -167,19 +160,6 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>com.aspose</groupId>-->
-<!--            <artifactId>aspose-words</artifactId>-->
-<!--            <version>22.02</version>-->
-<!--            <classifier>jdk8</classifier>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>com.aspose</groupId>
-            <artifactId>aspose-words</artifactId>
-            <version>18.10</version>
-        </dependency>
-
 
     </dependencies>
 

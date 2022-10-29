@@ -1,9 +1,12 @@
 package com.jiaruiblog.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -13,6 +16,7 @@ import java.util.zip.ZipOutputStream;
  * @author ljheee
  *
  */
+@Slf4j
 public class CompactAlgorithm {
 
     /**
@@ -22,10 +26,14 @@ public class CompactAlgorithm {
 
     public CompactAlgorithm() {}
 
-    public CompactAlgorithm(File target) {
-        targetFile = target;
+    public CompactAlgorithm(File targetFile) {
         if (targetFile.exists()) {
-            targetFile.delete();
+            try {
+                Files.delete(targetFile.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+                log.error("delete failed {}", targetFile);
+            }
         }
     }
 
@@ -35,11 +43,7 @@ public class CompactAlgorithm {
      * @param srcfile
      */
     public void zipFiles(File srcfile) {
-
-        ZipOutputStream out = null;
-        try {
-            out = new ZipOutputStream(new FileOutputStream(targetFile));
-
+        try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(targetFile));) {
             if(srcfile.isFile()){
                 zipFile(srcfile, out, "");
             } else{
@@ -48,18 +52,8 @@ public class CompactAlgorithm {
                     compress(list[i], out, "");
                 }
             }
-
-            System.out.println("压缩完毕");
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -90,11 +84,10 @@ public class CompactAlgorithm {
         }
 
         byte[] buf = new byte[1024];
-        FileInputStream in = null;
 
-        try {
+        try (FileInputStream in = new FileInputStream(srcfile);) {
             int len;
-            in = new FileInputStream(srcfile);
+
             out.putNextEntry(new ZipEntry(basedir + srcfile.getName()));
 
             while ((len = in.read(buf)) > 0) {
@@ -106,9 +99,6 @@ public class CompactAlgorithm {
             try {
                 if (out != null) {
                     out.closeEntry();
-                }
-                if (in != null) {
-                    in.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

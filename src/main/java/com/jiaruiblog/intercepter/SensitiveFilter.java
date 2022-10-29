@@ -71,7 +71,7 @@ public class SensitiveFilter {
      * @return Set
      */
     public Set<String> getSensitiveWord(String txt, int matchType) {
-        Set<String> sensitiveWordList = new HashSet<String>();
+        Set<String> sensitiveWordList = new HashSet<>();
         for (int i = 0; i < txt.length(); i++) {
             // 判断是否包含敏感字符
             int length = checkSensitiveWord(txt, i, matchType);

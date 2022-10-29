@@ -557,9 +557,7 @@ public class FileServiceImpl implements IFileService {
         if ( StringUtils.hasText(thumbId)) {
             Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(thumbId));
             GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
-            if(fsFile == null) {
-                return null;
-            }
+
             try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());){
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
