@@ -18,7 +18,7 @@ services:
     tty: true
 
   ad_elasticsearch:
-    image: elasticsearch:6.8.12
+    image: elasticsearch:7.9.3
     container_name: ad_elasticsearch
     restart: always
     volumes:
