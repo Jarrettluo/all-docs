@@ -1,6 +1,7 @@
 package com.jiaruiblog.config;
 
-import com.jiaruiblog.entity.ResponseModel;
+import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,15 +18,13 @@ public class CommonExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
-    public ResponseModel handle(Exception e) {
-        ResponseModel model = ResponseModel.getInstance();
+    public BaseApiResult handle(Exception e) {
         e.printStackTrace();
         if (e instanceof MaxUploadSizeExceededException) {
-            model.setMessage("上传的文件超过大小限制");
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, "上传的文件超过大小限制");
         } else {
-            model.setMessage("操作失败");
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, "操作失败");
         }
-        return model;
     }
 
 }

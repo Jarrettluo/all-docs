@@ -254,13 +254,13 @@ public class FileController {
      * @Author luojiarui
      * @Description previewThumb
      * @Date 8:02 下午 2022/7/24
-     * @Param [thumbid]
+     * @Param [thumbId]
      * @return byte[]
      **/
-    @GetMapping(value = "/image/{thumbid}",produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/image/{thumbId}",produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public byte[] previewThumb(@PathVariable String thumbid) throws Exception {
-        InputStream inputStream = fileService.getFileThumb(thumbid);
+    public byte[] previewThumb(@PathVariable String thumbId) throws Exception {
+        InputStream inputStream = fileService.getFileThumb(thumbId);
         FileInputStream fileInputStream = (FileInputStream) (inputStream);
         if(inputStream == null) {
             return new byte[0];
@@ -272,7 +272,7 @@ public class FileController {
 
     @GetMapping(value = "/image",produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public byte[] test() throws Exception {
+    public byte[] test(){
 
         File file = new File("thumbnail20220724194018003.png");
         try (FileInputStream inputStream = new FileInputStream(file);) {

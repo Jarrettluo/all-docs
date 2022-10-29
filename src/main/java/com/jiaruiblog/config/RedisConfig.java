@@ -32,7 +32,7 @@ public class RedisConfig {
         // 创建RedisTemplate<String, Object>对象
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         //使用fastjson序列化
-        FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
+        FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
 
         // value值的序列化采用fastJsonRedisSerializer
         template.setValueSerializer(fastJsonRedisSerializer);
