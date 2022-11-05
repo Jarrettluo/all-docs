@@ -46,15 +46,15 @@ public class DocumentController {
     @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
     @PostMapping(value = "/list")
     public BaseApiResult list(@RequestBody DocumentDTO documentDTO) throws IOException {
-        if(StringUtils.hasText(documentDTO.getFilterWord()) &&
+        if (StringUtils.hasText(documentDTO.getFilterWord()) &&
                 documentDTO.getType() == Type.FILTER) {
             String filterWord = documentDTO.getFilterWord();
             //非法敏感词汇判断
             SensitiveFilter filter = SensitiveFilter.getInstance();
-            int n = filter.checkSensitiveWord( filterWord,0,1);
+            int n = filter.checkSensitiveWord(filterWord, 0, 1);
             //存在非法字符
-            if( n > 0 ){
-                log.info("这个人输入了非法字符--> {},不知道他到底要查什么~",filterWord);
+            if (n > 0) {
+                log.info("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
             }
             redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
         }
@@ -63,13 +63,13 @@ public class DocumentController {
 
     @ApiOperation(value = "2.2 查询文档的详细信息", notes = "查询文档的详细信息")
     @GetMapping(value = "/detail")
-    public BaseApiResult detail(@RequestParam(value = "docId") String id){
+    public BaseApiResult detail(@RequestParam(value = "docId") String id) {
         return iFileService.detail(id);
     }
 
     @ApiOperation(value = "3.2 删除某个文档", notes = "删除某个文档")
     @DeleteMapping(value = "/auth/remove")
-    public BaseApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO){
+    public BaseApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO) {
         return iFileService.remove(removeObjectDTO.getId());
     }
 

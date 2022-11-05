@@ -9,7 +9,6 @@ import com.jiaruiblog.util.MsExcelParse;
 import com.jiaruiblog.util.PdfUtil;
 import org.apache.commons.compress.utils.Lists;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -29,7 +28,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -202,7 +200,6 @@ public class ElasticServiceImpl implements ElasticService {
      * @Description // 转换各类office文档到es中
      * @Date 23:00 2022/8/28
      * @Param [is, fileDocument]
-     * @return void
      **/
     @Override
     public void uploadFileToEsDocx(InputStream is, FileDocument fileDocument) {

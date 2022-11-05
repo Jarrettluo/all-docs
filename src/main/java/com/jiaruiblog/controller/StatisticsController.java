@@ -59,25 +59,25 @@ public class StatisticsController {
 
     @ApiOperation(value = "4.1 查询热度榜", notes = "查询列表")
     @GetMapping(value = "/trend")
-    public BaseApiResult trend(){
+    public BaseApiResult trend() {
         return statisticsService.trend();
     }
 
     @ApiOperation(value = "4.2 查询统计数据", notes = "查询列表")
     @GetMapping(value = "/all")
-    public BaseApiResult all(){
+    public BaseApiResult all() {
         return statisticsService.all();
     }
 
     /**
+     * @return com.jiaruiblog.utils.ApiResult
      * @Author luojiarui
      * @Description 查询推荐的搜索记录
      * @Date 15:46 2022/9/11
      * @Param []
-     * @return com.jiaruiblog.utils.ApiResult
      **/
     @GetMapping("getSearchResult")
-    public BaseApiResult getSearchResult(HttpServletRequest request){
+    public BaseApiResult getSearchResult(HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
         List<String> userSearchList = Lists.newArrayList();
         if (StringUtils.hasText(userId)) {
@@ -93,17 +93,18 @@ public class StatisticsController {
     /**
      * 优化一下，按照指定的顺序进行提取，先无脑取回来，然后再进行排序
      * List<FileDocument> fileDocumentList = fileService.listAndFilterByPageNotSort(0, docIdList.size(), docIdList);
-     *
+     * <p>
      * 存储无效的redis id
      * List<String> invalidDocs = Lists.newArrayList();
-     *
+     * <p>
      * 批量从redis中删除
      * invalidDocs.add(s);
+     *
+     * @return com.jiaruiblog.utils.ApiResult
      * @Author luojiarui
      * @Description 查看热榜
      * @Date 15:51 2022/9/11
      * @Param []
-     * @return com.jiaruiblog.utils.ApiResult
      **/
     @GetMapping("getHotTrend")
     public BaseApiResult getHotTrend() {
@@ -117,7 +118,7 @@ public class StatisticsController {
         List<FileDocument> fileDocumentList = Lists.newArrayList();
         for (String s : docIdList) {
             FileDocument fileDocument = fileService.queryById(s);
-            if ( fileDocument != null) {
+            if (fileDocument != null) {
                 fileDocumentList.add(fileDocument);
             } else {
                 redisService.delKey(s, RedisServiceImpl.DOC_KEY);
@@ -125,7 +126,7 @@ public class StatisticsController {
         }
         // 从redis中删除无效id
 
-        if ( CollectionUtils.isEmpty(fileDocumentList)) {
+        if (CollectionUtils.isEmpty(fileDocumentList)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         FileDocument topFileDocument = fileDocumentList.remove(0);
@@ -145,7 +146,7 @@ public class StatisticsController {
             otherInfo.put("hit", count);
             otherInfo.put("name", fileDocument.getName());
             otherInfo.put("id", fileDocument.getId());
-            count --;
+            count--;
             others.add(otherInfo);
         }
 
@@ -158,12 +159,12 @@ public class StatisticsController {
 
 
     /**
+     * @return com.jiaruiblog.utils.ApiResult
      * @Author luojiarui
      * @Description 获取首页最近的数据
      * 展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档；
      * @Date 21:58 2022/9/17
      * @Param []
-     * @return com.jiaruiblog.utils.ApiResult
      **/
     @GetMapping("/recentDocs")
     public BaseApiResult getRecentDocs() {
@@ -188,15 +189,15 @@ public class StatisticsController {
     }
 
     /**
+     * @return java.util.List<java.util.Map < java.lang.String, java.lang.Object>>
      * @Author luojiarui
      * @Description 文档列表转向为map
      * @Date 22:47 2022/9/17
      * @Param [fileDocuments]
-     * @return java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
      **/
     private List<Map<String, Object>> doc2Map(List<FileDocument> fileDocuments) {
         List<Map<String, Object>> result = new ArrayList<>();
-        if(CollectionUtils.isEmpty(fileDocuments)) {
+        if (CollectionUtils.isEmpty(fileDocuments)) {
             return result;
         }
 
@@ -211,15 +212,15 @@ public class StatisticsController {
     }
 
     /**
+     * @return java.util.Map<java.lang.String, java.lang.Object>
      * @Author luojiarui
      * @Description 生成返回的数据
      * @Date 23:07 2022/9/17
      * @Param [name, tagId, docList]
-     * @return java.util.Map<java.lang.String,java.lang.Object>
      **/
-    private Map<String, Object> getTagMap(String name, String tagId, Object docList){
+    private Map<String, Object> getTagMap(String name, String tagId, Object docList) {
         Map<String, Object> tagMap = Maps.newHashMap();
-        if ( name == null || tagId == null || docList == null) {
+        if (name == null || tagId == null || docList == null) {
             return tagMap;
         }
         tagMap.put("name", name);

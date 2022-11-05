@@ -4,6 +4,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.enums.Type;
 
 import lombok.Data;
+
 import javax.validation.constraints.NotNull;
 
 

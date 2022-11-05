@@ -26,11 +26,12 @@ public class MongoConfig {
 
     /**
      * GridFSBucket用于打开下载流
+     *
      * @param mongoClient MongoClient
      * @return GridFSBucket
      */
     @Bean
-    public GridFSBucket getGridFsBucket(MongoClient mongoClient){
+    public GridFSBucket getGridFsBucket(MongoClient mongoClient) {
         MongoDatabase mongoDatabase = mongoClient.getDatabase(db);
         return GridFSBuckets.create(mongoDatabase);
     }

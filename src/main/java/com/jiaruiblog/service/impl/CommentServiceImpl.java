@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements ICommentService {
 
 
-    private static String collectionName = "commentCollection";
+    private static final String COLLECTION_NAME = "commentCollection";
 
     private static final String DOC_ID = "docId";
 
@@ -54,7 +54,7 @@ public class CommentServiceImpl implements ICommentService {
         }
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
-        template.save(comment, collectionName);
+        template.save(comment, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -67,7 +67,7 @@ public class CommentServiceImpl implements ICommentService {
         }
 
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
-        Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, collectionName))
+        Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
                 .orElse(new Comment());
         if( !commentDb.getUserId().equals(comment.getUserId())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
@@ -88,12 +88,12 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     public BaseApiResult remove(Comment comment, String userId) {
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
-        Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, collectionName))
+        Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
                 .orElse(new Comment());
         if( !commentDb.getUserId().equals(comment.getUserId())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        template.remove(query, Comment.class, collectionName);
+        template.remove(query, Comment.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -111,11 +111,11 @@ public class CommentServiceImpl implements ICommentService {
         }
         Query query = new Query(Criteria.where(DOC_ID).is(comment.getDocId()))
                 .with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        Long totalNum = template.count(query, Comment.class, collectionName);
+        Long totalNum = template.count(query, Comment.class, COLLECTION_NAME);
         long skip = (long) comment.getPage() * comment.getRows();
         query.skip(skip);
         query.limit(comment.getRows());
-        List<Comment> comments = template.find(query, Comment.class, collectionName);
+        List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
 
         Map<String, Object> result = Maps.newHashMap();
         result.put("totalNum", totalNum);
@@ -138,7 +138,7 @@ public class CommentServiceImpl implements ICommentService {
      **/
     public Long commentNum(String docId) {
         Query query = new Query().addCriteria(Criteria.where(DOC_ID).is(docId));
-        return template.count(query, Comment.class, collectionName);
+        return template.count(query, Comment.class, COLLECTION_NAME);
     }
 
     /**
@@ -154,7 +154,7 @@ public class CommentServiceImpl implements ICommentService {
         Query query = new Query();
         query.addCriteria(Criteria.where("content").regex(pattern));
 
-        List<Comment> comments = template.find(query, Comment.class, collectionName);
+        List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
         return comments.stream().map(Comment::getDocId).collect(Collectors.toList());
 
     }
@@ -164,12 +164,11 @@ public class CommentServiceImpl implements ICommentService {
      * @Description //根据文档进行删除评论信息
      * @Date 11:14 上午 2022/6/25
      * @Param [docId]
-     * @return void
      **/
     public void removeByDocId(String docId) {
         Query query = new Query(Criteria.where(DOC_ID).is(docId));
-        List<Comment> commentDb = template.find(query, Comment.class, collectionName);
-        commentDb.forEach(item -> template.remove(item, collectionName));
+        List<Comment> commentDb = template.find(query, Comment.class, COLLECTION_NAME);
+        commentDb.forEach(item -> template.remove(item, COLLECTION_NAME));
 
     }
 
@@ -181,6 +180,6 @@ public class CommentServiceImpl implements ICommentService {
      * @return java.lang.Integer
      **/
     public long countAllFile() {
-        return template.getCollection(collectionName).estimatedDocumentCount();
+        return template.getCollection(COLLECTION_NAME).estimatedDocumentCount();
     }
 }

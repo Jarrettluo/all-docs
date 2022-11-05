@@ -101,7 +101,7 @@ public class UserController {
     public BaseApiResult deleteById(@RequestBody User user, HttpServletRequest request) {
         // 用户只能删除自己，不能删除其他人的信息
         String userId = (String) request.getAttribute("id");
-        if( !userId.equals(user.getId())) {
+        if (!userId.equals(user.getId())) {
             return BaseApiResult.error(1201, MessageConstant.OPERATE_FAILED);
         }
         log.info("根据id删除用户请求==={}", user.toString());

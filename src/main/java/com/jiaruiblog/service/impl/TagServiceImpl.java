@@ -6,7 +6,6 @@ import com.jiaruiblog.entity.*;
 import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.util.BaseApiResult;
-import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,7 +254,7 @@ public class TagServiceImpl implements TagService {
         if ( tagId != null) {
             query.addCriteria(Criteria.where(TAG_ID).is(tagId));
         }
-        return Optional.ofNullable(mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME)).orElse(Lists.newArrayList());
+        return Optional.of(mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME)).orElse(Lists.newArrayList());
     }
 
     /**
@@ -352,7 +351,7 @@ public class TagServiceImpl implements TagService {
         String suffix = fileDocument.getSuffix();
         String tagName = suffix.substring(suffix.lastIndexOf(".") + 1);
 
-        if ( tagName == null || tagName.length() == 0) {
+        if (tagName.length() == 0) {
             return;
         }
 

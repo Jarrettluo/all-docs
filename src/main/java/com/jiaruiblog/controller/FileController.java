@@ -126,7 +126,7 @@ public class FileController {
             String description = request.getParameter("description");
             InputStream in = new ByteArrayInputStream(data);
             log.info("data_string:" + StrUtil.str(data, "UTF-8"));
-            if ( data.length > 0) {
+            if (data.length > 0) {
                 FileDocument fileDocument = new FileDocument();
                 fileDocument.setName(name);
                 fileDocument.setSize(data.length);
@@ -135,11 +135,11 @@ public class FileController {
                 fileDocument.setSuffix(ext);
                 String fileMd5 = SecureUtil.md5(in);
                 fileDocument.setMd5(fileMd5);
-                log.info("文件的md5 ==> {} " , fileMd5);
+                log.info("文件的md5 ==> {} ", fileMd5);
                 fileDocument.setDescription(description);
                 fileService.saveFile(fileDocument, in);
 
-                log.info("保存的fileDocument ==> {}" , fileDocument);
+                log.info("保存的fileDocument ==> {}", fileDocument);
                 model.setData(fileDocument.getId());
                 model.setCode(ResponseModel.SUCCESS);
                 model.setMessage("上传成功");
@@ -168,13 +168,13 @@ public class FileController {
         try {
             if (file != null && !file.isEmpty()) {
                 String originFileName = file.getOriginalFilename();
-                if ( !StringUtils.hasText(originFileName)) {
+                if (!StringUtils.hasText(originFileName)) {
                     model.setMessage("格式不支持！");
                     return model;
                 }
                 //获取文件后缀名
                 String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
-                if( !availableSuffixList.contains(suffix)) {
+                if (!availableSuffixList.contains(suffix)) {
                     model.setMessage("格式不支持！");
                     return model;
                 }
@@ -251,18 +251,18 @@ public class FileController {
     }
 
     /**
+     * @return byte[]
      * @Author luojiarui
      * @Description previewThumb
      * @Date 8:02 下午 2022/7/24
      * @Param [thumbId]
-     * @return byte[]
      **/
-    @GetMapping(value = "/image/{thumbId}",produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/image/{thumbId}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public byte[] previewThumb(@PathVariable String thumbId) throws Exception {
         InputStream inputStream = fileService.getFileThumb(thumbId);
         FileInputStream fileInputStream = (FileInputStream) (inputStream);
-        if(inputStream == null) {
+        if (inputStream == null) {
             return new byte[0];
         }
         byte[] bytes = new byte[fileInputStream.available()];
@@ -270,9 +270,9 @@ public class FileController {
         return bytes;
     }
 
-    @GetMapping(value = "/image",produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/image", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public byte[] test(){
+    public byte[] test() {
 
         File file = new File("thumbnail20220724194018003.png");
         try (FileInputStream inputStream = new FileInputStream(file);) {
@@ -301,11 +301,11 @@ public class FileController {
         }
     }
 
-    @GetMapping(value = "/image2/{thumbid}",produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/image2/{thumbid}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public byte[] previewThumb2(@PathVariable String thumbid) {
         InputStream inputStream = fileService.getFileThumb(thumbid);
-        if(inputStream == null) {
+        if (inputStream == null) {
             return new byte[0];
         }
         return IoUtil.readBytes(inputStream);

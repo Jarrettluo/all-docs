@@ -11,7 +11,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
- *
  * //@ConditionalOnClass(RedisOperations.class)
  * //@EnableConfigurationProperties(RedisProperties.class)
  *

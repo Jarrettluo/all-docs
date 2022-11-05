@@ -50,12 +50,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 新增一条分类记录
+     *
      * @param category -> Category 实体
      * @return
      */
     @Override
     public BaseApiResult insert(Category category) {
-        if(isNameExist(category.getName())) {
+        if (isNameExist(category.getName())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(category, COLLECTION_NAME);
@@ -64,12 +65,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 更新一条已经存在的记录
+     *
      * @param category -> Category 实体
      * @return
      */
     @Override
     public BaseApiResult update(Category category) {
-        if(isNameExist(category.getName())) {
+        if (isNameExist(category.getName())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query();
@@ -82,11 +84,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
+     * @return boolean
      * @Author luojiarui
      * @Description // 判断该名字是否存在，如果是存在的则返回true，否则返回false
      * @Date 11:47 上午 2022/6/25
      * @Param [name]
-     * @return boolean
      **/
     private boolean isNameExist(String name) {
         Query query = new Query(Criteria.where("name").is(name));
@@ -95,7 +97,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     *
      * @param category -> Category 实体
      * @return
      */
@@ -126,19 +127,20 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 增加某个文件的分类关系
+     *
      * @param relationship
      * @return
      */
     @Override
     public BaseApiResult addRelationShip(CateDocRelationship relationship) {
-        if(relationship.getCategoryId() == null || relationship.getFileId() == null){
+        if (relationship.getCategoryId() == null || relationship.getFileId() == null) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 先排查一个文章只能有一个分类关系，不能有多个分类信息
         Query query1 = new Query(Criteria.where(FILE_ID).is(relationship.getFileId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
-        if( !CollectionUtils.isEmpty(relationships)) {
+        if (!CollectionUtils.isEmpty(relationships)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
@@ -147,7 +149,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .and(FILE_ID).is(relationship.getFileId()));
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
-        if(!result.isEmpty()) {
+        if (!result.isEmpty()) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
@@ -156,6 +158,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 取消某个文件在分类下的关联关系
+     *
      * @param relationship
      * @return
      */
@@ -169,13 +172,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 根据category的id，查询相关连的文件id列表
+     *
      * @param categoryDb
      * @return
      */
     public List<String> queryDocListByCategory(Category categoryDb) {
         Query query = new Query(Criteria.where(CATEGORY_ID).is(categoryDb.getId()));
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-        if(result.isEmpty()) {
+        if (result.isEmpty()) {
             return Lists.newArrayList();
         }
         return result.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
@@ -183,29 +187,30 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 根据分类的id查询分类信息
+     *
      * @param id
      * @return
      */
     public Category queryById(String id) {
-        if(id == null || "".equals(id)) {
+        if (id == null || "".equals(id)) {
             return null;
         }
         return mongoTemplate.findById(id, Category.class, COLLECTION_NAME);
     }
 
     /**
+     * @return com.jiaruiblog.entity.Category
      * @Author luojiarui
      * @Description //根据文档的信息返回分类信息
      * @Date 10:52 下午 2022/6/22
      * @Param [docId]
-     * @return com.jiaruiblog.entity.Category
      **/
     public CategoryVO queryByDocId(String docId) {
 
         Query query1 = new Query().addCriteria(Criteria.where(FILE_ID).is(docId));
         CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
-        if(relationship == null || relationship.getCategoryId()==null) {
+        if (relationship == null || relationship.getCategoryId() == null) {
             return null;
         }
         Category category = mongoTemplate.findById(relationship.getCategoryId(), Category.class, COLLECTION_NAME);
@@ -220,6 +225,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 根据关键字模糊搜索相关的文档id
+     *
      * @param keyWord 关键字
      * @return 文档的id信息
      */
@@ -227,7 +233,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (!StringUtils.hasText(keyWord)) {
             return Lists.newArrayList();
         }
-        Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
         query.addCriteria(Criteria.where("name").regex(pattern));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
@@ -240,11 +246,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description // 根据文档的id进行分类和文档的关系删除
      * @Date 11:20 上午 2022/6/25
      * @Param [docId]
-     * @return void
      **/
     public void removeRelateByDocId(String docId) {
         Query query = new Query(Criteria.where("docId").is(docId));
@@ -254,11 +260,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
+     * @return java.util.List<com.jiaruiblog.entity.Category>
      * @Author luojiarui
      * @Description //热度随机产生
      * @Date 4:58 下午 2022/6/26
      * @Param []
-     * @return java.util.List<com.jiaruiblog.entity.Category>
      **/
     public List<Category> getRandom() {
         int pageIndex = 1;
@@ -267,15 +273,15 @@ public class CategoryServiceImpl implements CategoryService {
         long skip = (long) (pageIndex - 1) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
-        return  mongoTemplate.find(query, Category.class, COLLECTION_NAME);
+        return mongoTemplate.find(query, Category.class, COLLECTION_NAME);
     }
 
     /**
+     * @return java.util.List<com.jiaruiblog.entity.CateDocRelationship>
      * @Author luojiarui
      * @Description // 根据总类查询关系
      * @Date 5:00 下午 2022/6/26
      * @Param [cateId]
-     * @return java.util.List<com.jiaruiblog.entity.CateDocRelationship>
      **/
     public List<CateDocRelationship> getRelateByCateId(String cateId) {
         Integer pageIndex = 0;
@@ -289,11 +295,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
+     * @return java.lang.Integer
      * @Author luojiarui
      * @Description // 统计总数
      * @Date 4:40 下午 2022/6/26
      * @Param []
-     * @return java.lang.Integer
      **/
     public long countAllFile() {
         return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();

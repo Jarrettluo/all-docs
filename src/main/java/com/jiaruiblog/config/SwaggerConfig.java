@@ -30,7 +30,7 @@ public class SwaggerConfig {
                 .apiInfo(apiInfo())
                 .select()
                 // 指定要生成api接口的包路径
-                // .apis(RequestHandlerSelectors.basePackage("com.example.demoswagger.controller"))
+                // .apis(RequestHandlerSelectors.basePackage("com.controller"))
                 //使用了 @ApiOperation 注解的方法生成api接口文档
                 .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
                 .paths(PathSelectors.any())

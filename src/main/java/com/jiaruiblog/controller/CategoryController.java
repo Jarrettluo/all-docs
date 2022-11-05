@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Date;
 
 /**
@@ -43,7 +44,7 @@ public class CategoryController {
 
     @ApiOperation(value = "3.2 新增单个分类", notes = "新增单个分类")
     @PostMapping(value = "/insert")
-    public BaseApiResult insert(@RequestBody CategoryDTO categoryDTO){
+    public BaseApiResult insert(@RequestBody CategoryDTO categoryDTO) {
         // 插入进来的参数必需经过清洗
         categoryDTO.setId(null);
         switch (categoryDTO.getType()) {
@@ -66,7 +67,7 @@ public class CategoryController {
 
     @ApiOperation(value = "3.3 更新分类", notes = "更新分类")
     @PutMapping(value = "/update")
-    public BaseApiResult update(@RequestBody CategoryDTO categoryDTO){
+    public BaseApiResult update(@RequestBody CategoryDTO categoryDTO) {
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
@@ -87,7 +88,7 @@ public class CategoryController {
 
     @ApiOperation(value = "3.4 根据id移除某个分类", notes = "根据id移除某个分类")
     @DeleteMapping(value = "/remove")
-    public BaseApiResult remove(@RequestBody CategoryDTO categoryDTO){
+    public BaseApiResult remove(@RequestBody CategoryDTO categoryDTO) {
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
@@ -104,7 +105,7 @@ public class CategoryController {
 
     @ApiOperation(value = "3.7 查询所有的分类或者是标签", notes = "查询列表")
     @GetMapping(value = "/all")
-    public BaseApiResult list(@RequestParam Type type){
+    public BaseApiResult list(@RequestParam Type type) {
         switch (type) {
             case CATEGORY:
                 return categoryService.list();
@@ -117,6 +118,7 @@ public class CategoryController {
 
     /**
      * 同步动作，一个文档只能有一个分类关系，不能出现一对多
+     *
      * @param relationDTO
      * @return
      */
