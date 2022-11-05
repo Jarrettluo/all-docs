@@ -36,5 +36,12 @@ https://www.cnblogs.com/caizhaokai/p/11037610.html
 
 启动mongodb
 
-./mongod --dbpath=/data/mongo --logpath=/usr/local/mongodb4/db.log
+./mongod --dbpath=/data/mongo --logpath=/usr/local/mongodb4/db.log --fork
+
+
+启动es
+```shell
+systemctl start elasticsearch
+```
+
 

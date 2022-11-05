@@ -6,7 +6,6 @@ import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.service.impl.ElasticServiceImpl;
 import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.task.exception.TaskRunException;
-import com.jiaruiblog.util.PdfUtil;
 import com.jiaruiblog.util.SpringApplicationContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Criteria;
