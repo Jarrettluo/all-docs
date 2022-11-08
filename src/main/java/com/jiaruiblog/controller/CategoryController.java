@@ -1,6 +1,7 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.common.RegxConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.dto.CategoryDTO;
@@ -47,6 +48,10 @@ public class CategoryController {
     public BaseApiResult insert(@RequestBody CategoryDTO categoryDTO) {
         // 插入进来的参数必需经过清洗
         categoryDTO.setId(null);
+        String name = categoryDTO.getName();
+        if (!name.matches(RegxConstant.CH_ENG_WORD)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
@@ -68,6 +73,10 @@ public class CategoryController {
     @ApiOperation(value = "3.3 更新分类", notes = "更新分类")
     @PutMapping(value = "/update")
     public BaseApiResult update(@RequestBody CategoryDTO categoryDTO) {
+        String name = categoryDTO.getName();
+        if (!name.matches(RegxConstant.CH_ENG_WORD)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
@@ -119,8 +128,8 @@ public class CategoryController {
     /**
      * 同步动作，一个文档只能有一个分类关系，不能出现一对多
      *
-     * @param relationDTO
-     * @return
+     * @param relationDTO RelationDTO
+     * @return BaseApiResult
      */
     @ApiOperation(value = "3.5 增加关系", notes = "检索分类")
     @PostMapping(value = "/addRelationship")

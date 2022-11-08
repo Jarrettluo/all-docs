@@ -2,8 +2,8 @@ package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.enums.Type;
-
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
 
@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
 public class CategoryDTO {
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
+    @Length(max = 64, message = MessageConstant.PARAMS_LENGTH_REQUIRED)
     private String name;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
