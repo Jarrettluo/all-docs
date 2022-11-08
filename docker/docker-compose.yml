@@ -9,6 +9,7 @@ services:
     volumes:
       - ./data/mongo/configdb:/data/configdb
       - ./data/mongo/db:/data/db
+      - ./data/mongodb/log:/var/log/mongodb  # 挂载日志目录
     command: mongod --auth
     #初始化管理员用户名和密码
     environment:
@@ -31,6 +32,17 @@ services:
       - ${AD_ES_PORT}:9200
     environment:
       - discovery.type=single-node
+
+  kibana:
+    image: kibana:7.17.1
+    ports:
+      - "5601:5601"
+    container_name: "kibana"
+    #restart: always
+    depends_on:
+      - ad_elasticsearch
+    volumes:
+      - ./data/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
 
   ad_redis:
     image: redis:latest
@@ -76,4 +88,3 @@ services:
       - ${AD_WEB_PORT}:80
     depends_on:
       - ad_server
-
