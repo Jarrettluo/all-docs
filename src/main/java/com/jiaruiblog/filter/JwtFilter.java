@@ -3,6 +3,8 @@ package com.jiaruiblog.filter;
 import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
+
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
@@ -64,16 +66,15 @@ public class JwtFilter implements Filter
             }
 
             Map<String, Claim> userData = JwtUtil.verifyToken(token);
-            if (userData == null) {
+            if (CollectionUtils.isEmpty(userData)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+            } else {
+                //拦截器 拿到用户信息，放到request中
+                request.setAttribute("id", userData.get("id").asString());
+                request.setAttribute("username", userData.get("username").asString());
+                request.setAttribute("password", userData.get("password").asString());
+                chain.doFilter(req, res);
             }
-
-            //拦截器 拿到用户信息，放到request中
-            request.setAttribute("id", userData.get("id").asString());
-            request.setAttribute("username", userData.get("username").asString());
-            request.setAttribute("password", userData.get("password").asString());
-            chain.doFilter(req, res);
         }
     }
 
