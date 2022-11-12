@@ -4,8 +4,9 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Category;
-import com.jiaruiblog.entity.dto.DocumentDTO;
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
@@ -14,9 +15,6 @@ import com.jiaruiblog.util.PdfUtil;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSFile;
-import com.jiaruiblog.entity.FileDocument;
-
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +28,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -383,7 +382,11 @@ public class FileServiceImpl implements IFileService {
         if( fileDocument == null ) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
         } else {
-            redisService.incrementScoreByUserId(id, RedisServiceImpl.DOC_KEY);
+            try{
+                redisService.incrementScoreByUserId(id, RedisServiceImpl.DOC_KEY);
+            } catch (RedisConnectionFailureException e) {
+                log.error("连接redis失败，暂时无法写入数据库",e);
+            }
         }
         // 查询评论信息，查询分类信息，查询分类关系，查询标签信息，查询标签关系信息
         return BaseApiResult.success(convertDocument(null, fileDocument));
