@@ -11,11 +11,6 @@ import java.io.InputStream;
 public class DocxExecutor extends TaskExecutor{
 
     @Override
-    protected String downloadFile() {
-        return super.downloadFile();
-    }
-
-    @Override
     protected void readText(InputStream is, String textFilePath) throws IOException {
         // TODO document why this method is empty
     }

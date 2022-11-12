@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author jiarui.luo
@@ -68,6 +69,11 @@ public class FileDocument {
      * 预览图的GridFS的ID
      */
     private String thumbId;
+
+    /**
+     * 缩略图
+     **/
+    private List<Thumbnail> thumbnailList;
 
 
 }

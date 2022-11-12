@@ -1,5 +1,6 @@
 package com.jiaruiblog.entity;
 
+import com.jiaruiblog.enums.ThumbSizeEnum;
 import com.jiaruiblog.enums.ThumbnailEnum;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -36,5 +37,11 @@ public class Thumbnail {
      * 大文件管理GridFS的ID
      */
     private String gridfsId;
+
+    /**
+     * 缩略图的尺寸大小
+     **/
+    private ThumbSizeEnum thumbSizeEnum;
+
 
 }

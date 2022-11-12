@@ -3,6 +3,7 @@ package com.jiaruiblog.task.executor;
 import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
+import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.impl.ElasticServiceImpl;
 import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.task.exception.TaskRunException;
@@ -27,34 +28,40 @@ import java.util.Date;
 @Slf4j
 public abstract class TaskExecutor {
 
-    protected String downloadFile() {
-        return "1";
+    protected InputStream downloadFile(String gridFsId) {
+        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        return fileService.getFileThumb(gridFsId);
     }
 
     private static final String PDF_SUFFIX = ".pdf";
 
     public void execute(TaskData taskData) throws TaskRunException {
+        System.out.println(taskData);
+        FileDocument fileDocument = taskData.getFileDocument();
+        InputStream docInputStream = downloadFile(fileDocument.getGridfsId());
+        if (docInputStream == null) {
+            throw new TaskRunException("拉取数据的时候出错了，请检查！");
+        }
         try {
             // 将文本索引到es中
-            uploadFileToEs(new FileInputStream("abc"), taskData.getFileDocument());
+            uploadFileToEs(docInputStream, fileDocument);
         } catch (Exception e) {
             throw new TaskRunException("建立索引的时候出错拉！{}", e);
         }
 
-        try {
-
-            // 制作不同分辨率的缩略图
-            updateFileThumb(new FileInputStream("abc"), taskData.getFileDocument());
-        } catch (Exception e) {
-            throw new TaskRunException("建立缩略图的时候出错啦！{}", e);
-        }
+//        try {
+//            // 制作不同分辨率的缩略图
+//            updateFileThumb(new FileInputStream("abc"), taskData.getFileDocument());
+//        } catch (Exception e) {
+//            throw new TaskRunException("建立缩略图的时候出错啦！{}", e);
+//        }
 
     }
 
     public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
-
         String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
-
+        System.out.println("textfilePath");
+        System.out.println(textFilePath);
         try {
             // TODO 就是在这里做出区别
             readText(is, textFilePath);
@@ -62,15 +69,15 @@ public abstract class TaskExecutor {
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());
             fileObj.setType(fileDocument.getContentType());
-            this.upload(fileObj);
+//            this.upload(fileObj);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            // 删除临时的txt文件
-            File file = new File(textFilePath);
-            if(file.exists()) {
-                file.deleteOnExit();
-            }
+//            // 删除临时的txt文件
+//            File file = new File(textFilePath);
+//            if(file.exists()) {
+//                file.deleteOnExit();
+//            }
         }
     }
 

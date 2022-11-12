@@ -12,10 +12,6 @@ import java.io.InputStream;
  */
 public class PdfWordTaskExecutor extends TaskExecutor {
 
-    @Override
-    protected String downloadFile() {
-        return super.downloadFile();
-    }
 
     @Override
     protected void readText(InputStream is, String textFilePath) throws IOException {
@@ -26,6 +22,5 @@ public class PdfWordTaskExecutor extends TaskExecutor {
     protected void makeThumb(InputStream is, String picPath) {
         // super.makeThumb();
         PdfUtil.pdfThumbnail(is, picPath);
-
     }
 }

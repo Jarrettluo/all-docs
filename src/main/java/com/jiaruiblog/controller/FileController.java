@@ -9,8 +9,8 @@ import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
 import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.FileContentTypeUtils;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +44,9 @@ public class FileController {
 
     @Autowired
     private ElasticService elasticService;
+
+    @Autowired
+    private TaskExecuteService taskExecuteService;
 
 
     /**
@@ -183,10 +186,11 @@ public class FileController {
 
                 switch (suffix) {
                     case "pdf":
-                        // 在这里进行上传
-                        elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
-                        // 异步进行缩略图的制作
-                        fileService.updateFileThumb(file.getInputStream(), fileDocument);
+//                        // 在这里进行上传
+//                        elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
+//                        // 异步进行缩略图的制作
+//                        fileService.updateFileThumb(file.getInputStream(), fileDocument);
+                        taskExecuteService.execute(fileDocument);
                         break;
                     case "docx":
                     case "pptx":

@@ -1,5 +1,6 @@
 package com.jiaruiblog.task.thread;
 
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.enums.DocType;
 import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.task.exception.TaskRunException;
@@ -17,9 +18,11 @@ public class MainTask implements RunnableTask{
 
     private TaskExecutor taskExecutor;
 
-    public MainTask() {
-        this.taskExecutor = TaskExecutorFactory.getTaskExecutor(DocType.getDocType("pdf"));
+    private TaskData taskData = new TaskData();
 
+    public MainTask(FileDocument fileDocument) {
+        taskData.setFileDocument(fileDocument);
+        this.taskExecutor = TaskExecutorFactory.getTaskExecutor(DocType.getDocType("pdf"));
     }
 
     @Override
@@ -39,11 +42,11 @@ public class MainTask implements RunnableTask{
             throw new NullPointerException(MessageFormat.format("空指针异常,异常数据{}", "taskData"));
         }
 
-        // 更新子任务数据
-
-        TaskData taskData = new TaskData();
+        // 更新子任务数据,开始更新状态，开始进行解析等等
 
         try {
+            System.out.println("收到分类第三节福利大奖");
+            System.out.println(taskData);
             // 调用执行器执行任务
             this.taskExecutor.execute(taskData);
         } catch (TaskRunException e) {

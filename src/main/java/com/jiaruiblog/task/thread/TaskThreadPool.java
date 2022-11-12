@@ -47,7 +47,6 @@ public class TaskThreadPool {
         FutureCallback<V> futureCallback = new FutureCallback<V>() {
             @Override
             public void onSuccess(Object o) {
-
                 mainTaskList.remove(mainTask);
             }
 

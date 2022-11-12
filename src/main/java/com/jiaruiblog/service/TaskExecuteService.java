@@ -1,5 +1,7 @@
 package com.jiaruiblog.service;
 
+import com.jiaruiblog.entity.FileDocument;
+
 /**
  * @Author Jarrett Luo
  * @Date 2022/10/20 18:03
@@ -7,6 +9,6 @@ package com.jiaruiblog.service;
  */
 public interface TaskExecuteService {
 
-    void execute();
+    void execute(FileDocument fileDocument);
 
 }

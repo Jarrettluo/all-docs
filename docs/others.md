@@ -47,3 +47,10 @@ systemctl start elasticsearch
 
 在macos上进行安装redis
 https://www.jianshu.com/p/3bdfda703552
+
+
+
+在macos上安装es
+https://cloud.tencent.com/developer/article/2032233
+注意版本适配
+
