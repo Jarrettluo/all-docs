@@ -13,5 +13,7 @@ public class TaskData {
 
     FileDocument fileDocument;
 
+    String txtFilePath;
+
 
 }

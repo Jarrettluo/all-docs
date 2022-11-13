@@ -45,7 +45,7 @@ public interface IFileService {
      * @Param [fileDocument, state]
      * @return void
      **/
-    void updateState(FileDocument fileDocument, DocStateEnum state) throws TaskRunException;
+    void updateState(FileDocument fileDocument, DocStateEnum state, String errorMsg) throws TaskRunException;
 
     /**
      * 删除文件

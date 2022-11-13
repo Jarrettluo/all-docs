@@ -5,7 +5,7 @@ package com.jiaruiblog.task.exception;
  * @Date 2022/10/26 17:57
  * @Version 1.0
  */
-public class TaskRunException extends Exception {
+public class TaskRunException extends RuntimeException {
 
 
     static final long serialVersionUID = 781837582814609045L;

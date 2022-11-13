@@ -55,14 +55,12 @@ public class TaskThreadPool {
 
             @Override
             public void onFailure(Throwable throwable) {
-                mainTask.failed();
+                mainTask.failed(throwable);
                 mainTask.fallback();
-                log.info("报错的内容{}", throwable.getMessage());
                 mainTaskList.remove(mainTask);
             }
         };
         Futures.addCallback(future, futureCallback, this.listeningExecutorService);
 
     }
-
 }

@@ -11,7 +11,10 @@ import com.jiaruiblog.task.executor.TaskExecutorFactory;
 import com.jiaruiblog.util.SpringApplicationContext;
 import lombok.extern.slf4j.Slf4j;
 
-import java.text.MessageFormat;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * @Author Jarrett Luo
@@ -19,7 +22,7 @@ import java.text.MessageFormat;
  * @Version 1.0
  */
 @Slf4j
-public class MainTask implements RunnableTask{
+public class MainTask implements RunnableTask {
 
     private TaskExecutor taskExecutor;
 
@@ -27,54 +30,41 @@ public class MainTask implements RunnableTask{
 
     /**
      * @Author luojiarui
-     * @Description // 初始化任务
+     * @Description // 初始化任务，指定一个
      * @Date 15:43 2022/11/13
      * @Param [fileDocument]
-     * @return
      **/
     public MainTask(FileDocument fileDocument) {
         taskData.setFileDocument(fileDocument);
         String fileSuffix = fileDocument.getSuffix();
-        log.info("查询到的文件的后缀是{}", fileSuffix);
         this.taskExecutor = TaskExecutorFactory.getTaskExecutor(DocType.getDocType(fileSuffix));
     }
 
     @Override
     public void success() {
-        // TODO document why this method is empty
-        log.info("成功啦");
+        taskData.getFileDocument().setDocState(DocStateEnum.SUCCESS);
+        updateTaskStatus();
     }
 
     @Override
-    public void failed() {
-        // TODO document why this method is empty
-        log.error("失败啦");
-
+    public void failed(Throwable throwable) {
+        String errorMsg = throwable.getLocalizedMessage();
+        taskData.getFileDocument().setDocState(DocStateEnum.FAIL);
+        taskData.getFileDocument().setErrorMsg(errorMsg);
+        updateTaskStatus();
     }
 
     @Override
     public void run() {
-
         if (null == taskExecutor) {
-            throw new NullPointerException(MessageFormat.format("空指针异常,异常数据{}", "taskData"));
+            throw new TaskRunException("执行器失败");
         }
-
         // 更新子任务数据,开始更新状态，开始进行解析等等
-        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
-        try {
-            fileService.updateState(taskData.getFileDocument(), DocStateEnum.ON_PROCESS);
-            log.info("开始进行更新，");
-        } catch (TaskRunException e) {
-            e.printStackTrace();
-            throw new RuntimeException("方式来减肥连锁机构", e);
-        }
+        taskData.getFileDocument().setDocState(DocStateEnum.ON_PROCESS);
+        updateTaskStatus();
 
-        try {
-            // 调用执行器执行任务
-            this.taskExecutor.execute(taskData);
-        } catch (TaskRunException e) {
-            throw new RuntimeException("方式来减肥连锁机构", e);
-        }
+        // 调用执行器执行任务
+        this.taskExecutor.execute(taskData);
 
     }
 
@@ -83,5 +73,25 @@ public class MainTask implements RunnableTask{
         log.info("这里进行数据的回滚");
         // 删除es中的数据，删除thumb数据，删除存储的txt文本文件
 
+        try {
+            String txtFilePath = taskData.getTxtFilePath();
+            if(new File(txtFilePath).exists()) {
+                Files.delete(Paths.get(txtFilePath));
+            }
+        }  catch (IOException e) {
+            log.error("删除文件路径{} ==> 失败信息{}", taskData.getTxtFilePath(), e);
+        }
     }
+
+
+    private void updateTaskStatus() {
+        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        FileDocument fileDocument = taskData.getFileDocument();
+        try {
+            fileService.updateState(fileDocument, fileDocument.getDocState(), fileDocument.getErrorMsg());
+        } catch (TaskRunException e) {
+            throw new TaskRunException("更新文档状态失败", e);
+        }
+    }
+
 }

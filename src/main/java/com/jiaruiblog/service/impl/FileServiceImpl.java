@@ -117,24 +117,27 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description // 更新文档状态
      * @Date 15:41 2022/11/13
      * @Param [fileDocument, state]
-     * @return void
      **/
     @Override
-    public void updateState(FileDocument fileDocument, DocStateEnum state) throws TaskRunException {
+    public void updateState(FileDocument fileDocument, DocStateEnum state, String errorMsg) throws TaskRunException {
         Query query = new Query(Criteria.where("_id").is(fileDocument.getId()));
-        Update update  = new Update();
+        if (state != DocStateEnum.FAIL) {
+            errorMsg = "无";
+        }
+        Update update = new Update();
         update.set("docState", state);
+        update.set("errorMsg", errorMsg);
         try {
             mongoTemplate.updateFirst(query, update, FileDocument.class, collectionName);
         } catch (Exception e) {
             log.error("更新文档状态信息{}==>出错==>{}", fileDocument, e);
             throw new TaskRunException("更新文档状态信息==>出错==>{}", e);
         }
-
     }
 
     /**
@@ -148,7 +151,7 @@ public class FileServiceImpl implements IFileService {
     public FileDocument saveFile(String md5, MultipartFile file) {
         //已存在该文件，则实现秒传
         FileDocument fileDocument = getByMd5(md5);
-        if ( fileDocument != null) {
+        if (fileDocument != null) {
             return fileDocument;
         }
         String originFilename = file.getOriginalFilename();
@@ -159,7 +162,7 @@ public class FileServiceImpl implements IFileService {
         fileDocument.setUploadDate(new Date());
         fileDocument.setMd5(md5);
 
-        if ( StringUtils.hasText(originFilename)) {
+        if (StringUtils.hasText(originFilename)) {
             String suffix = originFilename.substring(originFilename.lastIndexOf("."));
             fileDocument.setSuffix(suffix);
         }
@@ -286,15 +289,15 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      * @Author luojiarui
      * @Description // 增加过滤条件的分页功能
      * @Date 11:12 下午 2022/6/22
      * @Param [pageIndex, pageSize, ids]
-     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
     @Override
     public List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
-        if( CollectionUtils.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return Lists.newArrayList();
         }
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
@@ -312,7 +315,7 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public List<FileDocument> listAndFilterByPageNotSort(int pageIndex, int pageSize, List<String> ids) {
-        if( CollectionUtils.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return Lists.newArrayList();
         }
         Query query = new Query();
@@ -331,11 +334,11 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return com.jiaruiblog.utils.ApiResult
      * @Author luojiarui
      * @Description 列表；过滤；检索等
      * @Date 11:49 2022/8/6
      * @Param [documentDTO]
-     * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
     public BaseApiResult list(DocumentDTO documentDTO) {
@@ -347,17 +350,17 @@ public class FileServiceImpl implements IFileService {
 
         switch (documentDTO.getType()) {
             case ALL:
-                fileDocuments = listFilesByPage(documentDTO.getPage(),documentDTO.getRows());
+                fileDocuments = listFilesByPage(documentDTO.getPage(), documentDTO.getRows());
                 totalNum = countAllFile();
                 break;
             case TAG:
                 Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
-                if(tag == null) {
+                if (tag == null) {
                     break;
                 }
                 List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
-                if(CollectionUtils.isEmpty(fileIdList1)) {
+                if (CollectionUtils.isEmpty(fileIdList1)) {
                     break;
                 }
                 Query query = new Query().addCriteria(Criteria.where("_id").in(fileIdList1));
@@ -377,7 +380,7 @@ public class FileServiceImpl implements IFileService {
                 List<FileDocument> esDoc = null;
                 try {
                     esDoc = elasticServiceImpl.search(keyWord);
-                    if( !CollectionUtils.isEmpty(esDoc)) {
+                    if (!CollectionUtils.isEmpty(esDoc)) {
                         Set<String> existIds = esDoc.stream().map(FileDocument::getId).collect(Collectors.toSet());
                         docIdSet.removeAll(existIds);
                     }
@@ -385,7 +388,7 @@ public class FileServiceImpl implements IFileService {
                     e.printStackTrace();
                 }
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), docIdSet);
-                if(esDoc != null){
+                if (esDoc != null) {
                     fileDocuments = Optional.ofNullable(fileDocuments).orElse(new ArrayList<>());
                     fileDocuments.addAll(esDoc);
                     totalNum = fileDocuments.size();
@@ -393,12 +396,12 @@ public class FileServiceImpl implements IFileService {
                 break;
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
-                if(category == null ) {
+                if (category == null) {
                     break;
                 }
                 List<String> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
-                if(CollectionUtils.isEmpty(fileIdList)) {
+                if (CollectionUtils.isEmpty(fileIdList)) {
                     break;
                 }
                 Query query1 = new Query().addCriteria(Criteria.where("_id").in(fileIdList));
@@ -415,22 +418,22 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return com.jiaruiblog.utils.ApiResult
      * @Author luojiarui
      * @Description // 查询文档的详细信息
      * @Date 9:27 下午 2022/6/23
      * @Param [id]
-     * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
     public BaseApiResult detail(String id) {
         FileDocument fileDocument = queryById(id);
-        if( fileDocument == null ) {
+        if (fileDocument == null) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
         } else {
-            try{
+            try {
                 redisService.incrementScoreByUserId(id, RedisServiceImpl.DOC_KEY);
             } catch (RedisConnectionFailureException e) {
-                log.error("连接redis失败，暂时无法写入数据库",e);
+                log.error("连接redis失败，暂时无法写入数据库", e);
             }
         }
         log.info("查询到的详细细节内容是:{}", fileDocument);
@@ -440,7 +443,7 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public BaseApiResult remove(String id) {
-        if( !isExist(id) ) {
+        if (!isExist(id)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 删除评论信息，删除分类关系，删除标签关系
@@ -454,18 +457,18 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return java.util.List<com.jiaruiblog.entity.vo.DocumentVO>
      * @Author luojiarui
      * @Description convertDocuments
      * @Date 10:16 下午 2022/6/21
      * @Param fileDocuments
-     * @return java.util.List<com.jiaruiblog.entity.vo.DocumentVO>
      **/
     private List<DocumentVO> convertDocuments(List<FileDocument> fileDocuments) {
-        if( fileDocuments == null) {
+        if (fileDocuments == null) {
             return Lists.newArrayList();
         }
         List<DocumentVO> documentVos = Lists.newArrayList();
-        for(FileDocument fileDocument : fileDocuments) {
+        for (FileDocument fileDocument : fileDocuments) {
             DocumentVO documentVO = new DocumentVO();
             documentVO = convertDocument(documentVO, fileDocument);
             documentVos.add(documentVO);
@@ -474,15 +477,15 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return com.jiaruiblog.entity.vo.DocumentVO
      * @Author luojiarui
      * @Description convertDocument
      * @Date 10:24 下午 2022/6/21
      * @Param [documentVO, fileDocument]
-     * @return com.jiaruiblog.entity.vo.DocumentVO
      **/
     public DocumentVO convertDocument(DocumentVO documentVO, FileDocument fileDocument) {
         documentVO = Optional.ofNullable(documentVO).orElse(new DocumentVO());
-        if(fileDocument == null ){
+        if (fileDocument == null) {
             return documentVO;
         }
         documentVO.setId(fileDocument.getId());
@@ -503,14 +506,15 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * 模糊搜索
+     *
      * @param keyWord
      * @return
      */
     public List<String> fuzzySearchDoc(String keyWord) {
-        if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
+        if (keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return Lists.newArrayList();
         }
-        Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
         query.addCriteria(Criteria.where("name").regex(pattern));
 
@@ -521,13 +525,14 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * 根据用户的主键id查询用户信息
-     *     //Pattern pattern=Pattern.compile("^.*"+pattern_name+".*$", Pattern.CASE_INSENSITIVE);
-     *     //query.addCriteria(Criteria.where("name").regex(pattern))；
+     * //Pattern pattern=Pattern.compile("^.*"+pattern_name+".*$", Pattern.CASE_INSENSITIVE);
+     * //query.addCriteria(Criteria.where("name").regex(pattern))；
+     *
      * @param docId
      * @return
      */
     public boolean isExist(String docId) {
-        if(docId == null || "".equals(docId)) {
+        if (docId == null || "".equals(docId)) {
             return false;
         }
         FileDocument fileDocument = queryById(docId);
@@ -536,6 +541,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * 检索已经存在的user
+     *
      * @param docId String
      * @return FileDocument
      */
@@ -546,22 +552,22 @@ public class FileServiceImpl implements IFileService {
 
 
     /**
+     * @return java.lang.Integer
      * @Author luojiarui
      * @Description // 统计总数
      * @Date 4:40 下午 2022/6/26
      * @Param []
-     * @return java.lang.Integer
      **/
     public long countAllFile() {
         return mongoTemplate.getCollection(collectionName).estimatedDocumentCount();
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description //转换pdf文档的图片，然后保存
      * @Date 7:49 下午 2022/7/24
      * @Param [inputStream, fileDocument]
-     * @return void
      **/
     @Async
     @Override
@@ -570,18 +576,18 @@ public class FileServiceImpl implements IFileService {
         String path = "thumbnail";
         String picPath = path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png";
         String gridfsId = IdUtil.simpleUUID();
-        if(PDF_SUFFIX.equals(fileDocument.getSuffix())) {
+        if (PDF_SUFFIX.equals(fileDocument.getSuffix())) {
             // 将pdf输入流转换为图片并临时保存下来
             PdfUtil.pdfThumbnail(inputStream, picPath);
 
-            if(new File(picPath).exists()) {
+            if (new File(picPath).exists()) {
                 String contentType = "image/png";
                 FileInputStream in = new FileInputStream(picPath);
                 //文件，存储在GridFS
                 gridFsTemplate.store(in, gridfsId, contentType);
                 try {
                     Files.delete(Paths.get(picPath));
-                }  catch (IOException e) {
+                } catch (IOException e) {
                     log.error("删除文件路径{} ==> 失败信息{}", picPath, e);
                 }
             }
@@ -594,20 +600,20 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return java.io.InputStream
      * @Author luojiarui
      * @Description //根据缩略图id返回图片信息
      * @Date 7:59 下午 2022/7/24
      * @Param [thumbId]
-     * @return java.io.InputStream
      **/
     @Override
     public InputStream getFileThumb(String thumbId) {
-        if ( StringUtils.hasText(thumbId)) {
+        if (StringUtils.hasText(thumbId)) {
             Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(thumbId));
 //            Query gridQuery = new Query().addCriteria(Criteria.where("_id").is(thumbId));
             GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
 
-            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());){
+            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());) {
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
                     return resource.getInputStream();
@@ -624,12 +630,12 @@ public class FileServiceImpl implements IFileService {
     @Override
     public byte[] getFileBytes(String thumbId) {
 
-        if ( StringUtils.hasText(thumbId)) {
+        if (StringUtils.hasText(thumbId)) {
             Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(thumbId));
 //            Query gridQuery = new Query().addCriteria(Criteria.where("_id").is(thumbId));
             GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
 
-            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());){
+            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());) {
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
                     return IoUtil.readBytes(resource.getInputStream());
@@ -644,11 +650,11 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return long
      * @Author luojiarui
      * @Description 根据查询条件查询总数量
      * @Date 12:09 2022/8/6
      * @Param [query]
-     * @return long
      **/
     public long countFileByQuery(Query query) {
         return mongoTemplate.count(query, FileDocument.class, collectionName);

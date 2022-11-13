@@ -37,18 +37,18 @@ public abstract class TaskExecutor {
         FileDocument fileDocument = taskData.getFileDocument();
         InputStream docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
 
+        // 将文本索引到es中
         try {
-            // 将文本索引到es中
-            uploadFileToEs(docInputStream, fileDocument);
+            uploadFileToEs(docInputStream, fileDocument, taskData);
         } catch (Exception e) {
-            throw new TaskRunException("建立索引的时候出错拉！{}", e);
+            throw new TaskRunException("建立索引的时候出错拉！", e);
         }
 
 //        try {
 //            // 制作不同分辨率的缩略图
 //            updateFileThumb(new FileInputStream("abc"), taskData.getFileDocument());
 //        } catch (Exception e) {
-//            throw new TaskRunException("建立缩略图的时候出错啦！{}", e);
+//            throw new TaskRunException("建立缩略图的时候出错啦！", e);
 //        }
 
     }
@@ -65,8 +65,10 @@ public abstract class TaskExecutor {
         return fileService.getFileBytes(gridFsId);
     }
 
-    public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
+    public void uploadFileToEs(InputStream is, FileDocument fileDocument, TaskData taskData) {
         String textFilePath = "./"+ fileDocument.getMd5() + fileDocument.getName() + ".txt";
+        taskData.setTxtFilePath(textFilePath);
+
         try {
             // 根据不同的执行器，执行不同的文本提取方法，在这里做出区别
             readText(is, textFilePath);
