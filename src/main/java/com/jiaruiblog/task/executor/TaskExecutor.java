@@ -33,18 +33,52 @@ public abstract class TaskExecutor {
         return fileService.getFileThumb(gridFsId);
     }
 
+    protected byte[] downFileBytes(String gridFsId){
+        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        return fileService.getFileBytes(gridFsId);
+    }
+
     private static final String PDF_SUFFIX = ".pdf";
 
     public void execute(TaskData taskData) throws TaskRunException {
         System.out.println(taskData);
         FileDocument fileDocument = taskData.getFileDocument();
-        InputStream docInputStream = downloadFile(fileDocument.getGridfsId());
-        if (docInputStream == null) {
-            throw new TaskRunException("拉取数据的时候出错了，请检查！");
-        }
+//        InputStream docInputStream = downloadFile(fileDocument.getGridfsId());
+
+//        byte[] content = IoUtil.readBytes(docInputStream);
+//        FileInputStream fileInputStream = new FileInputStream(content);
+
+        InputStream xx = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
+
+        System.out.println(xx);
+        System.out.println("取到文件流啦");
+//        FileInputStream fileInputStream = (FileInputStream) (docInputStream);
+//        if (docInputStream == null) {
+//            System.out.println("文件流关闭");
+//            throw new TaskRunException("拉取数据的时候出错了，请检查！");
+//        }
+//        byte[] bytes = new byte[0];
+//        try {
+//            bytes = new byte[fileInputStream.available()];
+//            fileInputStream.read(bytes, 0, fileInputStream.available());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            throw new TaskRunException("拉取数据的时候出错了，请检查！");
+//        }
+
+        System.out.println("jflsjfldsj");
+
+//        if (docInputStream == null) {
+//            System.out.println("文件流关闭");
+//            throw new TaskRunException("拉取数据的时候出错了，请检查！");
+//        }
+//
+//        System.out.println(docInputStream);
+
         try {
+            System.out.println(xx);
             // 将文本索引到es中
-            uploadFileToEs(docInputStream, fileDocument);
+            uploadFileToEs(xx, fileDocument);
         } catch (Exception e) {
             throw new TaskRunException("建立索引的时候出错拉！{}", e);
         }
@@ -59,17 +93,21 @@ public abstract class TaskExecutor {
     }
 
     public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
-        String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
+        String textFilePath = "./"+ fileDocument.getMd5() + fileDocument.getName() + ".txt";
         System.out.println("textfilePath");
         System.out.println(textFilePath);
         try {
             // TODO 就是在这里做出区别
             readText(is, textFilePath);
+            if (!new File(textFilePath).exists()) {
+                return;
+            }
             FileObj fileObj = readFile(textFilePath);
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());
             fileObj.setType(fileDocument.getContentType());
 //            this.upload(fileObj);
+            System.out.println(fileObj);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

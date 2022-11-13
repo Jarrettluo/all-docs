@@ -14,6 +14,7 @@ import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.PdfUtil;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
+import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
@@ -164,6 +165,8 @@ public class FileServiceImpl implements IFileService {
         String gridfsId = IdUtil.simpleUUID();
         //文件，存储在GridFS中
         gridFsTemplate.store(in, gridfsId, contentType);
+        // 其实应该使用文件id进行存储
+//        ObjectId objectId = gridFsTemplate.store()
         return gridfsId;
     }
 
@@ -199,6 +202,10 @@ public class FileServiceImpl implements IFileService {
         if (fileDocument != null) {
             Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(fileDocument.getGridfsId()));
             GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+
+            // 开启文件下载
+            GridFSDownloadOptions gridFSDownloadOptions = new GridFSDownloadOptions();
+
             try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());) {
                 if (in.getGridFSFile().getLength() > 0) {
                     GridFsResource resource = new GridFsResource(fsFile, in);
@@ -558,6 +565,7 @@ public class FileServiceImpl implements IFileService {
     public InputStream getFileThumb(String thumbId) {
         if ( StringUtils.hasText(thumbId)) {
             Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(thumbId));
+//            Query gridQuery = new Query().addCriteria(Criteria.where("_id").is(thumbId));
             GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
 
             try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());){
@@ -572,6 +580,28 @@ public class FileServiceImpl implements IFileService {
             }
         }
         return null;
+    }
+
+    @Override
+    public byte[] getFileBytes(String thumbId) {
+
+        if ( StringUtils.hasText(thumbId)) {
+            Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(thumbId));
+//            Query gridQuery = new Query().addCriteria(Criteria.where("_id").is(thumbId));
+            GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+
+            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());){
+                if (in.getGridFSFile().getLength() > 0) {
+                    GridFsResource resource = new GridFsResource(fsFile, in);
+                    return IoUtil.readBytes(resource.getInputStream());
+                } else {
+                    return new byte[0];
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return new byte[0];
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.jiaruiblog.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -18,6 +19,7 @@ import java.util.Date;
  * @Date 2022/7/13 7:55 下午
  * @Version 1.0
  **/
+@Slf4j
 public class PdfUtil {
 
     public static void readPdfText(String path) throws IOException {
@@ -27,7 +29,10 @@ public class PdfUtil {
     }
 
     public static void readPdfText(InputStream file, String textPath) throws IOException {
-
+        if (file == null) {
+            log.info("inputstream is null");
+            return;
+        }
         try (PDDocument document = PDDocument.load(file)) {
             AccessPermission ap = document.getCurrentAccessPermission();
             if (!ap.canExtractContent()) {
@@ -39,23 +44,28 @@ public class PdfUtil {
             stripper.setSortByPosition(true);
 
             FileWriter fileWriter = new FileWriter(textPath, true);
+            System.out.println("==f==fdsfdslfj");
             for (int p = 1; p <= document.getNumberOfPages(); ++p) {
                 stripper.setStartPage(p);
                 stripper.setEndPage(p);
                 String text = stripper.getText(document);
-                text = text.replace("\n","");
+                text = text.replace("\n", "");
+                System.out.println(text);
                 fileWriter.write(text.trim());
             }
             fileWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("解析pdf文本文件出错", e);
         }
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description // 保存文本为某个文件
      * @Date 8:01 下午 2022/7/13
      * @Param [text, path]
-     * @return void
      **/
     public static void saveTxt(String text, String path) {
         FileWriter writer;
@@ -77,11 +87,11 @@ public class PdfUtil {
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description //TODO
      * @Date 10:01 下午 2022/7/16
      * @Param [pdfPath]
-     * @return void
      **/
     public static void transPdf2png(String pdfPath) {
         try {
@@ -95,7 +105,7 @@ public class PdfUtil {
             for (int i = 0; i < pageCount; i++) {
                 // 第二个参数是设置缩放比(即像素)
                 BufferedImage image = renderer.renderImage(i, 2.5f);
-                ImageIO.write(image,"PNG", new File(path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png"));
+                ImageIO.write(image, "PNG", new File(path + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".png"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,22 +114,22 @@ public class PdfUtil {
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description //根据文件路径保存pdf的缩略图
      * @Date 7:21 下午 2022/7/24
      * @Param [pdfPath]
-     * @return void
      **/
-    public static void pdfThumbnail (String pdfPath) throws FileNotFoundException {
+    public static void pdfThumbnail(String pdfPath) throws FileNotFoundException {
         pdfThumbnail(new FileInputStream(pdfPath));
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description //根据文件输入流保存pdf缩略图
      * @Date 7:21 下午 2022/7/24
      * @Param [inputStream]
-     * @return void
      **/
     public static void pdfThumbnail(InputStream inputStream) {
         // 新建pdf文件的路径
@@ -129,11 +139,11 @@ public class PdfUtil {
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description //根据文件输入流和图片地址保存缩略图
      * @Date 7:22 下午 2022/7/24
      * @Param [inputStream, picPath]
-     * @return void
      **/
     public static void pdfThumbnail(InputStream inputStream, String picPath) {
         try {
@@ -141,13 +151,12 @@ public class PdfUtil {
             PDFRenderer renderer = new PDFRenderer(doc);
             // 第二个参数是设置缩放比(即像素)
             BufferedImage image = renderer.renderImage(0, 2.0f);
-            ImageIO.write(image,"PNG", new File(picPath));
+            ImageIO.write(image, "PNG", new File(picPath));
             doc.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 
 
     public static void main(String[] args) throws IOException {

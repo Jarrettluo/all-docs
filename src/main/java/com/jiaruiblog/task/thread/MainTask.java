@@ -45,7 +45,7 @@ public class MainTask implements RunnableTask{
         // 更新子任务数据,开始更新状态，开始进行解析等等
 
         try {
-            System.out.println("收到分类第三节福利大奖");
+            System.out.println("开始进行程序执行");
             System.out.println(taskData);
             // 调用执行器执行任务
             this.taskExecutor.execute(taskData);

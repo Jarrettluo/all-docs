@@ -135,4 +135,6 @@ public interface IFileService {
      * @return java.io.InputStream
      **/
     InputStream getFileThumb(String thumbId);
+
+    byte[] getFileBytes(String thumbId);
 }

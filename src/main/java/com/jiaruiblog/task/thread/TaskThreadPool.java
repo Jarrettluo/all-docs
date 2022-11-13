@@ -52,6 +52,8 @@ public class TaskThreadPool {
 
             @Override
             public void onFailure(Throwable throwable) {
+                System.out.println("失败啦");
+                throwable.printStackTrace();
                 mainTaskList.remove(mainTask);
             }
         };
