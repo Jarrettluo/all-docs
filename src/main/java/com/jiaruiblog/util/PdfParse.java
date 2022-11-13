@@ -1,26 +1,14 @@
 package com.jiaruiblog.util;
 
-import java.io.File;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.pdf.PDFParser;
+import org.apache.tika.sax.BodyContentHandler;
+import org.xml.sax.SAXException;
 
 import java.io.FileInputStream;
-
 import java.io.IOException;
-
-
-
-import org.apache.tika.exception.TikaException;
-
-import org.apache.tika.metadata.Metadata;
-
-import org.apache.tika.parser.ParseContext;
-
-import org.apache.tika.parser.pdf.PDFParser;
-
-import org.apache.tika.sax.BodyContentHandler;
-
-
-
-import org.xml.sax.SAXException;
 
 
 
@@ -34,8 +22,6 @@ import org.xml.sax.SAXException;
  **/
 public class PdfParse {
 
-//    private final static String filePath = "/Users/molly/Downloads/软件开发云服务白皮书.pdf";
-
     private final static String FILE_PATH = "/Users/molly/Desktop/test.pdf/习近平在厦门的副本.pdf";
 
     public static void main(final String[] args) throws IOException, TikaException, SAXException {
@@ -45,7 +31,7 @@ public class PdfParse {
 
         Metadata metadata = new Metadata();
 
-        FileInputStream inputstream = new FileInputStream(new File(FILE_PATH));
+        FileInputStream inputstream = new FileInputStream(FILE_PATH);
 
         ParseContext pcontext = new ParseContext();
 

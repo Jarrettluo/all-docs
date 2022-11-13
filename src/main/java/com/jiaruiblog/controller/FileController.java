@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
-import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.FileContentTypeUtils;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.Date;
@@ -41,9 +41,6 @@ public class FileController {
 
     @Autowired
     private IFileService fileService;
-
-    @Autowired
-    private ElasticService elasticService;
 
     @Autowired
     private TaskExecuteService taskExecuteService;
@@ -72,6 +69,7 @@ public class FileController {
         Optional<FileDocument> file = fileService.getById(id);
         if (file.isPresent()) {
             return ResponseEntity.ok()
+                    // 这里需要进行中文编码
                     .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + file.get().getName())
                     .header(HttpHeaders.CONTENT_TYPE, file.get().getContentType())
                     .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "").header("Connection", "close")
@@ -186,16 +184,10 @@ public class FileController {
 
                 switch (suffix) {
                     case "pdf":
-//                        // 在这里进行上传
-//                        elasticService.uploadFileToEs(file.getInputStream(), fileDocument);
-//                        // 异步进行缩略图的制作
-//                        fileService.updateFileThumb(file.getInputStream(), fileDocument);
-                        taskExecuteService.execute(fileDocument);
-                        break;
                     case "docx":
                     case "pptx":
                     case "xlsx":
-                        elasticService.uploadFileToEsDocx(file.getInputStream(), fileDocument);
+                        taskExecuteService.execute(fileDocument);
                         break;
                     default:
                         break;
@@ -279,12 +271,12 @@ public class FileController {
     public byte[] test() {
 
         File file = new File("thumbnail20220724194018003.png");
-        try (FileInputStream inputStream = new FileInputStream(file);) {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
             byte[] bytes = new byte[inputStream.available()];
             inputStream.read(bytes, 0, inputStream.available());
             return bytes;
         } catch (Exception e) {
-            log.error("预览文档图片报错 ==> {}", e);
+            log.error("预览文档图片报错 ==> ", e);
             return new byte[0];
         }
     }
@@ -305,9 +297,39 @@ public class FileController {
         }
     }
 
-    @GetMapping(value = "/image2/{thumbid}", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/image2/{thumbId}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public byte[] previewThumb2(@PathVariable String thumbid) {
-        return fileService.getFileBytes(thumbid);
+    public byte[] previewThumb2(@PathVariable String thumbId) {
+        return fileService.getFileBytes(thumbId);
+    }
+
+    @GetMapping(value = "/text2/{txtId}", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    public byte[] previewTxt(@PathVariable String txtId) {
+        return fileService.getFileBytes(txtId);
+    }
+
+    @GetMapping(value = "/text/{txtId}", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    public void downloadTxt(@PathVariable String txtId, HttpServletResponse response) {
+        try {
+            byte[] buffer = fileService.getFileBytes(txtId);
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.setCharacterEncoding("UTF-8");
+            //Content-Disposition的作用：告知浏览器以何种方式显示响应返回的文件，用浏览器打开还是以附件的形式下载到本地保存
+            //attachment表示以附件方式下载   inline表示在线打开   "Content-Disposition: inline; filename=文件名.mp3"
+            // filename表示文件的默认名称，因为网络传输只支持URL编码的相关支付，因此需要将文件名URL编码后进行传输,前端收到后需要反编码才能获取到真正的名称
+            response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("字符文件", "UTF-8") + ".txt");
+            // 告知浏览器文件的大小
+            response.addHeader("Content-Length", "" + buffer.length);
+            OutputStream outputStream = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            outputStream.write(buffer);
+            outputStream.flush();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 }

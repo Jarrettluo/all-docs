@@ -1,6 +1,7 @@
 package com.jiaruiblog.task.data;
 
 import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.enums.DocType;
 import lombok.Data;
 
 /**
@@ -16,6 +17,8 @@ public class TaskData {
     String txtFilePath;
 
     String thumbFilePath;
+
+    DocType docType;
 
 
 }

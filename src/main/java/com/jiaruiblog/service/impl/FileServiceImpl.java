@@ -525,6 +525,11 @@ public class FileServiceImpl implements IFileService {
         documentVO.setCollectNum(collectServiceImpl.collectNum(docId));
         documentVO.setCategoryVO(categoryServiceImpl.queryByDocId(docId));
         documentVO.setTagVOList(tagServiceImpl.queryByDocId(docId));
+        // 查询文档的信息:新增文档地址，文档错误信息，文本id
+        documentVO.setDocState(fileDocument.getDocState());
+        documentVO.setErrorMsg(fileDocument.getErrorMsg());
+        documentVO.setTxtId(fileDocument.getErrorMsg());
+
         return documentVO;
     }
 
@@ -656,7 +661,6 @@ public class FileServiceImpl implements IFileService {
 
         if (StringUtils.hasText(thumbId)) {
             Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(thumbId));
-//            Query gridQuery = new Query().addCriteria(Criteria.where("_id").is(thumbId));
             GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
 
             try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId());) {

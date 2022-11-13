@@ -10,8 +10,10 @@ import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.SpringApplicationContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -78,17 +80,7 @@ public abstract class TaskExecutor {
             throw new TaskRunException("存入es的过程中报错了", e);
         }
 
-        try ( RandomAccessFile file = new RandomAccessFile(textFilePath, "r")){
-            String str = file.readLine();
-            if (str == null) {
-                str = "无描述";
-            } else if (str.length() > 128) {
-                str = str.substring(0, 128);
-            }
-            fileDocument.setDescription(str);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        handleDescription(textFilePath, fileDocument);
 
         // 被文本文件上传到gridFS系统中
         try (FileInputStream inputStream = new FileInputStream(textFilePath)) {
@@ -110,6 +102,27 @@ public abstract class TaskExecutor {
             log.error("删除文件路径{} ==> 失败信息{}", textFilePath, e);
         }
 
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 设置描述内容
+     * @Date 18:54 2022/11/13
+     * @Param [textFilePath, fileDocument]
+     * @return void
+     **/
+    private void handleDescription(String textFilePath, FileDocument fileDocument) {
+        try{
+            String str = FileUtils.readLines(new File(textFilePath), StandardCharsets.UTF_8).get(0);
+            if (str == null) {
+                str = "无描述";
+            } else if (str.length() > 128) {
+                str = str.substring(0, 128);
+            }
+            fileDocument.setDescription(str);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

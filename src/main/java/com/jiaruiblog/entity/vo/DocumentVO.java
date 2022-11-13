@@ -1,5 +1,6 @@
 package com.jiaruiblog.entity.vo;
 
+import com.jiaruiblog.enums.DocStateEnum;
 import lombok.Data;
 
 import java.util.Date;
@@ -34,6 +35,12 @@ public class DocumentVO {
     private String userName;
 
     private String thumbId;
+
+    private DocStateEnum docState;
+
+    private String errorMsg;
+
+    private String txtId;
 
     private Date createTime;
 

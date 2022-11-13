@@ -11,6 +11,8 @@ public enum DocType {
     PDF,
     // word文档
     DOCX,
+    PPTX,
+    XLSX,
     // unknown
     UNKNOWN;
 
@@ -20,6 +22,10 @@ public enum DocType {
                 return PDF;
             case ".docx":
                 return DOCX;
+            case ".pptx":
+                return PPTX;
+            case ".xlsx":
+                return XLSX;
             default:
                 return UNKNOWN;
         }

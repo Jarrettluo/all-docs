@@ -38,6 +38,8 @@ public class TaskExecutorFactory {
                 taskExecutor = new PdfWordTaskExecutor();
                 break;
             case DOCX:
+            case PPTX:
+            case XLSX:
                 taskExecutor = new DocxExecutor();
                 break;
             default:

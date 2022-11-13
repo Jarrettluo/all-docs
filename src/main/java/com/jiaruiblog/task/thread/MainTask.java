@@ -40,7 +40,9 @@ public class MainTask implements RunnableTask {
         taskData.setThumbFilePath("");
         taskData.setThumbFilePath("");
         String fileSuffix = fileDocument.getSuffix();
-        this.taskExecutor = TaskExecutorFactory.getTaskExecutor(DocType.getDocType(fileSuffix));
+        DocType docType = DocType.getDocType(fileSuffix);
+        taskData.setDocType(docType);
+        this.taskExecutor = TaskExecutorFactory.getTaskExecutor(docType);
     }
 
     /**
@@ -54,7 +56,7 @@ public class MainTask implements RunnableTask {
         taskData.getFileDocument().setDocState(DocStateEnum.SUCCESS);
         updateTaskStatus();
 
-        // 更新数据
+        // 更新文档的数据
         IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
         fileService.updateFile(taskData.getFileDocument());
     }
