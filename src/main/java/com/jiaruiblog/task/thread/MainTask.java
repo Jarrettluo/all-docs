@@ -40,10 +40,20 @@ public class MainTask implements RunnableTask {
         this.taskExecutor = TaskExecutorFactory.getTaskExecutor(DocType.getDocType(fileSuffix));
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 成功以后更新文件
+     * @Date 18:17 2022/11/13
+     * @Param []
+     **/
     @Override
     public void success() {
         taskData.getFileDocument().setDocState(DocStateEnum.SUCCESS);
         updateTaskStatus();
+
+        // 更新数据
+        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        fileService.updateFile(taskData.getFileDocument());
     }
 
     @Override
@@ -59,6 +69,9 @@ public class MainTask implements RunnableTask {
         if (null == taskExecutor) {
             throw new TaskRunException("执行器失败");
         }
+        if (taskData.getFileDocument() != null) {
+            removeExistGridFs();
+        }
         // 更新子任务数据,开始更新状态，开始进行解析等等
         taskData.getFileDocument().setDocState(DocStateEnum.ON_PROCESS);
         updateTaskStatus();
@@ -70,17 +83,26 @@ public class MainTask implements RunnableTask {
 
     @Override
     public void fallback() {
-        log.info("这里进行数据的回滚");
         // 删除es中的数据，删除thumb数据，删除存储的txt文本文件
 
         try {
             String txtFilePath = taskData.getTxtFilePath();
-            if(new File(txtFilePath).exists()) {
+            if (new File(txtFilePath).exists()) {
                 Files.delete(Paths.get(txtFilePath));
             }
-        }  catch (IOException e) {
+            String picFilePath = taskData.getThumbFilePath();
+            if (new File(picFilePath).exists()) {
+                Files.delete(Paths.get(picFilePath));
+            }
+        } catch (IOException e) {
             log.error("删除文件路径{} ==> 失败信息{}", taskData.getTxtFilePath(), e);
         }
+
+        // 删除相关的文件
+        removeExistGridFs();
+
+        // 删除es中的数据
+
     }
 
 
@@ -92,6 +114,22 @@ public class MainTask implements RunnableTask {
         } catch (TaskRunException e) {
             throw new TaskRunException("更新文档状态失败", e);
         }
+    }
+
+    /**
+     * @return void
+     * @Author luojiarui
+     * @Description 删除已经存在的文本文件和缩略图文件
+     * @Date 18:19 2022/11/13
+     * @Param []
+     **/
+    private void removeExistGridFs() {
+        FileDocument fileDocument = taskData.getFileDocument();
+        String textFileId = fileDocument.getTextFileId();
+        String thumbFileId = fileDocument.getThumbId();
+
+        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        fileService.deleteGridFs(textFileId, thumbFileId);
     }
 
 }

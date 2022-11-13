@@ -116,6 +116,17 @@ public class FileServiceImpl implements IFileService {
         return fileDocument;
     }
 
+    @Override
+    public void updateFile(FileDocument fileDocument) {
+        Query query = new Query(Criteria.where("_id").is(fileDocument.getId()));
+        Update update = new Update();
+        update.set("textFileId", fileDocument.getTextFileId());
+        update.set("thumbId", fileDocument.getThumbId());
+        update.set("description", fileDocument.getDescription());
+        mongoTemplate.updateFirst(query, update, FileDocument.class, collectionName);
+
+    }
+
     /**
      * @return void
      * @Author luojiarui
@@ -138,6 +149,19 @@ public class FileServiceImpl implements IFileService {
             log.error("更新文档状态信息{}==>出错==>{}", fileDocument, e);
             throw new TaskRunException("更新文档状态信息==>出错==>{}", e);
         }
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 从gridFs中删除文件
+     * @Date 18:01 2022/11/13
+     * @Param [id]
+     * @return void
+     **/
+    @Override
+    public void deleteGridFs(String ...id) {
+        Query deleteQuery = new Query().addCriteria(Criteria.where(FILE_NAME).in(id));
+        gridFsTemplate.delete(deleteQuery);
     }
 
     /**

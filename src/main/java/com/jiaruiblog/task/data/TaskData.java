@@ -15,5 +15,7 @@ public class TaskData {
 
     String txtFilePath;
 
+    String thumbFilePath;
+
 
 }

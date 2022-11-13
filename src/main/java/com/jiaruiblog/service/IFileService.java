@@ -40,12 +40,30 @@ public interface IFileService {
 
     /**
      * @Author luojiarui
+     * @Description 重建索引和缩略图的时候专用的
+     * @Date 18:05 2022/11/13
+     * @Param [fileDocument]
+     * @return void
+     **/
+    void updateFile(FileDocument fileDocument);
+
+    /**
+     * @Author luojiarui
      * @Description // 更新文档状态
      * @Date 15:41 2022/11/13
      * @Param [fileDocument, state]
      * @return void
      **/
     void updateState(FileDocument fileDocument, DocStateEnum state, String errorMsg) throws TaskRunException;
+
+    /**
+     * @Author luojiarui
+     * @Description // 删除GridFS系统中的文件
+     * @Date 18:02 2022/11/13
+     * @Param [id]
+     * @return void
+     **/
+    void deleteGridFs(String ...id);
 
     /**
      * 删除文件

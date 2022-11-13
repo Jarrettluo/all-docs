@@ -15,7 +15,6 @@ public class PdfWordTaskExecutor extends TaskExecutor {
 
     @Override
     protected void readText(InputStream is, String textFilePath) throws IOException {
-        System.out.println("sdfldsjflsdj");
         PdfUtil.readPdfText(is, textFilePath);
     }
 
