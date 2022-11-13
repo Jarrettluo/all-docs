@@ -3,6 +3,7 @@ package com.jiaruiblog.task.executor;
 import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
+import com.jiaruiblog.enums.FileFormatEnum;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.impl.ElasticServiceImpl;
 import com.jiaruiblog.task.data.TaskData;
@@ -17,7 +18,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -28,57 +28,18 @@ import java.util.Date;
 @Slf4j
 public abstract class TaskExecutor {
 
-    protected InputStream downloadFile(String gridFsId) {
-        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
-        return fileService.getFileThumb(gridFsId);
-    }
-
-    protected byte[] downFileBytes(String gridFsId){
-        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
-        return fileService.getFileBytes(gridFsId);
-    }
 
     private static final String PDF_SUFFIX = ".pdf";
 
     public void execute(TaskData taskData) throws TaskRunException {
-        System.out.println(taskData);
+
+        // 第一步下载文件，转换为byte数组
         FileDocument fileDocument = taskData.getFileDocument();
-//        InputStream docInputStream = downloadFile(fileDocument.getGridfsId());
-
-//        byte[] content = IoUtil.readBytes(docInputStream);
-//        FileInputStream fileInputStream = new FileInputStream(content);
-
-        InputStream xx = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
-
-        System.out.println(xx);
-        System.out.println("取到文件流啦");
-//        FileInputStream fileInputStream = (FileInputStream) (docInputStream);
-//        if (docInputStream == null) {
-//            System.out.println("文件流关闭");
-//            throw new TaskRunException("拉取数据的时候出错了，请检查！");
-//        }
-//        byte[] bytes = new byte[0];
-//        try {
-//            bytes = new byte[fileInputStream.available()];
-//            fileInputStream.read(bytes, 0, fileInputStream.available());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            throw new TaskRunException("拉取数据的时候出错了，请检查！");
-//        }
-
-        System.out.println("jflsjfldsj");
-
-//        if (docInputStream == null) {
-//            System.out.println("文件流关闭");
-//            throw new TaskRunException("拉取数据的时候出错了，请检查！");
-//        }
-//
-//        System.out.println(docInputStream);
+        InputStream docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
 
         try {
-            System.out.println(xx);
             // 将文本索引到es中
-            uploadFileToEs(xx, fileDocument);
+            uploadFileToEs(docInputStream, fileDocument);
         } catch (Exception e) {
             throw new TaskRunException("建立索引的时候出错拉！{}", e);
         }
@@ -92,31 +53,55 @@ public abstract class TaskExecutor {
 
     }
 
+    /**
+     * @Author luojiarui
+     * @Description // 从gridFS 系统中下载文件为字节流
+     * @Date 15:02 2022/11/13
+     * @Param [gridFsId]
+     * @return byte[]
+     **/
+    protected byte[] downFileBytes(String gridFsId){
+        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        return fileService.getFileBytes(gridFsId);
+    }
+
     public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
         String textFilePath = "./"+ fileDocument.getMd5() + fileDocument.getName() + ".txt";
-        System.out.println("textfilePath");
-        System.out.println(textFilePath);
         try {
-            // TODO 就是在这里做出区别
+            // 根据不同的执行器，执行不同的文本提取方法，在这里做出区别
             readText(is, textFilePath);
             if (!new File(textFilePath).exists()) {
-                return;
+                throw new TaskRunException("文本文件不存在，需要进行重新提取");
             }
-            FileObj fileObj = readFile(textFilePath);
+            FileObj fileObj = new FileObj();
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());
             fileObj.setType(fileDocument.getContentType());
+            fileObj.readFile(textFilePath);
 //            this.upload(fileObj);
-            System.out.println(fileObj);
+
+        } catch (IOException | TaskRunException e) {
+            e.printStackTrace();
+        }
+
+        // 被文本文件上传到gridFS系统中
+        try(FileInputStream inputStream = new FileInputStream(textFilePath)) {
+
+            IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+            String txtObjId = fileService.uploadFileToGridFs(FileFormatEnum.TEXT.getFilePrefix(),
+                    inputStream, FileFormatEnum.TEXT.getContentType());
+            fileDocument.setTextFileId(txtObjId);
+
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-//            // 删除临时的txt文件
-//            File file = new File(textFilePath);
-//            if(file.exists()) {
-//                file.deleteOnExit();
-//            }
         }
+
+        try {
+            Files.delete(Paths.get(textFilePath));
+        }  catch (IOException e) {
+            log.error("删除文件路径{} ==> 失败信息{}", textFilePath, e);
+        }
+
     }
 
     /**
@@ -135,28 +120,13 @@ public abstract class TaskExecutor {
      */
     protected abstract void makeThumb(InputStream is, String picPath) throws IOException;
 
-
-    public FileObj readFile(String path) throws IOException {
-
-        //读文件
-        File file = new File(path);
-        FileObj fileObj = new FileObj();
-
-        fileObj.setName(file.getName());
-        fileObj.setType(file.getName().substring(file.getName().lastIndexOf(".") + 1));
-
-        byte[] bytes = getContent(file);
-
-        //将文件内容转化为base64编码
-        String base64 = Base64.getEncoder().encodeToString(bytes);
-        fileObj.setContent(base64);
-
-        return fileObj;
-    }
-
-
-
-
+    /**
+     * @Author luojiarui
+     * @Description // 上传整备好的文本文件进行上传到es中
+     * @Date 15:11 2022/11/13
+     * @Param [fileObj]
+     * @return void
+     **/
     public void upload(FileObj fileObj) throws IOException {
         ElasticServiceImpl elasticService = SpringApplicationContext.getBean(ElasticServiceImpl.class);
         elasticService.upload(fileObj);

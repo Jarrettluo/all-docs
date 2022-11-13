@@ -179,7 +179,9 @@ public class ElasticServiceImpl implements ElasticService {
 
         try {
             PdfUtil.readPdfText(is, textFilePath);
-            FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
+//            FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
+            FileObj fileObj = new FileObj();
+            fileObj.readFile(textFilePath);
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());
             fileObj.setType(fileDocument.getContentType());
@@ -206,7 +208,9 @@ public class ElasticServiceImpl implements ElasticService {
         String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
         try {
             MsExcelParse.readPdfText(is, textFilePath);
-            FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
+//            FileObj fileObj = fileOperationServiceImpl.readFile(textFilePath);
+            FileObj fileObj = new FileObj();
+            fileObj.readFile(textFilePath);
             fileObj.setId(fileDocument.getMd5());
             fileObj.setName(fileDocument.getName());
             fileObj.setType(fileDocument.getContentType());

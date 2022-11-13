@@ -1,5 +1,6 @@
 package com.jiaruiblog.entity;
 
+import com.jiaruiblog.enums.DocStateEnum;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -71,9 +72,24 @@ public class FileDocument {
     private String thumbId;
 
     /**
+     * 文本文件的id
+     **/
+    private String textFileId;
+
+    /**
      * 缩略图
      **/
     private List<Thumbnail> thumbnailList;
+
+    /**
+     * 文档的状态
+     **/
+    private DocStateEnum docState = DocStateEnum.WAITE;
+
+    /**
+     * 文档错误信息
+     **/
+    private String errorMsg;
 
 
 }

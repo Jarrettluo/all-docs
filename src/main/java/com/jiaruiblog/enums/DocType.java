@@ -16,9 +16,9 @@ public enum DocType {
 
     public static DocType getDocType(String suffixName) {
         switch (suffixName) {
-            case "pdf":
+            case ".pdf":
                 return PDF;
-            case "docx":
+            case ".docx":
                 return DOCX;
             default:
                 return UNKNOWN;

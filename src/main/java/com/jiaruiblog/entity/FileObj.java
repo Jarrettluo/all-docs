@@ -20,7 +20,7 @@ import java.util.Base64;
  * @Version 1.0
  **/
 @Data
-@Document(indexName = "docwrite", createIndex = true)
+@Document(indexName = "docwrite")
 public class FileObj {
 
     /**
@@ -49,27 +49,20 @@ public class FileObj {
     private String content;
 
 
-    public FileObj readFile(String path) throws IOException {
+    public void readFile(String path){
         //读文件
         File file = new File(path);
-
-        FileObj fileObj = new FileObj();
-        fileObj.setName(file.getName());
-        fileObj.setType(file.getName().substring(file.getName().lastIndexOf(".") + 1));
-
         byte[] bytes = getContent(file);
-
         //将文件内容转化为base64编码
-        String base64 = Base64.getEncoder().encodeToString(bytes);
-        fileObj.setContent(base64);
-
-        return fileObj;
+        this.content = Base64.getEncoder().encodeToString(bytes);
     }
 
     private byte[] getContent(File file) {
         byte[] bytesArray = new byte[(int) file.length()];
         try (FileInputStream fileInputStream = new FileInputStream(file)){
-            fileInputStream.read(bytesArray);
+            if (fileInputStream.read(bytesArray) < 0) {
+                return bytesArray;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -8,8 +8,10 @@ import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.vo.DocumentVO;
+import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
+import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.PdfUtil;
 import com.mongodb.client.gridfs.GridFSBucket;
@@ -115,6 +117,27 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @Author luojiarui
+     * @Description // 更新文档状态
+     * @Date 15:41 2022/11/13
+     * @Param [fileDocument, state]
+     * @return void
+     **/
+    @Override
+    public void updateState(FileDocument fileDocument, DocStateEnum state) throws TaskRunException {
+        Query query = new Query(Criteria.where("_id").is(fileDocument.getId()));
+        Update update  = new Update();
+        update.set("docState", state);
+        try {
+            mongoTemplate.updateFirst(query, update, FileDocument.class, collectionName);
+        } catch (Exception e) {
+            log.error("更新文档状态信息{}==>出错==>{}", fileDocument, e);
+            throw new TaskRunException("更新文档状态信息==>出错==>{}", e);
+        }
+
+    }
+
+    /**
      * 表单上传附件
      *
      * @param md5
@@ -167,6 +190,21 @@ public class FileServiceImpl implements IFileService {
         gridFsTemplate.store(in, gridfsId, contentType);
         // 其实应该使用文件id进行存储
 //        ObjectId objectId = gridFsTemplate.store()
+        return gridfsId;
+    }
+
+    /**
+     * 上传文件到Mongodb的GridFs中
+     *
+     * @param in
+     * @param contentType
+     * @return
+     */
+    @Override
+    public String uploadFileToGridFs(String prefix, InputStream in, String contentType) {
+        String gridfsId = prefix + IdUtil.simpleUUID();
+        //文件，存储在GridFS中
+        gridFsTemplate.store(in, gridfsId, contentType);
         return gridfsId;
     }
 
@@ -395,6 +433,7 @@ public class FileServiceImpl implements IFileService {
                 log.error("连接redis失败，暂时无法写入数据库",e);
             }
         }
+        log.info("查询到的详细细节内容是:{}", fileDocument);
         // 查询评论信息，查询分类信息，查询分类关系，查询标签信息，查询标签关系信息
         return BaseApiResult.success(convertDocument(null, fileDocument));
     }

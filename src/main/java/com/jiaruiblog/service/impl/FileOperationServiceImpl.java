@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 /**
@@ -22,25 +21,6 @@ import java.util.List;
 @Slf4j
 @Service
 public class FileOperationServiceImpl implements FileOperationService {
-
-    public FileObj readFile(String path) throws IOException {
-
-        //读文件
-        File file = new File(path);
-        FileObj fileObj = new FileObj();
-
-        fileObj.setName(file.getName());
-        fileObj.setType(file.getName().substring(file.getName().lastIndexOf(".") + 1));
-
-        byte[] bytes = getContent(file);
-
-        //将文件内容转化为base64编码
-        String base64 = Base64.getEncoder().encodeToString(bytes);
-        fileObj.setContent(base64);
-
-        return fileObj;
-    }
-
 
     /**
      * 这个方法将一个目录下所有的文件读入然后全部上传
@@ -56,7 +36,8 @@ public class FileOperationServiceImpl implements FileOperationService {
 
         File[] files = file.listFiles();
         for (File f: files) {
-            FileObj fileObj = readFile(f.getAbsolutePath());
+            FileObj fileObj = new FileObj();
+            fileObj.readFile(f.getAbsolutePath());
             fileObjs.add(fileObj);
         }
 

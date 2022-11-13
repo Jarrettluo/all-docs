@@ -17,4 +17,6 @@ public interface RunnableTask extends Runnable {
      */
     void failed();
 
+    void fallback();
+
 }

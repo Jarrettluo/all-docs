@@ -1,6 +1,7 @@
 package com.jiaruiblog.task.thread;
 
 import com.google.common.util.concurrent.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @Date 2022/10/20 17:37
  * @Version 1.0
  */
+@Slf4j
 public class TaskThreadPool {
 
     private final ThreadPoolExecutor threadPoolExecutor;
@@ -47,13 +49,15 @@ public class TaskThreadPool {
         FutureCallback<V> futureCallback = new FutureCallback<V>() {
             @Override
             public void onSuccess(Object o) {
+                mainTask.success();
                 mainTaskList.remove(mainTask);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                System.out.println("失败啦");
-                throwable.printStackTrace();
+                mainTask.failed();
+                mainTask.fallback();
+                log.info("报错的内容{}", throwable.getMessage());
                 mainTaskList.remove(mainTask);
             }
         };

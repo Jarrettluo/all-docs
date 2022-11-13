@@ -1,7 +1,9 @@
 package com.jiaruiblog.service;
 
-import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.entity.dto.DocumentDTO;
+import com.jiaruiblog.enums.DocStateEnum;
+import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +37,15 @@ public interface IFileService {
      * @return
      */
     FileDocument saveFile(FileDocument fileDocument, InputStream inputStream);
+
+    /**
+     * @Author luojiarui
+     * @Description // 更新文档状态
+     * @Date 15:41 2022/11/13
+     * @Param [fileDocument, state]
+     * @return void
+     **/
+    void updateState(FileDocument fileDocument, DocStateEnum state) throws TaskRunException;
 
     /**
      * 删除文件
@@ -137,4 +148,9 @@ public interface IFileService {
     InputStream getFileThumb(String thumbId);
 
     byte[] getFileBytes(String thumbId);
+
+    /**
+     * 保存文件流到dfs系统中
+     **/
+    String uploadFileToGridFs(String prefix, InputStream in, String contentType);
 }

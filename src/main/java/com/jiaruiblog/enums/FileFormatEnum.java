@@ -50,21 +50,33 @@ public enum FileFormatEnum implements BaseEnum {
     /**
      * png
      */
-    PNG(9, "png"),
+    PNG(9, "png", "png_", "image/png"),
 
     /**
      * jpeg
      */
-    JPEG(10, "JPEG");
+    JPEG(10, "JPEG"),
+
+    TEXT(11,"txt","txt_","text/plain");
 
 
     private Integer code;
 
     private String description;
 
+    private String filePrefix;
+
+    private String contentType;
+
     FileFormatEnum(int code, String description) {
         this.code = code;
         this.description = description;
+    }
+
+    FileFormatEnum(int code, String description, String filePrefix, String contentType) {
+        this(code, description);
+        this.filePrefix = filePrefix;
+        this.contentType = contentType;
     }
 
     @Override
@@ -74,5 +86,13 @@ public enum FileFormatEnum implements BaseEnum {
 
     public String getDescription() {
         return this.description;
+    }
+
+    public String getFilePrefix() {
+        return this.filePrefix;
+    }
+
+    public String getContentType() {
+        return this.contentType;
     }
 }
