@@ -15,7 +15,7 @@ public final class ErrorApiResult extends BaseApiResult implements Serializable 
     /**
      * 错误信息
      */
-    protected String message;
+    public String message;
 
     public ErrorApiResult(Integer code, String message) {
         this.timestamp = System.currentTimeMillis();

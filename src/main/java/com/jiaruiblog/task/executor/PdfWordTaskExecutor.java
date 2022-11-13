@@ -20,7 +20,6 @@ public class PdfWordTaskExecutor extends TaskExecutor {
 
     @Override
     protected void makeThumb(InputStream is, String picPath) {
-        // super.makeThumb();
         PdfUtil.pdfThumbnail(is, picPath);
     }
 }

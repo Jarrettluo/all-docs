@@ -36,13 +36,13 @@ public abstract class TaskExecutor {
             throw new TaskRunException("建立索引的时候出错拉！", e);
         }
 
+        docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
         try {
             // 制作不同分辨率的缩略图
-            updateFileThumb(new FileInputStream("abc"), taskData.getFileDocument(), taskData);
+            updateFileThumb(docInputStream, taskData.getFileDocument(), taskData);
         } catch (Exception e) {
             throw new TaskRunException("建立缩略图的时候出错啦！", e);
         }
-
     }
 
     /**

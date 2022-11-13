@@ -10,6 +10,7 @@ import com.jiaruiblog.task.executor.TaskExecutor;
 import com.jiaruiblog.task.executor.TaskExecutorFactory;
 import com.jiaruiblog.util.SpringApplicationContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,8 @@ public class MainTask implements RunnableTask {
      **/
     public MainTask(FileDocument fileDocument) {
         taskData.setFileDocument(fileDocument);
+        taskData.setThumbFilePath("");
+        taskData.setThumbFilePath("");
         String fileSuffix = fileDocument.getSuffix();
         this.taskExecutor = TaskExecutorFactory.getTaskExecutor(DocType.getDocType(fileSuffix));
     }
@@ -66,10 +69,11 @@ public class MainTask implements RunnableTask {
 
     @Override
     public void run() {
-        if (null == taskExecutor) {
+        FileDocument fileDocument = taskData.getFileDocument();
+        if (null == taskExecutor || fileDocument == null) {
             throw new TaskRunException("执行器失败");
         }
-        if (taskData.getFileDocument() != null) {
+        if (StringUtils.hasText(fileDocument.getThumbId()) || StringUtils.hasText(fileDocument.getTextFileId())) {
             removeExistGridFs();
         }
         // 更新子任务数据,开始更新状态，开始进行解析等等
@@ -117,7 +121,6 @@ public class MainTask implements RunnableTask {
     }
 
     /**
-     * @return void
      * @Author luojiarui
      * @Description 删除已经存在的文本文件和缩略图文件
      * @Date 18:19 2022/11/13

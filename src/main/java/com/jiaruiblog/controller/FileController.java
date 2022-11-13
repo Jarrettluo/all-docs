@@ -308,10 +308,6 @@ public class FileController {
     @GetMapping(value = "/image2/{thumbid}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public byte[] previewThumb2(@PathVariable String thumbid) {
-        InputStream inputStream = fileService.getFileThumb(thumbid);
-        if (inputStream == null) {
-            return new byte[0];
-        }
-        return IoUtil.readBytes(inputStream);
+        return fileService.getFileBytes(thumbid);
     }
 }
