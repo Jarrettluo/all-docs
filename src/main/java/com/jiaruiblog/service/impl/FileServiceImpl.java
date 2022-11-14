@@ -528,7 +528,7 @@ public class FileServiceImpl implements IFileService {
         // 查询文档的信息:新增文档地址，文档错误信息，文本id
         documentVO.setDocState(fileDocument.getDocState());
         documentVO.setErrorMsg(fileDocument.getErrorMsg());
-        documentVO.setTxtId(fileDocument.getErrorMsg());
+        documentVO.setTxtId(fileDocument.getTextFileId());
 
         return documentVO;
     }

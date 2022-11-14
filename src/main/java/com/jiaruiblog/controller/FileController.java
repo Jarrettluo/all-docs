@@ -7,8 +7,10 @@ import com.google.common.collect.Lists;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
+import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TaskExecuteService;
+import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -126,7 +129,7 @@ public class FileController {
             String name = request.getParameter("name");
             String description = request.getParameter("description");
             InputStream in = new ByteArrayInputStream(data);
-            log.info("data_string:" + StrUtil.str(data, "UTF-8"));
+            log.info("data_string:" + StrUtil.str(data, StandardCharsets.UTF_8));
             if (data.length > 0) {
                 FileDocument fileDocument = new FileDocument();
                 fileDocument.setName(name);
@@ -318,6 +321,9 @@ public class FileController {
             response.reset();
             // 设置response的Header
             response.setCharacterEncoding("UTF-8");
+            // 解决跨域问题，这句话是关键，对任意的域都可以，如果需要安全，可以设置成安前的域名
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
             //Content-Disposition的作用：告知浏览器以何种方式显示响应返回的文件，用浏览器打开还是以附件的形式下载到本地保存
             //attachment表示以附件方式下载   inline表示在线打开   "Content-Disposition: inline; filename=文件名.mp3"
             // filename表示文件的默认名称，因为网络传输只支持URL编码的相关支付，因此需要将文件名URL编码后进行传输,前端收到后需要反编码才能获取到真正的名称
@@ -330,6 +336,27 @@ public class FileController {
             outputStream.flush();
         } catch (IOException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 重建文档索引，继续加入到列表中
+     * @Date 22:19 2022/11/14
+     * @Param [docId]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @GetMapping("/rebuildIndex")
+    public BaseApiResult rebuildIndex(@RequestParam("docId") String docId) {
+        if (!StringUtils.hasText(docId)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
+        FileDocument fileDocument = fileService.queryById(docId);
+        if (fileDocument != null && fileDocument.getDocState() != DocStateEnum.ON_PROCESS) {
+            taskExecuteService.execute(fileDocument);
+            return BaseApiResult.success(MessageConstant.SUCCESS);
+        } else {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
     }
 }
