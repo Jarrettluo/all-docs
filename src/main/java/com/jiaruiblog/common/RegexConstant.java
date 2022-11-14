@@ -1,15 +1,15 @@
 package com.jiaruiblog.common;
 
 /**
- * @ClassName RegxConstant
- * @Description TODO
+ * @ClassName RegexConstant
+ * @Description 正则表达式
  * @Author luojiarui
  * @Date 2022/11/8 23:23
  * @Version 1.0
  **/
-public class RegxConstant {
+public class RegexConstant {
 
-    private RegxConstant() {
+    private RegexConstant() {
         throw new IllegalStateException("RegxConstant class error!");
     }
 

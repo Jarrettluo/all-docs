@@ -25,44 +25,20 @@ public class PdfParse {
     private final static String FILE_PATH = "/Users/molly/Desktop/test.pdf/习近平在厦门的副本.pdf";
 
     public static void main(final String[] args) throws IOException, TikaException, SAXException {
-
-
         BodyContentHandler handler = new BodyContentHandler();
-
         Metadata metadata = new Metadata();
-
         FileInputStream inputstream = new FileInputStream(FILE_PATH);
-
         ParseContext pcontext = new ParseContext();
-
-
-
         //parsing the document using PDF parser
-
         PDFParser pdfparser = new PDFParser();
-
         pdfparser.parse(inputstream, handler, metadata,pcontext);
-
-
-
         //getting the content of the document
-
         System.out.println("Contents of the PDF :" + handler.toString());
-
-
-
         //getting metadata of the document
-
         System.out.println("Metadata of the PDF:");
-
         String[] metadataNames = metadata.names();
-
-
-
         for(String name : metadataNames) {
-
             System.out.println(name+ " : " + metadata.get(name));
-
         }
 
     }
