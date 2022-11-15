@@ -50,7 +50,7 @@ public class MsExcelParse {
      **/
     public static String parseExcel(InputStream inputStream) throws IOException, TikaException, SAXException {
 
-        //detecting the file type
+        //detecting the file filterTypeEnum
 
         BodyContentHandler handler = new BodyContentHandler();
 

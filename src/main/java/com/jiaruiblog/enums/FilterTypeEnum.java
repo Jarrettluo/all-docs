@@ -5,7 +5,7 @@ import com.jiaruiblog.util.converter.BaseEnum;
 /**
  * @author jiarui.luo
  */
-public enum Type implements BaseEnum {
+public enum FilterTypeEnum implements BaseEnum {
 
     /**
      * all
@@ -29,7 +29,7 @@ public enum Type implements BaseEnum {
 
     private Integer code;
 
-    Type(int code) {
+    FilterTypeEnum(int code) {
         this.code = code;
     }
 

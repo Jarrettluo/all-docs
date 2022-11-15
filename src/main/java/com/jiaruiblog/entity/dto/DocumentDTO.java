@@ -1,7 +1,7 @@
 package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.enums.Type;
+import com.jiaruiblog.enums.FilterTypeEnum;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
 public class DocumentDTO {
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Type type;
+    private FilterTypeEnum type;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private String filterWord;

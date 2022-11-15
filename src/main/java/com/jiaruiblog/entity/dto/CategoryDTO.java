@@ -1,7 +1,7 @@
 package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.enums.Type;
+import com.jiaruiblog.enums.FilterTypeEnum;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -24,7 +24,8 @@ public class CategoryDTO {
     private String name;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Type type;
+    private FilterTypeEnum type;
+
 
     private String id;
 

@@ -1,9 +1,10 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.RemoveObjectDTO;
 
-import com.jiaruiblog.enums.Type;
+import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
@@ -47,7 +48,7 @@ public class DocumentController {
     @PostMapping(value = "/list")
     public BaseApiResult list(@RequestBody DocumentDTO documentDTO) throws IOException {
         if (StringUtils.hasText(documentDTO.getFilterWord()) &&
-                documentDTO.getType() == Type.FILTER) {
+                documentDTO.getType() == FilterTypeEnum.FILTER) {
             String filterWord = documentDTO.getFilterWord();
             //非法敏感词汇判断
             SensitiveFilter filter = SensitiveFilter.getInstance();
@@ -71,6 +72,18 @@ public class DocumentController {
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO) {
         return iFileService.remove(removeObjectDTO.getId());
+    }
+
+
+    @ApiOperation(value = "2.3 指定分类时，查询文档的分页列表页", notes = "根据参数查询文档列表")
+    @GetMapping(value = "/listWithCategory")
+    public BaseApiResult listWithCategory(@RequestParam DocumentDTO documentDTO) {
+        FilterTypeEnum filterType = documentDTO.getType();
+        if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG) ) {
+            return iFileService.listWithCategory(documentDTO);
+        } else {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
     }
 
     @GetMapping("/addKey")

@@ -147,6 +147,8 @@ public interface IFileService {
      */
     BaseApiResult remove(String id);
 
+    BaseApiResult listWithCategory(DocumentDTO documentDTO);
+
     /**
      * update file thumb
      * @param inputStream FileDocument

@@ -481,6 +481,33 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @Author luojiarui
+     * @Description 查询不同分类条件的文档列表
+     * @Date 22:44 2022/11/15
+     * @Param [documentDTO]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Override
+    public BaseApiResult listWithCategory(DocumentDTO documentDTO){
+        String restrictId = "";
+        String filterWord = documentDTO.getFilterWord();
+        int page = documentDTO.getPage();
+        int row = documentDTO.getRows();
+        switch (documentDTO.getType()){
+            case CATEGORY:
+                restrictId = documentDTO.getCategoryId();
+                break;
+            case TAG:
+                restrictId = documentDTO.getTagId();
+                break;
+            default:
+                break;
+        }
+
+        return BaseApiResult.success();
+    }
+
+    /**
      * @return java.util.List<com.jiaruiblog.entity.vo.DocumentVO>
      * @Author luojiarui
      * @Description convertDocuments

@@ -11,7 +11,7 @@ import lombok.Data;
 public class RemoveObjectDTO {
 
     /**
-     * requestbody 请求对象中只具有单一参数id
+     * request body 请求对象中只具有单一参数id
      */
     private String id;
 
