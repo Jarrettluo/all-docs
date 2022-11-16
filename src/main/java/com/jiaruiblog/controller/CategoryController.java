@@ -1,7 +1,7 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.common.RegxConstant;
+import com.jiaruiblog.common.RegexConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.dto.CategoryDTO;
@@ -49,7 +49,7 @@ public class CategoryController {
         // 插入进来的参数必需经过清洗
         categoryDTO.setId(null);
         String name = categoryDTO.getName();
-        if (!name.matches(RegxConstant.CH_ENG_WORD)) {
+        if (!name.matches(RegexConstant.CH_ENG_WORD)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         switch (categoryDTO.getType()) {
@@ -74,7 +74,7 @@ public class CategoryController {
     @PutMapping(value = "/update")
     public BaseApiResult update(@RequestBody CategoryDTO categoryDTO) {
         String name = categoryDTO.getName();
-        if (!name.matches(RegxConstant.CH_ENG_WORD)) {
+        if (!name.matches(RegexConstant.CH_ENG_WORD)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         switch (categoryDTO.getType()) {
