@@ -77,7 +77,7 @@ public class DocumentController {
 
     @ApiOperation(value = "2.3 指定分类时，查询文档的分页列表页", notes = "根据参数查询文档列表")
     @GetMapping(value = "/listWithCategory")
-    public BaseApiResult listWithCategory(@RequestParam DocumentDTO documentDTO) {
+    public BaseApiResult listWithCategory(@ModelAttribute("documentDTO") DocumentDTO documentDTO) {
         FilterTypeEnum filterType = documentDTO.getType();
         if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG) ) {
             return iFileService.listWithCategory(documentDTO);

@@ -75,4 +75,13 @@ public interface TagService {
      */
     Map<Tag, List<TagDocRelationship>> getRecentTagRelationship();
 
+    /**
+     * @Author luojiarui
+     * @Description 某个标签是否文档存在关系
+     * @Date 22:21 2022/11/16
+     * @Param [tagId, fileId]
+     * @return boolean
+     **/
+    boolean relateExist(String tagId, String fileId);
+
 }

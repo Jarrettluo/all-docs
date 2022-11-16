@@ -1,5 +1,7 @@
 package com.jiaruiblog.entity.vo;
 
+import lombok.Data;
+
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +12,7 @@ import java.util.List;
  * @Date 2022/11/15 22:24
  * @Version 1.0
  **/
+@Data
 public class DocWithCateVO {
 
     /**

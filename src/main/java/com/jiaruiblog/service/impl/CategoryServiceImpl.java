@@ -302,4 +302,20 @@ public class CategoryServiceImpl implements CategoryService {
         return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 某个分类和文档是否存在关系
+     * @Date 22:19 2022/11/16
+     * @Param [categoryId, fileId]
+     * @return boolean
+     **/
+    @Override
+    public boolean relateExist(String categoryId, String fileId) {
+        // 先排查是否具有该链接关系，否则不予进行关联
+        Query query = new Query(Criteria.where(CATEGORY_ID).is(categoryId)
+                .and(FILE_ID).is(fileId));
+        List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
+        return !CollectionUtils.isEmpty(result);
+    }
+
 }

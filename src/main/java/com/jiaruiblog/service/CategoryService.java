@@ -61,4 +61,13 @@ public interface CategoryService {
      */
     BaseApiResult cancleCategoryRelationship(CateDocRelationship relationship);
 
+    /**
+     * @Author luojiarui
+     * @Description 排查某个分类和文档是否存在关系
+     * @Date 22:20 2022/11/16
+     * @Param [categoryId, fileId]
+     * @return boolean
+     **/
+    boolean relateExist(String categoryId, String fileId);
+
 }
