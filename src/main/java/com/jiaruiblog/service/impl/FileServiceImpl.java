@@ -63,6 +63,9 @@ public class FileServiceImpl implements IFileService {
 
     private static final String CONTENT = "content";
 
+    private static final String[] EXCLUDE_FIELD = new String[]{"md5", "content", "contentType", "suffix", "description",
+            "gridfsId", "thumbId", "textFileId", "errorMsg"};
+
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
@@ -165,9 +168,9 @@ public class FileServiceImpl implements IFileService {
     /**
      * 表单上传附件
      *
-     * @param md5
-     * @param file
-     * @return
+     * @param md5 文件md5
+     * @param file 文件
+     * @return FileDocument
      */
     @Override
     public FileDocument saveFile(String md5, MultipartFile file) {
@@ -344,7 +347,6 @@ public class FileServiceImpl implements IFileService {
             return Lists.newArrayList();
         }
         Query query = new Query();
-
         query.with(Sort.unsorted());
         // 增加过滤条件
         query.addCriteria(Criteria.where("_id").in(ids));
@@ -494,9 +496,8 @@ public class FileServiceImpl implements IFileService {
         String filterWord = documentDTO.getFilterWord();
         int page = documentDTO.getPage();
         int row = documentDTO.getRows();
-        Query query = getFuzzySearchQuery(filterWord, page, row);
-        List<FileDocument> fileDocuments = fuzzySearchDocWithPage(query);
-        long totalNum = countFileByQuery(query);
+        List<FileDocument> fileDocuments = fuzzySearchDocWithPage(filterWord, page, row);
+        long totalNum = countNumByKeyWord(filterWord);
 
         List<DocWithCateVO> documentVos = Lists.newArrayList();
         switch (documentDTO.getType()) {
@@ -524,46 +525,44 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
-     * @Author luojiarui
-     * @Description 返回查询条件
-     * @Date 22:57 2022/11/16
-     * @Param [keyWord, page, row]
-     * @return org.springframework.data.mongodb.core.query.Query
-     **/
-    private Query getFuzzySearchQuery(String keyWord, int page, int row) {
-        Query query = new Query();
-        if ( keyWord == null && row > 100) {
-            return query;
-        }
-        if ( StringUtils.hasText(keyWord)) {
-            Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
-            query.addCriteria(Criteria.where("name").regex(pattern));
-        }
-        // 设置起始页和每页查询条数
-        Pageable pageable = PageRequest.of(page, row);
-        query.with(pageable);
-        // 不包含该字段
-        query.fields().exclude("md5");
-        query.fields().exclude("content");
-        query.fields().exclude("contentType");
-        query.fields().exclude("suffix");
-        query.fields().exclude("description");
-        query.fields().exclude("gridfsId");
-        query.fields().exclude("thumbId");
-        query.fields().exclude("textFileId");
-        query.fields().exclude("errorMsg");
-        return query;
-    }
-
-    /**
      * 根据搜索条件进行模糊查询
      *
-     * @param query 关键字
+     * @param keyWord 关键字
      * @return -> List<FileDocument>
      * @since 2022年11月16日
      */
-    public List<FileDocument> fuzzySearchDocWithPage(Query query) {
+    private List<FileDocument> fuzzySearchDocWithPage(String keyWord, int page, int row) {
+        Query query = new Query();
+        if (StringUtils.hasText(keyWord)) {
+            Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
+            query.addCriteria(Criteria.where("name").regex(pattern));
+        }
+        // 不包含该字段
+        query.fields().exclude(EXCLUDE_FIELD);
+
+        // 设置起始页和每页查询条数
+        Pageable pageable = PageRequest.of(page, row);
+        query.with(pageable);
+        query.with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 符合关键字的总数查询
+     * @Date 21:55 2022/11/17
+     * @Param [keyWord]
+     * @return long
+     **/
+    private long countNumByKeyWord(String keyWord) {
+        if (StringUtils.hasText(keyWord)) {
+            Query query = new Query();
+            Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
+            query.addCriteria(Criteria.where("name").regex(pattern));
+            return mongoTemplate.count(query, COLLECTION_NAME);
+        } else {
+            return countAllFile();
+        }
     }
 
     private DocWithCateVO entityTransfer(boolean checkState, FileDocument fileDocument) {
