@@ -67,12 +67,12 @@ public class FileController {
      * @return
      */
     @GetMapping("/view/{id}")
-    public ResponseEntity<Object> serveFileOnline(@PathVariable String id) {
+    public ResponseEntity<Object> serveFileOnline(@PathVariable String id) throws UnsupportedEncodingException {
         Optional<FileDocument> file = fileService.getById(id);
         if (file.isPresent()) {
             return ResponseEntity.ok()
                     // 这里需要进行中文编码
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + file.get().getName())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8"))
                     .header(HttpHeaders.CONTENT_TYPE, file.get().getContentType())
                     .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "").header("Connection", "close")
                     .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
