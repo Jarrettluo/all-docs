@@ -110,13 +110,14 @@ public class CommentServiceImpl implements ICommentService {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         Query query = new Query(Criteria.where(DOC_ID).is(comment.getDocId()))
-                .with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+                .with(Sort.by(Sort.Direction.DESC, "createDate"));
+
         Long totalNum = template.count(query, Comment.class, COLLECTION_NAME);
+        // 分页查询
         long skip = (long) comment.getPage() * comment.getRows();
         query.skip(skip);
         query.limit(comment.getRows());
         List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
-
         Map<String, Object> result = Maps.newHashMap();
         result.put("totalNum", totalNum);
         result.put("comments", comments);

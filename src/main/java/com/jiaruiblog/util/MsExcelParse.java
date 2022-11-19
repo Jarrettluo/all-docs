@@ -32,7 +32,7 @@ public class MsExcelParse {
      * @Date 22:59 2022/8/28
      * @Param [file, textPath]
      **/
-    public static void readPdfText(InputStream file, String textPath) throws IOException {
+    public static void readPdfText(InputStream file, String textPath) {
         try (FileWriter fileWriter = new FileWriter(textPath, true)) {
             fileWriter.write(textPath);
             fileWriter.write(parseExcel(file));

@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 @Slf4j
 public class MainTask implements RunnableTask {
 
-    private TaskExecutor taskExecutor;
+    private final TaskExecutor taskExecutor;
 
     private TaskData taskData = new TaskData();
 

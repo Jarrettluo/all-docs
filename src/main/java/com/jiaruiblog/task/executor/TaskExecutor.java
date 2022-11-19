@@ -75,7 +75,7 @@ public abstract class TaskExecutor {
             fileObj.setName(fileDocument.getName());
             fileObj.setType(fileDocument.getContentType());
             fileObj.readFile(textFilePath);
-//            this.upload(fileObj);
+            this.upload(fileObj);
 
         } catch (IOException | TaskRunException e) {
             throw new TaskRunException("存入es的过程中报错了", e);

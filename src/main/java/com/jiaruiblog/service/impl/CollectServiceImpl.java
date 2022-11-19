@@ -107,7 +107,6 @@ public class CollectServiceImpl implements CollectService {
     }
 
     /**
-     * @return void
      * @Author luojiarui
      * @Description // 根据文档的id删除掉点赞的关系
      * @Date 11:17 上午 2022/6/25

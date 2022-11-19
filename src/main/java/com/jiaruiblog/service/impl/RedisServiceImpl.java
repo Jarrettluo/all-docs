@@ -71,14 +71,14 @@ public class RedisServiceImpl implements RedisService {
 
     /**
      * 删除个人历史数据
-     * @param userid
-     * @param searchkey
-     * @return
+     * @param userid String 用户id
+     * @param searchKey 搜索关键字
+     * @return Long
      */
     @Override
-    public Long delSearchHistoryByUserId(String userid, String searchkey) {
+    public Long delSearchHistoryByUserId(String userid, String searchKey) {
         String shistory = RedisKeyUtils.getSearchHistoryKey(userid);
-        return redisSearchTemplate.opsForHash().delete(shistory, searchkey);
+        return redisSearchTemplate.opsForHash().delete(shistory, searchKey);
     }
 
     /**
@@ -121,8 +121,7 @@ public class RedisServiceImpl implements RedisService {
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
         List<String> title = new ArrayList<>();
         title.add(searchkey);
-        for (int i = 0, lengh = title.size(); i < lengh; i++) {
-            String tle = title.get(i);
+        for (String tle : title) {
             try {
                 // 如果没找到相应的key，则返回null
                 if (zSetOperations.score(value, tle) == null) {

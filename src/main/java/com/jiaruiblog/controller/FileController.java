@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -129,7 +128,6 @@ public class FileController {
             String name = request.getParameter("name");
             String description = request.getParameter("description");
             InputStream in = new ByteArrayInputStream(data);
-            log.info("data_string:" + StrUtil.str(data, StandardCharsets.UTF_8));
             if (data.length > 0) {
                 FileDocument fileDocument = new FileDocument();
                 fileDocument.setName(name);
@@ -139,11 +137,9 @@ public class FileController {
                 fileDocument.setSuffix(ext);
                 String fileMd5 = SecureUtil.md5(in);
                 fileDocument.setMd5(fileMd5);
-                log.info("文件的md5 ==> {} ", fileMd5);
                 fileDocument.setDescription(description);
                 fileService.saveFile(fileDocument, in);
 
-                log.info("保存的fileDocument ==> {}", fileDocument);
                 model.setData(fileDocument.getId());
                 model.setCode(ResponseModel.SUCCESS);
                 model.setMessage("上传成功");

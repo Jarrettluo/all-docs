@@ -49,7 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
      * 新增一条分类记录
      * todo 这里需要考虑并发插入的事务问题
      * @param category -> Category 实体
-     * @return
+     * @return -> BaseApiResult
      */
     @Override
     public BaseApiResult insert(Category category) {
@@ -64,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
      * 更新一条已经存在的记录
      *
      * @param category -> Category 实体
-     * @return
+     * @return -> BaseApiResult
      */
     @Override
     public BaseApiResult update(Category category) {
@@ -95,7 +95,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @param category -> Category 实体
-     * @return
+     * @return -> BaseApiResult
      */
     @Override
     public BaseApiResult remove(Category category) {
@@ -125,8 +125,8 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * 增加某个文件的分类关系
      *
-     * @param relationship
-     * @return
+     * @param relationship -> CateDocRelationship
+     * @return -> BaseApiResult
      */
     @Override
     public BaseApiResult addRelationShip(CateDocRelationship relationship) {
@@ -156,11 +156,11 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * 取消某个文件在分类下的关联关系
      *
-     * @param relationship
-     * @return
+     * @param relationship -> CateDocRelationship
+     * @return -> CateDocRelationship
      */
     @Override
-    public BaseApiResult cancleCategoryRelationship(CateDocRelationship relationship) {
+    public BaseApiResult cancelCategoryRelationship(CateDocRelationship relationship) {
         Query query = new Query(Criteria.where(CATEGORY_ID).is(relationship.getCategoryId())
                 .and(FILE_ID).is(relationship.getFileId()));
         mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
@@ -170,8 +170,8 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * 根据category的id，查询相关连的文件id列表
      *
-     * @param categoryDb
-     * @return
+     * @param categoryDb -> Category
+     * @return -> List<String>
      */
     public List<String> queryDocListByCategory(Category categoryDb) {
         Query query = new Query(Criteria.where(CATEGORY_ID).is(categoryDb.getId()));
@@ -185,8 +185,8 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * 根据分类的id查询分类信息
      *
-     * @param id
-     * @return
+     * @param id -> String
+     * @return -> Category
      */
     public Category queryById(String id) {
         if (id == null || "".equals(id)) {
@@ -243,7 +243,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * @return void
      * @Author luojiarui
      * @Description // 根据文档的id进行分类和文档的关系删除
      * @Date 11:20 上午 2022/6/25
@@ -253,7 +252,7 @@ public class CategoryServiceImpl implements CategoryService {
         Query query = new Query(Criteria.where("docId").is(docId));
         List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
-        relationships.forEach(this::cancleCategoryRelationship);
+        relationships.forEach(this::cancelCategoryRelationship);
     }
 
     /**
@@ -281,10 +280,10 @@ public class CategoryServiceImpl implements CategoryService {
      * @Param [cateId]
      **/
     public List<CateDocRelationship> getRelateByCateId(String cateId) {
-        Integer pageIndex = 0;
-        Integer pageSize = 7;
+        long pageIndex = 0;
+        int pageSize = 7;
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, UPDATE_DATE));
-        long skip = (long) (pageIndex - 1) * pageSize;
+        long skip = (pageIndex - 1) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
         query.addCriteria(Criteria.where(CATEGORY_ID).is(cateId));

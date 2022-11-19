@@ -160,7 +160,7 @@ public class CategoryController {
                 CateDocRelationship category = new CateDocRelationship();
                 category.setCategoryId(relationDTO.getId());
                 category.setFileId(relationDTO.getDocId());
-                return categoryService.cancleCategoryRelationship(category);
+                return categoryService.cancelCategoryRelationship(category);
             case TAG:
                 TagDocRelationship tag = new TagDocRelationship();
                 tag.setTagId(relationDTO.getId());

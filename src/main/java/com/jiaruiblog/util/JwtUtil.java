@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.jiaruiblog.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class JwtUtil {
      * 校验token并解析token
      */
     public static Map<String, Claim> verifyToken(String token) {
-        DecodedJWT jwt = null;
+        DecodedJWT jwt;
         try {
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
             jwt = verifier.verify(token);

@@ -57,8 +57,8 @@ public interface TagService {
 
     /**
      * add relationship
-     * @param relationship
-     * @return
+     * @param relationship TagDocRelationship
+     * @return BaseApiResult
      */
     BaseApiResult addRelationShip(TagDocRelationship relationship);
 

@@ -40,11 +40,11 @@ public class StatisticsServiceImpl implements StatisticsService {
 
 
     /**
+     * @return com.jiaruiblog.utils.ApiResult
      * @Author luojiarui
      * @Description // 统计随机的三个分类
      * @Date 2:29 下午 2022/6/26
      * @Param []
-     * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
     public BaseApiResult trend() {
@@ -58,7 +58,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             trendVO.setName(category.getName());
             List<DocVO> docVos = new ArrayList<>();
 
-            if(category.getId() != null) {
+            if (category.getId() != null) {
                 List<FileDocument> documents;
                 List<CateDocRelationship> relationships = categoryServiceImpl.getRelateByCateId(category.getId());
                 List<String> ids = relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
@@ -80,11 +80,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
+     * @return com.jiaruiblog.utils.ApiResult
      * @Author luojiarui
      * @Description // 统计数量
      * @Date 2:29 下午 2022/6/26
      * @Param []
-     * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
     public BaseApiResult all() {

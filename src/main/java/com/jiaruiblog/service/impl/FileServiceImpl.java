@@ -208,9 +208,9 @@ public class FileServiceImpl implements IFileService {
     /**
      * 上传文件到Mongodb的GridFs中
      *
-     * @param in
-     * @param contentType
-     * @return
+     * @param in -> InputStream
+     * @param contentType -> String
+     * @return -> String
      */
     private String uploadFileToGridFs(InputStream in, String contentType) {
         String gridfsId = IdUtil.simpleUUID();
@@ -369,7 +369,6 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public BaseApiResult list(DocumentDTO documentDTO) {
-        log.info(">>>>>>>检索文档>>>>>>检索参数{}", documentDTO.toString());
         List<DocumentVO> documentVos;
         List<FileDocument> fileDocuments = Lists.newArrayList();
 
@@ -463,7 +462,6 @@ public class FileServiceImpl implements IFileService {
                 log.error("连接redis失败，暂时无法写入数据库", e);
             }
         }
-        log.info("查询到的详细细节内容是:{}", fileDocument);
         // 查询评论信息，查询分类信息，查询分类关系，查询标签信息，查询标签关系信息
         return BaseApiResult.success(convertDocument(null, fileDocument));
     }

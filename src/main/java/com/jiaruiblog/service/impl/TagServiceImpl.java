@@ -215,7 +215,6 @@ public class TagServiceImpl implements TagService {
     public Map<Tag, List<TagDocRelationship>> getRecentTagRelationship(Integer tagNum) {
         Map<Tag, List<TagDocRelationship>> result = Maps.newHashMap();
         List<TagDocRelationship> files = getTagRelationshipByPage(0, tagNum, null);
-        log.info("查询到最近的文档为==>{}", files);
         if( CollectionUtils.isEmpty(files)) {
             return result;
         }

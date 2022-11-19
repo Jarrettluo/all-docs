@@ -28,7 +28,7 @@ public class PdfUtil {
 
     public static void readPdfText(InputStream file, String textPath) throws IOException {
         if (file == null) {
-            log.info("inputStream is null");
+            log.error("inputStream is null");
             return;
         }
         try (PDDocument document = PDDocument.load(file);

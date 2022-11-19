@@ -5,8 +5,6 @@ import com.google.common.collect.Sets;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.service.ElasticService;
-import com.jiaruiblog.util.MsExcelParse;
-import com.jiaruiblog.util.PdfUtil;
 import org.apache.commons.compress.utils.Lists;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -22,12 +20,9 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -48,9 +43,6 @@ public class ElasticServiceImpl implements ElasticService {
     private RestHighLevelClient client;
 
     @Autowired
-    private FileOperationServiceImpl fileOperationServiceImpl;
-
-    @Autowired
     private FileServiceImpl fileServiceImpl;
 
 
@@ -62,12 +54,11 @@ public class ElasticServiceImpl implements ElasticService {
      */
     public void upload(FileObj file) throws IOException {
         IndexRequest indexRequest = new IndexRequest(INDEX_NAME);
-        //上传同时，使用attachment pipline进行提取文件
+        //上传同时，使用attachment pipeline 进行提取文件
         indexRequest.source(JSON.toJSONString(file), XContentType.JSON);
         indexRequest.setPipeline("attachment");
         client.index(indexRequest, RequestOptions.DEFAULT);
     }
-
 
 
     /**
@@ -75,11 +66,12 @@ public class ElasticServiceImpl implements ElasticService {
      * 查询文件中的文本内容
      * 默认会search出所有的东西来
      * SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-     *
+     * <p>
      * // srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
+     *
      * @param keyword String
-     * @throws IOException ioexception
      * @return list
+     * @throws IOException ioexception
      */
     @Override
     public List<FileDocument> search(String keyword) throws IOException {
@@ -113,7 +105,7 @@ public class ElasticServiceImpl implements ElasticService {
         searchRequest.source(srb);
         SearchResponse res = client.search(searchRequest, RequestOptions.DEFAULT);
 
-        if ( res== null || res.getHits() == null ) {
+        if (res == null || res.getHits() == null) {
             return Lists.newArrayList();
         }
         //获取hits，这样就可以获取查询到的记录了
@@ -146,16 +138,16 @@ public class ElasticServiceImpl implements ElasticService {
                 stringBuilder1.append(fragment.toString());
             }
             String abstractString = stringBuilder1.toString();
-            if(abstractString.length() > 500) {
+            if (abstractString.length() > 500) {
                 abstractString = abstractString.substring(0, 500);
             }
 
-            if(sourceAsMap.containsKey("id")){
+            if (sourceAsMap.containsKey("id")) {
                 String id = (String) sourceAsMap.get("id");
-                if ( id != null && !idSet.contains(id)) {
+                if (id != null && !idSet.contains(id)) {
                     idSet.add(id);
                     FileDocument fileDocument = fileServiceImpl.getByMd5(id);
-                    if ( fileDocument == null ) {
+                    if (fileDocument == null) {
                         //从redis中剔除该doc，并跳过循环
                         continue;
                     }
@@ -167,61 +159,9 @@ public class ElasticServiceImpl implements ElasticService {
             stringBuilder.append(highlightFields);
         }
 
-        stringBuilder.append("查询到" + count + "条记录");
+        stringBuilder.append("查询到").append(count).append("条记录");
         return fileDocumentList;
     }
 
-    @Async
-    @Override
-    public void uploadFileToEs(InputStream is, FileDocument fileDocument) {
-
-        String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
-
-        try {
-            PdfUtil.readPdfText(is, textFilePath);
-            FileObj fileObj = new FileObj();
-            fileObj.readFile(textFilePath);
-            fileObj.setId(fileDocument.getMd5());
-            fileObj.setName(fileDocument.getName());
-            fileObj.setType(fileDocument.getContentType());
-            this.upload(fileObj);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            // 删除临时的txt文件
-            File file = new File(textFilePath);
-            if(file.exists()) {
-                file.deleteOnExit();
-            }
-        }
-    }
-
-    /**
-     * @Author luojiarui
-     * @Description // 转换各类office文档到es中
-     * @Date 23:00 2022/8/28
-     * @Param [is, fileDocument]
-     **/
-    @Override
-    public void uploadFileToEsDocx(InputStream is, FileDocument fileDocument) {
-        String textFilePath = fileDocument.getMd5() + fileDocument.getName() + ".txt";
-        try {
-            MsExcelParse.readPdfText(is, textFilePath);
-            FileObj fileObj = new FileObj();
-            fileObj.readFile(textFilePath);
-            fileObj.setId(fileDocument.getMd5());
-            fileObj.setName(fileDocument.getName());
-            fileObj.setType(fileDocument.getContentType());
-            this.upload(fileObj);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            // 删除临时的txt文件
-            File file = new File(textFilePath);
-            if(file.exists()) {
-                file.deleteOnExit();
-            }
-        }
-    }
 
 }
