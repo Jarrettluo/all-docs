@@ -2,10 +2,10 @@ package com.jiaruiblog.service.impl;
 
 import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
-
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.CommentListDTO;
+import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,17 @@ public class CommentServiceImpl implements ICommentService {
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
+        try {
+            // 敏感词过滤
+            SensitiveFilter filter = SensitiveFilter.getInstance();
+            String content = comment.getContent();
+            content = filter.replaceSensitiveWord(content, 1,"*");
+            comment.setContent(content);
+        } catch (IOException e) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getLocalizedMessage());
+        }
+
+
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
         template.save(comment, COLLECTION_NAME);

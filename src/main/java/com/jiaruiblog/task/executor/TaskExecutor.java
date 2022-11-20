@@ -115,7 +115,7 @@ public abstract class TaskExecutor {
         try{
             List<String> stringList = FileUtils.readLines(new File(textFilePath), StandardCharsets.UTF_8);
             String str = null;
-            if (stringList.size() > 0) {
+            if (!stringList.isEmpty()) {
                 str = stringList.get(0);
             }
 
