@@ -55,6 +55,11 @@ public class DocReview {
     private boolean userRemove;
 
     /**
+     * 管理员删除评审意见
+     **/
+    private boolean adminRemove;
+
+    /**
      * 评审意见
      */
     private String reviewLog;

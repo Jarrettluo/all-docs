@@ -48,4 +48,6 @@ public class User {
     public String toString () {
         return JSON.toJSONString(this);
     }
+
+    // 管理员可以屏蔽掉某个用户，用户可以注销某个账号
 }
