@@ -2,6 +2,7 @@ package com.jiaruiblog.config;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.util.BaseApiResult;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,7 +23,9 @@ public class CommonExceptionHandler {
         e.printStackTrace();
         if (e instanceof MaxUploadSizeExceededException) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, "上传的文件超过大小限制");
-        } else {
+        } else if (e instanceof HttpRequestMethodNotSupportedException) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, "请求方法不对！");
+        }else {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, "操作失败");
         }
     }

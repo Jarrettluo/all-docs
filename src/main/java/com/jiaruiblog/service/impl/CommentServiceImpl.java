@@ -2,10 +2,10 @@ package com.jiaruiblog.service.impl;
 
 import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
-
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.CommentListDTO;
+import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,17 @@ public class CommentServiceImpl implements ICommentService {
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
+        try {
+            // 敏感词过滤
+            SensitiveFilter filter = SensitiveFilter.getInstance();
+            String content = comment.getContent();
+            content = filter.replaceSensitiveWord(content, 1,"*");
+            comment.setContent(content);
+        } catch (IOException e) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getLocalizedMessage());
+        }
+
+
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
         template.save(comment, COLLECTION_NAME);
@@ -110,13 +122,14 @@ public class CommentServiceImpl implements ICommentService {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         Query query = new Query(Criteria.where(DOC_ID).is(comment.getDocId()))
-                .with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+                .with(Sort.by(Sort.Direction.DESC, "createDate"));
+
         Long totalNum = template.count(query, Comment.class, COLLECTION_NAME);
+        // 分页查询
         long skip = (long) comment.getPage() * comment.getRows();
         query.skip(skip);
         query.limit(comment.getRows());
         List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
-
         Map<String, Object> result = Maps.newHashMap();
         result.put("totalNum", totalNum);
         result.put("comments", comments);

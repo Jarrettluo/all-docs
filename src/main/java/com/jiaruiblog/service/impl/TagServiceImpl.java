@@ -215,7 +215,6 @@ public class TagServiceImpl implements TagService {
     public Map<Tag, List<TagDocRelationship>> getRecentTagRelationship(Integer tagNum) {
         Map<Tag, List<TagDocRelationship>> result = Maps.newHashMap();
         List<TagDocRelationship> files = getTagRelationshipByPage(0, tagNum, null);
-        log.info("查询到最近的文档为==>{}", files);
         if( CollectionUtils.isEmpty(files)) {
             return result;
         }
@@ -238,6 +237,23 @@ public class TagServiceImpl implements TagService {
     public Map<Tag, List<TagDocRelationship>> getRecentTagRelationship() {
         return getRecentTagRelationship(2);
     }
+
+    /**
+     * @Author luojiarui
+     * @Description 判断某个标签是否和文件存在关系
+     * @Date 22:22 2022/11/16
+     * @Param [tagId, fileId]
+     * @return boolean
+     **/
+    @Override
+    public boolean relateExist(String tagId, String fileId) {
+        // 判断以下是否存在这个关系
+        Query query = new Query(Criteria.where(TAG_ID).is(tagId)
+                .and(FILE_ID).is(fileId));
+        List<TagDocRelationship> result = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
+        return !CollectionUtils.isEmpty(result);
+    }
+
     /**
      * @Author luojiarui
      * @Description 分页查询相关的关系列表

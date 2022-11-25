@@ -16,6 +16,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * @Author Jarrett Luo
@@ -35,7 +36,7 @@ public abstract class TaskExecutor {
         try {
             uploadFileToEs(docInputStream, fileDocument, taskData);
         } catch (Exception e) {
-            throw new TaskRunException("建立索引的时候出错拉！", e);
+            throw new TaskRunException("建立索引的时候出错：", e);
         }
 
         docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
@@ -74,7 +75,7 @@ public abstract class TaskExecutor {
             fileObj.setName(fileDocument.getName());
             fileObj.setType(fileDocument.getContentType());
             fileObj.readFile(textFilePath);
-//            this.upload(fileObj);
+            this.upload(fileObj);
 
         } catch (IOException | TaskRunException e) {
             throw new TaskRunException("存入es的过程中报错了", e);
@@ -109,11 +110,15 @@ public abstract class TaskExecutor {
      * @Description 设置描述内容
      * @Date 18:54 2022/11/13
      * @Param [textFilePath, fileDocument]
-     * @return void
      **/
     private void handleDescription(String textFilePath, FileDocument fileDocument) {
         try{
-            String str = FileUtils.readLines(new File(textFilePath), StandardCharsets.UTF_8).get(0);
+            List<String> stringList = FileUtils.readLines(new File(textFilePath), StandardCharsets.UTF_8);
+            String str = null;
+            if (!stringList.isEmpty()) {
+                str = stringList.get(0);
+            }
+
             if (str == null) {
                 str = "无描述";
             } else if (str.length() > 128) {

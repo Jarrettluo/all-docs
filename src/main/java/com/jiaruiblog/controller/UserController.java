@@ -2,16 +2,12 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.User;
-import com.jiaruiblog.service.ElasticService;
-import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JwtUtil;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -43,11 +39,6 @@ public class UserController {
     @Autowired
     private MongoTemplate template;
 
-    @Autowired
-    private IFileService fileService;
-
-    @Autowired
-    private ElasticService elasticService;
 
     @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")
@@ -104,10 +95,13 @@ public class UserController {
         if (!userId.equals(user.getId())) {
             return BaseApiResult.error(1201, MessageConstant.OPERATE_FAILED);
         }
-        log.info("根据id删除用户请求==={}", user.toString());
         DeleteResult remove = template.remove(user, COLLECTION_NAME);
-        log.info("删除的结果==={}", remove);
-        return BaseApiResult.success("删除成功");
+        if(remove.getDeletedCount() > 0) {
+            log.warn("[删除警告]正在删除用户：{}", user);
+            return BaseApiResult.success("删除成功");
+        } else {
+            return BaseApiResult.error(1201, MessageConstant.OPERATE_FAILED);
+        }
     }
 
 
@@ -118,9 +112,8 @@ public class UserController {
     public BaseApiResult login(@RequestBody User user) {
         Query query = new Query(Criteria.where("username").is(user.getUsername()));
         User dbUser = template.findOne(query, User.class, COLLECTION_NAME);
-        dbUser = Optional.ofNullable(dbUser).orElse(new User());
-
-        if (dbUser.getUsername().equals(user.getUsername()) && dbUser.getPassword().equals(user.getPassword())) {
+        if (dbUser != null && dbUser.getUsername().equals(user.getUsername())
+                && dbUser.getPassword().equals(user.getPassword())) {
             String token = JwtUtil.createToken(dbUser);
             Map<String, String> result = new HashMap<>(8);
             result.put("token", token);

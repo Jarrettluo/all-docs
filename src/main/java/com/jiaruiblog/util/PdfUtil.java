@@ -28,7 +28,7 @@ public class PdfUtil {
 
     public static void readPdfText(InputStream file, String textPath) throws IOException {
         if (file == null) {
-            log.info("inputStream is null");
+            log.error("inputStream is null");
             return;
         }
         try (PDDocument document = PDDocument.load(file);
@@ -36,11 +36,10 @@ public class PdfUtil {
         ) {
             AccessPermission ap = document.getCurrentAccessPermission();
             if (!ap.canExtractContent()) {
-                throw new IOException("You do not have permission to extract text");
+                ap.setCanExtractContent(true);
             }
 
             PDFTextStripper stripper = new PDFTextStripper();
-
             stripper.setSortByPosition(true);
 
             for (int p = 1; p <= document.getNumberOfPages(); ++p) {
@@ -51,8 +50,8 @@ public class PdfUtil {
                 fileWriter.write(text.trim());
             }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("解析pdf文本文件出错", e);
+            throw e;
         }
     }
 

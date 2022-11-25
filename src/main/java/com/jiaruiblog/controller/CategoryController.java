@@ -8,7 +8,7 @@ import com.jiaruiblog.entity.dto.CategoryDTO;
 import com.jiaruiblog.entity.dto.RelationDTO;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
-import com.jiaruiblog.enums.Type;
+import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -114,7 +114,7 @@ public class CategoryController {
 
     @ApiOperation(value = "3.7 查询所有的分类或者是标签", notes = "查询列表")
     @GetMapping(value = "/all")
-    public BaseApiResult list(@RequestParam Type type) {
+    public BaseApiResult list(@RequestParam FilterTypeEnum type) {
         switch (type) {
             case CATEGORY:
                 return categoryService.list();
@@ -160,7 +160,7 @@ public class CategoryController {
                 CateDocRelationship category = new CateDocRelationship();
                 category.setCategoryId(relationDTO.getId());
                 category.setFileId(relationDTO.getDocId());
-                return categoryService.cancleCategoryRelationship(category);
+                return categoryService.cancelCategoryRelationship(category);
             case TAG:
                 TagDocRelationship tag = new TagDocRelationship();
                 tag.setTagId(relationDTO.getId());

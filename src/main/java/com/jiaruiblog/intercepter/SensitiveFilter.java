@@ -27,7 +27,7 @@ public class SensitiveFilter {
     /**
      * 敏感词过滤器：利用DFA算法  进行敏感词过滤
      */
-    private Map sensitiveWordMap = null;
+    private Map sensitiveWordMap;
 
     /**
      * 最小匹配规则
@@ -153,8 +153,8 @@ public class SensitiveFilter {
         // 获取所有的敏感词
         Set<String> set = getSensitiveWord(txt, matchType);
         Iterator<String> iterator = set.iterator();
-        String word = null;
-        String replaceString = null;
+        String word;
+        String replaceString;
         while (iterator.hasNext()) {
             word = iterator.next();
             replaceString = getReplaceChars(replaceChar, word.length());
@@ -171,11 +171,11 @@ public class SensitiveFilter {
      * @return String
      */
     private String getReplaceChars(String replaceChar, int length) {
-        String resultReplace = replaceChar;
+        StringBuilder resultReplace = new StringBuilder(replaceChar);
         for (int i = 1; i < length; i++) {
-            resultReplace += replaceChar;
+            resultReplace.append(replaceChar);
         }
-        return resultReplace;
+        return resultReplace.toString();
     }
 
 }

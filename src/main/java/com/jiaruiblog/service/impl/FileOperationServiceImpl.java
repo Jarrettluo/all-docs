@@ -24,9 +24,9 @@ public class FileOperationServiceImpl implements FileOperationService {
 
     /**
      * 这个方法将一个目录下所有的文件读入然后全部上传
-     * @return
+     * @return List<FileObj>
      */
-    public List<FileObj> readFileByDir(String path) throws IOException {
+    public List<FileObj> readFileByDir(String path) {
         List<FileObj> fileObjs = new ArrayList<>();
         File file = new File(path);
 
@@ -35,6 +35,7 @@ public class FileOperationServiceImpl implements FileOperationService {
         }
 
         File[] files = file.listFiles();
+        assert files != null;
         for (File f: files) {
             FileObj fileObj = new FileObj();
             fileObj.readFile(f.getAbsolutePath());
@@ -45,7 +46,7 @@ public class FileOperationServiceImpl implements FileOperationService {
 
     }
 
-    private byte[] getContent(File file) throws IOException {
+    private byte[] getContent(File file) {
 
         long fileSize = file.length();
         if (fileSize > Integer.MAX_VALUE) {
@@ -55,7 +56,7 @@ public class FileOperationServiceImpl implements FileOperationService {
         try (FileInputStream fi = new FileInputStream(file)) {
             byte[] buffer = new byte[(int) fileSize];
             int offset = 0;
-            int numRead = 0;
+            int numRead ;
             while (offset < buffer.length
                     && (numRead = fi.read(buffer, offset, buffer.length - offset)) >= 0) {
                 offset += numRead;

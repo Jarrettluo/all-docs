@@ -1,7 +1,7 @@
 package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.enums.Type;
+import com.jiaruiblog.enums.FilterTypeEnum;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -20,7 +20,7 @@ public class RelationDTO {
     private String docId;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private Type type;
+    private FilterTypeEnum type;
 
     private String id;
 

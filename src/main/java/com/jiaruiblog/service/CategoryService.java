@@ -43,22 +43,31 @@ public interface CategoryService {
 
     /**
      * 查询分类的列表信息
-     * @return
+     * @return BaseApiResult
      */
     BaseApiResult list();
 
     /**
      * 增加分类和文档的信息
-     * @param relationship
-     * @return
+     * @param relationship CateDocRelationship
+     * @return BaseApiResult
      */
     BaseApiResult addRelationShip(CateDocRelationship relationship);
 
     /**
      * 取消分类和文档的关联
-     * @param relationship
-     * @return
+     * @param relationship CateDocRelationship
+     * @return BaseApiResult
      */
-    BaseApiResult cancleCategoryRelationship(CateDocRelationship relationship);
+    BaseApiResult cancelCategoryRelationship(CateDocRelationship relationship);
+
+    /**
+     * @Author luojiarui
+     * @Description 排查某个分类和文档是否存在关系
+     * @Date 22:20 2022/11/16
+     * @Param [categoryId, fileId]
+     * @return boolean
+     **/
+    boolean relateExist(String categoryId, String fileId);
 
 }

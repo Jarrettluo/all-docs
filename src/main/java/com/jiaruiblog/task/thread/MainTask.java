@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 @Slf4j
 public class MainTask implements RunnableTask {
 
-    private TaskExecutor taskExecutor;
+    private final TaskExecutor taskExecutor;
 
     private TaskData taskData = new TaskData();
 
@@ -63,6 +63,7 @@ public class MainTask implements RunnableTask {
 
     @Override
     public void failed(Throwable throwable) {
+        log.error("解析文件报错啦", throwable);
         String errorMsg = throwable.getLocalizedMessage();
         taskData.getFileDocument().setDocState(DocStateEnum.FAIL);
         taskData.getFileDocument().setErrorMsg(errorMsg);
@@ -73,7 +74,8 @@ public class MainTask implements RunnableTask {
     public void run() {
         FileDocument fileDocument = taskData.getFileDocument();
         if (null == taskExecutor || fileDocument == null) {
-            throw new TaskRunException("执行器失败");
+            log.error("执行文件{}报错",fileDocument);
+            throw new TaskRunException("当前执行器初始化失败！");
         }
         if (StringUtils.hasText(fileDocument.getThumbId()) || StringUtils.hasText(fileDocument.getTextFileId())) {
             removeExistGridFs();
@@ -90,14 +92,13 @@ public class MainTask implements RunnableTask {
     @Override
     public void fallback() {
         // 删除es中的数据，删除thumb数据，删除存储的txt文本文件
-
         try {
             String txtFilePath = taskData.getTxtFilePath();
-            if (new File(txtFilePath).exists()) {
+            if (StringUtils.hasText(txtFilePath) && new File(txtFilePath).exists()) {
                 Files.delete(Paths.get(txtFilePath));
             }
             String picFilePath = taskData.getThumbFilePath();
-            if (new File(picFilePath).exists()) {
+            if (StringUtils.hasText(picFilePath) && new File(picFilePath).exists()) {
                 Files.delete(Paths.get(picFilePath));
             }
         } catch (IOException e) {

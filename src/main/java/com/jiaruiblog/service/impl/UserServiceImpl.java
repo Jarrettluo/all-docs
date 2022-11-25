@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements IUserService {
 
-    private static String collectionName = "user";
+    private static final String COLLECTION_NAME = "user";
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -38,6 +38,6 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     public User queryById(String userId) {
-        return mongoTemplate.findById(userId, User.class, collectionName);
+        return mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
     }
 }
