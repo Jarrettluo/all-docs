@@ -91,5 +91,11 @@ public class FileDocument {
      **/
     private String errorMsg;
 
+    // true 正在审核；false 审核完毕
+    private boolean reviewing;
+
+    // 违禁词列表
+    private List<String> wordList;
+
 
 }

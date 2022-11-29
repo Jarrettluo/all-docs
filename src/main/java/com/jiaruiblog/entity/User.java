@@ -40,6 +40,9 @@ public class User {
 
     private String avatar;
 
+    // 封禁状态
+    private boolean banning;
+
     private Date createDate;
 
     private Date updateDate;

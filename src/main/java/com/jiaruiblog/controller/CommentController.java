@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.dto.CommentDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
@@ -30,6 +31,12 @@ public class CommentController {
 
     @Autowired
     ICommentService commentService;
+
+    @ApiOperation(value = "2.6 查询评论列表", notes = "更新评论")
+    @GetMapping("queryDocReviewList")
+    public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+        return BaseApiResult.success();
+    }
 
     @ApiOperation(value = "2.5 新增单个评论", notes = "新增单个评论")
     @PostMapping(value = "/auth/insert")

@@ -1,12 +1,12 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author Jarrett Luo
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @Version 1.0
  */
 @Slf4j
-@RequestMapping("/comment")
+@RequestMapping("/docReview")
 public class DocReviewController {
 
     /**
@@ -23,9 +23,13 @@ public class DocReviewController {
      */
     @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
     @GetMapping("queryDocReviewList")
-    public BaseApiResult queryDocReviewList() {
+    public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+
+
+
         return BaseApiResult.success();
     }
+
 
     /**
      * 修改已读
@@ -33,17 +37,49 @@ public class DocReviewController {
      */
     @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
     @PutMapping("updateDocReview")
-    public BaseApiResult updateDocReview() {
+    public BaseApiResult updateDocReview(@RequestBody List<String> ids) {
+        // 修改评审意见为通过
         return BaseApiResult.success();
     }
 
+    // 单个进行拒绝
+    @PostMapping("signalA")
+    public BaseApiResult single() {
+        return BaseApiResult.success();
+    }
+
+    // 批量进行拒绝，并删除文档
+    @PostMapping("allA")
+    public BaseApiResult allA() {
+        return BaseApiResult.success();
+    }
+
+    // 评审结果列表
+    @GetMapping("queryReviewResultList")
+    public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+        return BaseApiResult.success();
+    }
+
+
     /**
-     * 普通用户删除，管理员删除
+     * 普通用户删除，管理员删除，删除评审日志
      * @return BaseApiResult
      */
     @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
     @DeleteMapping("removeDocReview")
     public BaseApiResult removeDocReview() {
+        return BaseApiResult.success();
+    }
+
+
+    // 评审结果列表
+    @GetMapping("queryLogList")
+    public BaseApiResult queryLogList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+        return BaseApiResult.success();
+    }
+
+    @DeleteMapping("removeDocReview")
+    public BaseApiResult removeLog() {
         return BaseApiResult.success();
     }
 
