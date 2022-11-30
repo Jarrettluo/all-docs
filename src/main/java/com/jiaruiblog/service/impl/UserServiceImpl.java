@@ -34,8 +34,8 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 检索已经存在的user
-     * @param userId
-     * @return
+     * @param userId String userId
+     * @return User
      */
     public User queryById(String userId) {
         return mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
