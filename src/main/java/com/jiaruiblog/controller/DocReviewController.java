@@ -3,6 +3,7 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.dto.IdList;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.impl.UserServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author Jarrett Luo
@@ -162,7 +164,8 @@ public class DocReviewController {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @DeleteMapping("removeDocReview")
-    public BaseApiResult removeLog(List<String> logIds) {
+    public BaseApiResult removeLog(@RequestBody Map<String, List<String>> params) {
+        List<String> logIds = params.get("ids");
         return docReviewService.deleteDocLogBatch(logIds);
     }
 

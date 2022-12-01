@@ -55,6 +55,6 @@ public class DocReviewServiceImpl implements DocReviewService {
 
     @Override
     public BaseApiResult deleteDocLogBatch(List<String> logIds) {
-        return null;
+        return BaseApiResult.success();
     }
 }
