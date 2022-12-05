@@ -3,7 +3,6 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.User;
-import com.jiaruiblog.entity.dto.IdList;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.impl.UserServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
@@ -40,7 +39,7 @@ public class DocReviewController {
      * 管理员查询到所有的文档评审信息
      * @return BaseApiResult
      */
-    @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
+    @ApiOperation(value = "查询需要评审的文档列表", notes = "查询需要评审的文档列表")
     @GetMapping("queryDocForReview")
     public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams,
                                             HttpServletRequest request) {
@@ -62,7 +61,7 @@ public class DocReviewController {
      * 用户必须是文档的上传人
      * @return BaseApiResult
      */
-    @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
+    @ApiOperation(value = "修改已读", notes = "修改已读功能只有普通用户有此权限")
     @PutMapping("userRead")
     public BaseApiResult updateDocReview(@RequestBody List<String> ids, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
@@ -81,6 +80,7 @@ public class DocReviewController {
      * @Param [docId, reason]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @ApiOperation(value = "管理员拒绝某个文档", notes = "管理员拒绝某个文档，只有管理员有操作该文档的权限")
     @PostMapping("refuse")
     public BaseApiResult refuse(String docId, String reason, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
@@ -99,6 +99,7 @@ public class DocReviewController {
      * @Param [docIds]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @ApiOperation(value = "管理员拒绝一批文档", notes = "管理员拒绝一批文档，只有管理员有操作该文档的权限")
     @PostMapping("refuseBatch")
     public BaseApiResult refuseBatch(List<String> docIds, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
@@ -116,6 +117,7 @@ public class DocReviewController {
      * @Param [pageParams, request]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
     @GetMapping("queryReviewResultList")
     public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") BasePageDTO pageParams,
                                                HttpServletRequest request) {
@@ -151,6 +153,7 @@ public class DocReviewController {
      * @Param [pageParams]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @ApiOperation(value = "管理员查询系统日志信息", notes = "只有管理员有权限查询日志列表")
     @GetMapping("queryLogList")
     public BaseApiResult queryLogList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
         return docReviewService.queryDocLogs(pageParams, new User());
@@ -163,10 +166,17 @@ public class DocReviewController {
      * @Param [logIds]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @ApiOperation(value = "管理员删除文档信息", notes = "只有管理员有权限删除文档的日志")
     @DeleteMapping("removeDocReview")
     public BaseApiResult removeLog(@RequestBody Map<String, List<String>> params) {
         List<String> logIds = params.get("ids");
         return docReviewService.deleteDocLogBatch(logIds);
+    }
+
+    @ApiOperation(value = "管理员修改系统设置", notes = "只有管理员有权限修改系统的设置信息")
+    @PutMapping("systemConfig")
+    public BaseApiResult systemConfig(@RequestBody String params) {
+        return BaseApiResult.success();
     }
 
 }
