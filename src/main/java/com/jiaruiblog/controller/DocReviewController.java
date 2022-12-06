@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.annontation.MustAdmin;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.User;
@@ -39,19 +40,24 @@ public class DocReviewController {
      * 管理员查询到所有的文档评审信息
      * @return BaseApiResult
      */
+    @MustAdmin()
     @ApiOperation(value = "查询需要评审的文档列表", notes = "查询需要评审的文档列表")
     @GetMapping("queryDocForReview")
     public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams,
                                             HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        User user = userServiceImpl.queryById(userId);
+
+//        System.out.println(request.get);
+        System.out.println(userId);
+        System.out.println(pageParams);
+//        User user = userServiceImpl.queryById(userId);
         // 必须是管理员才有资格进行评审
-        if (user == null) {
-            assert false;
-            if (user.getUsername() != "sf") {
-                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
-            }
-        }
+//        if (user == null) {
+//            assert false;
+//            if (user.getUsername() != "sf") {
+//                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+//            }
+//        }
         return docReviewService.queryReviewsByPage(pageParams, new User());
     }
 

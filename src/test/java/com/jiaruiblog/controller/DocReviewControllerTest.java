@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.jiaruiblog.DocumentSharingSiteApplication;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = DocumentSharingSiteApplication.class)
@@ -44,20 +42,29 @@ public class DocReviewControllerTest {
     public void tearDown() throws Exception {
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 仅仅有管理员可以进行评审
+     * @Date 22:37 2022/12/6
+     * @Param []
+     * @return void
+     **/
     @Test
     public void queryDocReviewList() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders
-                .get("/document/list")
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                .get("/docReview/queryDocForReview")
+                .requestAttr("id", "1")
+                .param("page", String.valueOf(1))
+                .param("rows", String.valueOf(10))
+                .contentType(MediaType.APPLICATION_JSON)
                 // 设置返回值类型为utf-8，否则默认为ISO-8859-1
-                .accept(MediaType.APPLICATION_JSON)
-                .param("type", "ALL")
-                .param("filterWord", "")
-                .param("rows", "10")
-                .param("categoryId", "1")
-                .param("tagid", "1")
-                .param("page", "1"))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(MockMvcResultHandlers.print());
+                .andReturn();;
+
+        String result1 = result.getResponse().getContentAsString(Charset.defaultCharset());
+        System.out.println(result1);
     }
 
     @Test
