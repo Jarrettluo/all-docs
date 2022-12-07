@@ -1,15 +1,19 @@
 package com.jiaruiblog.filter;
 
 import com.auth0.jwt.interfaces.Claim;
+import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.method.HandlerMethod;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +53,18 @@ public class JwtFilter implements Filter
         if (SAFE_URL_LIST.contains(url)) {
             return;
         }
+
+
+        // 获取方法中的注解
+        HandlerMethod handlerMethod = (HandlerMethod) chain;
+        Method method = handlerMethod.getMethod();
+
+        // 获取类注解
+        Permission permissionClass = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Permission.class);
+        // 获取方法注解
+        Permission permissionMethod = AnnotationUtils.findAnnotation(method,Permission.class);
+
+
 
         //获取 header里的token
         final String token = request.getHeader("authorization");
