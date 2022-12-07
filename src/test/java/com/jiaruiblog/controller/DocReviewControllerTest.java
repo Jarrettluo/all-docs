@@ -47,11 +47,9 @@ public class DocReviewControllerTest {
      * @Description 仅仅有管理员可以进行评审
      * @Date 22:37 2022/12/6
      * @Param []
-     * @return void
      **/
     @Test
-    public void queryDocReviewList() throws Exception {
-
+    public void queryDocReviewListTest1() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
                 .get("/docReview/queryDocForReview")
                 .requestAttr("id", "1")
@@ -62,7 +60,50 @@ public class DocReviewControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();;
+        String result1 = result.getResponse().getContentAsString(Charset.defaultCharset());
+        System.out.println(result1);
+    }
 
+    /**
+     * @Author luojiarui
+     * @Description 仅仅有管理员可以进行评审, page为负数
+     * @Date 22:37 2022/12/6
+     * @Param []
+     **/
+    @Test
+    public void queryDocReviewListTest2() throws Exception {
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                .get("/docReview/queryDocForReview")
+                .requestAttr("id", "1")
+                .param("page", String.valueOf(-1))
+                .param("rows", String.valueOf(10))
+                .contentType(MediaType.APPLICATION_JSON)
+                // 设置返回值类型为utf-8，否则默认为ISO-8859-1
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();;
+        String result1 = result.getResponse().getContentAsString(Charset.defaultCharset());
+        System.out.println(result1);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 仅仅有管理员可以进行评审， page 超过限制
+     * @Date 22:37 2022/12/6
+     * @Param []
+     **/
+    @Test
+    public void queryDocReviewListTest3() throws Exception {
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                .get("/docReview/queryDocForReview")
+                .requestAttr("id", "1")
+                .param("page", String.valueOf(1))
+                .param("rows", String.valueOf(110))
+                .contentType(MediaType.APPLICATION_JSON)
+                // 设置返回值类型为utf-8，否则默认为ISO-8859-1
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();;
         String result1 = result.getResponse().getContentAsString(Charset.defaultCharset());
         System.out.println(result1);
     }

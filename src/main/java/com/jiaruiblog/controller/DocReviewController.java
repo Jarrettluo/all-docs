@@ -14,10 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * 文档评审，日志查询
  * @Author Jarrett Luo
  * @Date 2022/11/25 15:56
  * @Version 1.0
@@ -45,7 +47,7 @@ public class DocReviewController {
     @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "查询需要评审的文档列表", notes = "查询需要评审的文档列表")
     @GetMapping("queryDocForReview")
-    public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+    public BaseApiResult queryDocReviewList(@Valid @ModelAttribute("pageParams") BasePageDTO pageParams) {
         System.out.println(pageParams);
         return docReviewService.queryReviewsByPage(pageParams);
     }
