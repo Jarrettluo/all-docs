@@ -1,6 +1,7 @@
 package com.jiaruiblog.controller;
 
-import com.jiaruiblog.annontation.MustAdmin;
+import com.jiaruiblog.auth.Permission;
+import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.User;
@@ -38,44 +39,27 @@ public class DocReviewController {
      * 该接口必须在登录条件下才能查询
      * 普通普通查询到自己上传的文档
      * 管理员查询到所有的文档评审信息
+     * 必须是管理员才有资格进行评审
      * @return BaseApiResult
      */
-    @MustAdmin()
+    @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "查询需要评审的文档列表", notes = "查询需要评审的文档列表")
     @GetMapping("queryDocForReview")
-    public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams,
-                                            HttpServletRequest request) {
-        String userId = (String) request.getAttribute("id");
-
-//        System.out.println(request.get);
-        System.out.println(userId);
-        System.out.println(pageParams);
-//        User user = userServiceImpl.queryById(userId);
-        // 必须是管理员才有资格进行评审
-//        if (user == null) {
-//            assert false;
-//            if (user.getUsername() != "sf") {
-//                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
-//            }
-//        }
-        return docReviewService.queryReviewsByPage(pageParams, new User());
+    public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+        return docReviewService.queryReviewsByPage(pageParams);
     }
 
 
     /**
      * 修改已读， 只有普通用户有此权限
+     * 修改评审意见为通过
      * 用户必须是文档的上传人
      * @return BaseApiResult
      */
+    @Permission({PermissionEnum.USER})
     @ApiOperation(value = "修改已读", notes = "修改已读功能只有普通用户有此权限")
     @PutMapping("userRead")
-    public BaseApiResult updateDocReview(@RequestBody List<String> ids, HttpServletRequest request) {
-        String userId = (String) request.getAttribute("id");
-        User user = userServiceImpl.queryById(userId);
-        if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
-        }
-        // 修改评审意见为通过
+    public BaseApiResult updateDocReview(@RequestBody List<String> ids) {
         return docReviewService.userRead(ids);
     }
 
@@ -86,15 +70,10 @@ public class DocReviewController {
      * @Param [docId, reason]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员拒绝某个文档", notes = "管理员拒绝某个文档，只有管理员有操作该文档的权限")
     @PostMapping("refuse")
-    public BaseApiResult refuse(String docId, String reason, HttpServletRequest request) {
-        String userId = (String) request.getAttribute("id");
-        User user = userServiceImpl.queryById(userId);
-        // 必须是管理员才行
-        if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
-        }
+    public BaseApiResult refuse(String docId, String reason) {
         return docReviewService.refuse(docId, reason);
     }
 
@@ -105,14 +84,10 @@ public class DocReviewController {
      * @Param [docIds]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员拒绝一批文档", notes = "管理员拒绝一批文档，只有管理员有操作该文档的权限")
     @PostMapping("refuseBatch")
-    public BaseApiResult refuseBatch(List<String> docIds, HttpServletRequest request) {
-        String userId = (String) request.getAttribute("id");
-        User user = userServiceImpl.queryById(userId);
-        if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
-        }
+    public BaseApiResult refuseBatch(List<String> docIds) {
         return docReviewService.refuseBatch(docIds);
     }
 
@@ -123,6 +98,7 @@ public class DocReviewController {
      * @Param [pageParams, request]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @Permission({PermissionEnum.USER, PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
     @GetMapping("queryReviewResultList")
     public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") BasePageDTO pageParams,
@@ -159,6 +135,7 @@ public class DocReviewController {
      * @Param [pageParams]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员查询系统日志信息", notes = "只有管理员有权限查询日志列表")
     @GetMapping("queryLogList")
     public BaseApiResult queryLogList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
@@ -172,6 +149,7 @@ public class DocReviewController {
      * @Param [logIds]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @Permission(PermissionEnum.ADMIN)
     @ApiOperation(value = "管理员删除文档信息", notes = "只有管理员有权限删除文档的日志")
     @DeleteMapping("removeDocReview")
     public BaseApiResult removeLog(@RequestBody Map<String, List<String>> params) {
@@ -179,6 +157,7 @@ public class DocReviewController {
         return docReviewService.deleteDocLogBatch(logIds);
     }
 
+    @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员修改系统设置", notes = "只有管理员有权限修改系统的设置信息")
     @PutMapping("systemConfig")
     public BaseApiResult systemConfig(@RequestBody String params) {

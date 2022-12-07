@@ -19,7 +19,7 @@ import java.util.List;
 public class DocReviewServiceImpl implements DocReviewService {
 
     @Override
-    public BaseApiResult queryReviewsByPage(BasePageDTO page, User user) {
+    public BaseApiResult queryReviewsByPage(BasePageDTO page) {
         return null;
     }
 

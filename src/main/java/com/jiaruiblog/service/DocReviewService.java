@@ -16,7 +16,7 @@ public interface DocReviewService {
      * @Param [page, user]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult queryReviewsByPage(BasePageDTO page, User user);
+    BaseApiResult queryReviewsByPage(BasePageDTO page);
 
     /**
      * @Author luojiarui

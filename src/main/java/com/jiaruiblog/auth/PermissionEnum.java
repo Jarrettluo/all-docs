@@ -8,13 +8,13 @@ import lombok.Getter;
 public enum PermissionEnum {
 
     /**
-     * 用户管理权限
+     * 用户权限
      */
-    USER(1, "用户管理权限"),
+    USER(1, "用户权限"),
     /**
-     * 教师管理权限
+     * 管理员管理权限
      */
-    TEACHER(2, "教师管理权限"),
+    ADMIN(2, "管理员管理权限"),
 
     /**
      * 无需校验,
