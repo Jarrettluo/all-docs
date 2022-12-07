@@ -1,5 +1,7 @@
 package com.jiaruiblog.auth;
 
+import com.jiaruiblog.entity.User;
+import com.jiaruiblog.service.IUserService;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -19,6 +21,14 @@ import java.lang.reflect.Method;
  **/
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
+    // 拦截器中无法注入bean，因此使用构造器
+    private final IUserService userService;
+
+    public AuthenticationInterceptor(IUserService userService) {
+        this.userService = userService;
+    }
+
+
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -32,9 +42,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         Method method = handlerMethod.getMethod();
         // 省略判断是否需要登录的方法.....
-        // 省略Token解析的方法.....
-        // 此处根据自己的系统架构，通过Token或Cookie等获取用户信息。
-//        UserInfo userInfo = userService.getUserByToken(token);
 
         // 获取类注解
         Permission permissionClass = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Permission.class);
@@ -46,6 +53,30 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             // 不需要校验权限，直接放行
             return true;
         }
+
+        // 省略Token解析的方法.....
+
+        //获取 header里的token
+//        final String token = request.getHeader("authorization");
+//        if (token == null) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return false;
+//        }
+//        Map<String, Claim> userData = JwtUtil.verifyToken(token);
+//
+//        if (CollectionUtils.isEmpty(userData)) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return false;
+//        }
+//
+//        User userInfo = userService.queryById(userData.get("id").asString());
+        System.out.println("这里是userInfo");
+        User userInfo = new User();
+
+        // 此处根据自己的系统架构，通过Token或Cookie等获取用户信息。
+//        UserInfo userInfo = userService.getUserByToken(token);
+
+
         // 获取该方法注解，优先级:方法注解>类注解
         PermissionEnum[] permissionEnums;
         if (permissionClass != null && permissionMethod == null) {
@@ -63,20 +94,23 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 permissionEnums
         );
 
+        System.out.println(userService);
+
         // 校验该用户是否有改权限
         // 校验方法可自行实现，拿到permissionEnums中的参数进行比较
-//        if(userService.checkPermissionForUser(userInfo,permissionEnums)){
-            // 拥有权限
-//            return true;
-//        } else {
-            // 抛出自定义异常，可在全局异常捕获后自行处理。
-//            throw new AuthTokenException(CheckConstants.PERMISSION_ERROR);
-//        }
+        if(userService.checkPermissionForUser(userInfo, permissionEnums)){
+             // 拥有权限
+            return true;
+        } else {
+             // 抛出自定义异常，可在全局异常捕获后自行处理。
+//            throw new CourseException
+            throw new Exception("sdfjdls");
+        }
 
 
 //        return HandlerInterceptor.super.preHandle(request, response, handler);
 
-        return true;
+//        return true;
     }
 
     /**

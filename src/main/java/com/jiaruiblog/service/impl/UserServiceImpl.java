@@ -1,5 +1,6 @@
 package com.jiaruiblog.service.impl;
 
+import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,21 @@ public class UserServiceImpl implements IUserService {
      * @param userId String userId
      * @return User
      */
+    @Override
     public User queryById(String userId) {
         return mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 检查某个用户是否具有某种权限
+     * @Date 21:28 2022/12/7
+     * @Param [user, permissionEnum]
+     * @return boolean
+     **/
+    @Override
+    public boolean checkPermissionForUser(User user, PermissionEnum[] permissionEnums) {
+        System.out.println("这里进行权限检查！");
+        return true;
     }
 }

@@ -46,6 +46,7 @@ public class DocReviewController {
     @ApiOperation(value = "查询需要评审的文档列表", notes = "查询需要评审的文档列表")
     @GetMapping("queryDocForReview")
     public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+        System.out.println(pageParams);
         return docReviewService.queryReviewsByPage(pageParams);
     }
 
