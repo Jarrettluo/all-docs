@@ -3,18 +3,22 @@ package com.jiaruiblog.config;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -24,7 +28,7 @@ import java.util.stream.Collectors;
  * @author jiarui.luo
  */
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 public class CommonExceptionHandler {
 
     @ResponseBody
@@ -46,26 +50,48 @@ public class CommonExceptionHandler {
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public BaseApiResult dealMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("this is controller MethodArgumentNotValidException,param valid failed", e);
         List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
-        String message = allErrors.stream().map(s -> s.getDefaultMessage()).collect(Collectors.joining(";"));
+        String message = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(";"));
         return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description validation 效验post or get 方式表单方式提交转对象，效验出错
+     * @Date 21:50 2022/12/8
+     * @Param [e]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @ExceptionHandler(BindException.class)
+    public BaseApiResult handleValidation(BindException e) {
+        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
+        String messages = fieldErrors.stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(";"));
+        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, messages);
     }
 
     /**
      * 拦截valid参数校验返回的异常，并转化成基本的返回样式
      */
-    @ExceptionHandler(value = BindException.class)
-    public BaseApiResult dealBindException(BindException e) {
-        log.error("this is controller MethodArgumentNotValidException,param valid failed", e);
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    public BaseApiResult dealConstraintViolationException(ConstraintViolationException e) {
+        Set<ConstraintViolation<?>> allErrors = e.getConstraintViolations();
+        String message = allErrors.stream().map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(";"));
+        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
+    }
 
-        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-        List<String> msgList = fieldErrors.stream()
-                .map(o -> o.getDefaultMessage())
-                .collect(Collectors.toList());
-        String messages = StringUtils.join(msgList.toArray(), ";");
-
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, messages);
+    /**
+     * 参数类型转换错误
+     *
+     * @param exception 错误
+     * @return 错误信息
+     */
+    @ExceptionHandler(HttpMessageConversionException.class)
+    public BaseApiResult parameterTypeException(HttpMessageConversionException exception) {
+        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "类型转换错误");
     }
 
 

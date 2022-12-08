@@ -20,32 +20,32 @@ public class DocReviewServiceImpl implements DocReviewService {
 
     @Override
     public BaseApiResult queryReviewsByPage(BasePageDTO page) {
-        return null;
+        return BaseApiResult.success();
     }
 
     @Override
     public BaseApiResult userRead(List<String> ids) {
-        return null;
+        return BaseApiResult.success();
     }
 
     @Override
     public BaseApiResult refuse(String docId, String reason) {
-        return null;
+        return BaseApiResult.success();
     }
 
     @Override
     public BaseApiResult refuseBatch(List<String> docIds) {
-        return null;
+        return BaseApiResult.success();
     }
 
     @Override
     public BaseApiResult deleteReviewsBatch(List<String> docIds) {
-        return null;
+        return BaseApiResult.success();
     }
 
     @Override
     public BaseApiResult queryReviewLog(BasePageDTO page, User user) {
-        return null;
+        return BaseApiResult.success();
     }
 
     @Override
