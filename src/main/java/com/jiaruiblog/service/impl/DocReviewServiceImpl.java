@@ -34,9 +34,15 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     @Override
-    public BaseApiResult refuseBatch(List<String> docIds) {
+    public BaseApiResult refuseBatch(List<String> docIds, String reason) {
         return BaseApiResult.success();
     }
+
+    @Override
+    public BaseApiResult approveBatch(List<String> docIds) {
+        return BaseApiResult.success();
+    }
+
 
     @Override
     public BaseApiResult deleteReviewsBatch(List<String> docIds) {

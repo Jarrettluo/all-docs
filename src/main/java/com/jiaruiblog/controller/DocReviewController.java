@@ -98,15 +98,21 @@ public class DocReviewController {
     @ApiOperation(value = "管理员拒绝一批文档", notes = "管理员拒绝一批文档，只有管理员有操作该文档的权限")
     @PostMapping("refuseBatch")
     public BaseApiResult refuseBatch(@RequestBody @Valid RefuseBatchDTO refuseBatchDTO) {
-        return docReviewService.refuseBatch(refuseBatchDTO.getIds());
+        return docReviewService.refuseBatch(refuseBatchDTO.getIds(), refuseBatchDTO.getReason());
     }
 
-    // 缺少同意文档的信息
+    /**
+     * @Author luojiarui
+     * @Description  缺少同意文档的信息
+     * @Date 22:04 2022/12/9
+     * @Param [batchIdDTO]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "tongyi ")
-    @PostMapping("ok")
-    public BaseApiResult ok(@RequestBody @Valid BatchIdDTO batchIdDTO) {
-        return docReviewService.refuseBatch(batchIdDTO.getIds());
+    @ApiOperation(value = "统一某一批文档", notes = "管理员同意某一批文档")
+    @PostMapping("approve")
+    public BaseApiResult approve(@RequestBody @Valid BatchIdDTO batchIdDTO) {
+        return docReviewService.approveBatch(batchIdDTO.getIds());
     }
 
     /**

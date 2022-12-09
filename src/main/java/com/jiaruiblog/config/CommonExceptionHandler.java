@@ -3,11 +3,8 @@ package com.jiaruiblog.config;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,11 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 全局统一异常处理
@@ -50,10 +43,11 @@ public class CommonExceptionHandler {
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public BaseApiResult dealMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
-        String message = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.joining(";"));
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
+        String defaultMessage = e.getBindingResult().getFieldError().getDefaultMessage();
+//        List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
+//        String message = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
+//                .collect(Collectors.joining(";"));
+        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, defaultMessage);
     }
 
     /**
@@ -65,11 +59,12 @@ public class CommonExceptionHandler {
      **/
     @ExceptionHandler(BindException.class)
     public BaseApiResult handleValidation(BindException e) {
-        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-        String messages = fieldErrors.stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.joining(";"));
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, messages);
+        String defaultMessage = e.getFieldError().getDefaultMessage();
+//        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
+//        String messages = fieldErrors.stream()
+//                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+//                .collect(Collectors.joining(";"));
+        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, defaultMessage);
     }
 
     /**
@@ -77,9 +72,10 @@ public class CommonExceptionHandler {
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
     public BaseApiResult dealConstraintViolationException(ConstraintViolationException e) {
-        Set<ConstraintViolation<?>> allErrors = e.getConstraintViolations();
-        String message = allErrors.stream().map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining(";"));
+        String message = e.getMessage();
+//        Set<ConstraintViolation<?>> allErrors = e.getConstraintViolations();
+//        String message = allErrors.stream().map(ConstraintViolation::getMessage)
+//                .collect(Collectors.joining(";"));
         return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
     }
 
@@ -92,6 +88,19 @@ public class CommonExceptionHandler {
     @ExceptionHandler(HttpMessageConversionException.class)
     public BaseApiResult parameterTypeException(HttpMessageConversionException exception) {
         return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "类型转换错误");
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 请求方法不正确
+     * @Date 21:18 2022/12/9
+     * @Param [e]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public BaseApiResult dealHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        String message = e.getMessage();
+        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
     }
 
 

@@ -19,6 +19,7 @@ public class RefuseDTO {
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     @NotBlank(message = MessageConstant.PARAMS_LENGTH_REQUIRED)
+    @Size(min = 1, max = 64, message = MessageConstant.PARAMS_LENGTH_REQUIRED)
     private String docId;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)

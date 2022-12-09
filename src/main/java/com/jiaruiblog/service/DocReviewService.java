@@ -43,7 +43,16 @@ public interface DocReviewService {
      * @Param [docId] 文档列表的id
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult refuseBatch(List<String> docIds);
+    BaseApiResult refuseBatch(List<String> docIds, String reason);
+
+    /**
+     * @Author luojiarui
+     * @Description 管理员同意一批文档
+     * @Date 22:04 2022/12/9
+     * @Param [docIds]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    BaseApiResult approveBatch(List<String> docIds);
 
 
     /**
