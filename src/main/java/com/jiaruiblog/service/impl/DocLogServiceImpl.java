@@ -8,18 +8,18 @@ import com.jiaruiblog.entity.User;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @ClassName DocLogServiceImpl
- * @Description TODO
+ * @Description 文档日志的查询和删除
  * @Author luojiarui
  * @Date 2022/12/10 11:05
  * @Version 1.0
@@ -31,10 +31,10 @@ public class DocLogServiceImpl implements IDocLogService {
 
     public static final String RESULT = "操作成功了 %d 项目";
 
-    @Autowired
+    @Resource
     private UserServiceImpl userServiceImpl;
 
-    @Autowired
+    @Resource
     private MongoTemplate mongoTemplate;
 
 

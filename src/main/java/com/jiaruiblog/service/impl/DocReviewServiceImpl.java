@@ -14,7 +14,6 @@ import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.apache.commons.compress.utils.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -23,7 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import javax.annotation.Resource;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName DocReviewServiceImpl
@@ -38,14 +41,15 @@ public class DocReviewServiceImpl implements DocReviewService {
     public static final String DOC_REVIEW_COLLECTION = "docReview";
 
     public static final String RESULT = "操作成功了 %d 项目";
+    public static final String USER_ID = "userId";
 
-    @Autowired
+    @Resource
     private IFileService fileService;
 
-    @Autowired
+    @Resource
     MongoTemplate mongoTemplate;
 
-    @Autowired
+    @Resource
     private UserServiceImpl userServiceImpl;
 
     @Override
@@ -57,7 +61,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     @Override
     public BaseApiResult userRead(List<String> ids, String userId) {
         // 只能读自己的 文档评审意见
-        Query query = new Query(Criteria.where("_id").in(ids).and("userId").is(userId));
+        Query query = new Query(Criteria.where("_id").in(ids).and(USER_ID).is(userId));
         Update update = new Update();
         // 修改为已读状态
         update.set("readState", true);
@@ -178,7 +182,7 @@ public class DocReviewServiceImpl implements DocReviewService {
             DeleteResult deleteResult = mongoTemplate.remove(query, DocReview.class, DOC_REVIEW_COLLECTION);
             return BaseApiResult.success(String.format(RESULT, deleteResult.getDeletedCount()));
         }
-        query.addCriteria(Criteria.where("userId").is(user.getId()).and("_id").in(docIds));
+        query.addCriteria(Criteria.where(USER_ID).is(user.getId()).and("_id").in(docIds));
         Update update = new Update();
         update.set("userRemove", true);
         update.set("updateDate", new Date());
@@ -192,7 +196,7 @@ public class DocReviewServiceImpl implements DocReviewService {
         // 根据不同的user进行区分
         Query query = new Query();
         if (user.getPermissionEnum().equals(PermissionEnum.ADMIN)) {
-            query.addCriteria(Criteria.where("userId").is(user.getId()));
+            query.addCriteria(Criteria.where(USER_ID).is(user.getId()));
         }
         query.skip((long) page.getPage() * page.getRows());
         query.limit(page.getRows());

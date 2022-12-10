@@ -8,16 +8,16 @@ import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
 /**
  * @ClassName DocLogController
- * @Description TODO
+ * @Description 文档日志的查询等
  * @Author luojiarui
  * @Date 2022/12/10 11:10
  * @Version 1.0
@@ -28,7 +28,7 @@ import java.util.List;
 @RequestMapping("/docLog")
 public class DocLogController {
 
-    @Autowired
+    @Resource
     private IDocLogService docLogService;
 
     /**

@@ -3,22 +3,19 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.RemoveObjectDTO;
-
 import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
 
@@ -37,10 +34,10 @@ import java.util.List;
 @RequestMapping("/document")
 public class DocumentController {
 
-    @Autowired
+    @Resource
     IFileService iFileService;
 
-    @Autowired
+    @Resource
     RedisService redisService;
 
 

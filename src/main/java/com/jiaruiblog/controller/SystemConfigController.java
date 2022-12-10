@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/system")
 public class SystemConfigController {
 
-
-
     @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员修改系统设置", notes = "只有管理员有权限修改系统的设置信息")
     @PutMapping("config")
