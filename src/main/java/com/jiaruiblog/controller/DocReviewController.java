@@ -7,6 +7,7 @@ import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.RefuseBatchDTO;
 import com.jiaruiblog.entity.dto.RefuseDTO;
 import com.jiaruiblog.service.DocReviewService;
+import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -33,6 +35,9 @@ public class DocReviewController {
     @Autowired
     private DocReviewService docReviewService;
 
+    @Resource
+    private IFileService fileService;
+
     /**
      * 普通用户、管理员用户，列表查询
      * 该接口必须在登录条件下才能查询
@@ -46,7 +51,7 @@ public class DocReviewController {
     @ApiOperation(value = "查询需要评审的文档列表", notes = "查询需要评审的文档列表")
     @GetMapping("queryDocForReview")
     public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
-        return docReviewService.queryReviewsByPage(pageParams);
+        return fileService.queryFileDocumentResult(pageParams, true);
     }
 
 

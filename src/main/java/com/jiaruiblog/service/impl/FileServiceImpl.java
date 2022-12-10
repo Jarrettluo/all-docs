@@ -2,7 +2,9 @@ package com.jiaruiblog.service.impl;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
+import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
@@ -19,11 +21,8 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
-import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
-import org.bson.BsonArray;
-import org.bson.BsonValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -817,12 +816,38 @@ public class FileServiceImpl implements IFileService {
     @Override
     public List<FileDocument> queryAndUpdate(String... docId) {
         if (CollectionUtils.isEmpty(Arrays.asList(docId))) {
-            return null;
+            return Collections.emptyList();
         }
         Query query = new Query(Criteria.where("_id").in(docId));
         Update update = new Update();
-//        update.set("acb", true);
+        update.set("reviewing", false);
         mongoTemplate.updateMulti(query, update, COLLECTION_NAME);
         return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public List<FileDocument> queryFileDocument(BasePageDTO pageDTO, boolean reviewing) {
+
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "createDate"));
+        query.addCriteria(Criteria.where("reviewing").is(reviewing));
+        int pageIndex = pageDTO.getPage();
+        int pageSize = pageDTO.getRows();
+        long skip = (long) (pageIndex) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        Field field = query.fields();
+        field.exclude(CONTENT);
+
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public BaseApiResult queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing) {
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        query.addCriteria(Criteria.where("reviewing").is(reviewing));
+        Map<String, Object> result = Maps.newHashMap();
+        result.put("data", queryFileDocument(pageDTO, reviewing));
+        result.put("total", mongoTemplate.count(query,FileDocument.class, COLLECTION_NAME));
+        return BaseApiResult.success(result);
     }
 }

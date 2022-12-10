@@ -53,12 +53,6 @@ public class DocReviewServiceImpl implements DocReviewService {
     private UserServiceImpl userServiceImpl;
 
     @Override
-    public BaseApiResult queryReviewsByPage(BasePageDTO page) {
-        return BaseApiResult.success();
-    }
-
-
-    @Override
     public BaseApiResult userRead(List<String> ids, String userId) {
         // 只能读自己的 文档评审意见
         Query query = new Query(Criteria.where("_id").in(ids).and(USER_ID).is(userId));

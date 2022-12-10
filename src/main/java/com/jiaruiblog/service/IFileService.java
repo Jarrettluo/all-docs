@@ -1,5 +1,6 @@
 package com.jiaruiblog.service;
 
+import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.enums.DocStateEnum;
@@ -191,4 +192,22 @@ public interface IFileService {
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
     List<FileDocument> queryAndUpdate(String ...docId);
+
+    /**
+     * @Author luojiarui
+     * @Description 查询是否在评审的文档
+     * @Date 12:02 2022/12/10
+     * @Param [pageDTO, reviewing]
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
+     **/
+    List<FileDocument> queryFileDocument(BasePageDTO pageDTO, boolean reviewing);
+
+    /**
+     * @Author luojiarui
+     * @Description 查询文档评审的列表, 实际是查询文档的信息
+     * @Date 20:45 2022/11/30
+     * @Param [page, user]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    BaseApiResult queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing);
 }

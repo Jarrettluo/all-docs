@@ -8,14 +8,6 @@ import java.util.List;
 
 public interface DocReviewService {
 
-    /**
-     * @Author luojiarui
-     * @Description 查询文档评审的列表, 实际是查询文档的信息
-     * @Date 20:45 2022/11/30
-     * @Param [page, user]
-     * @return com.jiaruiblog.util.BaseApiResult
-     **/
-    BaseApiResult queryReviewsByPage(BasePageDTO page);
 
     /**
      * @Author luojiarui
