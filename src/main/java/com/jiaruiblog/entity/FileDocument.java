@@ -97,5 +97,9 @@ public class FileDocument {
     // 违禁词列表
     private List<String> wordList;
 
+    private String userId;
+
+    private String userName;
+
 
 }

@@ -1,11 +1,13 @@
 package com.jiaruiblog.service.impl;
 
 import com.google.common.collect.Maps;
+import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.service.DocReviewService;
+import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -17,6 +19,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -24,7 +28,7 @@ import java.util.Map;
 
 /**
  * @ClassName DocReviewServiceImpl
- * @Description TODO
+ * @Description 文档评审
  * @Author luojiarui
  * @Date 2022/11/30 21:02
  * @Version 1.0
@@ -34,7 +38,10 @@ public class DocReviewServiceImpl implements DocReviewService {
 
     public static final String DOC_REVIEW_COLLECTION = "docReview";
 
-    public static final String RESULT = "操作成功了{0}";
+    public static final String RESULT = "操作成功了 %d 项目";
+
+    @Autowired
+    private IFileService fileService;
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -46,60 +53,87 @@ public class DocReviewServiceImpl implements DocReviewService {
 
 
     @Override
-    public BaseApiResult userRead(List<String> ids) {
-        // 只能读自己的
-        Query query = new Query(Criteria.where("DOC_ID").in(ids))
+    public BaseApiResult userRead(List<String> ids, String userId) {
+        // 只能读自己的 文档评审意见
+        Query query = new Query(Criteria.where("_id").in(ids).and("userId").is(userId))
                 .with(Sort.by(Sort.Direction.DESC, "createDate"));
         Update update = new Update();
-        update.set("content", "comment.getContent()");
+        // 修改为已读状态
+        update.set("readState", true);
+        // 修改更新时间
         update.set("updateDate", new Date());
-
-        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, DOC_REVIEW_COLLECTION);
+        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, DocReview.class, DOC_REVIEW_COLLECTION);
         return BaseApiResult.success(String.format(RESULT, updateResult.getModifiedCount()));
     }
 
     @Override
     public BaseApiResult refuse(String docId, String reason) {
-        // 校验某个文档是否存在
+        // 校验某个文档是否存在, 查询并删除某个文档
+        List<FileDocument> fileDocumentList = fileService.queryAndRemove(docId);
+        if (CollectionUtils.isEmpty(fileDocumentList)) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         // 删除某个文档
+        DocReview docReview = docReviewInstance(fileDocumentList.get(0), reason, false);
+        if (docReview == null) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        mongoTemplate.save(docReview, DOC_REVIEW_COLLECTION);
+        return BaseApiResult.success();
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 创建一条文档评审的实例
+     * @Date 10:24 2022/12/10
+     * @Param [fileDocument, reason, approve]
+     * @return com.jiaruiblog.entity.DocReview
+     **/
+    private DocReview docReviewInstance(FileDocument fileDocument, String reason, boolean approve) {
+        if (!StringUtils.hasText(fileDocument.getId())) {
+            return null;
+        }
         DocReview docReview = new DocReview();
-        docReview.setDocId(docId);
-        docReview.setDocName("reason");
-        docReview.setUserId("");
-        docReview.setUserName("");
-        docReview.setCheckState(false);
+        docReview.setDocId(fileDocument.getId());
+        docReview.setDocName(fileDocument.getName());
+        docReview.setUserId(fileDocument.getUserId());
+        docReview.setUserName(fileDocument.getUserName());
+        docReview.setCheckState(approve);
         docReview.setReadState(false);
         docReview.setUserRemove(false);
         docReview.setReviewLog(reason);
         docReview.setCreateDate(new Date());
         docReview.setUpdateDate(new Date());
-        mongoTemplate.save(docReview, DOC_REVIEW_COLLECTION);
-        return BaseApiResult.success();
+        return docReview;
     }
 
     @Override
     public BaseApiResult refuseBatch(List<String> docIds, String reason) {
-
-        List<FileDocument> fileDocuments = Lists.newArrayList();
-        for (FileDocument fileDocument : fileDocuments) {
-            DocReview docReview = new DocReview();
-            docReview.setDocId(fileDocument.getId());
-            docReview.setDocName(fileDocument.getId());
-            docReview.setUserId("");
-            docReview.setUserName("");
-            docReview.setCheckState(false);
-            docReview.setReadState(false);
-            docReview.setUserRemove(false);
-            docReview.setReviewLog(reason);
-            docReview.setCreateDate(new Date());
-            docReview.setUpdateDate(new Date());
+        List<FileDocument> fileDocumentList = fileService.queryAndRemove(docIds.toArray(new String[0]));
+        if (CollectionUtils.isEmpty(fileDocumentList)) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
+        List<DocReview> docReviews = Lists.newArrayList();
+        for (FileDocument fileDocument : fileDocumentList) {
+            docReviews.add(docReviewInstance(fileDocument, reason, false));
+        }
+        // 可以进行批量操作，相对效率较save更高
+        mongoTemplate.insert(docReviews, DOC_REVIEW_COLLECTION);
         return BaseApiResult.success();
     }
 
     @Override
     public BaseApiResult approveBatch(List<String> docIds) {
-
+        List<FileDocument> fileDocumentList = fileService.queryAndUpdate(docIds.toArray(new String[0]));
+        if (CollectionUtils.isEmpty(fileDocumentList)) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        List<DocReview> docReviews = Lists.newArrayList();
+        for (FileDocument fileDocument : fileDocumentList) {
+            docReviews.add(docReviewInstance(fileDocument, null, true));
+        }
+        // 可以进行批量操作，相对效率较save更高
+        mongoTemplate.insert(docReviews, DOC_REVIEW_COLLECTION);
         return BaseApiResult.success();
     }
 

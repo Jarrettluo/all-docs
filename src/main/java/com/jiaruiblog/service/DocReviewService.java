@@ -25,7 +25,7 @@ public interface DocReviewService {
      * @Param [reviewId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult userRead(List<String> ids);
+    BaseApiResult userRead(List<String> ids, String userId);
 
     /**
      * @Author luojiarui

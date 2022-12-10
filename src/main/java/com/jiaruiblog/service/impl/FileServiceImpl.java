@@ -19,8 +19,11 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
+import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
+import org.bson.BsonArray;
+import org.bson.BsonValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -168,7 +171,7 @@ public class FileServiceImpl implements IFileService {
     /**
      * 表单上传附件
      *
-     * @param md5 文件md5
+     * @param md5  文件md5
      * @param file 文件
      * @return FileDocument
      */
@@ -208,7 +211,7 @@ public class FileServiceImpl implements IFileService {
     /**
      * 上传文件到Mongodb的GridFs中
      *
-     * @param in -> InputStream
+     * @param in          -> InputStream
      * @param contentType -> String
      * @return -> String
      */
@@ -546,11 +549,11 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return long
      * @Author luojiarui
      * @Description 符合关键字的总数查询
      * @Date 21:55 2022/11/17
      * @Param [keyWord]
-     * @return long
      **/
     private long countNumByKeyWord(String keyWord) {
         if (StringUtils.hasText(keyWord)) {
@@ -786,5 +789,40 @@ public class FileServiceImpl implements IFileService {
      **/
     public long countFileByQuery(Query query) {
         return mongoTemplate.count(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    /**
+     * @return com.jiaruiblog.entity.FileDocument
+     * @Author luojiarui
+     * @Description 查询并删除文档
+     * @Date 10:07 2022/12/10
+     * @Param [docId]
+     **/
+    @Override
+    public List<FileDocument> queryAndRemove(String ...docId) {
+        if (CollectionUtils.isEmpty(Arrays.asList(docId))) {
+            return null;
+        }
+        Query query = new Query(Criteria.where("_id").in(docId));
+        return mongoTemplate.findAllAndRemove(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 修改并返回查询到的文档信息
+     * @Date 10:31 2022/12/10
+     * @Param [docId]
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
+     **/
+    @Override
+    public List<FileDocument> queryAndUpdate(String... docId) {
+        if (CollectionUtils.isEmpty(Arrays.asList(docId))) {
+            return null;
+        }
+        Query query = new Query(Criteria.where("_id").in(docId));
+        Update update = new Update();
+//        update.set("acb", true);
+        mongoTemplate.updateMulti(query, update, COLLECTION_NAME);
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
     }
 }

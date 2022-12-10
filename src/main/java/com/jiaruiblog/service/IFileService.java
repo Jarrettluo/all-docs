@@ -173,4 +173,22 @@ public interface IFileService {
      * 保存文件流到dfs系统中
      **/
     String uploadFileToGridFs(String prefix, InputStream in, String contentType);
+
+    /**
+     * @Author luojiarui
+     * @Description 查询并删除某个文档
+     * @Date 10:01 2022/12/10
+     * @Param [docId]
+     * @return com.jiaruiblog.entity.FileDocument
+     **/
+    List<FileDocument> queryAndRemove(String ...docId);
+
+    /**
+     * @Author luojiarui
+     * @Description 文档查询并通过文档审批
+     * @Date 10:27 2022/12/10
+     * @Param [docId]
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
+     **/
+    List<FileDocument> queryAndUpdate(String ...docId);
 }

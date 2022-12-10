@@ -67,8 +67,9 @@ public class DocReviewController {
     @Permission({PermissionEnum.USER})
     @ApiOperation(value = "修改已读", notes = "修改已读功能只有普通用户有此权限")
     @PutMapping("userRead")
-    public BaseApiResult updateDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO) {
-        return docReviewService.userRead(batchIdDTO.getIds());
+    public BaseApiResult updateDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
+        String userId = (String) request.getAttribute("id");
+        return docReviewService.userRead(batchIdDTO.getIds(), userId);
     }
 
     /**
