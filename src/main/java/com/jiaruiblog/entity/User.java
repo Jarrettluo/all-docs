@@ -1,6 +1,7 @@
 package com.jiaruiblog.entity;
 
 import com.alibaba.fastjson.JSON;
+import com.jiaruiblog.auth.PermissionEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,6 +43,8 @@ public class User {
 
     // 封禁状态
     private boolean banning;
+
+    private PermissionEnum permissionEnum;
 
     private Date createDate;
 

@@ -2,14 +2,11 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.BasePageDTO;
-import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.RefuseBatchDTO;
 import com.jiaruiblog.entity.dto.RefuseDTO;
 import com.jiaruiblog.service.DocReviewService;
-import com.jiaruiblog.service.impl.UserServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * 文档评审，日志查询
@@ -36,9 +32,6 @@ public class DocReviewController {
 
     @Autowired
     private DocReviewService docReviewService;
-
-    @Autowired
-    private UserServiceImpl userServiceImpl;
 
     /**
      * 普通用户、管理员用户，列表查询
@@ -128,12 +121,7 @@ public class DocReviewController {
     @GetMapping("queryReviewResultList")
     public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
                                                HttpServletRequest request) {
-        String userId = (String) request.getAttribute("id");
-        User user = userServiceImpl.queryById(userId);
-        if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
-        }
-        return docReviewService.queryReviewLog(pageParams, new User());
+        return docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"));
     }
 
 
@@ -144,49 +132,8 @@ public class DocReviewController {
     @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
     @DeleteMapping("removeDocReview")
     public BaseApiResult removeDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
-        String userId = (String) request.getAttribute("id");
-        User user = userServiceImpl.queryById(userId);
-        if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
-        }
-        return docReviewService.deleteReviewsBatch(batchIdDTO.getIds());
+        return docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
     }
 
-
-    /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
-     * @Description 系统用户日志查询
-     * @Date 21:16 2022/11/30
-     * @Param [pageParams]
-     **/
-    @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "管理员查询系统日志信息", notes = "只有管理员有权限查询日志列表")
-    @GetMapping("queryLogList")
-    public BaseApiResult queryLogList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
-        return docReviewService.queryDocLogs(pageParams, new User());
-    }
-
-    /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
-     * @Description 删除用户日志
-     * @Date 21:16 2022/11/30
-     * @Param [logIds]
-     **/
-    @Permission(PermissionEnum.ADMIN)
-    @ApiOperation(value = "管理员删除文档信息", notes = "只有管理员有权限删除文档的日志")
-    @DeleteMapping("removeLog")
-    public BaseApiResult removeLog(@RequestBody @Valid BatchIdDTO batchIdDTO) {
-        List<String> logIds = batchIdDTO.getIds();
-        return docReviewService.deleteDocLogBatch(logIds);
-    }
-
-    @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "管理员修改系统设置", notes = "只有管理员有权限修改系统的设置信息")
-    @PutMapping("systemConfig")
-    public BaseApiResult systemConfig(@RequestBody String params) {
-        return BaseApiResult.success();
-    }
 
 }

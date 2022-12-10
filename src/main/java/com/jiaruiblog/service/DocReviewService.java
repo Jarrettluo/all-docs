@@ -2,7 +2,6 @@ package com.jiaruiblog.service;
 
 
 import com.jiaruiblog.entity.BasePageDTO;
-import com.jiaruiblog.entity.User;
 import com.jiaruiblog.util.BaseApiResult;
 
 import java.util.List;
@@ -62,7 +61,7 @@ public interface DocReviewService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult deleteReviewsBatch(List<String> docIds);
+    BaseApiResult deleteReviewsBatch(List<String> docIds, String userId);
 
     /**
      * @Author luojiarui
@@ -72,26 +71,5 @@ public interface DocReviewService {
      * @Param [page, user]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult queryReviewLog(BasePageDTO page, User user);
-
-    /**
-     * @Author luojiarui
-     * @Description 分页查询文档日志
-     * @Date 20:57 2022/11/30
-     * @Param [page, user]
-     * @return com.jiaruiblog.util.BaseApiResult
-     **/
-    BaseApiResult queryDocLogs(BasePageDTO page, User user);
-
-    /**
-     * @Author luojiarui
-     * @Description 批量删除文档的日志
-     * @Date 20:57 2022/11/30
-     * @Param [ids] 文档的id列表
-     * @return com.jiaruiblog.util.BaseApiResult
-     **/
-    BaseApiResult deleteDocLogBatch(List<String> logIds);
-
-
-
+    BaseApiResult queryReviewLog(BasePageDTO page, String userId);
 }
