@@ -1,5 +1,6 @@
 package com.jiaruiblog.service;
 
+import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.util.BaseApiResult;
@@ -44,5 +45,14 @@ public interface ICommentService {
      * @return result
      */
     BaseApiResult search(Comment comment);
+
+    /**
+     * @Author luojiarui
+     * @Description 查询评论列表
+     * @Date 14:44 2022/12/10
+     * @Param [pageDTO, userId]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    BaseApiResult queryAllComments(BasePageDTO pageDTO, String userId);
 
 }

@@ -126,6 +126,8 @@ public class DocReviewController {
     @GetMapping("queryReviewResultList")
     public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
                                                HttpServletRequest request) {
+        System.out.println(request.getAttribute("id"));
+
         return docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"));
     }
 

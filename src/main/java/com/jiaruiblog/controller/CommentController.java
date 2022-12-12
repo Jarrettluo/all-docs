@@ -1,5 +1,7 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.auth.Permission;
+import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.dto.CommentDTO;
@@ -78,5 +80,20 @@ public class CommentController {
         comment.setUserName((String) request.getAttribute("username"));
         comment.setUserId((String) request.getAttribute("id"));
         return comment;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 查询全部的用户评论列表
+     * TODO 这里有漏洞，管理员也是有自己的个人空间的！
+     * @Date 14:38 2022/12/10
+     * @Param [pageDTO, request]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Permission({PermissionEnum.ADMIN, PermissionEnum.USER})
+    @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")
+    @PostMapping(value = "/listALL")
+    public BaseApiResult queryAllComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
+        return commentService.queryAllComments(pageDTO, (String) request.getAttribute("id"));
     }
 }

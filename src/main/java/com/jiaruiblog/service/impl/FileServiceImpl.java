@@ -828,11 +828,11 @@ public class FileServiceImpl implements IFileService {
     @Override
     public List<FileDocument> queryFileDocument(BasePageDTO pageDTO, boolean reviewing) {
 
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "createDate"));
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         query.addCriteria(Criteria.where("reviewing").is(reviewing));
         int pageIndex = pageDTO.getPage();
         int pageSize = pageDTO.getRows();
-        long skip = (long) (pageIndex) * pageSize;
+        long skip = (long) (pageIndex-1) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
         Field field = query.fields();

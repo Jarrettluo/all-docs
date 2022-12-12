@@ -192,7 +192,7 @@ public class DocReviewServiceImpl implements DocReviewService {
         if (user.getPermissionEnum().equals(PermissionEnum.ADMIN)) {
             query.addCriteria(Criteria.where(USER_ID).is(user.getId()));
         }
-        query.skip((long) page.getPage() * page.getRows());
+        query.skip((long) (page.getPage()-1) * page.getRows());
         query.limit(page.getRows());
 
         // 还需要进行分页

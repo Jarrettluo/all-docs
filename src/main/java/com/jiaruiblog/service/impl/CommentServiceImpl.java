@@ -2,6 +2,7 @@ package com.jiaruiblog.service.impl;
 
 import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.entity.BasePageDTO;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.CommentListDTO;
@@ -194,5 +195,25 @@ public class CommentServiceImpl implements ICommentService {
      **/
     public long countAllFile() {
         return template.getCollection(COLLECTION_NAME).estimatedDocumentCount();
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 分页查询评论信息
+     * @Date 14:47 2022/12/10
+     * @Param [page, userId]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Override
+    public BaseApiResult queryAllComments(BasePageDTO page, String userId) {
+        Query query = new Query();
+        query.skip((long) (page.getPage()-1) * page.getRows());
+        query.limit(page.getRows());
+        List<Comment> commentDb = template.find(query, Comment.class, COLLECTION_NAME);
+        long count = template.count(new Query().with(Sort.by(Sort.Direction.DESC, "createDate")), Comment.class, COLLECTION_NAME);
+        Map<String, Object> result = Maps.newHashMap();
+        result.put("data", commentDb);
+        result.put("total", count);
+        return BaseApiResult.success(result);
     }
 }
