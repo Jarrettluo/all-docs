@@ -187,17 +187,20 @@ public class DocReviewServiceImpl implements DocReviewService {
     @Override
     public BaseApiResult queryReviewLog(BasePageDTO page, String userId) {
         User user = userServiceImpl.queryById(userId);
+        if (user == null) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         // 根据不同的user进行区分
         Query query = new Query();
-        if (user.getPermissionEnum().equals(PermissionEnum.ADMIN)) {
-            query.addCriteria(Criteria.where(USER_ID).is(user.getId()));
-        }
+//        if (user.getUsername().equals("admin123") || user.getPermissionEnum().equals(PermissionEnum.ADMIN)) {
+//            query.addCriteria(Criteria.where(USER_ID).is(user.getId()));
+//        }
         query.skip((long) (page.getPage()-1) * page.getRows());
         query.limit(page.getRows());
 
         // 还需要进行分页
         List<DocReview> docReviews = mongoTemplate.find(query, DocReview.class, DOC_REVIEW_COLLECTION);
-        long count = mongoTemplate.count(query, DocReview.class, DOC_REVIEW_COLLECTION);
+        long count = mongoTemplate.count(new Query(), DocReview.class, DOC_REVIEW_COLLECTION);
         Map<String, Object> result = Maps.newHashMap();
         result.put("total", count);
         result.put("data", docReviews);
