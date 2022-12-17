@@ -33,13 +33,11 @@ public class PdfParse {
         PDFParser pdfparser = new PDFParser();
         pdfparser.parse(inputstream, handler, metadata,pcontext);
         //getting the content of the document
-        System.out.println("Contents of the PDF :" + handler.toString());
         //getting metadata of the document
-        System.out.println("Metadata of the PDF:");
-        String[] metadataNames = metadata.names();
-        for(String name : metadataNames) {
-            System.out.println(name+ " : " + metadata.get(name));
-        }
+//        String[] metadataNames = metadata.names();
+//        for(String name : metadataNames) {
+//            System.out.println(name+ " : " + metadata.get(name));
+//        }
 
     }
 

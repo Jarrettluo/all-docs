@@ -52,7 +52,6 @@ public class UserServiceImpl implements IUserService {
      **/
     @Override
     public boolean checkPermissionForUser(User user, PermissionEnum[] permissionEnums) {
-        System.out.println("这里进行权限检查！");
         return true;
     }
 }

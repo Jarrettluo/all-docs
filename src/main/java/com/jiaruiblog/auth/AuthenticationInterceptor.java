@@ -33,7 +33,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        System.out.println("========");
         // 如果不是映射到方法直接通过
         if (!(handler instanceof HandlerMethod)) {
             return true;
@@ -70,7 +69,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 //        }
 //
 //        User userInfo = userService.queryById(userData.get("id").asString());
-        System.out.println("这里是userInfo");
+
         User userInfo = new User();
 
         // 此处根据自己的系统架构，通过Token或Cookie等获取用户信息。
@@ -90,11 +89,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             permissionEnums = permissionMethod.name();
         }
 
-        System.out.println(
-                permissionEnums
-        );
-
-        System.out.println(userService);
+//        System.out.println(
+//                permissionEnums
+//        );
+//
+//        System.out.println(userService);
 
         // 校验该用户是否有改权限
         // 校验方法可自行实现，拿到permissionEnums中的参数进行比较
