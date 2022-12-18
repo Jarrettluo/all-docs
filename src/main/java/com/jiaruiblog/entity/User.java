@@ -33,11 +33,13 @@ public class User {
 
     private String password;
 
-    private String message;
+    private String phone;
 
-    private String company;
+    private String mail;
 
-    private String hobby;
+    private boolean male = false;
+
+    private String description;
 
     private String avatar;
 

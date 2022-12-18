@@ -2,6 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.dto.UserDTO;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JwtUtil;
 import com.mongodb.client.result.DeleteResult;
@@ -14,10 +15,15 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @ClassName UserController
@@ -80,8 +86,8 @@ public class UserController {
         log.info("更新用户入参==={}", user.toString());
         Query query = new Query(Criteria.where("_id").is(user.getId()));
         Update update = new Update();
-        update.set("hobby", user.getHobby());
-        update.set("company", user.getCompany());
+//        update.set("hobby", user.getHobby());
+//        update.set("company", user.getCompany());
         UpdateResult updateResult = template.updateFirst(query, update, User.class, COLLECTION_NAME);
         log.info("更新的结果==={}", updateResult.toString());
         return BaseApiResult.success("更新成功！");
@@ -96,7 +102,7 @@ public class UserController {
             return BaseApiResult.error(1201, MessageConstant.OPERATE_FAILED);
         }
         DeleteResult remove = template.remove(user, COLLECTION_NAME);
-        if(remove.getDeletedCount() > 0) {
+        if (remove.getDeletedCount() > 0) {
             log.warn("[删除警告]正在删除用户：{}", user);
             return BaseApiResult.success("删除成功");
         } else {
@@ -140,5 +146,55 @@ public class UserController {
         return "当前用户信息id=" + id + ",userName=" + userName + ",password=" + password;
     }
 
+    static final Map<String, String> fieldRegx = new HashMap<>(8);
+
+    static {
+        // 1-64个数字字母下划线
+        fieldRegx.put("password", "^[0-9a-z_]{1,64}$");
+        fieldRegx.put("phone", "/^1(3\\d|4[5-9]|5[0-35-9]|6[567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$/");
+        fieldRegx.put("mail", "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
+        // 1-140个任意字符
+        fieldRegx.put("description", "(.*){1,140}");
+    }
+
+
+    /**
+     * @return com.jiaruiblog.util.BaseApiResult
+     * @Author luojiarui
+     * @Description 更新用户的基本信息
+     * @Date 13:07 2022/12/18
+     * @Param [userDTO]
+     **/
+    @PutMapping("updateUserInfo")
+    public BaseApiResult updateUserInfo(@RequestBody UserDTO userDTO) {
+
+        if (StringUtils.hasText(userDTO.getPassword())) {
+            if (!patternMatch(userDTO.getPassword(), fieldRegx.get("password"))) {
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            }
+        }
+        if (StringUtils.hasText(userDTO.getMail())) {
+            if (!patternMatch(userDTO.getPassword(), fieldRegx.get("mail"))) {
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            }
+        }
+
+        if (StringUtils.hasText(userDTO.getPhone())) {
+            if (!patternMatch(userDTO.getPassword(), fieldRegx.get("phone"))) {
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            }
+        }
+        if (StringUtils.hasText(userDTO.getDescription())) {
+            if (!patternMatch(userDTO.getPassword(), fieldRegx.get("description"))) {
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            }
+        }
+
+        return BaseApiResult.success();
+    }
+
+    private boolean patternMatch(String s, String regex) {
+        return  Pattern.compile(regex).matcher(s).matches();
+    }
 
 }
