@@ -1,10 +1,21 @@
 package com.jiaruiblog.service;
 
+import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.service.impl.CategoryServiceImpl;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.*;
+import javax.annotation.Resource;
 
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = DocumentSharingSiteApplication.class)
 public class CategoryServiceTest {
+
+    @Resource
+    CategoryServiceImpl categoryServiceImpl;
 
     @Test
     public void insert() {
@@ -36,5 +47,10 @@ public class CategoryServiceTest {
 
     @Test
     public void cancelCategoryRelationship() {
+    }
+
+    @Test
+    public void testQueryTest() {
+        categoryServiceImpl.testQuery();
     }
 }

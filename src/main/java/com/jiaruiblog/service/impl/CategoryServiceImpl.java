@@ -3,6 +3,7 @@ package com.jiaruiblog.service.impl;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
+import com.jiaruiblog.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -11,6 +12,9 @@ import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -315,6 +319,44 @@ public class CategoryServiceImpl implements CategoryService {
                 .and(FILE_ID).is(fileId));
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
         return !CollectionUtils.isEmpty(result);
+    }
+
+    public void testQuery() {
+
+        String cateId = "62b7a87eb2629837d99f09b1";
+
+        List<CateDocRelationship> relateByCateId = getRelateByCateId(cateId);
+        System.out.println(relateByCateId);
+
+
+        String fileId = "62b843695f74b25a63f5427b";
+
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                // 选择某些字段
+                Aggregation.project().and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                .as("id"),//新字段名称,
+
+                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
+                Aggregation.match(Criteria.where("abc.fileId").is(fileId))
+//                Aggregation.match(Criteria.where("abc.categoryId").is(cateId))
+//                        Aggregation.skip(1),
+//                        Aggregation.limit(10),
+//                Aggregation.sort(Sort.Direction.DESC, "uploadDate")
+                );
+
+
+
+
+        AggregationResults<FileDocumentDTO> aggregate = mongoTemplate.aggregate(aggregation,
+                FileServiceImpl.COLLECTION_NAME, FileDocumentDTO.class);
+
+        List<FileDocumentDTO> mappedResults = aggregate.getMappedResults();
+        System.out.println(mappedResults);
+
+
+
+
     }
 
 }

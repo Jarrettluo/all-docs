@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 @Service
 public class FileServiceImpl implements IFileService {
 
-    private static final String COLLECTION_NAME = "fileDatas";
+    public static final String COLLECTION_NAME = "fileDatas";
 
     private static final String PDF_SUFFIX = ".pdf";
 

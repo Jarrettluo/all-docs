@@ -2,6 +2,7 @@ package com.jiaruiblog.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.service.IFileService;
@@ -51,5 +52,12 @@ public class FileServiceImplTest {
         documentDTO.setCategoryId("62b6814b77914c7fa8fa959c");
         String s = JSON.toJSONString(iFileService.listWithCategory(documentDTO));
         System.out.println(s);
+    }
+
+    @Test
+    public void queryByIdTest() {
+        String docId = "62b843695f74b25a63f5427b";
+        FileDocument fileDocument = iFileService.queryById(docId);
+        System.out.println(fileDocument);
     }
 }
