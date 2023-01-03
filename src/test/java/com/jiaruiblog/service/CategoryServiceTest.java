@@ -49,8 +49,106 @@ public class CategoryServiceTest {
     public void cancelCategoryRelationship() {
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 无参数查找
+     * @Date 21:45 2023/1/3
+     * @Param []
+     * @return void
+     **/
     @Test
     public void testQueryTest() {
-        categoryServiceImpl.testQuery();
+        String cateId = "";
+        String tagId = "";
+        Long pageNum = 0L;
+        Long pageSize = 20L;
+        String keyword = "";
+        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+    }
+
+
+    /**
+     * @Author luojiarui
+     * @Description 通过标签id进行查找
+     * @Date 21:45 2023/1/3
+     * @Param []
+     * @return void
+     **/
+    @Test
+    public void testQueryTest1() {
+        String cateId = "";
+        String tagId = "62b68b4fb7859f613263e83d";
+        Long pageNum = 0L;
+        Long pageSize = 20L;
+        String keyword = "";
+        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 通过分类id进行查找
+     * @Date 21:46 2023/1/3
+     * @Param []
+     * @return void
+     **/
+    @Test
+    public void testQueryTest2() {
+        String cateId = "62b6814377914c7fa8fa959b";
+        String tagId = "";
+        Long pageNum = 0L;
+        Long pageSize = 20L;
+        String keyword = "";
+        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 联合查找
+     * @Date 21:46 2023/1/3
+     * @Param []
+     * @return void
+     **/
+    @Test
+    public void testQueryTest3() {
+        String cateId = "62b6814377914c7fa8fa959b";
+        String tagId = "636f52d21d19a36d975850ad";
+        Long pageNum = 0L;
+        Long pageSize = 20L;
+        String keyword = "";
+        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 联合查找
+     * @Date 21:46 2023/1/3
+     * @Param []
+     * @return void
+     **/
+    @Test
+    public void testQueryTest4() {
+        String cateId = "62b6814377914c7fa8fa959b";
+        String tagId = "636f52d21d19a36d975850ad";
+        Long pageNum = 0L;
+        Long pageSize = 20L;
+        String keyword = "白皮书";
+        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 联合查找
+     * @Date 21:46 2023/1/3
+     * @Param []
+     * @return void
+     **/
+    @Test
+    public void testQueryTest5() {
+        String cateId = "";
+        String tagId = "";
+        Long pageNum = 0L;
+        Long pageSize = 20L;
+        String keyword = "白皮书";
+        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
     }
 }

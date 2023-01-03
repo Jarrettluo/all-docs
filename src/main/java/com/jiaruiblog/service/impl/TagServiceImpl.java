@@ -34,7 +34,7 @@ public class TagServiceImpl implements TagService {
 
     private static final String COLLECTION_NAME = "tagCollection";
 
-    private static final String RELATE_COLLECTION_NAME = "relateTagCollection";
+    public static final String RELATE_COLLECTION_NAME = "relateTagCollection";
     
     private static final String FILE_ID = "fileId";
 

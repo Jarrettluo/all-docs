@@ -321,32 +321,43 @@ public class CategoryServiceImpl implements CategoryService {
         return !CollectionUtils.isEmpty(result);
     }
 
-    public void testQuery() {
+    public void testQuery(String cateId, String tagId, Long pageNum, Long pageSize, String keyword) {
 
-        String cateId = "62b7a87eb2629837d99f09b1";
+//        String cateId = "62b7a87eb2629837d99f09b1";
 
         List<CateDocRelationship> relateByCateId = getRelateByCateId(cateId);
-        System.out.println(relateByCateId);
+//        System.out.println(relateByCateId);
 
 
-        String fileId = "62b843695f74b25a63f5427b";
+//        String fileId = "62b843695f74b25a63f5427b";
+
+        Criteria criteria = new Criteria();
+        if (StringUtils.hasText(cateId) && StringUtils.hasText(tagId)) {
+            criteria = Criteria.where("abc.categoryId").is(cateId).and("xyz.tagId").is(tagId);
+        } else if (StringUtils.hasText(cateId) && !StringUtils.hasText(tagId)){
+            criteria = Criteria.where("abc.categoryId").is(cateId);
+        } else if (StringUtils.hasText(cateId) && !StringUtils.hasText(tagId)) {
+            criteria = Criteria.where("xyz.tagId").is(tagId);
+        }
+
+        if (StringUtils.hasText(keyword)) {
+            criteria.andOperator(Criteria.where("name").regex(Pattern.compile(keyword, Pattern.CASE_INSENSITIVE)));
+        }
 
 
         Aggregation aggregation = Aggregation.newAggregation(
                 // 选择某些字段
-                Aggregation.project().and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                Aggregation.project("id", "name", "size", "uploadDate").and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                 .as("id"),//新字段名称,
 
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
-                Aggregation.match(Criteria.where("abc.fileId").is(fileId))
-//                Aggregation.match(Criteria.where("abc.categoryId").is(cateId))
-//                        Aggregation.skip(1),
-//                        Aggregation.limit(10),
-//                Aggregation.sort(Sort.Direction.DESC, "uploadDate")
+                Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", "fileId", "xyz"),
+//                Aggregation.match(Criteria.where("abc.fileId").is(fileId))
+                Aggregation.match(criteria),
+                Aggregation.skip(pageNum),
+                Aggregation.limit(pageSize),
+                Aggregation.sort(Sort.Direction.DESC, "uploadDate")
                 );
-
-
-
 
         AggregationResults<FileDocumentDTO> aggregate = mongoTemplate.aggregate(aggregation,
                 FileServiceImpl.COLLECTION_NAME, FileDocumentDTO.class);

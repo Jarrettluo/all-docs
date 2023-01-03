@@ -1,6 +1,7 @@
 package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.entity.CateDocRelationship;
+import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.Thumbnail;
 import com.jiaruiblog.enums.DocStateEnum;
 import lombok.Data;
@@ -104,5 +105,7 @@ public class FileDocumentDTO {
     private String userName;
 
     private List<CateDocRelationship> abc;
+
+    private List<TagDocRelationship> xyz;
 
 }
