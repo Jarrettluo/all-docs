@@ -22,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -321,22 +323,14 @@ public class CategoryServiceImpl implements CategoryService {
         return !CollectionUtils.isEmpty(result);
     }
 
-    public void testQuery(String cateId, String tagId, Long pageNum, Long pageSize, String keyword) {
-
-//        String cateId = "62b7a87eb2629837d99f09b1";
-
-        List<CateDocRelationship> relateByCateId = getRelateByCateId(cateId);
-//        System.out.println(relateByCateId);
-
-
-//        String fileId = "62b843695f74b25a63f5427b";
-
+    @Override
+    public BaseApiResult getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
         Criteria criteria = new Criteria();
         if (StringUtils.hasText(cateId) && StringUtils.hasText(tagId)) {
             criteria = Criteria.where("abc.categoryId").is(cateId).and("xyz.tagId").is(tagId);
         } else if (StringUtils.hasText(cateId) && !StringUtils.hasText(tagId)){
             criteria = Criteria.where("abc.categoryId").is(cateId);
-        } else if (StringUtils.hasText(cateId) && !StringUtils.hasText(tagId)) {
+        } else if (StringUtils.hasText(tagId) && !StringUtils.hasText(cateId)) {
             criteria = Criteria.where("xyz.tagId").is(tagId);
         }
 
@@ -344,28 +338,46 @@ public class CategoryServiceImpl implements CategoryService {
             criteria.andOperator(Criteria.where("name").regex(Pattern.compile(keyword, Pattern.CASE_INSENSITIVE)));
         }
 
+        // 查询审核完毕的文档
+//        criteria.and("reviewing").is(false);
+
+        Aggregation countAggregation = Aggregation.newAggregation(
+                // 选择某些字段
+                Aggregation.project("id", "name", "uploadDate", "thumbId").and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                        .as("id"),//新字段名称,
+                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
+                Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", "fileId", "xyz"),
+                Aggregation.match(criteria)
+        );
+
 
         Aggregation aggregation = Aggregation.newAggregation(
                 // 选择某些字段
-                Aggregation.project("id", "name", "size", "uploadDate").and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                Aggregation.project("id", "name", "uploadDate", "thumbId").and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                 .as("id"),//新字段名称,
-
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
                 Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", "fileId", "xyz"),
-//                Aggregation.match(Criteria.where("abc.fileId").is(fileId))
                 Aggregation.match(criteria),
                 Aggregation.skip(pageNum),
                 Aggregation.limit(pageSize),
                 Aggregation.sort(Sort.Direction.DESC, "uploadDate")
                 );
 
+        int count = mongoTemplate.aggregate(countAggregation, FileServiceImpl.COLLECTION_NAME, FileDocumentDTO.class)
+                .getMappedResults().size();
+
         AggregationResults<FileDocumentDTO> aggregate = mongoTemplate.aggregate(aggregation,
                 FileServiceImpl.COLLECTION_NAME, FileDocumentDTO.class);
-
         List<FileDocumentDTO> mappedResults = aggregate.getMappedResults();
-        System.out.println(mappedResults);
 
 
+        Map<String, Object> result = new HashMap<>(20);
+        result.put("data", mappedResults);
+        result.put("total", count);
+        result.put("pageNum", pageNum);
+        result.put("pageSize", pageSize);
+
+        return BaseApiResult.success(result);
 
 
     }

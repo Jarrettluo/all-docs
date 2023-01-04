@@ -1,7 +1,10 @@
 package com.jiaruiblog.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.jiaruiblog.DocumentSharingSiteApplication;
 import com.jiaruiblog.service.impl.CategoryServiceImpl;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,11 +53,11 @@ public class CategoryServiceTest {
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description 无参数查找
      * @Date 21:45 2023/1/3
      * @Param []
-     * @return void
      **/
     @Test
     public void testQueryTest() {
@@ -63,16 +66,19 @@ public class CategoryServiceTest {
         Long pageNum = 0L;
         Long pageSize = 20L;
         String keyword = "";
-        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+        JSONObject result = (JSONObject) JSON.toJSON(
+                categoryServiceImpl.getDocByTagAndCate(cateId, tagId, keyword, pageNum, pageSize));
+        System.out.println(result);
+        Assert.assertEquals(200, result.get("code"));
     }
 
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description 通过标签id进行查找
      * @Date 21:45 2023/1/3
      * @Param []
-     * @return void
      **/
     @Test
     public void testQueryTest1() {
@@ -81,15 +87,18 @@ public class CategoryServiceTest {
         Long pageNum = 0L;
         Long pageSize = 20L;
         String keyword = "";
-        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+        JSONObject result = (JSONObject) JSON.toJSON(
+                categoryServiceImpl.getDocByTagAndCate(cateId, tagId, keyword, pageNum, pageSize));
+        System.out.println(result);
+        Assert.assertEquals(200, result.get("code"));
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description 通过分类id进行查找
      * @Date 21:46 2023/1/3
      * @Param []
-     * @return void
      **/
     @Test
     public void testQueryTest2() {
@@ -98,15 +107,18 @@ public class CategoryServiceTest {
         Long pageNum = 0L;
         Long pageSize = 20L;
         String keyword = "";
-        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+        JSONObject result = (JSONObject) JSON.toJSON(
+                categoryServiceImpl.getDocByTagAndCate(cateId, tagId, keyword, pageNum, pageSize));
+        System.out.println(result);
+        Assert.assertEquals(200, result.get("code"));
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description 联合查找
      * @Date 21:46 2023/1/3
      * @Param []
-     * @return void
      **/
     @Test
     public void testQueryTest3() {
@@ -115,7 +127,10 @@ public class CategoryServiceTest {
         Long pageNum = 0L;
         Long pageSize = 20L;
         String keyword = "";
-        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+        JSONObject result = (JSONObject) JSON.toJSON(
+                categoryServiceImpl.getDocByTagAndCate(cateId, tagId, keyword, pageNum, pageSize));
+        System.out.println(result);
+        Assert.assertEquals(200, result.get("code"));
     }
 
     /**
@@ -123,7 +138,6 @@ public class CategoryServiceTest {
      * @Description 联合查找
      * @Date 21:46 2023/1/3
      * @Param []
-     * @return void
      **/
     @Test
     public void testQueryTest4() {
@@ -132,7 +146,10 @@ public class CategoryServiceTest {
         Long pageNum = 0L;
         Long pageSize = 20L;
         String keyword = "白皮书";
-        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+        JSONObject result = (JSONObject) JSON.toJSON(
+                categoryServiceImpl.getDocByTagAndCate(cateId, tagId, keyword, pageNum, pageSize));
+        System.out.println(result);
+        Assert.assertEquals(200, result.get("code"));
     }
 
     /**
@@ -140,7 +157,6 @@ public class CategoryServiceTest {
      * @Description 联合查找
      * @Date 21:46 2023/1/3
      * @Param []
-     * @return void
      **/
     @Test
     public void testQueryTest5() {
@@ -149,6 +165,9 @@ public class CategoryServiceTest {
         Long pageNum = 0L;
         Long pageSize = 20L;
         String keyword = "白皮书";
-        categoryServiceImpl.testQuery(cateId, tagId, pageNum, pageSize, keyword);
+        JSONObject result = (JSONObject) JSON.toJSON(
+                categoryServiceImpl.getDocByTagAndCate(cateId, tagId, keyword, pageNum, pageSize));
+        System.out.println(result);
+        Assert.assertEquals(200, result.get("code"));
     }
 }

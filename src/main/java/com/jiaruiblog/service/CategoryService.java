@@ -70,4 +70,13 @@ public interface CategoryService {
      **/
     boolean relateExist(String categoryId, String fileId);
 
+    /**
+     * @Author luojiarui
+     * @Description 更具文档的分类和标签、关键字进行联合查询
+     * @Date 23:20 2023/1/4
+     * @Param []
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    BaseApiResult getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize);
+
 }
