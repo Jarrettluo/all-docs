@@ -4,10 +4,11 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.common.RegexConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
-import com.jiaruiblog.entity.dto.CategoryDTO;
-import com.jiaruiblog.entity.dto.RelationDTO;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
+import com.jiaruiblog.entity.dto.CategoryDTO;
+import com.jiaruiblog.entity.dto.QueryDocByTagCateDTO;
+import com.jiaruiblog.entity.dto.RelationDTO;
 import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.TagService;
@@ -15,9 +16,9 @@ import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -37,10 +38,10 @@ public class CategoryController {
     // 一个文章只能有一个分类项目
     // 一个文章下可能有多个列表
 
-    @Autowired
+    @Resource
     CategoryService categoryService;
 
-    @Autowired
+    @Resource
     TagService tagService;
 
     @ApiOperation(value = "3.2 新增单个分类", notes = "新增单个分类")
@@ -169,5 +170,12 @@ public class CategoryController {
             default:
                 return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
+    }
+
+    @ApiOperation(value = "根据分类、标签查询", notes = "查询文档列表信息")
+    @GetMapping(value = "getDocByTagCateKeyWord")
+    public BaseApiResult getDocByTagCateKeyWord(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO) {
+        return categoryService.getDocByTagAndCate(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
+                Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()));
     }
 }

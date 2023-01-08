@@ -102,7 +102,7 @@ public class CategoryServiceTest {
      **/
     @Test
     public void testQueryTest2() {
-        String cateId = "62b6814377914c7fa8fa959b";
+        String cateId = "62b68278b7251d2c780e37d7";
         String tagId = "";
         Long pageNum = 0L;
         Long pageSize = 20L;

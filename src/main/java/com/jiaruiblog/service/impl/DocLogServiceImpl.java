@@ -2,7 +2,7 @@ package com.jiaruiblog.service.impl;
 
 import com.google.common.collect.Maps;
 import com.jiaruiblog.auth.PermissionEnum;
-import com.jiaruiblog.entity.BasePageDTO;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.DocLog;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.service.IDocLogService;

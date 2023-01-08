@@ -2,7 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
-import com.jiaruiblog.entity.BasePageDTO;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.RefuseBatchDTO;
 import com.jiaruiblog.entity.dto.RefuseDTO;

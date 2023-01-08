@@ -1,6 +1,6 @@
 package com.jiaruiblog.service;
 
-import com.jiaruiblog.entity.BasePageDTO;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.util.BaseApiResult;
 
 import java.util.List;

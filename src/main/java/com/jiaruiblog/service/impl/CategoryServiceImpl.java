@@ -323,6 +323,13 @@ public class CategoryServiceImpl implements CategoryService {
         return !CollectionUtils.isEmpty(result);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 根据分类id， 标签id，搜索内容联合查询文档
+     * @Date 21:50 2023/1/6
+     * @Param [cateId, tagId, keyword, pageNum, pageSize]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @Override
     public BaseApiResult getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
         Criteria criteria = new Criteria();
@@ -343,7 +350,8 @@ public class CategoryServiceImpl implements CategoryService {
 
         Aggregation countAggregation = Aggregation.newAggregation(
                 // 选择某些字段
-                Aggregation.project("id", "name", "uploadDate", "thumbId").and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                Aggregation.project("id", "name", "uploadDate", "thumbId")
+                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                         .as("id"),//新字段名称,
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
                 Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", "fileId", "xyz"),
@@ -353,12 +361,13 @@ public class CategoryServiceImpl implements CategoryService {
 
         Aggregation aggregation = Aggregation.newAggregation(
                 // 选择某些字段
-                Aggregation.project("id", "name", "uploadDate", "thumbId").and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                Aggregation.project("id", "name", "uploadDate", "thumbId")
+                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                 .as("id"),//新字段名称,
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
                 Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", "fileId", "xyz"),
                 Aggregation.match(criteria),
-                Aggregation.skip(pageNum),
+                Aggregation.skip(pageNum*pageSize),
                 Aggregation.limit(pageSize),
                 Aggregation.sort(Sort.Direction.DESC, "uploadDate")
                 );

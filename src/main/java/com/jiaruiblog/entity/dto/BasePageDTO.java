@@ -1,4 +1,4 @@
-package com.jiaruiblog.entity;
+package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
 import lombok.Data;

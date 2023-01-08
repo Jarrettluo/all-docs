@@ -1,6 +1,6 @@
 package com.jiaruiblog.service;
 
-import com.jiaruiblog.entity.BasePageDTO;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.enums.DocStateEnum;

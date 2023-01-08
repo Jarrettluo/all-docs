@@ -4,7 +4,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.entity.BasePageDTO;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
