@@ -2,18 +2,24 @@ package com.jiaruiblog.service.impl;
 
 import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
+import com.jiaruiblog.entity.dto.CommentWithUserDTO;
+import com.jiaruiblog.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -22,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -206,14 +209,56 @@ public class CommentServiceImpl implements ICommentService {
      **/
     @Override
     public BaseApiResult queryAllComments(BasePageDTO page, String userId) {
-        Query query = new Query();
-        query.skip((long) (page.getPage()-1) * page.getRows());
-        query.limit(page.getRows());
-        List<Comment> commentDb = template.find(query, Comment.class, COLLECTION_NAME);
-        long count = template.count(new Query().with(Sort.by(Sort.Direction.DESC, "createDate")), Comment.class, COLLECTION_NAME);
+
+        log.info("查询的参数是：{}, {}", page, userId);
+
+        // 通过query进行查找
+        Aggregation countAggregation = Aggregation.newAggregation(
+                // 选择某些字段
+                Aggregation.project("id", "userName", "createDate", "content", "userId", "docId")
+                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                        .as("id")
+                        .and(ConvertOperators.Convert.convertValue("$docId").to("objectId")).as("docId")
+                ,//新字段名称,
+                Aggregation.match(Criteria.where("userId").is(userId))
+        );
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                // 选择某些字段
+                Aggregation.project("id", "userName", "createDate", "content", "userId", "docId")
+                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                        .as("id")
+                        .and(ConvertOperators.Convert.convertValue("$docId").to("objectId")).as("docId")
+                ,//新字段名称,
+
+                Aggregation.lookup(FileServiceImpl.COLLECTION_NAME, "docId", "_id", "abc"),
+                Aggregation.match(Criteria.where("userId").is(userId)),
+                Aggregation.skip((long) (page.getPage()-1) * page.getRows()),
+                Aggregation.limit(page.getRows()),
+                Aggregation.sort(Sort.Direction.DESC, "createDate")
+        );
+
+        AggregationResults<CommentWithUserDTO> aggregate = template.aggregate(aggregation,
+                COLLECTION_NAME, CommentWithUserDTO.class);
+        List<CommentWithUserDTO> mappedResults = aggregate.getMappedResults();
+        List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
+        mappedResults.forEach(item -> {
+            if (!item.getAbc().isEmpty()) {
+                CommentWithUserVO commentWithUserVO = new CommentWithUserVO();
+                BeanUtils.copyProperties(item, commentWithUserVO);
+                commentWithUserVO.setDocId(item.getAbc().get(0).getId());
+                commentWithUserVO.setDocName(item.getAbc().get(0).getName());
+                commentWithUserVOList.add(commentWithUserVO);
+            }
+        });
+
+        int count = template.aggregate(countAggregation, COLLECTION_NAME, CommentWithUserDTO.class).getMappedResults().size();
+
         Map<String, Object> result = Maps.newHashMap();
-        result.put("data", commentDb);
+        result.put("data", commentWithUserVOList);
         result.put("total", count);
+        result.put("pageNum", page.getPage());
+        result.put("pageSize", page.getRows());
         return BaseApiResult.success(result);
     }
 }

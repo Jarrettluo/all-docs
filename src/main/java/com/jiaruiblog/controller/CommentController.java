@@ -92,8 +92,9 @@ public class CommentController {
      **/
     @Permission({PermissionEnum.ADMIN, PermissionEnum.USER})
     @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")
-    @PostMapping(value = "/listALL")
+    @PostMapping(value = "/auth/listALL")
     public BaseApiResult queryAllComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
-        return commentService.queryAllComments(pageDTO, (String) request.getAttribute("id"));
+        String userId = (String) request.getAttribute("id");
+        return commentService.queryAllComments(pageDTO, userId);
     }
 }

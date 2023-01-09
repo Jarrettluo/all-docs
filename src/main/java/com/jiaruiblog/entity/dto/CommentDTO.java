@@ -16,9 +16,9 @@ import javax.validation.constraints.NotNull;
 public class CommentDTO {
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private String content;
+    protected String content;
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
-    private String docId;
+    protected String docId;
 
 }
