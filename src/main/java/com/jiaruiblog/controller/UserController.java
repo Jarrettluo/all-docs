@@ -90,14 +90,22 @@ public class UserController {
     @ApiOperation(value = "更新用户hobby和company", notes = "更新用户hobby和company")
     @PutMapping(value = "/updateUser")
     public BaseApiResult updateUser(@RequestBody User user) {
-        log.info("更新用户入参==={}", user.toString());
         Query query = new Query(Criteria.where("_id").is(user.getId()));
         Update update = new Update();
-//        update.set("hobby", user.getHobby());
-//        update.set("company", user.getCompany());
-        UpdateResult updateResult = template.updateFirst(query, update, User.class, COLLECTION_NAME);
-        log.info("更新的结果==={}", updateResult.toString());
-        return BaseApiResult.success("更新成功！");
+        if (StringUtils.hasText(user.getPassword())) {
+            update.set("password", user.getPassword());
+        }
+        update.set("phone", user.getPhone());
+        update.set("mail", user.getMail());
+        update.set("male", user.getMale());
+        update.set("description", user.getDescription());
+        UpdateResult updateResult1 = template.updateFirst(query, update, User.class, COLLECTION_NAME);
+        if(updateResult1.getMatchedCount() > 0) {
+            return BaseApiResult.success("更新成功！");
+        }
+        return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+
+
     }
 
     @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")

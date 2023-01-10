@@ -37,14 +37,14 @@ public class User {
 
     private String mail;
 
-    private boolean male = false;
+    private Boolean male = false;
 
     private String description;
 
     private String avatar;
 
     // 封禁状态
-    private boolean banning = false;
+    private Boolean banning = false;
 
     private PermissionEnum permissionEnum;
 
