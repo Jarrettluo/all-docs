@@ -2,7 +2,9 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.UserDTO;
+import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JwtUtil;
 import com.mongodb.client.result.DeleteResult;
@@ -18,6 +20,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +43,10 @@ import java.util.regex.Pattern;
 public class UserController {
 
     private static final String COLLECTION_NAME = "user";
+
+
+    @Resource
+    IUserService userService;
 
 
     @Autowired
@@ -129,10 +136,21 @@ public class UserController {
         return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
     }
 
-    @RequestMapping("/allUsers")
-    public BaseApiResult allUsers() {
-        List<User> users = template.findAll(User.class);
-        return BaseApiResult.success(users);
+    /**
+     * @return com.jiaruiblog.util.BaseApiResult
+     * @Author luojiarui
+     * @Description 根据分页参数查询用户列表
+     * @Date 21:21 2023/1/10
+     * @Param []
+     **/
+    @GetMapping("/allUsers")
+    public BaseApiResult allUsers(@ModelAttribute("pageDTO") BasePageDTO pageDTO) {
+        return userService.getUserList(pageDTO);
+    }
+
+    @GetMapping("blockUser")
+    public BaseApiResult blockUser(@RequestParam("userId") String userId) {
+        return userService.blockUser(userId);
     }
 
     /**
@@ -194,7 +212,7 @@ public class UserController {
     }
 
     private boolean patternMatch(String s, String regex) {
-        return  Pattern.compile(regex).matcher(s).matches();
+        return Pattern.compile(regex).matcher(s).matches();
     }
 
 }

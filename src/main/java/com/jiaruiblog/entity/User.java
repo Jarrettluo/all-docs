@@ -44,7 +44,7 @@ public class User {
     private String avatar;
 
     // 封禁状态
-    private boolean banning;
+    private boolean banning = false;
 
     private PermissionEnum permissionEnum;
 

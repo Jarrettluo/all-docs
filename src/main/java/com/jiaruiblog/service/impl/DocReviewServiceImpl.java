@@ -3,10 +3,10 @@ package com.jiaruiblog.service.impl;
 import com.google.common.collect.Maps;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -14,6 +14,7 @@ import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.apache.commons.compress.utils.Lists;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -197,6 +198,7 @@ public class DocReviewServiceImpl implements DocReviewService {
 //        }
         query.skip((long) (page.getPage()-1) * page.getRows());
         query.limit(page.getRows());
+        query.with(Sort.by(Sort.Direction.DESC, "createDate"));
 
         // 还需要进行分页
         List<DocReview> docReviews = mongoTemplate.find(query, DocReview.class, DOC_REVIEW_COLLECTION);
