@@ -2,18 +2,21 @@ package com.jiaruiblog.service.impl;
 
 import com.google.common.collect.Maps;
 import com.jiaruiblog.auth.PermissionEnum;
-import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.DocLog;
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +40,26 @@ public class DocLogServiceImpl implements IDocLogService {
     @Resource
     private MongoTemplate mongoTemplate;
 
+    public enum Action {
+        GET(),
+        POST(),
+        DELETE();
+    }
+
+    @Override
+    public void addLog(User user, FileDocument document, Action action) {
+        DocLog docLog = new DocLog();
+        docLog.setUserId(user.getId());
+        docLog.setUserName(user.getUsername());
+        docLog.setDocId(document.getId());
+        docLog.setDocName(document.getName());
+        docLog.setAction(action);
+        docLog.setCreateDate(new Date());
+        docLog.setUpdateDate(new Date());
+        mongoTemplate.save(docLog, DOC_LOG_COLLECTION);
+
+    }
+
 
     @Override
     public BaseApiResult queryDocLogs(BasePageDTO page, String userId) {
@@ -46,11 +69,15 @@ public class DocLogServiceImpl implements IDocLogService {
         if (user.getUsername().equals("admin123") || user.getPermissionEnum().equals(PermissionEnum.USER)) {
             query.addCriteria(Criteria.where("userId").is(user.getId()));
         }
-        query.skip((long) page.getPage() * page.getRows());
+
+        long count = mongoTemplate.count(query, DocLog.class, DOC_LOG_COLLECTION);
+
+        query.skip((long) (page.getPage() - 1) * page.getRows());
         query.limit(page.getRows());
+        query.with(Sort.by(Sort.Direction.DESC, "createDate"));
 
         List<DocLog> docLogList = mongoTemplate.find(query, DocLog.class);
-        long count = mongoTemplate.count(query, DocLog.class, DOC_LOG_COLLECTION);
+
         Map<String, Object> result = Maps.newHashMap();
         result.put("total", count);
         result.put("data", docLogList);

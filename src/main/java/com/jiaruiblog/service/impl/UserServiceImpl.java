@@ -40,7 +40,7 @@ public class UserServiceImpl implements IUserService {
         int pageNum = Optional.ofNullable(page.getPage()).orElse(1);
         int pageSize = Optional.ofNullable(page.getRows()).orElse(10);
         // 如果传入的参数超过了总数，返回第一页
-        if ((long) pageNum * pageSize > count) {
+        if ((long) (pageNum-1) * pageSize > count) {
             pageNum = 1;
         }
         Query query = new Query();

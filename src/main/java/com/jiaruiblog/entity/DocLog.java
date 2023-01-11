@@ -1,7 +1,10 @@
 package com.jiaruiblog.entity;
 
+import com.jiaruiblog.service.impl.DocLogServiceImpl;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+
+import java.util.Date;
 
 /**
  * @ClassName DocLog
@@ -20,5 +23,13 @@ public class DocLog {
 
     private String userName;
 
+    private DocLogServiceImpl.Action action;
 
+    private String docId;
+
+    private String docName;
+
+    private Date createDate;
+
+    private Date updateDate;
 }

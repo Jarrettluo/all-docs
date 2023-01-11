@@ -1,12 +1,16 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.RemoveObjectDTO;
 import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.intercepter.SensitiveFilter;
+import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
+import com.jiaruiblog.service.impl.DocLogServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
@@ -16,6 +20,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 
@@ -39,6 +44,9 @@ public class DocumentController {
 
     @Resource
     RedisService redisService;
+
+    @Resource
+    IDocLogService docLogService;
 
 
     @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
@@ -67,7 +75,17 @@ public class DocumentController {
 
     @ApiOperation(value = "3.2 删除某个文档", notes = "删除某个文档")
     @DeleteMapping(value = "/auth/remove")
-    public BaseApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO) {
+    public BaseApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO, HttpServletRequest request) {
+        FileDocument fileDocument = iFileService.queryById(removeObjectDTO.getId());
+        if (fileDocument == null){
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+        String username = (String) request.getAttribute("username");
+        String userId = (String) request.getAttribute("id");
+        User user = new User();
+        user.setUsername(username);
+        user.setId(userId);
+        docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.DELETE);
         return iFileService.remove(removeObjectDTO.getId());
     }
 
