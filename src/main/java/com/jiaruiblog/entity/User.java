@@ -43,7 +43,9 @@ public class User {
 
     private String description;
 
-    private List<String> avatar = new ArrayList<>();
+    private List<String> avatarList = new ArrayList<>();
+
+    private String avatar;
 
     // 封禁状态
     private Boolean banning = false;

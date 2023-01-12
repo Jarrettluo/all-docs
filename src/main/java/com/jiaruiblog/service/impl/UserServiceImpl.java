@@ -136,18 +136,37 @@ public class UserServiceImpl implements IUserService {
             log.error("上传dfs出错{}", e.getLocalizedMessage());
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        List<String> avatar = user.getAvatar();
+        List<String> avatar = user.getAvatarList();
         avatar.add(gridfsId);
 
         Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
         Update update = new Update();
-        update.set("avatar", avatar);
+        update.set("avatarList", avatar);
         update.set("updateDate", new Date());
+        update.set("avatar", gridfsId);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
         long matchedCount = updateResult.getMatchedCount();
         if (matchedCount > 0) {
             return BaseApiResult.success(MessageConstant.SUCCESS);
         }
         return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 删除某个用户的信息
+     * @Date 23:00 2023/1/12
+     * @Param [userId]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    public BaseApiResult removeUser(String userId) {
+        User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
+        if (user == null) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+        fileService.deleteGridFs((String[]) user.getAvatarList().toArray());
+        Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
+        mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 }
