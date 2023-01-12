@@ -19,13 +19,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -108,6 +106,13 @@ public class UserController {
 
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 删除用户的时候必须要删除其头像信息
+     * @Date 22:40 2023/1/12
+     * @Param [user, request]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
     @DeleteMapping(value = "/auth/deleteByID")
     public BaseApiResult deleteById(@RequestBody User user, HttpServletRequest request) {
@@ -217,6 +222,18 @@ public class UserController {
         }
 
         return BaseApiResult.success();
+    }
+
+
+    @PostMapping("/auth/uploadUserAvatar")
+    public BaseApiResult uploadUserAvatar(@RequestParam(value = "img") MultipartFile file, HttpServletRequest request) {
+        String userId = (String) request.getAttribute("id");
+        String type = file.getContentType();
+        String[] availableTypes = new String[]{"image/png", "image/jpeg", "image/gif"};
+        if (!Arrays.asList(availableTypes).contains(type)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+        return userService.uploadUserAvatar(userId, file);
     }
 
     private boolean patternMatch(String s, String regex) {

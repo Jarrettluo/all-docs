@@ -4,6 +4,7 @@ import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.util.BaseApiResult;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author jiarui.luo
@@ -31,5 +32,14 @@ public interface IUserService {
     User queryById(String userId);
 
     boolean checkPermissionForUser(User user, PermissionEnum[] permissionEnums);
+
+    /**
+     * @Author luojiarui
+     * @Description 上传用户的头像信息
+     * @Date 22:26 2023/1/12
+     * @Param []
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    BaseApiResult uploadUserAvatar(String userId, MultipartFile file);
 
 }

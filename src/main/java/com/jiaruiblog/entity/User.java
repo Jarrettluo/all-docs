@@ -9,7 +9,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -41,7 +43,7 @@ public class User {
 
     private String description;
 
-    private String avatar;
+    private List<String> avatar = new ArrayList<>();
 
     // 封禁状态
     private Boolean banning = false;
