@@ -42,4 +42,6 @@ public interface IUserService {
      **/
     BaseApiResult uploadUserAvatar(String userId, MultipartFile file);
 
+    BaseApiResult removeUserAvatar(String userId);
+
 }

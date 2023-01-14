@@ -144,6 +144,9 @@ public class UserController {
             Map<String, String> result = new HashMap<>(8);
             result.put("token", token);
             result.put("userId", dbUser.getId());
+            result.put("avatar", dbUser.getAvatar());
+            result.put("username", dbUser.getUsername());
+            result.put("type", dbUser.getPermissionEnum() != null ? dbUser.getPermissionEnum().toString() : null);
             return BaseApiResult.success(result);
         }
         return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
@@ -234,6 +237,11 @@ public class UserController {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         return userService.uploadUserAvatar(userId, file);
+    }
+
+    @DeleteMapping("/auth/removeUserAvatar")
+    public BaseApiResult removeUserAvatar(HttpServletRequest request) {
+        return userService.removeUserAvatar((String) request.getAttribute("id"));
     }
 
     private boolean patternMatch(String s, String regex) {

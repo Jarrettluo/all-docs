@@ -169,4 +169,19 @@ public class UserServiceImpl implements IUserService {
         mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
+
+    @Override
+    public BaseApiResult removeUserAvatar(String userId) {
+        User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
+        if (user == null) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+        fileService.deleteGridFs(user.getAvatar());
+        Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
+        Update update = new Update();
+        update.set("avatar", null);
+        update.set("updateDate", new Date());
+        mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
+    }
 }
