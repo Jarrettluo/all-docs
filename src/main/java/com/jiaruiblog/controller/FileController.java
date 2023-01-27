@@ -313,26 +313,30 @@ public class FileController {
     public void downloadTxt(@PathVariable String txtId, HttpServletResponse response) {
         try {
             byte[] buffer = fileService.getFileBytes(txtId);
-            // 清空response
-            response.reset();
-            // 设置response的Header
-            response.setCharacterEncoding("UTF-8");
-            // 解决跨域问题，这句话是关键，对任意的域都可以，如果需要安全，可以设置成安前的域名
-            response.addHeader("Access-Control-Allow-Origin", "*");
-            response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-            //Content-Disposition的作用：告知浏览器以何种方式显示响应返回的文件，用浏览器打开还是以附件的形式下载到本地保存
-            //attachment表示以附件方式下载   inline表示在线打开   "Content-Disposition: inline; filename=文件名.mp3"
-            // filename表示文件的默认名称，因为网络传输只支持URL编码的相关支付，因此需要将文件名URL编码后进行传输,前端收到后需要反编码才能获取到真正的名称
-            response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("字符文件", "UTF-8") + ".txt");
-            // 告知浏览器文件的大小
-            response.addHeader("Content-Length", "" + buffer.length);
-            OutputStream outputStream = new BufferedOutputStream(response.getOutputStream());
-            response.setContentType("application/octet-stream");
-            outputStream.write(buffer);
-            outputStream.flush();
+            extracted(response, buffer);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public static void extracted(HttpServletResponse response, byte[] buffer) throws IOException {
+        // 清空response
+        response.reset();
+        // 设置response的Header
+        response.setCharacterEncoding("UTF-8");
+        // 解决跨域问题，这句话是关键，对任意的域都可以，如果需要安全，可以设置成安前的域名
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        //Content-Disposition的作用：告知浏览器以何种方式显示响应返回的文件，用浏览器打开还是以附件的形式下载到本地保存
+        //attachment表示以附件方式下载   inline表示在线打开   "Content-Disposition: inline; filename=文件名.mp3"
+        // filename表示文件的默认名称，因为网络传输只支持URL编码的相关支付，因此需要将文件名URL编码后进行传输,前端收到后需要反编码才能获取到真正的名称
+        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("字符文件", "UTF-8") + ".txt");
+        // 告知浏览器文件的大小
+        response.addHeader("Content-Length", "" + buffer.length);
+        OutputStream outputStream = new BufferedOutputStream(response.getOutputStream());
+        response.setContentType("application/octet-stream");
+        outputStream.write(buffer);
+        outputStream.flush();
     }
 
     /**

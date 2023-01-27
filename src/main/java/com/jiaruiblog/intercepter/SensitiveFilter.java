@@ -64,6 +64,10 @@ public class SensitiveFilter {
         return instance;
     }
 
+    public void refresh() throws IOException {
+        sensitiveWordMap = new SensitiveWordInit().initKeyWord();
+    }
+
     /**
      * 获取文字中的敏感词
      * @param txt String

@@ -48,3 +48,10 @@ cloud:
     port: ${ES_PORT:9200}
 #    host: 81.69.247.172
 #    port: 8888
+
+all-docs:
+  config:
+    userUpload: ${AD_USER_UPLOAD:true}
+    adminReview: ${AD_ADMIN_REVIEW:true}
+    prohibitedWord: ${AD_PROHIBITED_WORD:true}
+    userRegistry: ${AD_USER_REGISTRY:false}

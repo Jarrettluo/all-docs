@@ -24,7 +24,7 @@ import java.util.Set;
  * @Version 1.0
  **/
 @Configuration
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SensitiveWordInit {
 
     /**
@@ -34,13 +34,14 @@ public class SensitiveWordInit {
 
     /**
      * 初始化敏感字库
+     *
      * @return Map
      * @throws IOException exception
      */
     public Map initKeyWord() throws IOException {
         // 读取敏感词库 ,存入Set中
         Set<String> wordSet = readSensitiveWordFile();
-        if(CollectionUtils.isEmpty(wordSet)) {
+        if (CollectionUtils.isEmpty(wordSet)) {
             return Maps.newHashMap();
         }
         // 将敏感词库加入到HashMap中//确定有穷自动机DFA
@@ -49,13 +50,18 @@ public class SensitiveWordInit {
 
     /**
      * 读取敏感词库 ,存入HashMap中
+     *
      * @return Set
      * @throws IOException ioexception
      */
-    private Set<String> readSensitiveWordFile() throws IOException {
-        Set<String> wordSet = null;
+    public static Set<String> readSensitiveWordFile() throws IOException {
         ClassPathResource classPathResource = new ClassPathResource("static/censorword.txt");
         InputStream inputStream = classPathResource.getInputStream();
+        return getStrings(inputStream);
+    }
+
+    public static Set<String> getStrings(InputStream inputStream) {
+        Set<String> wordSet = null;
         //敏感词库
         try {
             // 读取文件输入流
@@ -64,7 +70,7 @@ public class SensitiveWordInit {
             wordSet = new HashSet<>();
             // BufferedReader是包装类，先把字符读到缓存里，到缓存满了，再读入内存，提高了读的效率。
             BufferedReader br = new BufferedReader(read);
-            String txt = null;
+            String txt;
             // 读取文件，将文件内容放入到set中
             while ((txt = br.readLine()) != null) {
                 wordSet.add(txt);
@@ -78,8 +84,13 @@ public class SensitiveWordInit {
         return wordSet;
     }
 
+    public void saveStrings(Set<String> strings) {
+
+    }
+
     /**
      * 将HashSet中的敏感词,存入HashMap中
+     *
      * @param wordSet Set
      * @return Map
      */
