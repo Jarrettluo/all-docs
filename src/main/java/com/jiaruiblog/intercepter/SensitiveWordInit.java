@@ -11,10 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @ClassName SensitiveWordInit
@@ -57,17 +54,17 @@ public class SensitiveWordInit {
     public static Set<String> readSensitiveWordFile() throws IOException {
         ClassPathResource classPathResource = new ClassPathResource("static/censorword.txt");
         InputStream inputStream = classPathResource.getInputStream();
-        return getStrings(inputStream);
+        return getStrings(inputStream, ENCODING);
     }
 
-    public static Set<String> getStrings(InputStream inputStream) {
+    public static Set<String> getStrings(InputStream inputStream, Charset encode) {
         Set<String> wordSet = null;
         //敏感词库
         try {
             // 读取文件输入流
-            InputStreamReader read = new InputStreamReader(inputStream, ENCODING);
-            // 文件是否是文件 和 是否存在
-            wordSet = new HashSet<>();
+            InputStreamReader read = new InputStreamReader(inputStream, encode);
+            // 文件是否是文件 和 是否存在， 使用有序集合
+            wordSet = new LinkedHashSet<>();
             // BufferedReader是包装类，先把字符读到缓存里，到缓存满了，再读入内存，提高了读的效率。
             BufferedReader br = new BufferedReader(read);
             String txt;

@@ -18,9 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.jiaruiblog.controller.FileController.extracted;
 
@@ -37,6 +39,7 @@ import static com.jiaruiblog.controller.FileController.extracted;
 @RequestMapping("/system")
 public class SystemConfigController {
 
+    public static final String STATIC_CENSORWORD_TXT = "static/censorword.txt";
     @Resource
     SystemConfig systemConfig;
 
@@ -66,7 +69,7 @@ public class SystemConfigController {
     @ResponseBody
     public void downloadTxt(HttpServletResponse response) {
         try {
-            ClassPathResource classPathResource = new ClassPathResource("static/censorword.txt");
+            ClassPathResource classPathResource = new ClassPathResource(STATIC_CENSORWORD_TXT);
             InputStream inputStream = classPathResource.getInputStream();
             byte[] buffer = IoUtil.readBytes(inputStream);
             extracted(response, buffer);
@@ -82,14 +85,14 @@ public class SystemConfigController {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         String originFileName = file.getOriginalFilename();
-        if (!ObjectUtils.nullSafeEquals(originFileName, ".txt")) {
+        String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
+        if (!ObjectUtils.nullSafeEquals(suffix, "txt")) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
 
         try {
-            Set<String> strings = SensitiveWordInit.getStrings(file.getInputStream());
-            Set<String> strings1 = SensitiveWordInit.readSensitiveWordFile();
-            strings1.addAll(strings);
+            Set<String> strings = SensitiveWordInit.getStrings(file.getInputStream(), Charset.forName("GB2312"));
+            writeToFile(STATIC_CENSORWORD_TXT, strings);
             SensitiveFilter filter = SensitiveFilter.getInstance();
             filter.refresh();
         } catch (IOException e) {
@@ -97,6 +100,19 @@ public class SystemConfigController {
         }
 
         return BaseApiResult.success();
+    }
+
+    private void writeToFile(String textPath, Set<String> strSet) throws IOException{
+        String txt = strSet.stream().limit(10000).collect(Collectors.joining("\n"));
+        ClassPathResource classPathResource = new ClassPathResource(textPath);
+        OutputStream outputStream = new FileOutputStream(classPathResource.getFile().getPath(), false);
+        try (OutputStreamWriter out = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
+//        try (FileWriter fileWriter = new FileWriter(classPathResource.getFile(), false)) {
+            out.write(txt);
+            out.flush();
+        } catch (IOException e) {
+           e.printStackTrace();
+        }
     }
 
 }
