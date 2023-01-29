@@ -107,7 +107,6 @@ public class SystemConfigController {
         ClassPathResource classPathResource = new ClassPathResource(textPath);
         OutputStream outputStream = new FileOutputStream(classPathResource.getFile().getPath(), false);
         try (OutputStreamWriter out = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-//        try (FileWriter fileWriter = new FileWriter(classPathResource.getFile(), false)) {
             out.write(txt);
             out.flush();
         } catch (IOException e) {
