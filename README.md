@@ -120,7 +120,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 
 加入微信群，一起玩😄
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/imGroup.jpeg" alt="imGroup" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/imGroup.jpeg" alt="imGroup" width="200">
 
 
 1. `Fork` 该项目
@@ -145,8 +145,8 @@ Jarrett Luo - luojiarui2@163.com
 
 如果您觉得项目不错，欢迎赞赏支持！
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.jpg" alt="wechat" height="300">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/alipay.jpg" alt="alipay" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.jpg" alt="wechat" width="200">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/alipay.jpg" alt="alipay" width="200">
 
 
 
