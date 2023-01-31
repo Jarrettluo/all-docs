@@ -120,7 +120,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 
 加入微信群，一起玩😄
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/imGroup.jpg" alt="imGroup" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/imGroup.jpeg" alt="imGroup" height="300">
 
 
 1. `Fork` 该项目
