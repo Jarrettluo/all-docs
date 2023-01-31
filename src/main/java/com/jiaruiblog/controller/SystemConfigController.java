@@ -11,6 +11,8 @@ import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.WritableResource;
 import org.springframework.http.MediaType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
@@ -39,7 +42,7 @@ import static com.jiaruiblog.controller.FileController.extracted;
 @RequestMapping("/system")
 public class SystemConfigController {
 
-    public static final String STATIC_CENSORWORD_TXT = "static/censorword.txt";
+    public static final String STATIC_CENSOR_WORD_TXT = "static" + File.separator + "censorword.txt";
     @Resource
     SystemConfig systemConfig;
 
@@ -69,7 +72,7 @@ public class SystemConfigController {
     @ResponseBody
     public void downloadTxt(HttpServletResponse response) {
         try {
-            ClassPathResource classPathResource = new ClassPathResource(STATIC_CENSORWORD_TXT);
+            ClassPathResource classPathResource = new ClassPathResource(STATIC_CENSOR_WORD_TXT);
             InputStream inputStream = classPathResource.getInputStream();
             byte[] buffer = IoUtil.readBytes(inputStream);
             extracted(response, buffer);
@@ -92,10 +95,11 @@ public class SystemConfigController {
 
         try {
             Set<String> strings = SensitiveWordInit.getStrings(file.getInputStream(), Charset.forName("GB2312"));
-            writeToFile(STATIC_CENSORWORD_TXT, strings);
+            writeToFile(STATIC_CENSOR_WORD_TXT, strings);
             SensitiveFilter filter = SensitiveFilter.getInstance();
             filter.refresh();
         } catch (IOException e) {
+            e.printStackTrace();
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
@@ -105,7 +109,14 @@ public class SystemConfigController {
     private void writeToFile(String textPath, Set<String> strSet) throws IOException{
         String txt = strSet.stream().limit(10000).collect(Collectors.joining("\n"));
         ClassPathResource classPathResource = new ClassPathResource(textPath);
-        OutputStream outputStream = new FileOutputStream(classPathResource.getFile().getPath(), false);
+//        File inuModel = new File(filePath);
+//        FileUtils.copyToFile(resource.getInputStream(), inuModel);
+//        classPathResource
+//        OutputStream outputStream = new FileOutputStream(classPathResource.getInputStream(), false);
+        URI uri = classPathResource.getURI();
+        System.out.println(uri);
+        WritableResource resource = new PathResource(uri);
+        OutputStream outputStream = resource.getOutputStream();
         try (OutputStreamWriter out = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
             out.write(txt);
             out.flush();

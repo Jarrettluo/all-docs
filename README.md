@@ -50,14 +50,48 @@
 
 <p>体验地址：<a href="http://81.69.247.172/#/">http://81.69.247.172/#/</a></p>
 
+## 预览图
+
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/homepage.png" alt="homepage" width="300" height="300">
+<p align="center">
+全文档首页图
+</p>
+
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/docList.png" alt="docList" width="300" height="300">
+<p align="center">
+文档列表
+</p>
+
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/searchPage.png" alt="searchPage" width="300" height="300">
+<p align="center">
+文档搜索页面
+</p>
+
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/fileUpload.png" alt="fileUpload" width="300" height="300">
+<p align="center">
+文档上传页面
+</p>
+
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/userPage.png" alt="userPage" width="300" height="300">
+<p align="center">
+用户个人信息页面
+</p>
+
 
 ### 开源地址
 
-```
-前端项目 https://github.com/Jarrettluo/all-documents-vue.git
-后端项目 https://github.com/Jarrettluo/document-sharing-site.git
-```
-选择mongdoDB作为主要的数据库，存储文档和文件。
+前端项目
+<a href="https://github.com/Jarrettluo/all-documents-vue.git">
+https://github.com/Jarrettluo/all-documents-vue.git
+</a>
+
+
+后端项目 
+<a href="https://github.com/Jarrettluo/document-sharing-site.git">
+https://github.com/Jarrettluo/document-sharing-site.git
+</a>
+
+选择MongdoDB作为主要的数据库，存储文档和文件。
 
 后端技术：SpringBoot + MongoDB + ES
 
