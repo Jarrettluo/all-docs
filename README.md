@@ -53,35 +53,35 @@
 ## 预览图
 
 <p align="center">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/homepage.png" alt="homepage" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/homepage.png" alt="homepage" height="400">
 <p align="center">
 全文档首页图
 </p>
 </p>
 
 <p align="center">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/docList.png" alt="docList" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/docList.png" alt="docList" height="400">
 <p align="center">
 文档列表
 </p>
 </p>
 
 <p align="center">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/searchPage.png" alt="searchPage" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/searchPage.png" alt="searchPage" height="400">
 <p align="center">
 文档搜索页面
 </p>
 </p>
 
 <p align="center">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/fileUpload.png" alt="fileUpload" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/fileUpload.png" alt="fileUpload" height="400">
 <p align="center">
 文档上传页面
 </p>
 </p>
 
 <p align="center">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/userPage.png" alt="userPage" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/userPage.png" alt="userPage" height="400">
 <p align="center">
 用户个人信息页面
 </p>
@@ -120,7 +120,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 
 加入微信群，一起玩😄
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/imGroup.png" alt="imGroup" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/imGroup.jpg" alt="imGroup" height="300">
 
 
 1. `Fork` 该项目
@@ -145,8 +145,8 @@ Jarrett Luo - luojiarui2@163.com
 
 如果您觉得项目不错，欢迎赞赏支持！
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.png" alt="wechat" height="300">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/alipay.png" alt="alipay" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.jpg" alt="wechat" height="300">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/alipay.jpg" alt="alipay" height="300">
 
 
 
