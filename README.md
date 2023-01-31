@@ -57,22 +57,30 @@
 <p align="center">
 全文档首页图
 </p>
+</p>
 
+<p align="center">
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/docList.png" alt="docList" height="300">
 <p align="center">
 文档列表
 </p>
+</p>
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/searchPage.png" alt="searchPage"height="300">
+<p align="center">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/searchPage.png" alt="searchPage" height="300">
 <p align="center">
 文档搜索页面
 </p>
+</p>
 
+<p align="center">
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/fileUpload.png" alt="fileUpload" height="300">
 <p align="center">
 文档上传页面
 </p>
+</p>
 
+<p align="center">
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/userPage.png" alt="userPage" height="300">
 <p align="center">
 用户个人信息页面
@@ -111,6 +119,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 目前仍然存在很多问题，欢迎一起来贡献！
 
 加入微信群，一起玩😄
+
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/imGroup.png" alt="imGroup" height="300">
 
 
