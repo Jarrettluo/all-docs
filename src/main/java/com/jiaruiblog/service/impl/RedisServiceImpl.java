@@ -5,10 +5,11 @@ import com.jiaruiblog.util.RedisKeyUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.redis.core.*;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 /**
  * @ClassName RedisServiceImpl
- * @Description 用户在搜索栏输入某字符，则将该字符记录下来 以zset格式存储的redis中
+ * @Description 用户在搜索栏输入某字符，则将该字符记录下来 以zSet格式存储的redis中
  * 每当用户查询了已在redis存在了的字符时，则直接累加个数， 用来获取平台上最热查询的十条数据
  * 热词存储功能参考：https://zhuanlan.zhihu.com/p/551125686
  * @Author luojiarui
@@ -42,29 +43,32 @@ public class RedisServiceImpl implements RedisService {
     /**
      * StringRedisTemplate
      */
-    @Autowired
+    @Resource
     private StringRedisTemplate redisSearchTemplate;
 
     /**
      * 新增一条该userid用户在搜索栏的历史记录
-     * searchkey 代表输入的关键词
+     * searchKey 代表输入的关键词
      * @param userid String
-     * @param searchkey String
+     * @param searchKey String
      * @return int
      */
     @Override
-    public int addSearchHistoryByUserId(String userid, String searchkey) {
-        String shistory = RedisKeyUtils.getSearchHistoryKey(userid);
-        boolean b = redisSearchTemplate.hasKey(shistory);
+    public int addSearchHistoryByUserId(String userid, String searchKey) {
+        String searchHistoryKey = RedisKeyUtils.getSearchHistoryKey(userid);
+        if (StringUtils.isEmpty(searchHistoryKey)) {
+            return 1;
+        }
+        boolean b = redisSearchTemplate.hasKey(searchHistoryKey);
         if (b) {
-            Object hk = redisSearchTemplate.opsForHash().get(shistory, searchkey);
+            Object hk = redisSearchTemplate.opsForHash().get(searchHistoryKey, searchKey);
             if (hk != null) {
                 return 1;
             }else{
-                redisSearchTemplate.opsForHash().put(shistory, searchkey, "1");
+                redisSearchTemplate.opsForHash().put(searchHistoryKey, searchKey, "1");
             }
         }else{
-            redisSearchTemplate.opsForHash().put(shistory, searchkey, "1");
+            redisSearchTemplate.opsForHash().put(searchHistoryKey, searchKey, "1");
         }
         return 1;
     }
@@ -77,8 +81,8 @@ public class RedisServiceImpl implements RedisService {
      */
     @Override
     public Long delSearchHistoryByUserId(String userid, String searchKey) {
-        String shistory = RedisKeyUtils.getSearchHistoryKey(userid);
-        return redisSearchTemplate.opsForHash().delete(shistory, searchKey);
+        String searchHistoryKey = RedisKeyUtils.getSearchHistoryKey(userid);
+        return redisSearchTemplate.opsForHash().delete(searchHistoryKey, searchKey);
     }
 
     /**
@@ -89,10 +93,13 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public List<String> getSearchHistoryByUserId(String userid) {
         List<String> stringList = Lists.newArrayList();
-        String shistory = RedisKeyUtils.getSearchHistoryKey(userid);
-        boolean b = redisSearchTemplate.hasKey(shistory);
+        String searchHistoryKey = RedisKeyUtils.getSearchHistoryKey(userid);
+        if (StringUtils.isEmpty(searchHistoryKey)) {
+            return Lists.newArrayList();
+        }
+        boolean b = redisSearchTemplate.hasKey(searchHistoryKey);
         if(b){
-            Cursor<Map.Entry<Object, Object>> cursor = redisSearchTemplate.opsForHash().scan(shistory, ScanOptions.NONE);
+            Cursor<Map.Entry<Object, Object>> cursor = redisSearchTemplate.opsForHash().scan(searchHistoryKey, ScanOptions.NONE);
             while (cursor.hasNext()) {
                 Map.Entry<Object, Object> map = cursor.next();
                 String key = map.getKey().toString();
@@ -110,17 +117,17 @@ public class RedisServiceImpl implements RedisService {
 
     /**
      * 新增一条热词搜索记录，将用户输入的热词存储下来
-     * @param searchkey String
+     * @param searchKey String
      * @param value String
      * @return int
      */
     @Override
-    public int incrementScoreByUserId(String searchkey, String value) {
+    public int incrementScoreByUserId(String searchKey, String value) {
         Long now = System.currentTimeMillis();
         ZSetOperations<String, String> zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
         List<String> title = new ArrayList<>();
-        title.add(searchkey);
+        title.add(searchKey);
         for (String tle : title) {
             try {
                 // 如果没找到相应的key，则返回null
@@ -145,21 +152,21 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 根据searchkey搜索其相关最热的前十名 (如果searchkey为null空，则返回redis存储的前十最热词条)
-     * @param searchkey String
+     * 根据searchKey搜索其相关最热的前十名 (如果searchKey为null空，则返回redis存储的前十最热词条)
+     * @param searchKey String
      * @param keyValue String
      * @return List
      */
     @Override
-    public List<String> getHotList(String searchkey, String keyValue) {
-        String key = searchkey;
+    public List<String> getHotList(String searchKey, String keyValue) {
+        String key = searchKey;
         Long now = System.currentTimeMillis();
         List<String> result = new ArrayList<>();
         ZSetOperations<String, String> zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
         Set<String> value = zSetOperations.reverseRangeByScore(keyValue, 0, Double.MAX_VALUE);
         //key不为空的时候 推荐相关的最热前十名
-        if(StringUtils.isNotEmpty(searchkey)){
+        if(StringUtils.isNotEmpty(searchKey)){
             for (String val : value) {
                 if (StringUtils.containsIgnoreCase(val, key)) {
                     //只返回最热的前十名
@@ -207,15 +214,15 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 每次点击给相关词searchkey热度 +1
-     * @param searchkey String
+     * 每次点击给相关词searchKey热度 +1
+     * @param searchKey String
      * @return int
      * @deprecated 暂时废弃
      */
     @Override
     @Deprecated
-    public int incrementScore(String searchkey) {
-        String key = searchkey;
+    public int incrementScore(String searchKey) {
+        String key = searchKey;
         Long now = System.currentTimeMillis();
         ZSetOperations<String, String> zSetOperations = redisSearchTemplate.opsForZSet();
         ValueOperations<String, String> valueOperations = redisSearchTemplate.opsForValue();
