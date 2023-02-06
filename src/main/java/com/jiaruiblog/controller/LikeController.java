@@ -22,6 +22,7 @@ import java.util.Map;
  * @Date 2023/2/2 22:05
  * @Version 1.0
  * 点赞功能参考地址：https://blog.csdn.net/qq_45243783/article/details/128221372
+ * redis的数据和数据库的数据保持同步的方案： https://blog.csdn.net/qq_22343483/article/details/103304826
  **/
 @Api(tags = "统计模块")
 @RestController

@@ -133,6 +133,7 @@ public class CommentServiceImpl implements ICommentService {
         long skip = (long) comment.getPage() * comment.getRows();
         query.skip(skip);
         query.limit(comment.getRows());
+        // 这里应该联合查询，根据评论的id查询到评论的用户，再根据用户查询头像信息
         List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
         Map<String, Object> result = Maps.newHashMap();
         result.put("totalNum", totalNum);
