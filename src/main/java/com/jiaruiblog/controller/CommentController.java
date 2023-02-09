@@ -2,8 +2,8 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
-import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.Comment;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.CommentDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.service.ICommentService;
@@ -28,7 +28,7 @@ import java.util.Optional;
 @RestController
 @Slf4j
 @CrossOrigin
-@RequestMapping("/comment")
+@RequestMapping("/api/v1.0/comment")
 public class CommentController {
 
     @Autowired

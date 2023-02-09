@@ -31,7 +31,7 @@ import java.util.Date;
 @Api(tags = "文档分类模块")
 @RestController
 @Slf4j
-@RequestMapping("/category")
+@RequestMapping("/api/v1.0/category")
 @CrossOrigin
 public class CategoryController {
 

@@ -36,7 +36,7 @@ import java.util.Optional;
 @Slf4j
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("files")
+@RequestMapping("/api/v1.0/files")
 public class FileController {
 
     private static final String DOT = ".";

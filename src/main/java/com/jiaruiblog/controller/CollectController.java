@@ -24,7 +24,7 @@ import java.util.Date;
 @RestController
 @Slf4j
 @CrossOrigin
-@RequestMapping("/collect")
+@RequestMapping("/api/v1.0/collect")
 public class CollectController {
 
     @Autowired

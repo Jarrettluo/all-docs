@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author jiarui.luo
  */
 @Controller
+@RequestMapping("/api/v1.0")
 public class IndexController {
 
     @Autowired

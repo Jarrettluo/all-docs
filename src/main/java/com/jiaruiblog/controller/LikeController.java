@@ -28,7 +28,7 @@ import java.util.Map;
 @RestController
 @Slf4j
 @CrossOrigin
-@RequestMapping("/")
+@RequestMapping("/api/v1.0")
 public class LikeController{
 
     @Autowired
@@ -49,7 +49,7 @@ public class LikeController{
 
     // entityType: 1:点赞
     // entityType: 2:收藏
-    @PostMapping("like")
+    @PostMapping("/like")
     public BaseApiResult like(@RequestParam("entityType") int entityType,
                               @RequestParam("entityId") String entityId,
                               HttpServletRequest request) {
@@ -97,7 +97,7 @@ public class LikeController{
         return BaseApiResult.success(map);
     }
 
-    @GetMapping("queryLikeInfo")
+    @GetMapping("/queryLikeInfo")
     public BaseApiResult queryLikeInfo(@RequestParam("entityId") String entityId,
                                        HttpServletRequest request) {
         // 获取到当前用户

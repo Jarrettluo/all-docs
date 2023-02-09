@@ -39,7 +39,7 @@ import static com.jiaruiblog.controller.FileController.extracted;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("/system")
+@RequestMapping("/api/v1.0/system")
 public class SystemConfigController {
 
     public static final String STATIC_CENSOR_WORD_TXT = "static" + File.separator + "censorword.txt";
