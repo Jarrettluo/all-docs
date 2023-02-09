@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 @RestController
 @Slf4j
 @CrossOrigin
-@RequestMapping("/api/v1.0/user")
+@RequestMapping("/user")
 public class UserController {
 
     private static final String COLLECTION_NAME = "user";

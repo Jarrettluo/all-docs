@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1.0/docLog")
+@RequestMapping("/docLog")
 public class DocLogController {
 
     @Resource

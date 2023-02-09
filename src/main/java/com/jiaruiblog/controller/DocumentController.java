@@ -36,7 +36,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @CrossOrigin
-@RequestMapping("/api/v1.0/document")
+@RequestMapping("/document")
 public class DocumentController {
 
     @Resource

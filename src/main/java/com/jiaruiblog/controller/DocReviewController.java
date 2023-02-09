@@ -29,7 +29,7 @@ import javax.validation.Valid;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1.0/docReview")
+@RequestMapping("/docReview")
 public class DocReviewController {
 
     @Autowired

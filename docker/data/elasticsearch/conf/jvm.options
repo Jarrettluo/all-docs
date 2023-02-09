@@ -4,8 +4,8 @@
 # exceptions because stack traces are important for debugging
 -XX:-OmitStackTraceInFastThrow
 
--Xms1024m
--Xmx1024m
+-Xms128m
+-Xmx128m
 
 # flags to configure Netty
 -Dio.netty.noUnsafe=true
