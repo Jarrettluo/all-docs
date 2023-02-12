@@ -44,6 +44,10 @@ spring:
     mode: HTML
     cache: false
 
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
 cloud:
   elasticsearch:
     host: ${ES_HOST:localhost}
