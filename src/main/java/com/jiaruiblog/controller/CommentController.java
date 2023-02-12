@@ -2,8 +2,10 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
-import com.jiaruiblog.entity.dto.BasePageDTO;
+import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Comment;
+import com.jiaruiblog.entity.dto.BasePageDTO;
+import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.CommentDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.service.ICommentService;
@@ -12,9 +14,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -56,7 +61,20 @@ public class CommentController {
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody Comment comment, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
+        if (!StringUtils.hasText(comment.getId())) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
         return commentService.remove(comment, userId);
+    }
+
+    @ApiOperation(value = "2.7 根据id列表移除批量评论", notes = "根据id移除批量评论")
+    @DeleteMapping(value = "/auth/removeBatch")
+    public BaseApiResult removeBatch(@RequestBody BatchIdDTO batchIdDTO, HttpServletRequest request) {
+        List<String> commentIdList = batchIdDTO.getIds();
+        if (CollectionUtils.isEmpty(commentIdList)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+        return commentService.removeBatch(commentIdList);
     }
 
     @ApiOperation(value = "2.8 根据文档id查询相关评论", notes = "根据id查询某个评论")
@@ -83,12 +101,12 @@ public class CommentController {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 查询全部的用户评论列表
      * TODO 这里有漏洞，管理员也是有自己的个人空间的！
      * @Date 14:38 2022/12/10
      * @Param [pageDTO, request]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Permission({PermissionEnum.ADMIN, PermissionEnum.USER})
     @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")

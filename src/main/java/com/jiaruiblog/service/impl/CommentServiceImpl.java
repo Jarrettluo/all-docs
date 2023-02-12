@@ -11,6 +11,7 @@ import com.jiaruiblog.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.util.BaseApiResult;
+import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.BeanUtils;
@@ -47,6 +48,8 @@ public class CommentServiceImpl implements ICommentService {
     private static final String COLLECTION_NAME = "commentCollection";
 
     private static final String DOC_ID = "docId";
+
+    private static final String OBJECT_ID = "_id";
 
     @Autowired
     MongoTemplate template;
@@ -103,13 +106,30 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public BaseApiResult remove(Comment comment, String userId) {
-        Query query = new Query(Criteria.where("_id").is(comment.getId()));
+        Query query = new Query(Criteria.where(OBJECT_ID).is(comment.getId()));
         Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
                 .orElse(new Comment());
         if( !commentDb.getUserId().equals(comment.getUserId())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         template.remove(query, Comment.class, COLLECTION_NAME);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 删除批量的评论列表
+     * @Date 20:51 2023/2/12
+     * @Param [commentIdList]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Override
+    public BaseApiResult removeBatch(List<String> commentIdList) {
+        Query query = new Query(Criteria.where(OBJECT_ID).in(commentIdList));
+        DeleteResult remove = template.remove(query, Comment.class, COLLECTION_NAME);
+        if (remove.getDeletedCount() < commentIdList.size()) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
