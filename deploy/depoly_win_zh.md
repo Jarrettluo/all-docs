@@ -13,6 +13,8 @@
 - 将项目下载到本地，然后直接打开。
 
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676023600652-c9f640c5-ff38-4c5a-9829-ed62eaa2c6f3.png#averageHue=%233f464e&clientId=u4c71546f-fd35-4&from=paste&id=ue364a655&name=image.png&originHeight=392&originWidth=335&originalType=url&ratio=1&rotation=0&showTitle=false&size=19080&status=done&style=none&taskId=u14892263-1187-423e-91cd-f4d4be2f44e&title=)
+
+
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676023804115-e317853d-c620-4677-a188-2242b8199409.png#averageHue=%23051a2c&clientId=u4c71546f-fd35-4&from=paste&height=541&id=u6cc0f405&name=image.png&originHeight=541&originWidth=470&originalType=binary&ratio=1&rotation=0&showTitle=false&size=25896&status=done&style=none&taskId=u136ef585-77bf-4e44-9a18-c7d5cfe0436&title=&width=470)
 
 ## Redis
@@ -310,3 +312,7 @@ docker restart nginx
 - 发现调用的是Linux服务器地址。
 
 ![image-20230212123708108](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177101601-fb3bfcd9-b9a3-4e5a-8bbe-45053e4eaffb.png#averageHue=%23fbfbfb&clientId=u58c11836-cadc-4&from=ui&id=u2acb4add&name=image-20230212123708108.png&originHeight=524&originWidth=1628&originalType=binary&ratio=2&rotation=0&showTitle=false&size=132762&status=done&style=none&taskId=u7059c76c-29aa-469d-919b-631f2e14331&title=)
+
+------
+- 以上内容没有经过验证！欢迎勘误
+- 2023年2月19日 Jarrett
