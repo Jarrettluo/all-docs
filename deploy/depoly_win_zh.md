@@ -1,7 +1,6 @@
 
 
 # all-docs（全文档）在windows环境下部署
-
 本文主要以图文的形式讲解【全文档】项目所需环境在windows下的安装，主要包括IDEA、Redis、Mongodb、Elasticsearch、Kibana。
 
 ## IDEA
@@ -27,13 +26,11 @@
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676023636331-a9c9a4bf-2f70-4440-b09c-54a2ada49cc6.png#averageHue=%23fbf9f8&clientId=u4c71546f-fd35-4&from=paste&id=udb2634d7&name=image.png&originHeight=512&originWidth=710&originalType=url&ratio=1&rotation=0&showTitle=false&size=55801&status=done&style=none&taskId=ua8c9c160-ea35-454b-a651-e8770e13942&title=)
 
 - 在当前地址栏输入cmd命令后，使用如下命令可以启动Redis服务；
-
 ```shell
 redis-server.exe redis.windows.conf 
 ```
 
 - 如果你想把Redis注册为系统服务来使用的话可以试试下面的命令。
-
 ```shell
 # 安装为服务 
 redis-server --service-install redis.windows.conf 
@@ -49,7 +46,6 @@ redis-server --service-uninstall
 ```
 
 ## Elasticsearch
-
 下载Elasticsearch7.17.3版本的zip包，并解压到指定目录，下载地址：[https://www.elastic.co/cn/downloads/past-releases/elasticsearch-7-17-3](https://www.elastic.co/cn/downloads/past-releases/elasticsearch-7-17-3)
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676024050180-92647f97-d3f6-411f-95d0-6ed7fb69d7f8.png#averageHue=%23fcfbf9&clientId=u4c71546f-fd35-4&from=paste&id=u3652b6ba&name=image.png&originHeight=342&originWidth=722&originalType=url&ratio=1&rotation=0&showTitle=false&size=31376&status=done&style=none&taskId=ud15de4ae-fbd0-40cc-8b58-9499b2bcc33&title=)
 
@@ -118,7 +114,7 @@ PUT /_ingest/pipeline/attachment
 
 在`attachment`中指定要过滤的字段为`content`，所以写入`Elasticsearch`时需要将文档内容放在`content`字段。
 
-![定义文本抽取管道](/Users/molly/Downloads/windows 部署.assets/1240.png)
+![定义文本抽取管道](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177096682-deb67850-52ac-4e30-aabf-fce03f85756c.png#averageHue=%23eff1f6&clientId=u58c11836-cadc-4&from=ui&id=uc447b920&name=1240.png&originHeight=288&originWidth=1240&originalType=binary&ratio=2&rotation=0&showTitle=false&size=55838&status=done&style=none&taskId=uff7560f3-693e-401d-89d6-c7f219d7584&title=)
 
 
 
@@ -151,8 +147,8 @@ PUT /_ingest/pipeline/attachment
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676024224157-e8d3c605-9ef5-427b-adab-b0afa4fb930d.png#averageHue=%23262525&clientId=u4c71546f-fd35-4&from=paste&id=uf575537b&name=image.png&originHeight=512&originWidth=979&originalType=url&ratio=1&rotation=0&showTitle=false&size=37844&status=done&style=none&taskId=u2c947d67-0053-4e22-9d88-7a0f550f60b&title=)
 
 - 如果需要移除MongoDB服务，只需使用管理员权限运行cmd工具，并输入如下命令。
-
 ```shell
+
 # 需要先stop服务
 sc.exe stop mongodb
 
@@ -164,7 +160,8 @@ sc.exe delete MongoDB
 
 - 启动项目：直接运行com.jiaruiblog.DocumentSharingSiteApplication的main方法即可;
 
-  ![image-20230212113153077](/Users/molly/Downloads/windows 部署.assets/image-20230212113153077.png)
+  ![image-20230212113153077](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177096923-f73ccf79-4161-40d4-96d8-6e46fa08ed29.png#averageHue=%232d2c2b&clientId=u58c11836-cadc-4&from=ui&id=uc4f28230&name=image-20230212113153077.png&originHeight=626&originWidth=1370&originalType=binary&ratio=2&rotation=0&showTitle=false&size=117319&status=done&style=none&taskId=ue9c54ae0-9fe4-4a72-9d7f-069dbd056f5&title=)
+
 
 - 接口文档地址：http://localhost:8082/swagger-ui/
 
@@ -176,14 +173,13 @@ sc.exe delete MongoDB
 ## Windows下的安装及部署
 
 - 下载nodejs并安装，最好使用v14.16.1版本，版本不对会导致npm install出错，下载地址：https://nodejs.org/dist/v14.16.1/node-v14.16.1-x86.msi
-- 下载mall-admin-web的代码；
-    - Github：https://github.com/Jarrettluo/all-documents-vue
-- 从IDEA中打开mall-admin-web项目；
+- 下载all-documents-vue的代码；
+  - Github：https://github.com/Jarrettluo/all-documents-vue
+- 从开发工具中打开all-documents-vue项目；
 
-![image-20230212121442309](/Users/molly/Downloads/windows 部署.assets/image-20230212121442309.png)
+![image-20230212121442309](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177096858-fd2252c6-ac5a-484e-b7aa-e33679c1fe14.png#averageHue=%233d444c&clientId=u58c11836-cadc-4&from=ui&id=uf630dbd5&name=image-20230212121442309.png&originHeight=898&originWidth=608&originalType=binary&ratio=2&rotation=0&showTitle=false&size=93596&status=done&style=none&taskId=u212c3540-98cc-4ebb-8d7a-11828e9c5d7&title=)
 
 - 切换至淘宝镜像源加速访问；
-
 ```powershell
 # 设置为淘宝的镜像源 
 npm config set registry https://registry.npm.taobao.org 
@@ -193,16 +189,16 @@ npm config set registry https://registry.npmjs.org
 ```
 
 - 打开控制台输入命令安装相关依赖；
-
 ```powershell
 npm install 
 ```
 
-![image-20230212121528569](/Users/molly/Downloads/windows 部署.assets/image-20230212121528569.png)
+![image-20230212121528569](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177096904-6924685d-42e4-4aec-87e9-0afa01290c8e.png#averageHue=%23303030&clientId=u58c11836-cadc-4&from=ui&id=u516902bc&name=image-20230212121528569.png&originHeight=596&originWidth=1408&originalType=binary&ratio=2&rotation=0&showTitle=false&size=80619&status=done&style=none&taskId=u2f7711a1-ba30-4be9-b2bb-21bcdb5ba4b&title=)
+
+
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676024534986-991a2aae-839c-46b2-a5d6-b76acad8c45b.png#averageHue=%232f2d2c&clientId=u4c71546f-fd35-4&from=paste&id=u81c49c3d&name=image.png&originHeight=261&originWidth=1459&originalType=url&ratio=1&rotation=0&showTitle=false&size=28873&status=done&style=none&taskId=ua50a1357-52a9-437c-a504-4122b4dbe3d&title=)
 
 - node-sass无法下载导致构建失败时可使用如下命令下载。
-
 ```powershell
 # linux 
 SASS_BINARY_SITE=https://npm.taobao.org/mirrors/node-sass/ 
@@ -215,60 +211,54 @@ set SASS_BINARY_SITE=https://npm.taobao.org/mirrors/node-sass && npm install nod
 
 ## 已搭建全文档后台环境的启动
 
-- 可以直接运行mall-admin服务；
+- 可以直接运行全文档后台服务；
 
-![image-20230212122315757](/Users/molly/Downloads/windows 部署.assets/image-20230212122315757.png)
+![image-20230212122315757](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177096849-ed195d7e-052a-4941-9818-78629bbdf41e.png#averageHue=%232e2d2b&clientId=u58c11836-cadc-4&from=ui&id=u80d3774f&name=image-20230212122315757.png&originHeight=406&originWidth=1492&originalType=binary&ratio=2&rotation=0&showTitle=false&size=81335&status=done&style=none&taskId=ucb8bf656-2fe9-441b-bc35-a450736c4b2&title=)
 
 - 使用命令启动全文档前端，在控制台中输入如下命令：
-
 ```
 npm run serve
 ```
 
 
-![image-20230212122403431](/Users/molly/Downloads/windows 部署.assets/image-20230212122403431.png)
+![image-20230212122403431](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177098183-ddb7747a-5525-4e1f-832e-a038494ea6e4.png#averageHue=%23343434&clientId=u58c11836-cadc-4&from=ui&id=u11665114&name=image-20230212122403431.png&originHeight=736&originWidth=1432&originalType=binary&ratio=2&rotation=0&showTitle=false&size=125061&status=done&style=none&taskId=u897223d2-6dde-45de-a0cf-0477b8e3bd3&title=)
 
 - 访问地址查看效果：http://localhost:8080
 
-![image-20230212122517959](/Users/molly/Downloads/windows 部署.assets/image-20230212122517959.png)
+![image-20230212122517959](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177099700-62f20f14-68fa-4188-8ae0-56eb5bb4afdf.png#averageHue=%23e5ebef&clientId=u58c11836-cadc-4&from=ui&id=u490e9b8a&name=image-20230212122517959.png&originHeight=1484&originWidth=2880&originalType=binary&ratio=2&rotation=0&showTitle=false&size=530793&status=done&style=none&taskId=uf7731e9d-29a2-44ff-a252-5b7cb45d2b4&title=)
 
 - 不做任何更改，页面默认是本地接口：
 
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676024535919-2f271e22-1f32-4806-a446-1bf628dc9e01.png#averageHue=%23f7f6f6&clientId=u4c71546f-fd35-4&from=paste&id=u71f1bc67&name=image.png&originHeight=345&originWidth=1170&originalType=url&ratio=1&rotation=0&showTitle=false&size=38516&status=done&style=none&taskId=u2379b84c-795f-4f32-8075-50a41479ece&title=)
-
 ## 未搭建全文档后台环境的启动
-
 未搭建全文档后台的需要使用线上api进行访问，线上API地址：http://81.69.247.172:8082/api/v1.0 。
 
 - 修改./src/api/request.js文件中的baseURL为线上地址；
 
-![image-20230212122652194](/Users/molly/Downloads/windows 部署.assets/image-20230212122652194.png)
+![image-20230212122652194](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177099454-6a152868-08c9-40e7-b75e-481d7a14b7a0.png#averageHue=%23547442&clientId=u58c11836-cadc-4&from=ui&id=u8c99515b&name=image-20230212122652194.png&originHeight=1564&originWidth=1716&originalType=binary&ratio=2&rotation=0&showTitle=false&size=366255&status=done&style=none&taskId=u311cea3c-5fef-447e-bf67-ac517cd8427&title=)
 
-- 使用命令启动mall-admin-web，在IDEA控制台中输入如下命令：
-
+- 使用命令启动前端项目，在IDEA控制台中输入如下命令：
 ```
 npm run serve
 ```
 
 
-![image-20230212122941964](/Users/molly/Downloads/windows 部署.assets/image-20230212122941964.png)
+![image-20230212122941964](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177098902-a8a8eae7-194d-46a7-a7cd-ab4af9a06680.png#averageHue=%23313131&clientId=u58c11836-cadc-4&from=ui&id=ufde5fb07&name=image-20230212122941964.png&originHeight=266&originWidth=836&originalType=binary&ratio=2&rotation=0&showTitle=false&size=34032&status=done&style=none&taskId=u39936415-472f-4118-b8b2-b0fa0ba5b07&title=)
 
 - 访问地址http://localhost:8080查看效果：
 
-![image-20230212123112054](/Users/molly/Downloads/windows 部署.assets/image-20230212123112054.png)
+![image-20230212123112054](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177100676-30d4373b-d7e2-4982-b680-66f968adbc19.png#averageHue=%23e1e5e4&clientId=u58c11836-cadc-4&from=ui&id=u2ce95cb3&name=image-20230212123112054.png&originHeight=1488&originWidth=2880&originalType=binary&ratio=2&rotation=0&showTitle=false&size=903806&status=done&style=none&taskId=ub9c7f744-5532-4119-8770-7de1e9a2c85&title=)
 
 - 进行登录操作，发现调用的是线上接口：
 
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676024537081-e7b7640d-f997-465c-abb7-6e804baf92fa.png#averageHue=%23f7f6f6&clientId=u4c71546f-fd35-4&from=paste&id=ue536667f&name=image.png&originHeight=343&originWidth=1176&originalType=url&ratio=1&rotation=0&showTitle=false&size=38540&status=done&style=none&taskId=ue2c522e9-36af-4a53-a9a2-96ac2e9345e&title=)
-
 ## Linux下的部署
 
 - 修改修改./src/api/request.js文件中的baseURL为线上地址
 
-![image-20230212123617588](/Users/molly/Downloads/windows 部署.assets/image-20230212123617588.png)
+![image-20230212123617588](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177100810-426f5848-cc12-434c-b516-42285cae8791.png#averageHue=%23b1d9e0&clientId=u58c11836-cadc-4&from=ui&id=uf5cb5452&name=image-20230212123327158.png&originHeight=1486&originWidth=2880&originalType=binary&ratio=2&rotation=0&showTitle=false&size=653008&status=done&style=none&taskId=u30f09cc1-79ac-4122-9ad0-60ab705e4cd&title=)
 
 - 使用命令进行打包；
-
 ```
 npm run build 
 ```
@@ -278,7 +268,7 @@ npm run build
 
 - 打包后的代码位置
 
-![image-20230212123427506](/Users/molly/Downloads/windows 部署.assets/image-20230212123427506.png)
+![image-20230212123427506](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177100151-e81f8714-127a-4c48-9d28-232d1586b7e8.png#averageHue=%235e8683&clientId=u58c11836-cadc-4&from=ui&id=u6c2e2d6b&name=image-20230212123427506.png&originHeight=1112&originWidth=624&originalType=binary&ratio=2&rotation=0&showTitle=false&size=107683&status=done&style=none&taskId=ucea3fdcf-f15f-47f8-b6f8-514682b4cde&title=)
 
 - 将dist目录打包为dist.tar.gz文件
 
@@ -290,34 +280,24 @@ npm run build
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676024538709-fe44bd03-7b80-4790-9320-e63389953f54.png#averageHue=%23090604&clientId=u4c71546f-fd35-4&from=paste&id=u1f378153&name=image.png&originHeight=129&originWidth=664&originalType=url&ratio=1&rotation=0&showTitle=false&size=12788&status=done&style=none&taskId=u4a28a527-b955-4128-ba7a-64e556aedff&title=)
 
 - 使用该命令进行解压操作；
-
 ```
 tar -zxvf dist.tar.gz 
 ```
 
 
 - 删除nginx的html文件夹；
-
 ```
 rm -rf html 
 ```
 
 - 移动dist文件夹到html文件夹；
-
 ```
 mv dist html 
 ```
 
 
-- 运行mall-admin服务；
-
-```
-docker start mall-admin 
-```
-
 
 - 重启nginx；
-
 ```
 docker restart nginx 
 ```
@@ -325,9 +305,8 @@ docker restart nginx
 
 - 访问首页并登录：http://81.69.247.172
 
-![image-20230212123327158](/Users/molly/Downloads/windows 部署.assets/image-20230212123327158.png)
+![image-20230212123327158](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177100810-426f5848-cc12-434c-b516-42285cae8791.png#averageHue=%23b1d9e0&clientId=u58c11836-cadc-4&from=ui&id=uf5cb5452&name=image-20230212123327158.png&originHeight=1486&originWidth=2880&originalType=binary&ratio=2&rotation=0&showTitle=false&size=653008&status=done&style=none&taskId=u30f09cc1-79ac-4122-9ad0-60ab705e4cd&title=)
 
 - 发现调用的是Linux服务器地址。
 
-![image-20230212123708108](/Users/molly/Downloads/windows 部署.assets/image-20230212123708108.png)
-
+![image-20230212123708108](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177101601-fb3bfcd9-b9a3-4e5a-8bbe-45053e4eaffb.png#averageHue=%23fbfbfb&clientId=u58c11836-cadc-4&from=ui&id=u2acb4add&name=image-20230212123708108.png&originHeight=524&originWidth=1628&originalType=binary&ratio=2&rotation=0&showTitle=false&size=132762&status=done&style=none&taskId=u7059c76c-29aa-469d-919b-631f2e14331&title=)

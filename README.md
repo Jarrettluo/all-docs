@@ -106,6 +106,13 @@ https://github.com/Jarrettluo/document-sharing-site.git
 
 前端技术：Vue + axios
 
+### 项目部署
+
+- [全文档在Windows环境下部署](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/depoly_win_zh.md)
+- [全文档在Linux环境下部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/depoly_linux_zh.md)
+- [全文档使用Docker部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/depoly_docker_zh.md)
+- [全文档使用Docker-Compose部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/depoly_docker_compose_zh.md)
+
 <!-- ROADMAP -->
 ## 路线图
 
