@@ -23,5 +23,4 @@ public class DocumentSharingSiteApplication {
         SpringApplication.run(DocumentSharingSiteApplication.class, args);
     }
 
-
 }

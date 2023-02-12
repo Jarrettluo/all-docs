@@ -6,6 +6,8 @@ import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * @author jiarui.luo
  */
@@ -43,5 +45,9 @@ public interface IUserService {
     BaseApiResult uploadUserAvatar(String userId, MultipartFile file);
 
     BaseApiResult removeUserAvatar(String userId);
+
+    BaseApiResult removeUser(String userId);
+
+    BaseApiResult deleteUserByIdBatch(List<String> userIdList, String adminUserId);
 
 }

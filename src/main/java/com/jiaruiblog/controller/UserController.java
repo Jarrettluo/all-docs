@@ -1,18 +1,20 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.auth.Permission;
+import com.jiaruiblog.auth.PermissionEnum;
+import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
+import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.UserDTO;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JwtUtil;
-import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -42,12 +44,14 @@ public class UserController {
 
     private static final String COLLECTION_NAME = "user";
 
+    private static final String REQUEST_USER_ID = "id";
+
 
     @Resource
     IUserService userService;
 
 
-    @Autowired
+    @Resource
     private MongoTemplate template;
 
 
@@ -113,21 +117,37 @@ public class UserController {
      * @Param [user, request]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @Permission(PermissionEnum.ADMIN)
     @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
     @DeleteMapping(value = "/auth/deleteByID")
-    public BaseApiResult deleteById(@RequestBody User user, HttpServletRequest request) {
+    public BaseApiResult deleteById(@RequestBody User removeUser, HttpServletRequest request) {
+        String userId = (String) request.getAttribute(REQUEST_USER_ID);
+        // 不能删除自己的账号
+        String removeUserId = removeUser.getId();
+        if (userId == null || userId.equals(removeUserId)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        return userService.removeUser(removeUserId);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 管理员批量删除， 注意删除用户的时候必须要删除其头像信息
+     * @Date 22:40 2023/1/12
+     * @Param [user, request]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
+    @Permission(value = PermissionEnum.ADMIN)
+    @DeleteMapping(value = "/auth/deleteByIDBatch")
+    public BaseApiResult deleteByIdBatch(@RequestBody BatchIdDTO batchIdDTO, HttpServletRequest request) {
         // 用户只能删除自己，不能删除其他人的信息
-        String userId = (String) request.getAttribute("id");
-        if (!userId.equals(user.getId())) {
-            return BaseApiResult.error(1201, MessageConstant.OPERATE_FAILED);
+        String adminUserId = (String) request.getAttribute(REQUEST_USER_ID);
+        List<String> userIdList = Optional.ofNullable(batchIdDTO.getIds()).orElse(new ArrayList<>());
+        if (userIdList.size() > ConfigConstant.MAX_DELETE_NUM) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        DeleteResult remove = template.remove(user, COLLECTION_NAME);
-        if (remove.getDeletedCount() > 0) {
-            log.warn("[删除警告]正在删除用户：{}", user);
-            return BaseApiResult.success("删除成功");
-        } else {
-            return BaseApiResult.error(1201, MessageConstant.OPERATE_FAILED);
-        }
+        return userService.deleteUserByIdBatch(userIdList, adminUserId);
     }
 
 

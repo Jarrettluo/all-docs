@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -159,13 +160,39 @@ public class UserServiceImpl implements IUserService {
      * @Param [userId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
+    @Override
     public BaseApiResult removeUser(String userId) {
         User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
         if (user == null) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
-        fileService.deleteGridFs((String[]) user.getAvatarList().toArray());
+        log.warn("[删除警告]正在删除用户：{}", user);
+        fileService.deleteGridFs(user.getAvatarList().toArray(new String[0]));
         Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
+        mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 管理员根据用户的id批量删除用户
+     * @Date 20:28 2023/2/12
+     * @Param [userIdList, adminUserId]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Override
+    public BaseApiResult deleteUserByIdBatch(List<String> userIdList, String adminUserId) {
+        Query query = new Query().addCriteria(Criteria.where("_id").in(userIdList));
+        List<User> userList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
+        if (CollectionUtils.isEmpty(userList) || userIdList.contains(adminUserId)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+        List<String> allUserId = new ArrayList<>();
+        for (User user : userList) {
+            log.warn("[删除警告]正在删除用户：{}", user);
+            allUserId.addAll(user.getAvatarList());
+        }
+        fileService.deleteGridFs((String[]) allUserId.toArray());
         mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
@@ -184,4 +211,7 @@ public class UserServiceImpl implements IUserService {
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
+
+
+
 }
