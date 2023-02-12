@@ -102,7 +102,7 @@ public class UserController {
         update.set("male", user.getMale());
         update.set("description", user.getDescription());
         UpdateResult updateResult1 = template.updateFirst(query, update, User.class, COLLECTION_NAME);
-        if(updateResult1.getMatchedCount() > 0) {
+        if (updateResult1.getMatchedCount() > 0) {
             return BaseApiResult.success("更新成功！");
         }
         return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
@@ -111,11 +111,11 @@ public class UserController {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 删除用户的时候必须要删除其头像信息
      * @Date 22:40 2023/1/12
      * @Param [user, request]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Permission(PermissionEnum.ADMIN)
     @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
@@ -131,11 +131,11 @@ public class UserController {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 管理员批量删除， 注意删除用户的时候必须要删除其头像信息
      * @Date 22:40 2023/1/12
      * @Param [user, request]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
     @Permission(value = PermissionEnum.ADMIN)
@@ -184,8 +184,24 @@ public class UserController {
         return userService.getUserList(pageDTO);
     }
 
+    /**
+     * @return com.jiaruiblog.util.BaseApiResult
+     * @Author luojiarui
+     * @Description 屏蔽用户，使用户不可登录；再次调用此接口则取消屏蔽
+     * @Date 20:30 2023/2/12
+     * @Param [userId]
+     **/
+    @Permission(PermissionEnum.ADMIN)
     @GetMapping("blockUser")
-    public BaseApiResult blockUser(@RequestParam("userId") String userId) {
+    public BaseApiResult blockUser(@RequestParam("userId") String userId, HttpServletRequest request) {
+        if (!StringUtils.hasText(userId)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
+        String adminUserId = (String) request.getAttribute(REQUEST_USER_ID);
+        // 不能屏蔽自己的账号
+        if (userId.equals(adminUserId)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         return userService.blockUser(userId);
     }
 

@@ -33,6 +33,10 @@ public class UserServiceImpl implements IUserService {
 
     private static final String COLLECTION_NAME = "user";
 
+    private static final String OBJECT_ID = "_id";
+
+    private static final String USER_BANNING = "banning";
+
     @Resource
     MongoTemplate mongoTemplate;
 
@@ -65,13 +69,13 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public BaseApiResult blockUser(String userId) {
-
-        if (!isExist(userId)) {
+        User user = queryById(userId);
+        if ( user == null) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(userId));
-        Update update = new Update().set("banning", true);
+        query.addCriteria(Criteria.where(OBJECT_ID).is(userId));
+        Update update = new Update().set(USER_BANNING, !Optional.ofNullable(user.getBanning()).orElse(true));
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         if (updateResult.getModifiedCount() > 0) {
             return BaseApiResult.success(MessageConstant.SUCCESS);
@@ -117,11 +121,11 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 上传头像到文件的avatar中，保存了多个用户的信息
      * @Date 22:40 2023/1/12
      * @Param [userId, file]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
     public BaseApiResult uploadUserAvatar(String userId, MultipartFile file) {
@@ -154,11 +158,11 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 删除某个用户的信息
      * @Date 23:00 2023/1/12
      * @Param [userId]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
     public BaseApiResult removeUser(String userId) {
@@ -174,11 +178,11 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 管理员根据用户的id批量删除用户
      * @Date 20:28 2023/2/12
      * @Param [userIdList, adminUserId]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
     public BaseApiResult deleteUserByIdBatch(List<String> userIdList, String adminUserId) {
@@ -211,7 +215,6 @@ public class UserServiceImpl implements IUserService {
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
-
 
 
 }
