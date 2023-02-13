@@ -33,18 +33,18 @@ public interface IFileService {
     /**
      * 保存文件 - js文件流
      *
-     * @param fileDocument
-     * @param inputStream
-     * @return
+     * @param fileDocument FileDocument
+     * @param inputStream InputStream
+     * @return FileDocument
      */
     FileDocument saveFile(FileDocument fileDocument, InputStream inputStream);
 
     /**
+     * update file
      * @Author luojiarui
      * @Description 重建索引和缩略图的时候专用的
      * @Date 18:05 2022/11/13
-     * @Param [fileDocument]
-     * @return void
+     * @Param fileDocument FileDocument
      **/
     void updateFile(FileDocument fileDocument);
 

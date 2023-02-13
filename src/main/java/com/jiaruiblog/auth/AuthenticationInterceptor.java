@@ -21,13 +21,14 @@ import java.lang.reflect.Method;
  **/
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
-    // 拦截器中无法注入bean，因此使用构造器
+    /**
+     * 拦截器中无法注入bean，因此使用构造器
+     */
     private final IUserService userService;
 
     public AuthenticationInterceptor(IUserService userService) {
         this.userService = userService;
     }
-
 
 
     @Override
@@ -45,7 +46,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         // 获取类注解
         Permission permissionClass = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Permission.class);
         // 获取方法注解
-        Permission permissionMethod = AnnotationUtils.findAnnotation(method,Permission.class);
+        Permission permissionMethod = AnnotationUtils.findAnnotation(method, Permission.class);
 
         // 判断是否需要权限校验
         if (permissionClass == null && permissionMethod == null) {
@@ -97,11 +98,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
         // 校验该用户是否有改权限
         // 校验方法可自行实现，拿到permissionEnums中的参数进行比较
-        if(userService.checkPermissionForUser(userInfo, permissionEnums)){
-             // 拥有权限
+        if (userService.checkPermissionForUser(userInfo, permissionEnums)) {
+            // 拥有权限
             return true;
         } else {
-             // 抛出自定义异常，可在全局异常捕获后自行处理。
+            // 抛出自定义异常，可在全局异常捕获后自行处理。
 //            throw new CourseException
             throw new Exception("sdfjdls");
         }
@@ -113,11 +114,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description 请求处理之后进行调用，但是在视图被渲染之前（Controller方法调用之后）
      * @Date 20:26 2022/12/7
      * @Param [request, response, handler, modelAndView]
-     * @return void
      **/
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
@@ -125,14 +126,14 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     }
 
     /**
+     * @return void
      * @Author luojiarui
      * @Description 在整个请求结束之后被调用，也就是在DispatcherServlet 渲染了对应的视图之后执行（主要是用于进行资源清理工作）
      * @Date 20:27 2022/12/7
      * @Param [request, response, handler, ex]
-     * @return void
      **/
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-
+        // TODO document why this method is empty
     }
 }

@@ -2,7 +2,7 @@ package com.jiaruiblog.common;
 
 /**
  * @ClassName ConfigConstant
- * @Description TODO
+ * @Description 整个系统需要的配置常数，统一配置避免出现不匹配的情况
  * @Author luojiarui
  * @Date 2023/2/12 20:11
  * @Version 1.0

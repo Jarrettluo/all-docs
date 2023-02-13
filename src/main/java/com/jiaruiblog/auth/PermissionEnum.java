@@ -24,10 +24,10 @@ public enum PermissionEnum {
     /**
      * 权限编码
      */
-    private Integer code;
+    private final Integer code;
     /**
      * 权限名称
      */
-    private String msg;
+    private final String msg;
 
 }

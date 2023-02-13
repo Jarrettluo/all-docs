@@ -44,10 +44,26 @@ public interface IUserService {
      **/
     BaseApiResult uploadUserAvatar(String userId, MultipartFile file);
 
+    /**
+     * Deleting a user profile picture
+     * @param userId user index
+     * @return BaseApiResult
+     */
     BaseApiResult removeUserAvatar(String userId);
 
+    /**
+     * remove user entity
+     * @param userId user index
+     * @return BaseApiResult
+     */
     BaseApiResult removeUser(String userId);
 
+    /**
+     * Remove user entities in batches
+     * @param userIdList user index
+     * @param adminUserId administrator index
+     * @return BaseApiResult
+     */
     BaseApiResult deleteUserByIdBatch(List<String> userIdList, String adminUserId);
 
 }

@@ -38,7 +38,7 @@ public interface RedisService {
      * incrementScoreByUserId
      * @param searchKey String search key
      * @param keyValue String
-     * @return
+     * @return count
      */
     int incrementScoreByUserId(String searchKey, String keyValue);
 
@@ -67,10 +67,10 @@ public interface RedisService {
 
     /**
      * incrementScore
-     * @param searchkey String
+     * @param searchKey String
      * @return result
      */
-    int incrementScore(String searchkey);
+    int incrementScore(String searchKey);
 
 
 }

@@ -18,28 +18,32 @@ import java.util.List;
 public interface IDocLogService {
 
     /**
+     * add logs
      * @Author luojiarui
-     * @Description 用户增加日志信息
+     * @Description add logs
      * @Date 22:54 2023/1/11
      * @Param [user, document, action]
-     * @return void
      **/
     void addLog(User user, FileDocument document, DocLogServiceImpl.Action action);
 
     /**
+     * query Doc Logs
      * @Author luojiarui
      * @Description 分页查询文档日志
      * @Date 20:57 2022/11/30
-     * @Param [page, user]
+     * @Param page BasePageDTO
+     * @Param user String
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     BaseApiResult queryDocLogs(BasePageDTO page, String userId);
 
     /**
+     * delete doc logs in batches
      * @Author luojiarui
      * @Description 批量删除文档的日志
      * @Date 20:57 2022/11/30
-     * @Param [ids] 文档的id列表
+     * @Param ids 文档的id列表
+     * @Param userId user index
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     BaseApiResult deleteDocLogBatch(List<String> logIds, String userId);

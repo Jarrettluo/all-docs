@@ -104,7 +104,8 @@ public class DocumentController {
     @GetMapping("/addKey")
     public BaseApiResult addKey(@RequestParam("key") String key) {
 
-        redisService.addSearchHistoryByUserId("ljr", key);
+        final int ljr = redisService.addSearchHistoryByUserId("ljr", key);
+        log.info(String.valueOf(ljr));
         redisService.incrementScoreByUserId(key, RedisServiceImpl.SEARCH_KEY);
         return BaseApiResult.success(key);
     }

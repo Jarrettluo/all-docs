@@ -44,9 +44,6 @@ public class CommonExceptionHandler {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public BaseApiResult dealMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         String defaultMessage = e.getBindingResult().getFieldError().getDefaultMessage();
-//        List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
-//        String message = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
-//                .collect(Collectors.joining(";"));
         return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, defaultMessage);
     }
 
@@ -60,10 +57,6 @@ public class CommonExceptionHandler {
     @ExceptionHandler(BindException.class)
     public BaseApiResult handleValidation(BindException e) {
         String defaultMessage = e.getFieldError().getDefaultMessage();
-//        List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
-//        String messages = fieldErrors.stream()
-//                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-//                .collect(Collectors.joining(";"));
         return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, defaultMessage);
     }
 
@@ -73,9 +66,6 @@ public class CommonExceptionHandler {
     @ExceptionHandler(value = ConstraintViolationException.class)
     public BaseApiResult dealConstraintViolationException(ConstraintViolationException e) {
         String message = e.getMessage();
-//        Set<ConstraintViolation<?>> allErrors = e.getConstraintViolations();
-//        String message = allErrors.stream().map(ConstraintViolation::getMessage)
-//                .collect(Collectors.joining(";"));
         return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
     }
 
