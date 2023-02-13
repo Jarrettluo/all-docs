@@ -108,7 +108,7 @@ public class DocReviewController {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "统一某一批文档", notes = "管理员同意某一批文档")
+    @ApiOperation(value = "同意某一批文档", notes = "管理员同意某一批文档")
     @PostMapping("approve")
     public BaseApiResult approve(@RequestBody @Valid BatchIdDTO batchIdDTO) {
         return docReviewService.approveBatch(batchIdDTO.getIds());
