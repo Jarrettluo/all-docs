@@ -165,7 +165,8 @@ sc.exe delete MongoDB
   ![image-20230212113153077](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177096923-f73ccf79-4161-40d4-96d8-6e46fa08ed29.png#averageHue=%232d2c2b&clientId=u58c11836-cadc-4&from=ui&id=uc4f28230&name=image-20230212113153077.png&originHeight=626&originWidth=1370&originalType=binary&ratio=2&rotation=0&showTitle=false&size=117319&status=done&style=none&taskId=ue9c54ae0-9fe4-4a72-9d7f-069dbd056f5&title=)
 
 
-- 接口文档地址：http://localhost:8082/swagger-ui/
+- 接口文档地址：http://localhost:8082/api/v1.0/swagger-ui.html
+  (注意接口文档并不完善，请见谅)
 
 
 
