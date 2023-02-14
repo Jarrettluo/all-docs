@@ -4,6 +4,7 @@ import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
+import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -44,6 +45,27 @@ public class UserServiceImpl implements IUserService {
     @Resource
     IFileService fileService;
 
+    @Override
+    public BaseApiResult registry(RegistryUserDTO userDTO) {
+        User user = new User();
+        // 自带默认的关键字，如果出现此名称则自动赋予管理员
+        // 密码 15008201329
+        // 加密后的密码 8ggje41mnil0mcrd0b17tj4cj4om3dd4
+        if ("admin".equals(userDTO.getUsername())) {
+            user.setPermissionEnum(PermissionEnum.ADMIN);
+        }
+        Query query = new Query().addCriteria(Criteria.where("username").is(userDTO.getUsername()));
+        List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
+        if (CollectionUtils.isEmpty(users)) {
+            user.setUsername(userDTO.getUsername());
+            user.setPassword(userDTO.getEncodePassword());
+            user.setCreateDate(new Date());
+            mongoTemplate.save(user, COLLECTION_NAME);
+            return BaseApiResult.success(MessageConstant.SUCCESS);
+        }
+        return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_HAS_EXIST);
+
+    }
 
     @Override
     public BaseApiResult getUserList(BasePageDTO page) {
@@ -87,8 +109,8 @@ public class UserServiceImpl implements IUserService {
     /**
      * 根据用户的主键id查询用户信息
      *
-     * @param userId
-     * @return
+     * @param userId 用户信息
+     * @return 返回布尔
      */
     public boolean isExist(String userId) {
         if (userId == null || "".equals(userId)) {
@@ -198,7 +220,7 @@ public class UserServiceImpl implements IUserService {
             log.warn("[删除警告]正在删除用户：{}", user);
             allUserId.addAll(user.getAvatarList());
         }
-        fileService.deleteGridFs((String[]) allUserId.toArray());
+        fileService.deleteGridFs(allUserId.toArray(new String[0]));
         mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }

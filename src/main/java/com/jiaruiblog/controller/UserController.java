@@ -7,6 +7,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
+import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserDTO;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -57,10 +58,8 @@ public class UserController {
 
     @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")
-    public BaseApiResult insertObj(@RequestBody User user) {
-        user.setCreateDate(new Date());
-        template.save(user, COLLECTION_NAME);
-        return BaseApiResult.success("新增成功");
+    public BaseApiResult insertObj(@RequestBody RegistryUserDTO userDTO) {
+        return userService.registry(userDTO);
     }
 
     @ApiOperation(value = "批量新增用户", notes = "批量新增用户")

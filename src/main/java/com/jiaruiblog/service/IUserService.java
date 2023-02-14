@@ -3,6 +3,7 @@ package com.jiaruiblog.service;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
+import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +13,8 @@ import java.util.List;
  * @author jiarui.luo
  */
 public interface IUserService {
+
+    BaseApiResult registry(RegistryUserDTO userDTO);
 
     /**
      * @Author luojiarui
