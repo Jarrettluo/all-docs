@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author Jarrett Luo
@@ -117,7 +118,8 @@ public class UserServiceImpl implements IUserService {
      **/
     @Override
     public boolean checkPermissionForUser(User user, PermissionEnum[] permissionEnums) {
-        return true;
+        Set<PermissionEnum> collect = Arrays.stream(permissionEnums).collect(Collectors.toSet());
+        return collect.contains(user.getPermissionEnum());
     }
 
     /**
