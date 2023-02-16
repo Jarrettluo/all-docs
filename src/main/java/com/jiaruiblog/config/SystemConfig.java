@@ -24,4 +24,6 @@ public class SystemConfig {
 
     private Boolean userRegistry;
 
+    private String initialUsername;
+
 }

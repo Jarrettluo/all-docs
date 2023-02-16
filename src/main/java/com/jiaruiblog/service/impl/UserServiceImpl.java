@@ -2,12 +2,14 @@ package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
+import com.jiaruiblog.util.JwtUtil;
 import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -38,6 +40,8 @@ public class UserServiceImpl implements IUserService {
     private static final String OBJECT_ID = "_id";
 
     private static final String USER_BANNING = "banning";
+    public static final String AVATAR = "avatar";
+    public static final String USERNAME = "username";
 
     @Resource
     MongoTemplate mongoTemplate;
@@ -45,16 +49,36 @@ public class UserServiceImpl implements IUserService {
     @Resource
     IFileService fileService;
 
+    @Resource
+    private SystemConfig systemConfig;
+
+    @Override
+    public BaseApiResult login(RegistryUserDTO user) {
+        Query query = new Query(Criteria.where(USERNAME).is(user.getUsername()));
+        User dbUser = mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
+        if (dbUser != null && dbUser.getUsername().equals(user.getUsername())
+                && dbUser.getPassword().equals(user.getEncodePassword())) {
+            String token = JwtUtil.createToken(dbUser);
+            Map<String, String> result = new HashMap<>(8);
+            result.put("token", token);
+            result.put("userId", dbUser.getId());
+            result.put(AVATAR, dbUser.getAvatar());
+            result.put(USERNAME, dbUser.getUsername());
+            result.put("type", dbUser.getPermissionEnum() != null ? dbUser.getPermissionEnum().toString() : null);
+            return BaseApiResult.success(result);
+        }
+        return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+    }
+
     @Override
     public BaseApiResult registry(RegistryUserDTO userDTO) {
         User user = new User();
         // 自带默认的关键字，如果出现此名称则自动赋予管理员
-        // 密码 15008201329
-        // 加密后的密码 8ggje41mnil0mcrd0b17tj4cj4om3dd4
-        if ("admin".equals(userDTO.getUsername())) {
+        String initUsername = systemConfig.getInitialUsername();
+        if (initUsername.equals(userDTO.getUsername())) {
             user.setPermissionEnum(PermissionEnum.ADMIN);
         }
-        Query query = new Query().addCriteria(Criteria.where("username").is(userDTO.getUsername()));
+        Query query = new Query().addCriteria(Criteria.where(USERNAME).is(userDTO.getUsername()));
         List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
         if (CollectionUtils.isEmpty(users)) {
             user.setUsername(userDTO.getUsername());
@@ -172,7 +196,7 @@ public class UserServiceImpl implements IUserService {
         Update update = new Update();
         update.set("avatarList", avatar);
         update.set("updateDate", new Date());
-        update.set("avatar", gridfsId);
+        update.set(AVATAR, gridfsId);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
         long matchedCount = updateResult.getMatchedCount();
         if (matchedCount > 0) {
@@ -234,7 +258,7 @@ public class UserServiceImpl implements IUserService {
         fileService.deleteGridFs(user.getAvatar());
         Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
         Update update = new Update();
-        update.set("avatar", null);
+        update.set(AVATAR, null);
         update.set("updateDate", new Date());
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);

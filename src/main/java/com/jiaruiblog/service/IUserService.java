@@ -14,6 +14,8 @@ import java.util.List;
  */
 public interface IUserService {
 
+    BaseApiResult login(RegistryUserDTO userDTO);
+
     BaseApiResult registry(RegistryUserDTO userDTO);
 
     /**

@@ -4,5 +4,10 @@
       "name": "all-docs.config.userUpload",
       "type": "java.lang.String",
       "description": "Description for all-docs.config.userUpload."
-  }
-] }
+    },
+    {
+      "name": "all-docs.config.initialUsername",
+      "type": "java.lang.String",
+      "description": "Description for all-docs.config.initialUsername."
+    }
+  ] }

@@ -154,21 +154,8 @@ public class UserController {
      * 模拟用户 登录
      */
     @PostMapping("/login")
-    public BaseApiResult login(@RequestBody User user) {
-        Query query = new Query(Criteria.where("username").is(user.getUsername()));
-        User dbUser = template.findOne(query, User.class, COLLECTION_NAME);
-        if (dbUser != null && dbUser.getUsername().equals(user.getUsername())
-                && dbUser.getPassword().equals(user.getPassword())) {
-            String token = JwtUtil.createToken(dbUser);
-            Map<String, String> result = new HashMap<>(8);
-            result.put("token", token);
-            result.put("userId", dbUser.getId());
-            result.put("avatar", dbUser.getAvatar());
-            result.put("username", dbUser.getUsername());
-            result.put("type", dbUser.getPermissionEnum() != null ? dbUser.getPermissionEnum().toString() : null);
-            return BaseApiResult.success(result);
-        }
-        return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+    public BaseApiResult login(@RequestBody RegistryUserDTO user) {
+        return userService.login(user);
     }
 
     /**

@@ -61,3 +61,4 @@ all-docs:
     adminReview: ${AD_ADMIN_REVIEW:true}
     prohibitedWord: ${AD_PROHIBITED_WORD:true}
     userRegistry: ${AD_USER_REGISTRY:false}
+    initialUsername: ${AD_INITIAL_USERNAME:admin123}
