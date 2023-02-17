@@ -11,7 +11,6 @@ import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserDTO;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
-import com.jiaruiblog.util.JwtUtil;
 import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -100,6 +99,7 @@ public class UserController {
         update.set("mail", user.getMail());
         update.set("male", user.getMale());
         update.set("description", user.getDescription());
+        update.set("updateDate", new Date());
         UpdateResult updateResult1 = template.updateFirst(query, update, User.class, COLLECTION_NAME);
         if (updateResult1.getMatchedCount() > 0) {
             return BaseApiResult.success("更新成功！");

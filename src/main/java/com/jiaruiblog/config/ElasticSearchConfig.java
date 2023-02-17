@@ -31,4 +31,6 @@ public class ElasticSearchConfig {
                 )
         );
     }
+    // 在业务启动的时候进行初始化
+    // https://blog.csdn.net/wdz985721191/article/details/122866091
 }

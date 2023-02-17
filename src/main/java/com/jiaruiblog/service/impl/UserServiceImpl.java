@@ -6,6 +6,7 @@ import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
+import com.jiaruiblog.entity.vo.UserVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -84,6 +85,7 @@ public class UserServiceImpl implements IUserService {
             user.setUsername(userDTO.getUsername());
             user.setPassword(userDTO.getEncodePassword());
             user.setCreateDate(new Date());
+            user.setUpdateDate(new Date());
             mongoTemplate.save(user, COLLECTION_NAME);
             return BaseApiResult.success(MessageConstant.SUCCESS);
         }
@@ -94,6 +96,9 @@ public class UserServiceImpl implements IUserService {
     @Override
     public BaseApiResult getUserList(BasePageDTO page) {
         long count = mongoTemplate.count(new Query(), User.class, COLLECTION_NAME);
+        if (count < 1) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+        }
         int pageNum = Optional.ofNullable(page.getPage()).orElse(1);
         int pageSize = Optional.ofNullable(page.getRows()).orElse(10);
         // 如果传入的参数超过了总数，返回第一页
@@ -104,13 +109,12 @@ public class UserServiceImpl implements IUserService {
         query.skip((long) (pageNum - 1) * pageSize);
         query.limit(pageSize);
         query.with(Sort.by(Sort.Direction.DESC, "createDate"));
-        List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
+        List<UserVO> users = mongoTemplate.find(query, UserVO.class, COLLECTION_NAME);
         Map<String, Object> result = new HashMap<>();
         result.put("total", count);
         result.put("pageNum", pageNum);
         result.put("pageSize", pageSize);
         result.put("result", users);
-
         return BaseApiResult.success(result);
     }
 
