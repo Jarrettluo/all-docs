@@ -23,7 +23,7 @@ public class CommentServiceImplTest {
         page.setPage(1);
         page.setRows(11);
         String userId = "636f05ef852f7c3263f71d63";
-        String s = JSON.toJSONString(commentService.queryAllComments(page, userId));
+        String s = JSON.toJSONString(commentService.queryAllComments(page, userId, false));
         System.out.println(s);
     }
 
@@ -34,7 +34,7 @@ public class CommentServiceImplTest {
         page.setPage(1);
         page.setRows(11);
         String userId = "636f05ef852f7c3263f71d63";
-        String s = JSON.toJSONString(commentService.queryAllComments(page, userId));
+        String s = JSON.toJSONString(commentService.queryAllComments(page, userId, false));
         System.out.println(s);
     }
 }

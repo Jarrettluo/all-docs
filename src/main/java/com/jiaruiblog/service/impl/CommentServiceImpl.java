@@ -257,10 +257,11 @@ public class CommentServiceImpl implements ICommentService {
                 ,//新字段名称,
 
                 Aggregation.lookup(FileServiceImpl.COLLECTION_NAME, "docId", "_id", "abc"),
+                Aggregation.sort(Sort.Direction.DESC, "createDate"),
                 Aggregation.match(criteria),
                 Aggregation.skip((long) (page.getPage()-1) * page.getRows()),
-                Aggregation.limit(page.getRows()),
-                Aggregation.sort(Sort.Direction.DESC, "createDate")
+                Aggregation.limit(page.getRows())
+
         );
 
         AggregationResults<CommentWithUserDTO> aggregate = template.aggregate(aggregation,
