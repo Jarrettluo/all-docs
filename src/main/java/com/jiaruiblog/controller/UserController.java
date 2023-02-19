@@ -105,8 +105,6 @@ public class UserController {
             return BaseApiResult.success("更新成功！");
         }
         return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-
-
     }
 
     /**

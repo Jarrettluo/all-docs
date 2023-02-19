@@ -1,7 +1,7 @@
 package com.jiaruiblog.service;
 
-import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.task.exception.TaskRunException;
@@ -29,6 +29,9 @@ public interface IFileService {
      * @return
      */
     FileDocument saveFile(String md5, MultipartFile file);
+
+
+    BaseApiResult documentUpload(MultipartFile file, String userId, String username);
 
     /**
      * 保存文件 - js文件流

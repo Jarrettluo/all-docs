@@ -205,6 +205,21 @@ public class FileController {
         return model;
     }
 
+    /**
+     * 表单上传文件
+     * 当数据库中存在该md5值时，可以实现秒传功能
+     *
+     * @param file 文件
+     * @return
+     */
+    @PostMapping("auth/upload")
+    public BaseApiResult documentUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request){
+        String username = (String) request.getAttribute("username");
+        String userId = (String) request.getAttribute("id");
+        return fileService.documentUpload(file, userId, username);
+    }
+
+
 
     /**
      * 删除附件

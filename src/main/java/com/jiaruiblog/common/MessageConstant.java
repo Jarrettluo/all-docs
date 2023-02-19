@@ -22,6 +22,8 @@ public class MessageConstant {
     public static final String PARAMS_TYPE_ERROR = "类型转换错误";
     public static final String DATA_HAS_EXIST = "数据已经存在！";
     public static final String DATA_IS_NULL = "数据为空！";
+    public static final String FORMAT_ERROR = "格式不支持！";
+    public static final String DATA_DUPLICATE = "已经重复！";
 
     public static final String OPERATE_FAILED = "操作失败！";
     public static final String SUCCESS = "SUCCESS";

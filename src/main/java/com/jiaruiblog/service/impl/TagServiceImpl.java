@@ -359,6 +359,13 @@ public class TagServiceImpl implements TagService {
         return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 保存文章的时候保存标签和文档的关系
+     * @Date 12:15 2023/2/19
+     * @Param [fileDocument]
+     * @return void
+     **/
     @Async
     public void saveTagWhenSaveDoc(FileDocument fileDocument) {
         if(fileDocument == null || !StringUtils.hasText(fileDocument.getSuffix())) {

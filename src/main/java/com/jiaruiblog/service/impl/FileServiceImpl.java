@@ -2,18 +2,20 @@ package com.jiaruiblog.service.impl;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.crypto.SecureUtil;
 import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
+import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.PdfUtil;
@@ -93,6 +95,9 @@ public class FileServiceImpl implements IFileService {
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private TaskExecuteService taskExecuteService;
 
 
     /**
@@ -205,6 +210,94 @@ public class FileServiceImpl implements IFileService {
         tagServiceImpl.saveTagWhenSaveDoc(fileDocument);
 
         return fileDocument;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 使用用户id 和 用户名进行保存，此接口必须使用auth进行验证
+     * @Date 12:18 2023/2/19
+     * @Param [file, userId, username]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Override
+    public BaseApiResult documentUpload(MultipartFile file, String userId, String username) {
+        List<String> availableSuffixList = com.google.common.collect.Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");
+        try {
+            if (file != null && !file.isEmpty()) {
+                String originFileName = file.getOriginalFilename();
+                if (!StringUtils.hasText(originFileName)) {
+                    return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.FORMAT_ERROR);
+                }
+                //获取文件后缀名
+                String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
+                if (!availableSuffixList.contains(suffix)) {
+                    return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.FORMAT_ERROR);
+                }
+                String fileMd5 = SecureUtil.md5(file.getInputStream());
+
+                //已存在该文件，则拒绝保存
+                FileDocument fileDocumentInDb = getByMd5(fileMd5);
+                if (fileDocumentInDb != null) {
+                    return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_DUPLICATE);
+                }
+                FileDocument fileDocument = saveToDb(fileMd5, file, userId, username);
+
+                switch (suffix) {
+                    case "pdf":
+                    case "docx":
+                    case "pptx":
+                    case "xlsx":
+                        taskExecuteService.execute(fileDocument);
+                        break;
+                    default:
+                        break;
+                }
+                return BaseApiResult.success(fileDocument.getId());
+            } else {
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 存入数据库及解析索引
+     * @Date 12:12 2023/2/19
+     * @Param [fileMd5, file]
+     * @return java.lang.String
+     **/
+    private FileDocument saveToDb(String md5, MultipartFile file, String userId, String username) {
+        FileDocument fileDocument;
+        String originFilename = file.getOriginalFilename();
+        fileDocument = new FileDocument();
+        fileDocument.setName(originFilename);
+        fileDocument.setSize(file.getSize());
+        fileDocument.setContentType(file.getContentType());
+        fileDocument.setUploadDate(new Date());
+        fileDocument.setMd5(md5);
+        fileDocument.setUserId(userId);
+        fileDocument.setUserName(username);
+
+        if (StringUtils.hasText(originFilename)) {
+            String suffix = originFilename.substring(originFilename.lastIndexOf("."));
+            fileDocument.setSuffix(suffix);
+        }
+
+        try {
+            String gridfsId = uploadFileToGridFs(file.getInputStream(), file.getContentType());
+            fileDocument.setGridfsId(gridfsId);
+            fileDocument = mongoTemplate.save(fileDocument, COLLECTION_NAME);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        // 异步保存数据标签
+        tagServiceImpl.saveTagWhenSaveDoc(fileDocument);
+
+        return fileDocument;
+
     }
 
     /**
