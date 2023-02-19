@@ -4,16 +4,20 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.google.common.collect.Maps;
+import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.task.exception.TaskRunException;
@@ -25,7 +29,7 @@ import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.http.auth.AuthenticationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -43,6 +47,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -70,34 +75,41 @@ public class FileServiceImpl implements IFileService {
     private static final String[] EXCLUDE_FIELD = new String[]{"md5", "content", "contentType", "suffix", "description",
             "gridfsId", "thumbId", "textFileId", "errorMsg"};
 
-    @Autowired
+    @Resource
+    SystemConfig systemConfig;
+
+    @Resource
     private MongoTemplate mongoTemplate;
-    @Autowired
+
+    @Resource
     private GridFsTemplate gridFsTemplate;
 
-    @Autowired
+    @Resource
     private GridFSBucket gridFsBucket;
 
-    @Autowired
+    @Resource
     private CategoryServiceImpl categoryServiceImpl;
 
-    @Autowired
+    @Resource
     private CommentServiceImpl commentServiceImpl;
 
-    @Autowired
+    @Resource
     private CollectServiceImpl collectServiceImpl;
 
-    @Autowired
+    @Resource
     private TagServiceImpl tagServiceImpl;
 
-    @Autowired
+    @Resource
     private ElasticServiceImpl elasticServiceImpl;
 
-    @Autowired
+    @Resource
     private RedisService redisService;
 
-    @Autowired
+    @Resource
     private TaskExecuteService taskExecuteService;
+
+    @Resource
+    private IUserService userService;
 
 
     /**
@@ -213,14 +225,22 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 使用用户id 和 用户名进行保存，此接口必须使用auth进行验证
      * @Date 12:18 2023/2/19
      * @Param [file, userId, username]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public BaseApiResult documentUpload(MultipartFile file, String userId, String username) {
+    public BaseApiResult documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException {
+        User user = userService.queryById(userId);
+        if (user == null) {
+            throw new AuthenticationException();
+        }
+        // 用户非管理员且普通用户禁止
+        if (Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
+            throw new AuthenticationException(MessageConstant.OPERATE_FAILED);
+        }
         List<String> availableSuffixList = com.google.common.collect.Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");
         try {
             if (file != null && !file.isEmpty()) {
@@ -263,11 +283,11 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return java.lang.String
      * @Author luojiarui
      * @Description 存入数据库及解析索引
      * @Date 12:12 2023/2/19
      * @Param [fileMd5, file]
-     * @return java.lang.String
      **/
     private FileDocument saveToDb(String md5, MultipartFile file, String userId, String username) {
         FileDocument fileDocument;
@@ -891,7 +911,7 @@ public class FileServiceImpl implements IFileService {
      * @Param [docId]
      **/
     @Override
-    public List<FileDocument> queryAndRemove(String ...docId) {
+    public List<FileDocument> queryAndRemove(String... docId) {
         if (CollectionUtils.isEmpty(Arrays.asList(docId))) {
             return null;
         }
@@ -900,11 +920,11 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      * @Author luojiarui
      * @Description 修改并返回查询到的文档信息
      * @Date 10:31 2022/12/10
      * @Param [docId]
-     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
     @Override
     public List<FileDocument> queryAndUpdate(String... docId) {
@@ -925,7 +945,7 @@ public class FileServiceImpl implements IFileService {
         query.addCriteria(Criteria.where("reviewing").is(reviewing));
         int pageIndex = pageDTO.getPage();
         int pageSize = pageDTO.getRows();
-        long skip = (long) (pageIndex-1) * pageSize;
+        long skip = (long) (pageIndex - 1) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
         Field field = query.fields();
@@ -940,7 +960,7 @@ public class FileServiceImpl implements IFileService {
         query.addCriteria(Criteria.where("reviewing").is(reviewing));
         Map<String, Object> result = Maps.newHashMap();
         result.put("data", queryFileDocument(pageDTO, reviewing));
-        result.put("total", mongoTemplate.count(query,FileDocument.class, COLLECTION_NAME));
+        result.put("total", mongoTemplate.count(query, FileDocument.class, COLLECTION_NAME));
         return BaseApiResult.success(result);
     }
 }

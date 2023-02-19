@@ -13,6 +13,7 @@ import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.auth.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -213,7 +214,8 @@ public class FileController {
      * @return
      */
     @PostMapping("auth/upload")
-    public BaseApiResult documentUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request){
+    public BaseApiResult documentUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request)
+            throws AuthenticationException {
         String username = (String) request.getAttribute("username");
         String userId = (String) request.getAttribute("id");
         return fileService.documentUpload(file, userId, username);

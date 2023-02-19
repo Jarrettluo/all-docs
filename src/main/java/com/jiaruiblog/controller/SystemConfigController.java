@@ -43,6 +43,7 @@ import static com.jiaruiblog.controller.FileController.extracted;
 public class SystemConfigController {
 
     public static final String STATIC_CENSOR_WORD_TXT = "static" + File.separator + "censorword.txt";
+
     @Resource
     SystemConfig systemConfig;
 
@@ -106,7 +107,7 @@ public class SystemConfigController {
         return BaseApiResult.success();
     }
 
-    private void writeToFile(String textPath, Set<String> strSet) throws IOException{
+    private void writeToFile(String textPath, Set<String> strSet) throws IOException {
         String txt = strSet.stream().limit(10000).collect(Collectors.joining("\n"));
         ClassPathResource classPathResource = new ClassPathResource(textPath);
 //        File inuModel = new File(filePath);
@@ -121,7 +122,7 @@ public class SystemConfigController {
             out.write(txt);
             out.flush();
         } catch (IOException e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
     }
 

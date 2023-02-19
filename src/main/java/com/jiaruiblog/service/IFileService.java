@@ -6,6 +6,7 @@ import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.BaseApiResult;
+import org.apache.http.auth.AuthenticationException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
@@ -31,7 +32,7 @@ public interface IFileService {
     FileDocument saveFile(String md5, MultipartFile file);
 
 
-    BaseApiResult documentUpload(MultipartFile file, String userId, String username);
+    BaseApiResult documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
 
     /**
      * 保存文件 - js文件流
