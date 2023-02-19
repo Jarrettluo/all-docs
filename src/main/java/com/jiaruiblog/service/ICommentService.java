@@ -64,6 +64,6 @@ public interface ICommentService {
      * @Param [pageDTO, userId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult queryAllComments(BasePageDTO pageDTO, String userId);
+    BaseApiResult queryAllComments(BasePageDTO pageDTO, String userId, Boolean isAdmin);
 
 }

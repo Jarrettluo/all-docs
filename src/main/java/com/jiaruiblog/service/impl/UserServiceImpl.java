@@ -78,6 +78,8 @@ public class UserServiceImpl implements IUserService {
         String initUsername = systemConfig.getInitialUsername();
         if (initUsername.equals(userDTO.getUsername())) {
             user.setPermissionEnum(PermissionEnum.ADMIN);
+        } else {
+            user.setPermissionEnum(PermissionEnum.USER);
         }
         Query query = new Query().addCriteria(Criteria.where(USERNAME).is(userDTO.getUsername()));
         List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);

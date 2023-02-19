@@ -239,7 +239,7 @@ public class FileServiceImpl implements IFileService {
         }
         // 用户非管理员且普通用户禁止
         if (Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
-            throw new AuthenticationException(MessageConstant.OPERATE_FAILED);
+            throw new AuthenticationException();
         }
         List<String> availableSuffixList = com.google.common.collect.Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");
         try {

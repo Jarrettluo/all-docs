@@ -108,11 +108,25 @@ public class CommentController {
      * @Date 14:38 2022/12/10
      * @Param [pageDTO, request]
      **/
-    @Permission({PermissionEnum.ADMIN, PermissionEnum.USER})
     @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")
-    @PostMapping(value = "/auth/listALL")
-    public BaseApiResult queryAllComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
+    @PostMapping(value = "/auth/myComments")
+    public BaseApiResult queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        return commentService.queryAllComments(pageDTO, userId);
+        return commentService.queryAllComments(pageDTO, userId, false);
+    }
+
+    /**
+     * @return com.jiaruiblog.util.BaseApiResult
+     * @Author luojiarui
+     * @Description 查询全部的用户评论列表
+     * TODO 这里有漏洞，管理员也是有自己的个人空间的！
+     * @Date 14:38 2022/12/10
+     * @Param [pageDTO, request]
+     **/
+    @Permission(PermissionEnum.ADMIN)
+    @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")
+    @PostMapping(value = "/auth/allComments")
+    public BaseApiResult queryAllComments(@RequestBody BasePageDTO pageDTO) {
+        return commentService.queryAllComments(pageDTO, null, true);
     }
 }

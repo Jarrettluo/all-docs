@@ -3,6 +3,7 @@ package com.jiaruiblog.config;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.auth.AuthenticationException;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 
 /**
@@ -93,6 +95,17 @@ public class CommonExceptionHandler {
         return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
     }
 
+
+    /**
+     * @Author luojiarui
+     * @Description 管理员设置的禁止操作的错误
+     * @Date 21:18 2022/12/9
+     * @Param [e]
+     **/
+    @ExceptionHandler(AuthenticationException.class)
+    public void dealAuthenticationException(HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    }
 
 }
 

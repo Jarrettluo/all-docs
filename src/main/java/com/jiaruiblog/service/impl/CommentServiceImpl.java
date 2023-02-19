@@ -229,9 +229,13 @@ public class CommentServiceImpl implements ICommentService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public BaseApiResult queryAllComments(BasePageDTO page, String userId) {
+    public BaseApiResult queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
 
         log.info("查询的参数是：{}, {}", page, userId);
+        Criteria criteria = new Criteria();
+        if (!isAdmin) {
+            criteria = Criteria.where("userId").is(userId);
+        }
 
         // 通过query进行查找
         Aggregation countAggregation = Aggregation.newAggregation(
@@ -241,7 +245,7 @@ public class CommentServiceImpl implements ICommentService {
                         .as("id")
                         .and(ConvertOperators.Convert.convertValue("$docId").to("objectId")).as("docId")
                 ,//新字段名称,
-                Aggregation.match(Criteria.where("userId").is(userId))
+                Aggregation.match(criteria)
         );
 
         Aggregation aggregation = Aggregation.newAggregation(
@@ -253,7 +257,7 @@ public class CommentServiceImpl implements ICommentService {
                 ,//新字段名称,
 
                 Aggregation.lookup(FileServiceImpl.COLLECTION_NAME, "docId", "_id", "abc"),
-                Aggregation.match(Criteria.where("userId").is(userId)),
+                Aggregation.match(criteria),
                 Aggregation.skip((long) (page.getPage()-1) * page.getRows()),
                 Aggregation.limit(page.getRows()),
                 Aggregation.sort(Sort.Direction.DESC, "createDate")

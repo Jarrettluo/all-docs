@@ -60,7 +60,6 @@ public class JwtFilter implements Filter
         }
         // Except OPTIONS, other request should be checked by JWT
         else {
-
             if (token == null) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
