@@ -724,11 +724,15 @@ public class FileServiceImpl implements IFileService {
         if (fileDocument == null) {
             return documentVO;
         }
+        String username = fileDocument.getUserName();
+        if (!StringUtils.hasText(username)) {
+            username = "未知用户";
+        }
         documentVO.setId(fileDocument.getId());
         documentVO.setSize(fileDocument.getSize());
         documentVO.setTitle(fileDocument.getName());
         documentVO.setDescription(fileDocument.getDescription());
-        documentVO.setUserName("admin");
+        documentVO.setUserName(username);
         documentVO.setCreateTime(fileDocument.getUploadDate());
         documentVO.setThumbId(fileDocument.getThumbId());
         // 根据文档的id进行查询 评论， 收藏，分类， 标签

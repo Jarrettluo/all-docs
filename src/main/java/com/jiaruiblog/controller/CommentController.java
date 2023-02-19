@@ -104,7 +104,6 @@ public class CommentController {
      * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 查询全部的用户评论列表
-     * TODO 这里有漏洞，管理员也是有自己的个人空间的！
      * @Date 14:38 2022/12/10
      * @Param [pageDTO, request]
      **/
@@ -119,7 +118,6 @@ public class CommentController {
      * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 查询全部的用户评论列表
-     * TODO 这里有漏洞，管理员也是有自己的个人空间的！
      * @Date 14:38 2022/12/10
      * @Param [pageDTO, request]
      **/

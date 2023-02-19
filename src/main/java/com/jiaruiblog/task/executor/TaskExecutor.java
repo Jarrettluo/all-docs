@@ -36,7 +36,7 @@ public abstract class TaskExecutor {
         try {
             uploadFileToEs(docInputStream, fileDocument, taskData);
         } catch (Exception e) {
-            throw new TaskRunException("建立索引的时候出错：", e);
+            throw new TaskRunException("建立索引的时候出错!", e);
         }
 
         docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));

@@ -64,9 +64,9 @@ public class MainTask implements RunnableTask {
     @Override
     public void failed(Throwable throwable) {
         log.error("解析文件报错啦", throwable);
-        String errorMsg = throwable.getLocalizedMessage();
+        String errorMsg = throwable.getMessage();
         taskData.getFileDocument().setDocState(DocStateEnum.FAIL);
-        taskData.getFileDocument().setErrorMsg(errorMsg);
+        taskData.getFileDocument().setErrorMsg(errorMsg +" " + throwable.getCause());
         updateTaskStatus();
     }
 
