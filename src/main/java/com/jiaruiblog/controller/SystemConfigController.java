@@ -47,6 +47,7 @@ public class SystemConfigController {
     @Resource
     SystemConfig systemConfig;
 
+    @Permission(PermissionEnum.ADMIN)
     @GetMapping("getConfig")
     @ApiOperation(value = "管理员获取系统设置", notes = "只有管理员有权限修改系统的设置信息")
     public BaseApiResult getSystemConfig() {

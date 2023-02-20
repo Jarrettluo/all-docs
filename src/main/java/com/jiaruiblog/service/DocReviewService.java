@@ -63,5 +63,5 @@ public interface DocReviewService {
      * @Param [page, user]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult queryReviewLog(BasePageDTO page, String userId);
+    BaseApiResult queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin);
 }

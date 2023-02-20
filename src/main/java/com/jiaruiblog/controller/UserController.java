@@ -163,6 +163,7 @@ public class UserController {
      * @Date 21:21 2023/1/10
      * @Param []
      **/
+    @Permission(PermissionEnum.ADMIN)
     @GetMapping("/allUsers")
     public BaseApiResult allUsers(@ModelAttribute("pageDTO") BasePageDTO pageDTO) {
         return userService.getUserList(pageDTO);

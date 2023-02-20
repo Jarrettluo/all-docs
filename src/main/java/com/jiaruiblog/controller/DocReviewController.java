@@ -62,7 +62,7 @@ public class DocReviewController {
      *
      * @return BaseApiResult
      */
-    @Permission({PermissionEnum.USER})
+    @Permission({PermissionEnum.ADMIN, PermissionEnum.USER})
     @ApiOperation(value = "修改已读", notes = "修改已读功能只有普通用户有此权限")
     @PutMapping("userRead")
     public BaseApiResult updateDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
@@ -121,12 +121,27 @@ public class DocReviewController {
      * @Date 21:15 2022/11/30
      * @Param [pageParams, request]
      **/
-    @Permission({PermissionEnum.USER, PermissionEnum.ADMIN})
+    @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
     @GetMapping("queryReviewResultList")
     public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
                                                HttpServletRequest request) {
-        return docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"));
+        return docReviewService.queryReviewLog(pageParams, null, true);
+    }
+
+    /**
+     * @return com.jiaruiblog.util.BaseApiResult
+     * @Author luojiarui
+     * @Description 管理员和普通用户分别查询
+     * @Date 21:15 2022/11/30
+     * @Param [pageParams, request]
+     **/
+    @Permission({PermissionEnum.USER, PermissionEnum.ADMIN})
+    @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
+    @GetMapping("queryMyReviewResultList")
+    public BaseApiResult queryMyReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
+                                               HttpServletRequest request) {
+        return docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"), false);
     }
 
 
