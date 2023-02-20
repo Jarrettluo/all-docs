@@ -18,7 +18,13 @@ public @interface Permission {
     /**
      * 权限数组，来自PermissionEnum
      */
-    @AliasFor("name")
+    @AliasFor("value")
     PermissionEnum[] name() default {};
+
+    /**
+     * 权限数组，来自PermissionEnum
+     */
+    @AliasFor("name")
+    PermissionEnum[] value() default {};
 
 }

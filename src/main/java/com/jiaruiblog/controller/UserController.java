@@ -5,10 +5,7 @@ import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.User;
-import com.jiaruiblog.entity.dto.BasePageDTO;
-import com.jiaruiblog.entity.dto.BatchIdDTO;
-import com.jiaruiblog.entity.dto.RegistryUserDTO;
-import com.jiaruiblog.entity.dto.UserDTO;
+import com.jiaruiblog.entity.dto.*;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.UpdateResult;
@@ -167,6 +164,18 @@ public class UserController {
     @GetMapping("/allUsers")
     public BaseApiResult allUsers(@ModelAttribute("pageDTO") BasePageDTO pageDTO) {
         return userService.getUserList(pageDTO);
+    }
+
+
+    @Permission(PermissionEnum.ADMIN)
+    @PutMapping("changeUserRole")
+    public BaseApiResult changeUserRole(@RequestBody UserRoleDTO userRoleDTO, HttpServletRequest request) {
+        String adminUserId = (String) request.getAttribute(REQUEST_USER_ID);
+        // 不能屏蔽自己的账号
+        if (userRoleDTO.getUserId().equals(adminUserId)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        return userService.changeUserRole(userRoleDTO);
     }
 
     /**

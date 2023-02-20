@@ -4,6 +4,7 @@ import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
+import com.jiaruiblog.entity.dto.UserRoleDTO;
 import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +27,8 @@ public interface IUserService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     BaseApiResult getUserList(BasePageDTO pageDTO);
+
+    BaseApiResult changeUserRole(UserRoleDTO userRoleDTO);
 
     /**
      * @Author luojiarui

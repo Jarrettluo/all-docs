@@ -6,6 +6,7 @@ import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
+import com.jiaruiblog.entity.dto.UserRoleDTO;
 import com.jiaruiblog.entity.vo.UserVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
@@ -43,6 +44,8 @@ public class UserServiceImpl implements IUserService {
     private static final String USER_BANNING = "banning";
     public static final String AVATAR = "avatar";
     public static final String USERNAME = "username";
+    public static final String ROLE = "permissionEnum";
+    public static final String UPDATE_TIME = "updateDate";
 
     @Resource
     MongoTemplate mongoTemplate;
@@ -54,21 +57,27 @@ public class UserServiceImpl implements IUserService {
     private SystemConfig systemConfig;
 
     @Override
-    public BaseApiResult login(RegistryUserDTO user) {
-        Query query = new Query(Criteria.where(USERNAME).is(user.getUsername()));
+    public BaseApiResult login(RegistryUserDTO userDTO) {
+        Query query = new Query(Criteria.where(USERNAME)
+                .is(userDTO.getUsername()).and("password").is(userDTO.getEncodePassword()));
         User dbUser = mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
-        if (dbUser != null && dbUser.getUsername().equals(user.getUsername())
-                && dbUser.getPassword().equals(user.getEncodePassword())) {
-            String token = JwtUtil.createToken(dbUser);
-            Map<String, String> result = new HashMap<>(8);
-            result.put("token", token);
-            result.put("userId", dbUser.getId());
-            result.put(AVATAR, dbUser.getAvatar());
-            result.put(USERNAME, dbUser.getUsername());
-            result.put("type", dbUser.getPermissionEnum() != null ? dbUser.getPermissionEnum().toString() : null);
-            return BaseApiResult.success(result);
+        if (dbUser == null) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        // 屏蔽用户禁止访问
+        if (Boolean.TRUE.equals(dbUser.getBanning())) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.USER_HAS_BANNED);
+        }
+
+        String token = JwtUtil.createToken(dbUser);
+        Map<String, String> result = new HashMap<>(8);
+        result.put("token", token);
+        result.put("userId", dbUser.getId());
+        result.put(AVATAR, dbUser.getAvatar());
+        result.put(USERNAME, dbUser.getUsername());
+        result.put("type", dbUser.getPermissionEnum() != null ? dbUser.getPermissionEnum().toString() : null);
+        return BaseApiResult.success(result);
+
     }
 
     @Override
@@ -118,6 +127,21 @@ public class UserServiceImpl implements IUserService {
         result.put("pageSize", pageSize);
         result.put("result", users);
         return BaseApiResult.success(result);
+    }
+
+
+    @Override
+    public BaseApiResult changeUserRole(UserRoleDTO userRoleDTO) {
+        User user = mongoTemplate.findById(userRoleDTO.getUserId(), User.class, COLLECTION_NAME);
+        if (user == null || userRoleDTO.getRole().equals(user.getPermissionEnum())) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        Query query = new Query().addCriteria(Criteria.where("_id").is(user.getId()));
+        Update update = new Update();
+        update.set(ROLE, userRoleDTO.getRole());
+        update.set(UPDATE_TIME, new Date());
+        mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
@@ -201,7 +225,7 @@ public class UserServiceImpl implements IUserService {
         Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
         Update update = new Update();
         update.set("avatarList", avatar);
-        update.set("updateDate", new Date());
+        update.set(UPDATE_TIME, new Date());
         update.set(AVATAR, gridfsId);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
         long matchedCount = updateResult.getMatchedCount();
@@ -265,7 +289,7 @@ public class UserServiceImpl implements IUserService {
         Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
         Update update = new Update();
         update.set(AVATAR, null);
-        update.set("updateDate", new Date());
+        update.set(UPDATE_TIME, new Date());
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }

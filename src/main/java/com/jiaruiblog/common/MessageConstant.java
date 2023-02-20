@@ -27,6 +27,7 @@ public class MessageConstant {
     public static final String REQUEST_METHOD_ERROR = "请求方法不对！";
     public static final String FILE_SIZE_ERROR = "上传的文件超过大小限制!";
 
+    public static final String USER_HAS_BANNED = "该账号已经被屏蔽，请联系管理员！";
 
     public static final String OPERATE_FAILED = "操作失败！";
     public static final String SUCCESS = "SUCCESS";
