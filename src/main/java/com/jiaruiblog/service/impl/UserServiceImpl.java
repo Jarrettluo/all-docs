@@ -71,7 +71,7 @@ public class UserServiceImpl implements IUserService {
             mongoTemplate.save(user, COLLECTION_NAME);
             return;
         }
-        if (systemConfig.getCoverAdmin()) {
+        if (Boolean.TRUE.equals(systemConfig.getCoverAdmin())) {
             Update update = new Update();
             update.set(ROLE, PermissionEnum.ADMIN);
             update.set("password", userDTO.getEncodePassword());
