@@ -31,11 +31,11 @@ public class CommonExceptionHandler {
     public BaseApiResult handle(Exception e) {
         e.printStackTrace();
         if (e instanceof MaxUploadSizeExceededException) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, "上传的文件超过大小限制");
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.FILE_SIZE_ERROR);
         } else if (e instanceof HttpRequestMethodNotSupportedException) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, "请求方法不对！");
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.REQUEST_METHOD_ERROR);
         }else {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, "操作失败");
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
     }
 

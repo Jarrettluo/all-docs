@@ -24,6 +24,9 @@ public class MessageConstant {
     public static final String DATA_IS_NULL = "数据为空！";
     public static final String FORMAT_ERROR = "格式不支持！";
     public static final String DATA_DUPLICATE = "已经重复！";
+    public static final String REQUEST_METHOD_ERROR = "请求方法不对！";
+    public static final String FILE_SIZE_ERROR = "上传的文件超过大小限制!";
+
 
     public static final String OPERATE_FAILED = "操作失败！";
     public static final String SUCCESS = "SUCCESS";

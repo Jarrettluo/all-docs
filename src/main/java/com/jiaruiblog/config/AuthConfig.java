@@ -36,9 +36,9 @@ public class AuthConfig extends WebMvcConfigurationSupport {
     }
 
     /**
-     * 解决swagger 和 拦截器的冲突
+     * 解决swagger UI页面 和 拦截器的冲突
      * https://blog.csdn.net/m0_62943596/article/details/126186521
-     * @param registry
+     * @param registry ResourceHandlerRegistry
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
