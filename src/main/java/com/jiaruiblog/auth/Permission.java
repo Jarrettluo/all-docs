@@ -16,14 +16,9 @@ import java.lang.annotation.*;
 public @interface Permission {
 
     /**
-     * 权限
-     */
-    @AliasFor("value")
-    PermissionEnum[] name() default {};
-
-    /**
-     * 权限
+     * 权限数组，来自PermissionEnum
      */
     @AliasFor("name")
-    PermissionEnum[] value() default {};
+    PermissionEnum[] name() default {};
+
 }

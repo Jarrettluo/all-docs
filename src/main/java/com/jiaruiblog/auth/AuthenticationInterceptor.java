@@ -36,7 +36,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
         // 如果不是映射到方法直接通过
         if (!(handler instanceof HandlerMethod)) {
@@ -100,26 +100,25 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * @return void
      * @Author luojiarui
      * @Description 请求处理之后进行调用，但是在视图被渲染之前（Controller方法调用之后）
      * @Date 20:26 2022/12/7
      * @Param [request, response, handler, modelAndView]
      **/
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+                           ModelAndView modelAndView) {
+        // empty
     }
 
     /**
-     * @return void
      * @Author luojiarui
      * @Description 在整个请求结束之后被调用，也就是在DispatcherServlet 渲染了对应的视图之后执行（主要是用于进行资源清理工作）
      * @Date 20:27 2022/12/7
      * @Param [request, response, handler, ex]
      **/
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        // TODO document why this method is empty
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        // empty
     }
 }

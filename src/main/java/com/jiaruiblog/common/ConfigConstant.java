@@ -13,5 +13,8 @@ public class ConfigConstant {
         throw new IllegalStateException("ConfigConstant class");
     }
 
+    /**
+     * 删除操作的最大数
+     */
     public static final Integer MAX_DELETE_NUM = 100;
 }
