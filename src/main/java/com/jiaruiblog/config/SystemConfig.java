@@ -26,4 +26,9 @@ public class SystemConfig {
 
     private String initialUsername;
 
+    private String initialPassword;
+
+    private Boolean coverAdmin;
+
+
 }

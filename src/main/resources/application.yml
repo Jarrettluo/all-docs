@@ -62,3 +62,5 @@ all-docs:
     prohibitedWord: ${AD_PROHIBITED_WORD:true}
     userRegistry: ${AD_USER_REGISTRY:false}
     initialUsername: ${AD_INITIAL_USERNAME:admin123}
+    initialPassword: ${AD_INITIAL_PASSWORD:admin123}
+    coverAdmin: ${COVER_ADMIN:true}

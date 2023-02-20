@@ -38,9 +38,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements IUserService {
 
     private static final String COLLECTION_NAME = "user";
-
     private static final String OBJECT_ID = "_id";
-
     private static final String USER_BANNING = "banning";
     public static final String AVATAR = "avatar";
     public static final String USERNAME = "username";
@@ -55,6 +53,33 @@ public class UserServiceImpl implements IUserService {
 
     @Resource
     private SystemConfig systemConfig;
+
+    @Override
+    public void initFirstUser() {
+        RegistryUserDTO userDTO = new RegistryUserDTO();
+        userDTO.setUsername(systemConfig.getInitialUsername());
+        userDTO.setPassword(systemConfig.getInitialPassword());
+        Query query = new Query().addCriteria(Criteria.where(USERNAME).is(userDTO.getUsername()));
+        List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
+        if (CollectionUtils.isEmpty(users)) {
+            User user = new User();
+            user.setPermissionEnum(PermissionEnum.ADMIN);
+            user.setUsername(systemConfig.getInitialUsername());
+            user.setPassword(userDTO.getEncodePassword());
+            user.setCreateDate(new Date());
+            user.setUpdateDate(new Date());
+            mongoTemplate.save(user, COLLECTION_NAME);
+            return;
+        }
+        if (systemConfig.getCoverAdmin()) {
+            Update update = new Update();
+            update.set(ROLE, PermissionEnum.ADMIN);
+            update.set("password", userDTO.getEncodePassword());
+            update.set(UPDATE_TIME, new Date());
+            mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
+        }
+
+    }
 
     @Override
     public BaseApiResult login(RegistryUserDTO userDTO) {
@@ -83,13 +108,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public BaseApiResult registry(RegistryUserDTO userDTO) {
         User user = new User();
-        // 自带默认的关键字，如果出现此名称则自动赋予管理员
-        String initUsername = systemConfig.getInitialUsername();
-        if (initUsername.equals(userDTO.getUsername())) {
-            user.setPermissionEnum(PermissionEnum.ADMIN);
-        } else {
-            user.setPermissionEnum(PermissionEnum.USER);
-        }
+        user.setPermissionEnum(PermissionEnum.USER);
         Query query = new Query().addCriteria(Criteria.where(USERNAME).is(userDTO.getUsername()));
         List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
         if (CollectionUtils.isEmpty(users)) {
