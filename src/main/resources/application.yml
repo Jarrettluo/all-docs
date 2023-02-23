@@ -48,6 +48,10 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
+logging:
+  level:
+    root: ${LOGGING_LEVEL:ERROR}
+
 cloud:
   elasticsearch:
     host: ${ES_HOST:localhost}
