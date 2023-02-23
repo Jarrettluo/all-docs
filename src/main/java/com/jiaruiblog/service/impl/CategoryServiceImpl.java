@@ -367,9 +367,9 @@ public class CategoryServiceImpl implements CategoryService {
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
                 Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", "fileId", "xyz"),
                 Aggregation.match(criteria),
+                Aggregation.sort(Sort.Direction.DESC, "uploadDate"),
                 Aggregation.skip(pageNum*pageSize),
-                Aggregation.limit(pageSize),
-                Aggregation.sort(Sort.Direction.DESC, "uploadDate")
+                Aggregation.limit(pageSize)
                 );
 
         int count = mongoTemplate.aggregate(countAggregation, FileServiceImpl.COLLECTION_NAME, FileDocumentDTO.class)

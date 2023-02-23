@@ -100,7 +100,7 @@ https://github.com/Jarrettluo/all-documents-vue.git
 https://github.com/Jarrettluo/document-sharing-site.git
 </a>
 
-选择MongdoDB作为主要的数据库，存储文档和文件。
+选择MongoDB作为主要的数据库，存储文档和文件。
 
 后端技术：SpringBoot + MongoDB + ES
 
