@@ -35,7 +35,6 @@ public class OcrUtil {
         File imgDir = new File("/Users/molly/IdeaProjects/document-sharing-site/document-sharing-site/ocr.png");
         if(imgDir.exists()){
             long startTime = System.currentTimeMillis();
-            System.out.println(startTime);
             BufferedImage bufferedImage = ImageIO.read(imgDir);
             String ocrResult = instance.doOCR(bufferedImage);
 

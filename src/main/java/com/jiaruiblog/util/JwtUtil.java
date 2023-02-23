@@ -74,8 +74,6 @@ public class JwtUtil {
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
             jwt = verifier.verify(token);
         } catch (Exception e) {
-            logger.error(e.getMessage());
-            logger.error("token解码异常");
             //解码异常则抛出异常
             return Maps.newHashMap();
         }

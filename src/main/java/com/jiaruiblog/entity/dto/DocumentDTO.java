@@ -37,4 +37,5 @@ public class DocumentDTO {
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private String tagId;
 
+    private String userId;
 }

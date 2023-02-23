@@ -55,10 +55,7 @@ public class RedisServiceImpl implements RedisService {
      */
     @Override
     public int addSearchHistoryByUserId(String userid, String searchKey) {
-        String searchHistoryKey = RedisKeyUtils.getSearchHistoryKey(userid);
-        if (StringUtils.isEmpty(searchHistoryKey)) {
-            return 1;
-        }
+        String searchHistoryKey = userid;
         boolean b = redisSearchTemplate.hasKey(searchHistoryKey);
         if (b) {
             Object hk = redisSearchTemplate.opsForHash().get(searchHistoryKey, searchKey);
@@ -93,13 +90,15 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public List<String> getSearchHistoryByUserId(String userid) {
         List<String> stringList = Lists.newArrayList();
-        String searchHistoryKey = RedisKeyUtils.getSearchHistoryKey(userid);
-        if (StringUtils.isEmpty(searchHistoryKey)) {
-            return Lists.newArrayList();
-        }
+//        String searchHistoryKey = RedisKeyUtils.getSearchHistoryKey(userid);
+        String searchHistoryKey = userid;
+//        if (StringUtils.isEmpty(searchHistoryKey)) {
+//            return Lists.newArrayList();
+//        }
         boolean b = redisSearchTemplate.hasKey(searchHistoryKey);
         if(b){
-            Cursor<Map.Entry<Object, Object>> cursor = redisSearchTemplate.opsForHash().scan(searchHistoryKey, ScanOptions.NONE);
+            Cursor<Map.Entry<Object, Object>> cursor = redisSearchTemplate.opsForHash()
+                    .scan(searchHistoryKey, ScanOptions.NONE);
             while (cursor.hasNext()) {
                 Map.Entry<Object, Object> map = cursor.next();
                 String key = map.getKey().toString();

@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.service.ElasticService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.*;
 
 /**
@@ -32,6 +34,7 @@ import java.util.*;
  * @Date 2022/7/12 10:54 下午
  * @Version 1.0
  **/
+@Slf4j
 @Service
 public class ElasticServiceImpl implements ElasticService {
 
@@ -103,7 +106,13 @@ public class ElasticServiceImpl implements ElasticService {
         //把刚才设置的值导入进去
         srb.highlighter(highlightBuilder);
         searchRequest.source(srb);
-        SearchResponse res = client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse res;
+        try {
+            res = client.search(searchRequest, RequestOptions.DEFAULT);
+        } catch (ConnectException e) {
+            log.error("连接es失败！", e.getCause());
+            res = null;
+        }
 
         if (res == null || res.getHits() == null) {
             return Lists.newArrayList();

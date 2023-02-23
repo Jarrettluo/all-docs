@@ -188,16 +188,16 @@ public class DocReviewServiceImpl implements DocReviewService {
     @Override
     public BaseApiResult queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin) {
 
-        long count = mongoTemplate.count(new Query(), DocReview.class, DOC_REVIEW_COLLECTION);
+        // 根据不同的user进行区分，如果不是管理员，则必须输入用户id
+        Query query = new Query();
+        if (!isAdmin && userId != null) {
+            query.addCriteria(Criteria.where(USER_ID).is(userId));
+        }
+        long count = mongoTemplate.count(query, DocReview.class, DOC_REVIEW_COLLECTION);
         if (count < 1) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
         }
 
-        // 根据不同的user进行区分
-        Query query = new Query();
-        if (!isAdmin) {
-            query.addCriteria(Criteria.where(USER_ID).is(userId));
-        }
         query.with(Sort.by(Sort.Direction.DESC, "createDate"));
         query.skip((long) (page.getPage()-1) * page.getRows());
         query.limit(page.getRows());

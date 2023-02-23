@@ -22,7 +22,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -77,11 +76,10 @@ public class StatisticsController {
      * @Param []
      **/
     @GetMapping("getSearchResult")
-    public BaseApiResult getSearchResult(HttpServletRequest request) {
-        String userId = (String) request.getAttribute("id");
+    public BaseApiResult getSearchResult(@RequestHeader("id") String userId) {
         List<String> userSearchList = Lists.newArrayList();
         if (StringUtils.hasText(userId)) {
-            userSearchList = redisService.getSearchHistoryByUserId("");
+            userSearchList = redisService.getSearchHistoryByUserId(userId);
         }
         List<String> hotSearchList = redisService.getHotList(null, RedisServiceImpl.SEARCH_KEY);
         Map<String, List<String>> result = Maps.newHashMap();

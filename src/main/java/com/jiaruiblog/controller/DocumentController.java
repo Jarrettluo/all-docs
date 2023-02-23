@@ -51,7 +51,9 @@ public class DocumentController {
 
     @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
     @PostMapping(value = "/list")
-    public BaseApiResult list(@RequestBody DocumentDTO documentDTO) throws IOException {
+    public BaseApiResult list(@RequestBody DocumentDTO documentDTO)
+            throws IOException {
+        String userId = documentDTO.getUserId();
         if (StringUtils.hasText(documentDTO.getFilterWord()) &&
                 documentDTO.getType() == FilterTypeEnum.FILTER) {
             String filterWord = documentDTO.getFilterWord();
@@ -60,9 +62,14 @@ public class DocumentController {
             int n = filter.checkSensitiveWord(filterWord, 0, 1);
             //存在非法字符
             if (n > 0) {
-                log.info("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
+                log.error("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
+            } else {
+                redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
+                if (StringUtils.hasText(userId)) {
+                    System.out.println(userId);
+                    redisService.addSearchHistoryByUserId(userId, filterWord);
+                }
             }
-            redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
         }
         return iFileService.list(documentDTO);
     }
