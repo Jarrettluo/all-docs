@@ -144,6 +144,7 @@ public class FileServiceImpl implements IFileService {
         Update update = new Update();
         update.set("textFileId", fileDocument.getTextFileId());
         update.set("thumbId", fileDocument.getThumbId());
+        update.set("previewFileId", fileDocument.getPreviewFileId());
         update.set("description", fileDocument.getDescription());
         mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
 
@@ -745,6 +746,7 @@ public class FileServiceImpl implements IFileService {
         documentVO.setDocState(fileDocument.getDocState());
         documentVO.setErrorMsg(fileDocument.getErrorMsg());
         documentVO.setTxtId(fileDocument.getTextFileId());
+        documentVO.setPreviewId(fileDocument.getPreviewFileId());
 
         return documentVO;
     }

@@ -18,6 +18,8 @@ public class TaskData {
 
     String thumbFilePath;
 
+    String previewFilePath;
+
     DocType docType;
 
 

@@ -76,6 +76,8 @@ public class FileDocument {
      **/
     private String textFileId;
 
+    private String previewFileId;
+
     /**
      * 缩略图
      **/

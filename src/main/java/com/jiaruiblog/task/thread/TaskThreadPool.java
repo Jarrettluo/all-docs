@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
 /**
  * @Author Jarrett Luo
@@ -21,7 +19,7 @@ public class TaskThreadPool {
 
     private final ListeningExecutorService listeningExecutorService;
 
-    private static final TaskThreadPool INSTANCE = new TaskThreadPool(3, "Task_Thread_%d");
+    private static final TaskThreadPool INSTANCE = new TaskThreadPool(2, "Task_Thread_%d");
 
     private List<MainTask> mainTaskList;
 
@@ -31,7 +29,16 @@ public class TaskThreadPool {
                 .setDaemon(true)
                 .setNameFormat(threadNameFormat)
                 .build();
-        threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadsNum, threadFactory);
+//        buildthreadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadsNum, threadFactory);
+        threadPoolExecutor = new ThreadPoolExecutor(threadsNum,
+                threadsNum,
+                60L,
+                TimeUnit.MICROSECONDS,
+                new LinkedBlockingQueue<>(512),
+                threadFactory,
+                new ThreadPoolExecutor.AbortPolicy());
+        // 让线程释放，释放资源
+        threadPoolExecutor.allowCoreThreadTimeOut(true);
         listeningExecutorService = MoreExecutors.listeningDecorator(this.threadPoolExecutor);
         mainTaskList = new LinkedList<>();
     }

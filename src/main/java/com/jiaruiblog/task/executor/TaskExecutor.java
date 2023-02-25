@@ -32,7 +32,7 @@ public abstract class TaskExecutor {
         FileDocument fileDocument = taskData.getFileDocument();
         InputStream docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
 
-        // 将文本索引到es中
+        // 第二步 将文本索引到es中
         try {
             uploadFileToEs(docInputStream, fileDocument, taskData);
         } catch (Exception e) {
@@ -46,6 +46,10 @@ public abstract class TaskExecutor {
         } catch (Exception e) {
             throw new TaskRunException("建立缩略图的时候出错啦！", e);
         }
+        // 第三步 制作预览文件
+        docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
+        makePreviewFile(docInputStream, taskData);
+
     }
 
     /**
@@ -148,6 +152,8 @@ public abstract class TaskExecutor {
      */
     protected abstract void makeThumb(InputStream is, String picPath) throws IOException;
 
+    protected abstract void makePreviewFile(InputStream is, TaskData taskData);
+
     /**
      * @Author luojiarui
      * @Description // 上传整备好的文本文件进行上传到es中
@@ -195,5 +201,33 @@ public abstract class TaskExecutor {
             log.error("删除文件路径{} ==> 失败信息{}", picPath, e);
         }
 
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 某个文件中存储到dfs系统中
+     * @Date 21:40 2023/2/25
+     * @Param [filePath, fileFormatEnum]
+     * @return java.lang.String
+     **/
+    protected String saveFileToDFS(String filePath, FileFormatEnum fileFormatEnum) {
+        String objId = null;
+        try (FileInputStream thumbIns = new FileInputStream(filePath)){
+            // 存储到GridFS系统中
+            IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+            objId = fileService.uploadFileToGridFs(
+                    fileFormatEnum.getFilePrefix(),
+                    thumbIns,
+                    fileFormatEnum.getContentType());
+        } catch (IOException e) {
+            throw new TaskRunException("存储缩略图文件报错了，请核对", e);
+        }
+
+        try {
+            Files.delete(Paths.get(filePath));
+        } catch (IOException e) {
+            log.error("删除文件路径{} ==> 失败信息{}", filePath, e);
+        }
+        return objId;
     }
 }

@@ -94,13 +94,14 @@ public class MainTask implements RunnableTask {
         // 删除es中的数据，删除thumb数据，删除存储的txt文本文件
         try {
             String txtFilePath = taskData.getTxtFilePath();
-            if (StringUtils.hasText(txtFilePath) && new File(txtFilePath).exists()) {
-                Files.delete(Paths.get(txtFilePath));
-            }
             String picFilePath = taskData.getThumbFilePath();
-            if (StringUtils.hasText(picFilePath) && new File(picFilePath).exists()) {
-                Files.delete(Paths.get(picFilePath));
-            }
+            String previewFilePath = taskData.getPreviewFilePath();
+
+            // 清除过程中失败的过程文件
+            removeFileIfExist(txtFilePath);
+            removeFileIfExist(picFilePath);
+            removeFileIfExist(previewFilePath);
+
         } catch (IOException e) {
             log.error("删除文件路径{} ==> 失败信息{}", taskData.getTxtFilePath(), e);
         }
@@ -108,8 +109,14 @@ public class MainTask implements RunnableTask {
         // 删除相关的文件
         removeExistGridFs();
 
-        // 删除es中的数据
+        // TODO 删除es中的数据
 
+    }
+
+    private void removeFileIfExist(String picFilePath) throws IOException {
+        if (StringUtils.hasText(picFilePath) && new File(picFilePath).exists()) {
+            Files.delete(Paths.get(picFilePath));
+        }
     }
 
 
@@ -133,9 +140,10 @@ public class MainTask implements RunnableTask {
         FileDocument fileDocument = taskData.getFileDocument();
         String textFileId = fileDocument.getTextFileId();
         String thumbFileId = fileDocument.getThumbId();
+        String previewFileId = fileDocument.getPreviewFileId();
 
         IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
-        fileService.deleteGridFs(textFileId, thumbFileId);
+        fileService.deleteGridFs(textFileId, thumbFileId, previewFileId);
     }
 
 }

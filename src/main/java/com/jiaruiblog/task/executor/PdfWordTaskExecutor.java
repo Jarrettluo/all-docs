@@ -1,5 +1,6 @@
 package com.jiaruiblog.task.executor;
 
+import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.util.PdfUtil;
 
 import java.io.IOException;
@@ -21,5 +22,10 @@ public class PdfWordTaskExecutor extends TaskExecutor {
     @Override
     protected void makeThumb(InputStream is, String picPath) {
         PdfUtil.pdfThumbnail(is, picPath);
+    }
+
+    @Override
+    protected void makePreviewFile(InputStream is, TaskData taskData) {
+
     }
 }
