@@ -35,7 +35,7 @@ public class PptxExecutor extends DocxExecutor{
             throw new TaskRunException("转换预览文件报错", e);
         }
         // 解析出来的预览文件存储到文件系统中
-        String objId = saveFileToDFS(taskData.getPreviewFilePath(), FileFormatEnum.PDF);
+        String objId = saveFileToDFS(taskData.getPreviewFilePath(), FileFormatEnum.PDF, "preview-");
         FileDocument fileDocument = taskData.getFileDocument();
         fileDocument.setPreviewFileId(objId);
 

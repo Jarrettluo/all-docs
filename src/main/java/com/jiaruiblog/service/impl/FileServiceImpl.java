@@ -407,6 +407,44 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * 查询附件
+     *
+     * @param id 文件id
+     * @return
+     */
+    @Override
+    public Optional<FileDocument> getPreviewById(String id) {
+        FileDocument fileDocument = new FileDocument();
+        if (fileDocument != null) {
+            Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(id));
+            GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+
+            fileDocument.setSize(fsFile.getLength());
+            fileDocument.setName(fsFile.getFilename());
+
+            if (fsFile == null || fsFile.getObjectId() == null) {
+                return Optional.empty();
+            }
+
+            // 开启文件下载
+            GridFSDownloadOptions gridFSDownloadOptions = new GridFSDownloadOptions();
+
+            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId())) {
+                if (in.getGridFSFile().getLength() > 0) {
+                    GridFsResource resource = new GridFsResource(fsFile, in);
+                    fileDocument.setContent(IoUtil.readBytes(resource.getInputStream()));
+                    return Optional.of(fileDocument);
+                } else {
+                    return Optional.empty();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
      * 根据md5获取文件对象
      *
      * @param md5 String
@@ -746,7 +784,7 @@ public class FileServiceImpl implements IFileService {
         documentVO.setDocState(fileDocument.getDocState());
         documentVO.setErrorMsg(fileDocument.getErrorMsg());
         documentVO.setTxtId(fileDocument.getTextFileId());
-        documentVO.setPreviewId(fileDocument.getPreviewFileId());
+        documentVO.setPreviewFileId(fileDocument.getPreviewFileId());
 
         return documentVO;
     }

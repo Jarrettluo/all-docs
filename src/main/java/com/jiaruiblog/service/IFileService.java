@@ -88,6 +88,14 @@ public interface IFileService {
     Optional<FileDocument> getById(String id);
 
     /**
+     * 根据id获取文件
+     *
+     * @param id
+     * @return
+     */
+    Optional<FileDocument> getPreviewById(String id);
+
+    /**
      * 根据md5获取文件对象
      *
      * @param md5

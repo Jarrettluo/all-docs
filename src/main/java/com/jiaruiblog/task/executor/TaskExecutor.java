@@ -117,7 +117,8 @@ public abstract class TaskExecutor {
      **/
     private void handleDescription(String textFilePath, FileDocument fileDocument) {
         try{
-            List<String> stringList = FileUtils.readLines(new File(textFilePath), StandardCharsets.UTF_8);
+            List<String> stringList = FileUtils.readLines(new File(textFilePath),
+                    StandardCharsets.UTF_8);
             String str = null;
             if (!stringList.isEmpty()) {
                 str = stringList.get(0);
@@ -171,14 +172,14 @@ public abstract class TaskExecutor {
      * @Date 17:48 2022/11/13
      * @Param [inputStream, fileDocument]
      **/
-    public void updateFileThumb(InputStream inputStream, FileDocument fileDocument, TaskData taskData) throws IOException {
+    public void updateFileThumb(InputStream inputStream, FileDocument fileDocument,
+                                TaskData taskData) throws IOException {
 
         String picPath = "./" + IdUtil.simpleUUID() + ".png";
         taskData.setThumbFilePath(picPath);
 
         // 将pdf输入流转换为图片并临时保存下来
         makeThumb(inputStream, picPath);
-
         if ( !new File(picPath).exists()) {
             return;
         }
@@ -210,13 +211,15 @@ public abstract class TaskExecutor {
      * @Param [filePath, fileFormatEnum]
      * @return java.lang.String
      **/
-    protected String saveFileToDFS(String filePath, FileFormatEnum fileFormatEnum) {
+    protected String saveFileToDFS(String filePath,
+                                   FileFormatEnum fileFormatEnum,
+                                   String prefix) {
         String objId = null;
         try (FileInputStream thumbIns = new FileInputStream(filePath)){
             // 存储到GridFS系统中
             IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
             objId = fileService.uploadFileToGridFs(
-                    fileFormatEnum.getFilePrefix(),
+                    prefix,
                     thumbIns,
                     fileFormatEnum.getContentType());
         } catch (IOException e) {

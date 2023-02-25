@@ -84,6 +84,28 @@ public class FileController {
     }
 
     /**
+     * 在线显示文件
+     *
+     * @param id 文件id
+     * @return
+     */
+    @GetMapping("/view2/{id}")
+    public ResponseEntity<Object> previewFileOnline(@PathVariable String id) throws UnsupportedEncodingException {
+        Optional<FileDocument> file = fileService.getPreviewById(id);
+        if (file.isPresent()) {
+            return ResponseEntity.ok()
+                    // 这里需要进行中文编码
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8") + ".pdf")
+                    .header(HttpHeaders.CONTENT_TYPE, FileContentTypeUtils.getContentType("pdf"))
+                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "").header("Connection", "close")
+                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
+                    .body(file.get().getContent());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
+        }
+    }
+
+    /**
      * 下载附件
      *
      * @param id
