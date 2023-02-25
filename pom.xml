@@ -166,6 +166,12 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.4.3</version>
+        </dependency>
+
     </dependencies>
 
     <build>
