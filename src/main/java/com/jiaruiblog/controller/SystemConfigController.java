@@ -11,6 +11,7 @@ import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.util.ObjectUtils;
@@ -114,7 +115,13 @@ public class SystemConfigController {
         String txt = strSet.stream().limit(10000).collect(Collectors.joining("\n"));
         ClassPathResource classPathResource = new ClassPathResource(STATIC_CENSOR_WORD_TXT);
         String replacedTxt = txt.replace(" ", "");
-        FileOutputStream fileOutputStream = new FileOutputStream(classPathResource.getFile());
+
+        String filePath= this.getClass().getClassLoader().getResource(STATIC_CENSOR_WORD_TXT).getFile();
+        File file= new File(filePath);
+        // 通过流文件复制到file中
+        FileUtils.copyToFile(classPathResource.getInputStream(), file);
+
+        FileOutputStream fileOutputStream = new FileOutputStream(filePath);
         try (OutputStreamWriter out = new OutputStreamWriter(fileOutputStream, "UTF-8")) {
             out.write(replacedTxt);
             out.flush();

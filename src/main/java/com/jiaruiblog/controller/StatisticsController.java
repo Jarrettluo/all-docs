@@ -5,6 +5,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
+import com.jiaruiblog.entity.dto.SearchKeyDTO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
@@ -86,6 +87,12 @@ public class StatisticsController {
         result.put("userSearch", userSearchList);
         result.put("hotSearch", hotSearchList);
         return BaseApiResult.success(result);
+    }
+
+    @PutMapping(value = "removeKey")
+    public BaseApiResult removeKey(@RequestBody SearchKeyDTO searchKeyDTO) {
+        redisService.delSearchHistoryByUserId(searchKeyDTO.getUserId(), searchKeyDTO.getSearchWord());
+        return BaseApiResult.success();
     }
 
     /**

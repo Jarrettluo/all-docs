@@ -66,7 +66,6 @@ public class DocumentController {
             } else {
                 redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
                 if (StringUtils.hasText(userId)) {
-                    System.out.println(userId);
                     redisService.addSearchHistoryByUserId(userId, filterWord);
                 }
             }
