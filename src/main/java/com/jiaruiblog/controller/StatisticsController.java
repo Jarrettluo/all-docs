@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -77,11 +78,16 @@ public class StatisticsController {
      * @Param []
      **/
     @GetMapping("getSearchResult")
-    public BaseApiResult getSearchResult(@RequestHeader("id") String userId) {
+    public BaseApiResult getSearchResult(@RequestHeader HttpHeaders headers) {
         List<String> userSearchList = Lists.newArrayList();
-        if (StringUtils.hasText(userId)) {
-            userSearchList = redisService.getSearchHistoryByUserId(userId);
+        List<String> stringList = headers.get("id");
+        if (!CollectionUtils.isEmpty(stringList)) {
+            String userId = stringList.get(0);
+            if (StringUtils.hasText(userId)) {
+                userSearchList = redisService.getSearchHistoryByUserId(userId);
+            }
         }
+
         List<String> hotSearchList = redisService.getHotList(null, RedisServiceImpl.SEARCH_KEY);
         Map<String, List<String>> result = Maps.newHashMap();
         result.put("userSearch", userSearchList);
