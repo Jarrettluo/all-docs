@@ -181,9 +181,13 @@ public class FileController {
      * 表单上传文件
      * 当数据库中存在该md5值时，可以实现秒传功能
      *
+     * 由于增加了用户登录后上传的验证，因此该方法废弃
+     * 最新的上传方式使用：documentUpload
+     *
      * @param file 文件
      * @return
      */
+    @Deprecated
     @PostMapping("/upload")
     public ResponseModel formUpload(@RequestParam("file") MultipartFile file) throws IOException {
         List<String> availableSuffixList = Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");

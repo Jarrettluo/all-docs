@@ -242,7 +242,8 @@ public class FileServiceImpl implements IFileService {
         if (Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
             throw new AuthenticationException();
         }
-        List<String> availableSuffixList = com.google.common.collect.Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");
+        List<String> availableSuffixList = com.google.common.collect.Lists
+                .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
         try {
             if (file != null && !file.isEmpty()) {
                 String originFileName = file.getOriginalFilename();
@@ -263,11 +264,15 @@ public class FileServiceImpl implements IFileService {
                 }
                 FileDocument fileDocument = saveToDb(fileMd5, file, userId, username);
 
+                // 目前支持这一类数据进行预览
                 switch (suffix) {
                     case "pdf":
                     case "docx":
                     case "pptx":
                     case "xlsx":
+                    case "html":
+                    case "md":
+                    case "txt":
                         taskExecuteService.execute(fileDocument);
                         break;
                     default:
@@ -418,6 +423,10 @@ public class FileServiceImpl implements IFileService {
         if (fileDocument != null) {
             Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(id));
             GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+
+            if (fsFile == null) {
+                return Optional.empty();
+            }
 
             fileDocument.setSize(fsFile.getLength());
             fileDocument.setName(fsFile.getFilename());

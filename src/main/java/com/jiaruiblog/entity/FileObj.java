@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
 
 /**
@@ -57,10 +58,28 @@ public class FileObj {
         this.content = Base64.getEncoder().encodeToString(bytes);
     }
 
+    public void readFile(InputStream inputStream) {
+        byte[] bytes = getContent(inputStream);
+        //将文件内容转化为base64编码
+        this.content = Base64.getEncoder().encodeToString(bytes);
+    }
+
     private byte[] getContent(File file) {
         byte[] bytesArray = new byte[(int) file.length()];
         try (FileInputStream fileInputStream = new FileInputStream(file)){
             if (fileInputStream.read(bytesArray) < 0) {
+                return bytesArray;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bytesArray;
+    }
+
+    private byte[] getContent(InputStream inputStream) {
+        byte[] bytesArray = new byte[]{};
+        try {
+            if (inputStream.read(bytesArray) < 0) {
                 return bytesArray;
             }
         } catch (IOException e) {

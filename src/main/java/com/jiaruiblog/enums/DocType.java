@@ -13,6 +13,10 @@ public enum DocType {
     DOCX,
     PPTX,
     XLSX,
+    // txt类的文档
+    HTML,
+    MD,
+    TXT,
     // unknown
     UNKNOWN;
 
@@ -26,6 +30,12 @@ public enum DocType {
                 return PPTX;
             case ".xlsx":
                 return XLSX;
+            case ".md":
+                return MD;
+            case ".html":
+                return HTML;
+            case ".txt":
+                return TXT;
             default:
                 return UNKNOWN;
         }

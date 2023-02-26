@@ -44,6 +44,11 @@ public class TaskExecutorFactory {
             case PPTX:
                 taskExecutor = new PptxExecutor();
                 break;
+            case MD:
+            case HTML:
+            case TXT:
+                taskExecutor = new TxtExecutor();
+                break;
             default:
                 break;
         }

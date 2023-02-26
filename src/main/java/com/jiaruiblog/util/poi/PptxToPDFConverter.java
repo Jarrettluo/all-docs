@@ -36,7 +36,7 @@ public class PptxToPDFConverter extends Converter {
     @Override
     public void convert() throws Exception {
         Dimension pgSize = processSlides();
-        double zoom = 2; // magnify it by 2 as typical slides are low res
+        double zoom = 1; // magnify it by 2 as typical slides are low res
         AffineTransform at = new AffineTransform();
         at.setToScale(zoom, zoom);
         Document document = new Document();
