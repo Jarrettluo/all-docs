@@ -127,7 +127,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 
 加入微信群，一起玩😄
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/WechatIGroup.jpeg" alt="imGroup" width="200">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/WechatGroup.jpeg" alt="imGroup" width="200">
 
 
 1. `Fork` 该项目
