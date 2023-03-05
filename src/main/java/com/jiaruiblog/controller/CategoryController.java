@@ -28,7 +28,7 @@ import java.util.Date;
  * @Date 2022/6/4 3:10 下午
  * @Version 1.0
  **/
-@Api(tags = "文档分类模块")
+@Api(tags = "文档分类和标签模块")
 @RestController
 @Slf4j
 @RequestMapping("/category")
@@ -44,7 +44,7 @@ public class CategoryController {
     @Resource
     TagService tagService;
 
-    @ApiOperation(value = "3.2 新增单个分类", notes = "新增单个分类")
+    @ApiOperation(value = "新增单个分类，可选分类或者标签", notes = "新增单个分类")
     @PostMapping(value = "/insert")
     public BaseApiResult insert(@RequestBody CategoryDTO categoryDTO) {
         // 插入进来的参数必需经过清洗

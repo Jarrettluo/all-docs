@@ -2,7 +2,7 @@ version: '2.1'
 services:
   ad_mongodb:
     image: mongo
-    container_name: ad_mongodb
+    container_name: ad_mongo
     restart: always
     ports:
       - ${AD_MONGO_PORT}:27017
@@ -22,31 +22,33 @@ services:
     image: elasticsearch:7.9.3
     container_name: ad_elasticsearch
     restart: always
+    environment:
+      - "cluster.name=elasticsearch" #设置集群名称为elasticsearch
+      - "discovery.type=single-node" #以单一节点模式启动
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m" #设置使用jvm内存大小
     volumes:
       - ./data/elasticsearch/data:/usr/share/elasticsearch/data:rw
-      - ./data/elasticsearch/conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./data/elasticsearch/conf/jvm.options:/usr/share/elasticsearch/config/jvm.options
       - ./data/elasticsearch/logs:/user/share/elasticsearch/logs:rw
       - ./esplugins:/usr/share/elasticsearch/plugins
     ports:
       - ${AD_ES_PORT}:9200
-    environment:
-      - discovery.type=single-node
 
   kibana:
     image: kibana:7.17.1
-    ports:
-      - "5601:5601"
-    container_name: "kibana"
-    #restart: always
+    container_name: ad_kibana
+    links:
+      - ad_elasticsearch:elasticsearch #可以用es这个域名访问elasticsearch服务
     depends_on:
-      - ad_elasticsearch
-    volumes:
-      - ./data/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ad_elasticsearch #kibana在elasticsearch启动之后再启动
+    environment:
+      - "elasticsearch.hosts=http://elasticsearch:9200" #设置访问elasticsearch的地址
+    ports:
+      - 5601:5601
 
   ad_redis:
     image: redis:latest
     container_name: ad_redis
+    # 使用配置文件进行启动，可以选择性设置密码requirepass
     command: redis-server /etc/redis/redis.conf
     ports:
       - ${AD_REDIS_PORT}:6379
@@ -70,6 +72,7 @@ services:
       - ES_PORT=${AD_ES_PORT}
       - ES_USER=${AD_ES_USER}
       - ES_PWD=${AD_ES_PWD}
+      - 'TZ="Asia/Shanghai"'
     ports:
       - ${AD_SERVER_PORT}:8082
     healthcheck:
@@ -84,6 +87,8 @@ services:
   ad_web:
     image: jarrettluo/all-docs-web:${AD_SERVER_IMAGE_TAG}
     container_name: ad_web
+    external_links:
+      - ad_server:ad-server
     ports:
       - ${AD_WEB_PORT}:80
     depends_on:
