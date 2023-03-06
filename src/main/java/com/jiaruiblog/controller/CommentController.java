@@ -12,6 +12,8 @@ import com.jiaruiblog.service.ICommentService;
 import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -40,6 +42,9 @@ public class CommentController {
     ICommentService commentService;
 
     @ApiOperation(value = "2.6 查询评论列表", notes = "更新评论")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "请求成功",response = String.class)
+    })
     @GetMapping("queryDocReviewList")
     public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
         return BaseApiResult.success();
