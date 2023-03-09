@@ -111,7 +111,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 - [全文档在Windows环境下部署](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/depoly_win_zh.md)
 - [全文档在Linux环境下部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_linux_zh.md)
 - [全文档使用Docker部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_zh.md)
-- [全文档使用Docker-Compose部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_compose_zh.md)
+- [全文档使用Docker-Compose部署--最新发布](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_compose_zh.md)
 
 <!-- ROADMAP -->
 ## 路线图
@@ -127,7 +127,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 
 加入微信群，一起玩😄
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/WechatGroup.jpeg" alt="imGroup" width="200">
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/Wechat.jpeg" alt="imGroup" width="200">
 
 
 1. `Fork` 该项目
