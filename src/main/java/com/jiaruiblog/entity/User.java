@@ -39,7 +39,8 @@ public class User {
 
     private String mail;
 
-    private Boolean male = false;
+    // 默认为空，没有性别
+    private Boolean male;
 
     private String description;
 

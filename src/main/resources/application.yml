@@ -68,3 +68,5 @@ all-docs:
     initialUsername: ${AD_INITIAL_USERNAME:admin123}
     initialPassword: ${AD_INITIAL_PASSWORD:admin123}
     coverAdmin: ${COVER_ADMIN:true}
+  file-path:
+    sensitiveFile: sensitive.txt

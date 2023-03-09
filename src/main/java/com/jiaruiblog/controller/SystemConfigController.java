@@ -11,7 +11,7 @@ import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.util.ObjectUtils;
@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -46,6 +46,13 @@ public class SystemConfigController {
 
     @Resource
     SystemConfig systemConfig;
+
+    @Value("${all-docs.file-path.sensitiveFile}")
+    private String userDefinePath;
+
+    public String getUserDefinePath() {
+        return userDefinePath;
+    }
 
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("getConfig")
@@ -73,11 +80,17 @@ public class SystemConfigController {
     @GetMapping(value = "getProhibitedWord", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public void downloadTxt(HttpServletResponse response) {
+        File file = new File(userDefinePath);
         try {
-            ClassPathResource classPathResource = new ClassPathResource(STATIC_CENSOR_WORD_TXT);
-            InputStream inputStream = classPathResource.getInputStream();
-            byte[] buffer = IoUtil.readBytes(inputStream);
-            extracted(response, buffer);
+            if (file.exists()) {
+                byte[] buffer = IoUtil.readBytes(new FileInputStream(file));
+                extracted(response, buffer);
+            } else {
+                ClassPathResource classPathResource = new ClassPathResource(STATIC_CENSOR_WORD_TXT);
+                InputStream inputStream = classPathResource.getInputStream();
+                byte[] buffer = IoUtil.readBytes(inputStream);
+                extracted(response, buffer);
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -96,10 +109,9 @@ public class SystemConfigController {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
 
-
         try {
-            String fileCode = codeString(file.getInputStream());
-            Set<String> strings = SensitiveWordInit.getStrings(file.getInputStream(), Charset.forName(fileCode));
+//            String fileCode = codeString(file.getInputStream());
+            Set<String> strings = SensitiveWordInit.getStrings(file.getInputStream(), StandardCharsets.UTF_8);
             writeToFile(strings);
             SensitiveFilter filter = SensitiveFilter.getInstance();
             filter.refresh();
@@ -113,16 +125,10 @@ public class SystemConfigController {
 
     private void writeToFile(Set<String> strSet) throws IOException {
         String txt = strSet.stream().limit(10000).collect(Collectors.joining("\n"));
-        ClassPathResource classPathResource = new ClassPathResource(STATIC_CENSOR_WORD_TXT);
         String replacedTxt = txt.replace(" ", "");
 
-        String filePath= this.getClass().getClassLoader().getResource(STATIC_CENSOR_WORD_TXT).getFile();
-        File file= new File(filePath);
-        // 通过流文件复制到file中
-        FileUtils.copyToFile(classPathResource.getInputStream(), file);
-
-        FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-        try (OutputStreamWriter out = new OutputStreamWriter(fileOutputStream, "UTF-8")) {
+        FileOutputStream fileOutputStream = new FileOutputStream(userDefinePath);
+        try (OutputStreamWriter out = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8)) {
             out.write(replacedTxt);
             out.flush();
         } catch (IOException e) {

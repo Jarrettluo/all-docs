@@ -1,33 +1,43 @@
 package com.jiaruiblog.intercepter;
 
 import com.google.common.collect.Maps;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.CollectionUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @ClassName SensitiveWordInit
  * @Description 过滤不雅词汇，加上@Configuration在项目启动的时候加载一下; 屏蔽敏感词初始化
+ * https://blog.csdn.net/weixin_39610631/article/details/113039391
  * @Author luojiarui
  * @Date 2022/8/14 16:09
  * @Version 1.0
  **/
+@Data
 @Configuration
+@ConfigurationProperties(prefix = "all-docs.file-path")
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SensitiveWordInit {
+
 
     /**
      * 字符编码
      */
     private static final Charset ENCODING = StandardCharsets.UTF_8;
+
+    // @Bean > @Value > @Configuration 加载顺序
+
+    private String sensitiveFile="sensitive.txt";
 
     /**
      * 初始化敏感字库
@@ -51,10 +61,15 @@ public class SensitiveWordInit {
      * @return Set
      * @throws IOException ioexception
      */
-    public static Set<String> readSensitiveWordFile() throws IOException {
-        ClassPathResource classPathResource = new ClassPathResource("static/censorword.txt");
-        InputStream inputStream = classPathResource.getInputStream();
-        return getStrings(inputStream, ENCODING);
+    public Set<String> readSensitiveWordFile() throws IOException {
+        File file = new File(sensitiveFile);
+        if (file.exists()) {
+            return getStrings(new FileInputStream(file), ENCODING);
+        } else  {
+            ClassPathResource classPathResource = new ClassPathResource("static/censorword.txt");
+            InputStream inputStream = classPathResource.getInputStream();
+            return getStrings(inputStream, ENCODING);
+        }
     }
 
     public static Set<String> getStrings(InputStream inputStream, Charset encode) {
