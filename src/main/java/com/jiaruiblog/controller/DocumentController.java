@@ -31,7 +31,6 @@ import java.util.List;
  * @Date 2022/6/19 5:18 下午
  * @Version 1.0
  **/
-
 @Api(tags = "文档模块")
 @RestController
 @Slf4j
@@ -83,7 +82,7 @@ public class DocumentController {
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO, HttpServletRequest request) {
         FileDocument fileDocument = iFileService.queryById(removeObjectDTO.getId());
-        if (fileDocument == null){
+        if (fileDocument == null) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         String username = (String) request.getAttribute("username");
@@ -100,7 +99,7 @@ public class DocumentController {
     @GetMapping(value = "/listWithCategory")
     public BaseApiResult listWithCategory(@ModelAttribute("documentDTO") DocumentDTO documentDTO) {
         FilterTypeEnum filterType = documentDTO.getType();
-        if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG) ) {
+        if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG)) {
             return iFileService.listWithCategory(documentDTO);
         } else {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);

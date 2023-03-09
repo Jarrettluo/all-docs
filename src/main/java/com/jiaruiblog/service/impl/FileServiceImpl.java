@@ -181,7 +181,8 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public void deleteGridFs(String... id) {
-        Query deleteQuery = new Query().addCriteria(Criteria.where(FILE_NAME).in(id));
+        List<String> ids = Arrays.asList(id);
+        Query deleteQuery = new Query().addCriteria(Criteria.where(FILE_NAME).in(ids));
         gridFsTemplate.delete(deleteQuery);
     }
 
@@ -265,6 +266,13 @@ public class FileServiceImpl implements IFileService {
                 FileDocument fileDocument = saveToDb(fileMd5, file, userId, username);
 
                 // 目前支持这一类数据进行预览
+                // 进行全文的制作，索引，文本入库等
+                if (Boolean.TRUE.equals(systemConfig.getAdminReview())) {
+                    return BaseApiResult.success(fileDocument.getId());
+                } else {
+                    // 如果已经关闭了管理员审核功能，则设置审核状态为关闭
+                    fileDocument.setReviewing(false);
+                }
                 switch (suffix) {
                     case "pdf":
                     case "docx":
@@ -470,7 +478,8 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"))
+                .addCriteria(Criteria.where("reviewing").is(false));
         long skip = (long) (pageIndex) * pageSize;
         query.skip(skip);
         query.limit(pageSize);
@@ -493,7 +502,7 @@ public class FileServiceImpl implements IFileService {
         }
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         // 增加过滤条件
-        query.addCriteria(Criteria.where("_id").in(ids));
+        query.addCriteria(Criteria.where("_id").in(ids)).addCriteria(Criteria.where("reviewing").is(false));
         // 设置起始页和每页查询条数
         Pageable pageable = PageRequest.of(pageIndex, pageSize);
         query.with(pageable);
@@ -965,10 +974,11 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public List<FileDocument> queryAndRemove(String... docId) {
-        if (CollectionUtils.isEmpty(Arrays.asList(docId))) {
-            return null;
+        List<String> docIds = Arrays.asList(docId);
+        if (CollectionUtils.isEmpty(docIds)) {
+            return Collections.emptyList();
         }
-        Query query = new Query(Criteria.where("_id").in(docId));
+        Query query = new Query(Criteria.where("_id").in(docIds));
         return mongoTemplate.findAllAndRemove(query, FileDocument.class, COLLECTION_NAME);
     }
 
@@ -981,10 +991,11 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public List<FileDocument> queryAndUpdate(String... docId) {
-        if (CollectionUtils.isEmpty(Arrays.asList(docId))) {
+        List<String> docIds = Arrays.asList(docId);
+        if (CollectionUtils.isEmpty(docIds)) {
             return Collections.emptyList();
         }
-        Query query = new Query(Criteria.where("_id").in(docId));
+        Query query = new Query(Criteria.where("_id").in(docIds));
         Update update = new Update();
         update.set("reviewing", false);
         mongoTemplate.updateMulti(query, update, COLLECTION_NAME);

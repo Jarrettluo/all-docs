@@ -9,6 +9,7 @@ import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.result.DeleteResult;
@@ -52,6 +53,9 @@ public class DocReviewServiceImpl implements DocReviewService {
 
     @Resource
     private UserServiceImpl userServiceImpl;
+
+    @Resource
+    private TaskExecuteService taskExecuteService;
 
     @Override
     public BaseApiResult userRead(List<String> ids, String userId) {
@@ -144,6 +148,7 @@ public class DocReviewServiceImpl implements DocReviewService {
         }
         List<DocReview> docReviews = Lists.newArrayList();
         for (FileDocument fileDocument : fileDocumentList) {
+            updateDocTxt(fileDocument);
             docReviews.add(docReviewInstance(fileDocument, null, true));
         }
         // 可以进行批量操作，相对效率较save更高
@@ -152,6 +157,32 @@ public class DocReviewServiceImpl implements DocReviewService {
             return BaseApiResult.success();
         } catch (DuplicateKeyException e) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE,MessageConstant.OPERATE_FAILED);
+        }
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 管理员审核通过以后，对文档进行文本提取等工作
+     * @Date 22:51 2023/3/9
+     * @Param [fileDocument]
+     * @return void
+     **/
+    private void updateDocTxt(FileDocument fileDocument) {
+        String originFileName = fileDocument.getName();
+        //获取文件后缀名
+        String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
+        switch (suffix) {
+            case "pdf":
+            case "docx":
+            case "pptx":
+            case "xlsx":
+            case "html":
+            case "md":
+            case "txt":
+                taskExecuteService.execute(fileDocument);
+                break;
+            default:
+                break;
         }
     }
 
