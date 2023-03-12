@@ -47,7 +47,7 @@ public class SystemConfigController {
     @Resource
     SystemConfig systemConfig;
 
-    @Value("${all-docs.file-path.sensitiveFile}")
+    @Value("${all-docs.file-path.sensitive-file}")
     private String userDefinePath;
 
     public String getUserDefinePath() {
@@ -110,7 +110,6 @@ public class SystemConfigController {
         }
 
         try {
-//            String fileCode = codeString(file.getInputStream());
             Set<String> strings = SensitiveWordInit.getStrings(file.getInputStream(), StandardCharsets.UTF_8);
             writeToFile(strings);
             SensitiveFilter filter = SensitiveFilter.getInstance();
@@ -138,14 +137,15 @@ public class SystemConfigController {
 
     /**
      * 判断文件的编码格式
+     *
      * @param inputStream :file
      * @return 文件编码格式
-     * @throws Exception
+     * @throws IOException IO异常
      */
-    public static String codeString(InputStream inputStream) throws IOException{
+    public static String codeString(InputStream inputStream) throws IOException {
         BufferedInputStream bin = new BufferedInputStream(inputStream);
         int p = (bin.read() << 8) + bin.read();
-        String code = null;
+        String code;
 
         switch (p) {
             case 0xefbb:

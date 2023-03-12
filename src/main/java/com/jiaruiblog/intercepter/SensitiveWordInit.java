@@ -1,12 +1,15 @@
 package com.jiaruiblog.intercepter;
 
 import com.google.common.collect.Maps;
+import com.jiaruiblog.util.property.PropertiesUtil;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -25,10 +28,16 @@ import java.util.Set;
  **/
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "all-docs.file-path")
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SensitiveWordInit {
 
+    @Resource
+    private Environment env;
+
+    @PostConstruct
+    public void setProperties() {
+        PropertiesUtil.setEnvironment(env);
+    }
 
     /**
      * 字符编码
@@ -36,8 +45,9 @@ public class SensitiveWordInit {
     private static final Charset ENCODING = StandardCharsets.UTF_8;
 
     // @Bean > @Value > @Configuration 加载顺序
-
-    private String sensitiveFile="sensitive.txt";
+    // 使用环境Environment读取配置的数据
+//    private String sensitiveFile="sensitive.txt";
+//    private String sensitiveFile=env.getProperty("all-docs.file-path.sensitive-file");
 
     /**
      * 初始化敏感字库
@@ -62,6 +72,7 @@ public class SensitiveWordInit {
      * @throws IOException ioexception
      */
     public Set<String> readSensitiveWordFile() throws IOException {
+        String sensitiveFile=PropertiesUtil.getProperty("all-docs.file-path.sensitive-file");
         File file = new File(sensitiveFile);
         if (file.exists()) {
             return getStrings(new FileInputStream(file), ENCODING);
