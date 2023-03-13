@@ -41,28 +41,28 @@ public class CommentController {
     @Autowired
     ICommentService commentService;
 
-    @ApiOperation(value = "2.6 查询评论列表", notes = "更新评论")
+    @ApiOperation(value = "查询评论列表", notes = "更新评论")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "请求成功",response = String.class)
+            @ApiResponse(code = 200, message = "请求成功", response = String.class)
     })
     @GetMapping("queryDocReviewList")
     public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
         return BaseApiResult.success();
     }
 
-    @ApiOperation(value = "2.5 新增单个评论", notes = "新增单个评论")
+    @ApiOperation(value = "新增单个评论", notes = "新增单个评论")
     @PostMapping(value = "/auth/insert")
     public BaseApiResult insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
         return commentService.insert(getComment(commentDTO, request));
     }
 
-    @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
+    @ApiOperation(value = "更新评论", notes = "更新评论")
     @PostMapping(value = "/auth/update")
     public BaseApiResult update(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
         return commentService.update(getComment(commentDTO, request));
     }
 
-    @ApiOperation(value = "2.7 根据id移除某个评论", notes = "根据id移除某个评论")
+    @ApiOperation(value = "根据id移除某个评论", notes = "根据id移除某个评论")
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody Comment comment, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
@@ -72,7 +72,7 @@ public class CommentController {
         return commentService.remove(comment, userId);
     }
 
-    @ApiOperation(value = "2.7 根据id列表移除批量评论", notes = "根据id移除批量评论")
+    @ApiOperation(value = "根据id列表移除批量评论", notes = "根据id移除批量评论")
     @DeleteMapping(value = "/auth/removeBatch")
     public BaseApiResult removeBatch(@RequestBody BatchIdDTO batchIdDTO, HttpServletRequest request) {
         List<String> commentIdList = batchIdDTO.getIds();
@@ -82,7 +82,7 @@ public class CommentController {
         return commentService.removeBatch(commentIdList);
     }
 
-    @ApiOperation(value = "2.8 根据文档id查询相关评论", notes = "根据id查询某个评论")
+    @ApiOperation(value = "根据文档id查询相关评论", notes = "根据id查询某个评论")
     @PostMapping(value = "/list")
     public BaseApiResult queryById(@RequestBody CommentListDTO comment) {
         return commentService.queryById(comment);

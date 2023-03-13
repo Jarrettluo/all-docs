@@ -1,6 +1,7 @@
 package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ import java.util.List;
  * @Date 2022/12/8 22:30
  * @Version 1.0
  **/
+@ApiModel("批量请求基础对象")
 @Data
 public class BatchIdDTO {
 

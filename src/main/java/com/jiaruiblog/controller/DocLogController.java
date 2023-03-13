@@ -6,6 +6,7 @@ import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.util.BaseApiResult;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ import java.util.List;
  * @Date 2022/12/10 11:10
  * @Version 1.0
  **/
+@Api(tags = "文档日志模块")
 @Slf4j
 @CrossOrigin
 @RestController

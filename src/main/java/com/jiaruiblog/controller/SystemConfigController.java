@@ -8,6 +8,7 @@ import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.intercepter.SensitiveWordInit;
 import com.jiaruiblog.util.BaseApiResult;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
@@ -36,6 +37,7 @@ import static com.jiaruiblog.controller.FileController.extracted;
  * @Date 2022/12/10 11:12
  * @Version 1.0
  **/
+@Api(tags = "系统设置模块")
 @Slf4j
 @CrossOrigin
 @RestController

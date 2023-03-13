@@ -9,6 +9,7 @@ import com.jiaruiblog.entity.dto.RefuseDTO;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.util.BaseApiResult;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import javax.validation.Valid;
  * @Date 2022/11/25 15:56
  * @Version 1.0
  */
+@Api(tags = "文档评审模块")
 @Slf4j
 @CrossOrigin
 @RestController
@@ -149,7 +151,7 @@ public class DocReviewController {
      * 普通用户删除，管理员删除，删除评审日志
      * @return BaseApiResult
      */
-    @ApiOperation(value = "2.6 更新评论", notes = "更新评论")
+    @ApiOperation(value = "删除评审日志", notes = "管理员和普通用户都可以删除评审结果")
     @DeleteMapping("removeDocReview")
     public BaseApiResult removeDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
         return docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
