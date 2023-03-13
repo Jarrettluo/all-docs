@@ -12,7 +12,7 @@ import java.security.MessageDigest;
 
 /**
  * @ClassName RegistryUserDTO
- * @Description TODO
+ * @Description 用户注册实体类
  * @Author luojiarui
  * @Date 2023/2/14 22:12
  * @Version 1.0

@@ -2,7 +2,7 @@ package com.jiaruiblog.entity.data;
 
 /**
  * @ClassName Event
- * @Description TODO
+ * @Description 用户触发的事件
  * @Author luojiarui
  * @Date 2023/2/2 22:24
  * @Version 1.0

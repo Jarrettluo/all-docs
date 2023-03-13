@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @ClassName SystemConfig
- * @Description TODO
+ * @Description 全文档系统的设置，由管理员进行配置
  * @Author luojiarui
  * @Date 2022/11/29 23:11
  * @Version 1.0

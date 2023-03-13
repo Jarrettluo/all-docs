@@ -10,7 +10,7 @@ import java.io.InputStream;
 
 /**
  * @ClassName TxtExecutor
- * @Description TODO
+ * @Description 直接读取文本的执行器
  * @Author luojiarui
  * @Date 2023/2/26 11:22
  * @Version 1.0
@@ -19,17 +19,17 @@ public class TxtExecutor extends TaskExecutor{
 
     @Override
     protected void readText(InputStream is, String textFilePath) throws IOException {
-
+        // no action
     }
 
     @Override
     protected void makeThumb(InputStream is, String picPath) throws IOException {
-
+        // no action
     }
 
     @Override
     protected void makePreviewFile(InputStream is, TaskData taskData) {
-
+        // no action
     }
 
     @Override

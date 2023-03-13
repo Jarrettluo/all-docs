@@ -29,7 +29,6 @@ public class TaskThreadPool {
                 .setDaemon(true)
                 .setNameFormat(threadNameFormat)
                 .build();
-//        buildthreadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadsNum, threadFactory);
         threadPoolExecutor = new ThreadPoolExecutor(threadsNum,
                 threadsNum,
                 60L,

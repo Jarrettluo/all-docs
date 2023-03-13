@@ -59,8 +59,8 @@ public class DocReviewServiceImpl implements DocReviewService {
 
     @Override
     public BaseApiResult userRead(List<String> ids, String userId) {
-        // 只能读自己的 文档评审意见
-        Query query = new Query(Criteria.where("_id").in(ids)); //.and(USER_ID).is(userId));
+        // 只能读自己的 文档评审意见//.and(USER_ID).is(userId));
+        Query query = new Query(Criteria.where("_id").in(ids));
         Update update = new Update();
         // 修改为已读状态
         update.set("readState", true);

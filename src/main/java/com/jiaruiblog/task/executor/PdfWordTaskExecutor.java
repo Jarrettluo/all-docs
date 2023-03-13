@@ -26,6 +26,6 @@ public class PdfWordTaskExecutor extends TaskExecutor {
 
     @Override
     protected void makePreviewFile(InputStream is, TaskData taskData) {
-
+        // no action
     }
 }

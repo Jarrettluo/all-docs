@@ -350,11 +350,11 @@ public class CategoryServiceImpl implements CategoryService {
 
         Aggregation countAggregation = Aggregation.newAggregation(
                 // 选择某些字段
-                Aggregation.project("id", "name", "uploadDate", "thumbId")
+                Aggregation.project("id", "name", UPDATE_DATE, "thumbId")
                         .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                         .as("id"),//新字段名称,
-                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
-                Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", "fileId", "xyz"),
+                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", FILE_ID, "abc"),
+                Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", FILE_ID, "xyz"),
                 Aggregation.match(criteria)
         );
 
@@ -364,8 +364,8 @@ public class CategoryServiceImpl implements CategoryService {
                 Aggregation.project("id", "name", "uploadDate", "thumbId")
                         .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                 .as("id"),//新字段名称,
-                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "fileId", "abc"),
-                Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", "fileId", "xyz"),
+                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", FILE_ID, "abc"),
+                Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", FILE_ID, "xyz"),
                 Aggregation.match(criteria),
                 Aggregation.sort(Sort.Direction.DESC, "uploadDate"),
                 Aggregation.skip(pageNum*pageSize),

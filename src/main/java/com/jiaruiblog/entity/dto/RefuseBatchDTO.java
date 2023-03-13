@@ -8,7 +8,7 @@ import javax.validation.constraints.Size;
 
 /**
  * @ClassName RefuseBatchDTO
- * @Description TODO
+ * @Description 批量拒绝的实体类
  * @Author luojiarui
  * @Date 2022/12/8 22:45
  * @Version 1.0

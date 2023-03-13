@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * @ClassName UserSexDTO
- * @Description TODO
+ * @Description 用户角色
  * @Author luojiarui
  * @Date 2023/2/20 21:48
  * @Version 1.0

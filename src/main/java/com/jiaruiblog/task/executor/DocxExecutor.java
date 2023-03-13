@@ -21,11 +21,11 @@ public class DocxExecutor extends TaskExecutor{
     @Override
     protected void makeThumb(InputStream is, String picPath) throws IOException {
         // TODO document why this method is empty
-
+        // no action
     }
 
     @Override
     protected void makePreviewFile(InputStream is, TaskData taskData) {
-
+        // no action
     }
 }

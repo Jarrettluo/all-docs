@@ -148,6 +148,7 @@ public class UserController {
     /**
      * 模拟用户 登录
      */
+    @ApiOperation(value = "用户登录")
     @PostMapping("/login")
     public BaseApiResult login(@RequestBody RegistryUserDTO user) {
         return userService.login(user);
@@ -160,13 +161,14 @@ public class UserController {
      * @Date 21:21 2023/1/10
      * @Param []
      **/
+    @ApiOperation(value = "管理员查询全部用户信息", notes = "只有管理员有权限进行用户列表查询")
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("/allUsers")
     public BaseApiResult allUsers(@ModelAttribute("pageDTO") BasePageDTO pageDTO) {
         return userService.getUserList(pageDTO);
     }
 
-
+    @ApiOperation(value = "改变用户权限", notes = "管理员能够调整其他人的角色，不能调整自己的角色")
     @Permission(PermissionEnum.ADMIN)
     @PutMapping("changeUserRole")
     public BaseApiResult changeUserRole(@RequestBody UserRoleDTO userRoleDTO, HttpServletRequest request) {
@@ -185,6 +187,7 @@ public class UserController {
      * @Date 20:30 2023/2/12
      * @Param [userId]
      **/
+    @ApiOperation(value = "管理员屏蔽用户", notes = "管理员不能屏蔽自己的账号")
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("blockUser")
     public BaseApiResult blockUser(@RequestParam("userId") String userId, HttpServletRequest request) {

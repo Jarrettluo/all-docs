@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * @ClassName SearchKeyDTO
- * @Description TODO
+ * @Description 查询信息
  * @Author luojiarui
  * @Date 2023/2/25 11:20
  * @Version 1.0

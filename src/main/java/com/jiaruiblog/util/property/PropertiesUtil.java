@@ -2,7 +2,7 @@ package com.jiaruiblog.util.property;
 
 /**
  * @ClassName PropertiesUtil
- * @Description TODO
+ * @Description 读取springboot的配置
  * @Author luojiarui
  * @Date 2023/3/12 22:47
  * @Version 1.0

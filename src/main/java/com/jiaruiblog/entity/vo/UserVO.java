@@ -10,7 +10,7 @@ import java.util.Date;
 
 /**
  * @ClassName UserVO
- * @Description TODO
+ * @Description 返回查询的用户结果
  * @Author luojiarui
  * @Date 2023/2/18 00:14
  * @Version 1.0

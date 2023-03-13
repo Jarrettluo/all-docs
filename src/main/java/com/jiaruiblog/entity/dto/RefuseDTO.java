@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 
 /**
  * @ClassName RefuseDTO
- * @Description TODO
+ * @Description 拒绝文档的实体类
  * @Author luojiarui
  * @Date 2022/12/8 21:02
  * @Version 1.0
