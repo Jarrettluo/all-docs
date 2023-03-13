@@ -20,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +39,7 @@ import java.util.Optional;
 @RequestMapping("/comment")
 public class CommentController {
 
-    @Autowired
+    @Resource
     ICommentService commentService;
 
     @ApiOperation(value = "查询评论列表", notes = "更新评论")
@@ -74,7 +75,7 @@ public class CommentController {
 
     @ApiOperation(value = "根据id列表移除批量评论", notes = "根据id移除批量评论")
     @DeleteMapping(value = "/auth/removeBatch")
-    public BaseApiResult removeBatch(@RequestBody BatchIdDTO batchIdDTO, HttpServletRequest request) {
+    public BaseApiResult removeBatch(@RequestBody BatchIdDTO batchIdDTO) {
         List<String> commentIdList = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(commentIdList)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);

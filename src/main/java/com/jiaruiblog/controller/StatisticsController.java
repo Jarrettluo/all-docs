@@ -18,12 +18,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,28 +43,28 @@ import java.util.stream.Collectors;
 @RequestMapping("/statistics")
 public class StatisticsController {
 
-    @Autowired
+    @Resource
     StatisticsService statisticsService;
 
-    @Autowired
+    @Resource
     RedisService redisService;
 
-    @Autowired
+    @Resource
     IFileService fileService;
 
-    @Autowired
+    @Resource
     FileServiceImpl fileServiceImpl;
 
-    @Autowired
+    @Resource
     TagService tagService;
 
-    @ApiOperation(value = "4.1 查询热度榜", notes = "查询列表")
+    @ApiOperation(value = "查询热度榜", notes = "查询列表")
     @GetMapping(value = "/trend")
     public BaseApiResult trend() {
         return statisticsService.trend();
     }
 
-    @ApiOperation(value = "4.2 查询统计数据", notes = "查询列表")
+    @ApiOperation(value = "查询统计数据", notes = "查询列表")
     @GetMapping(value = "/all")
     public BaseApiResult all() {
         return statisticsService.all();
@@ -77,6 +77,7 @@ public class StatisticsController {
      * @Date 15:46 2022/9/11
      * @Param []
      **/
+    @ApiOperation(value = "查询搜索结果", notes = "查询列表")
     @GetMapping("getSearchResult")
     public BaseApiResult getSearchResult(@RequestHeader HttpHeaders headers) {
         List<String> userSearchList = Lists.newArrayList();
@@ -95,6 +96,7 @@ public class StatisticsController {
         return BaseApiResult.success(result);
     }
 
+    @ApiOperation(value = "删除用户的搜索关键词", notes = "删除key")
     @PutMapping(value = "removeKey")
     public BaseApiResult removeKey(@RequestBody SearchKeyDTO searchKeyDTO) {
         redisService.delSearchHistoryByUserId(searchKeyDTO.getUserId(), searchKeyDTO.getSearchWord());
@@ -117,6 +119,7 @@ public class StatisticsController {
      * @Date 15:51 2022/9/11
      * @Param []
      **/
+    @ApiOperation(value = "查询十条热门榜单", notes = "查询列表")
     @GetMapping("getHotTrend")
     public BaseApiResult getHotTrend() {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
@@ -177,6 +180,7 @@ public class StatisticsController {
      * @Date 21:58 2022/9/17
      * @Param []
      **/
+    @ApiOperation(value = "查询最新数据", notes = "查询列表展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档")
     @GetMapping("/recentDocs")
     public BaseApiResult getRecentDocs() {
         List<Map<String, Object>> result = Lists.newArrayList();

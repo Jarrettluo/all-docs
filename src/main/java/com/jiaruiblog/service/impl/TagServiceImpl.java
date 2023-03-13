@@ -2,13 +2,14 @@ package com.jiaruiblog.service.impl;
 
 import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.entity.*;
+import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -40,7 +42,7 @@ public class TagServiceImpl implements TagService {
 
     private static final String TAG_ID = "tagId";
 
-    @Autowired
+    @Resource
     MongoTemplate mongoTemplate;
 
     @Override
@@ -98,8 +100,8 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 根据文档的id查询tag数量
-     * @param tag
-     * @return
+     * @param tag 标签
+     * @return BaseApiResult
      */
     @Override
     public BaseApiResult queryById(Tag tag) {
@@ -117,7 +119,7 @@ public class TagServiceImpl implements TagService {
      **/
     public List<Tag> queryByIds(List<String> tagIds) {
         Query query = new Query(Criteria.where("_id").in(tagIds));
-        return Optional.ofNullable(mongoTemplate.find(query, Tag.class, COLLECTION_NAME)).orElse(Lists.newArrayList());
+        return Optional.of(mongoTemplate.find(query, Tag.class, COLLECTION_NAME)).orElse(Lists.newArrayList());
     }
 
     @Override
@@ -148,8 +150,8 @@ public class TagServiceImpl implements TagService {
 
     /**
      *
-     * @param relationship
-     * @return
+     * @param relationship 关系对象
+     * @return BaseApiResult
      */
     @Override
     public BaseApiResult addRelationShip(TagDocRelationship relationship) {
@@ -312,8 +314,8 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 判断某个tag名字是否已经存在？
-     * @param tagName
-     * @return
+     * @param tagName 标签名字
+     * @return 布尔
      */
     private boolean isTagExist(String tagName) {
         List<Tag> tags = queryTagByName(tagName);
@@ -339,7 +341,6 @@ public class TagServiceImpl implements TagService {
      * @Description // 根据文档的id解除掉标签和文档的关系
      * @Date 11:22 上午 2022/6/25
      * @Param [docId]
-     * @return void
      **/
     public void removeRelateByDocId(String docId) {
         Query query = new Query(Criteria.where("docId").is(docId));
@@ -364,7 +365,6 @@ public class TagServiceImpl implements TagService {
      * @Description 保存文章的时候保存标签和文档的关系
      * @Date 12:15 2023/2/19
      * @Param [fileDocument]
-     * @return void
      **/
     @Async
     public void saveTagWhenSaveDoc(FileDocument fileDocument) {

@@ -25,9 +25,9 @@ public interface IFileService {
     /**
      * 保存文件 - 表单
      *
-     * @param md5
-     * @param file
-     * @return
+     * @param md5 文件md5
+     * @param file 问价数据
+     * @return FileDocument
      */
     FileDocument saveFile(String md5, MultipartFile file);
 
@@ -39,7 +39,7 @@ public interface IFileService {
      *
      * @param fileDocument FileDocument
      * @param inputStream InputStream
-     * @return FileDocument
+     * @return FileDocument FileDocument
      */
     FileDocument saveFile(FileDocument fileDocument, InputStream inputStream);
 
@@ -57,7 +57,6 @@ public interface IFileService {
      * @Description // 更新文档状态
      * @Date 15:41 2022/11/13
      * @Param [fileDocument, state]
-     * @return void
      **/
     void updateState(FileDocument fileDocument, DocStateEnum state, String errorMsg) throws TaskRunException;
 
@@ -66,7 +65,6 @@ public interface IFileService {
      * @Description // 删除GridFS系统中的文件
      * @Date 18:02 2022/11/13
      * @Param [id]
-     * @return void
      **/
     void deleteGridFs(String ...id);
 
@@ -113,9 +111,9 @@ public interface IFileService {
     /**
      * 分页查询，按上传时间降序
      *
-     * @param pageIndex
-     * @param pageSize
-     * @return
+     * @param pageIndex 页数
+     * @param pageSize 每页数量
+     * @return List<FileDocument>
      */
     List<FileDocument> listFilesByPage(int pageIndex, int pageSize);
 

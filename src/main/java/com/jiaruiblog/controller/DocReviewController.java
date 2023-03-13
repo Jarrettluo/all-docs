@@ -12,7 +12,6 @@ import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,7 @@ import javax.validation.Valid;
 @RequestMapping("/docReview")
 public class DocReviewController {
 
-    @Autowired
+    @Resource
     private DocReviewService docReviewService;
 
     @Resource
@@ -126,8 +125,7 @@ public class DocReviewController {
     @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
     @GetMapping("queryReviewResultList")
-    public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
-                                               HttpServletRequest request) {
+    public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
         return docReviewService.queryReviewLog(pageParams, null, true);
     }
 

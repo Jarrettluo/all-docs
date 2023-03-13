@@ -9,7 +9,6 @@ import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private static final String FILE_ID = "fileId";
 
-    @Autowired
+    @Resource
     MongoTemplate mongoTemplate;
 
     /**
@@ -361,7 +361,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Aggregation aggregation = Aggregation.newAggregation(
                 // 选择某些字段
-                Aggregation.project("id", "name", "uploadDate", "thumbId")
+                Aggregation.project("id", "name", UPDATE_DATE, "thumbId")
                         .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                 .as("id"),//新字段名称,
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", FILE_ID, "abc"),

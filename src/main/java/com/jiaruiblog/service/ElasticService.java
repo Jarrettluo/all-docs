@@ -14,12 +14,7 @@ public interface ElasticService {
      * search
      * @param keyword String
      * @return result
-     */
-    /**
-     * search
-     * @param keyword String
-     * @return result
-     * @throws IOException
+     * @throws IOException exception
      */
     List<FileDocument> search(String keyword) throws IOException;
 

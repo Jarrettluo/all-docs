@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
@@ -27,16 +28,16 @@ import java.util.Date;
 @RequestMapping("/collect")
 public class CollectController {
 
-    @Autowired
+    @Resource
     CollectServiceImpl collectServiceImpl;
 
-    @ApiOperation(value = "2.3 新增一个收藏文档", notes = "新增单个收藏文档")
+    @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/auth/insert")
     public BaseApiResult insert(@RequestBody CollectDTO collect, HttpServletRequest request) {
         return collectServiceImpl.insert(setRelationshipValue(collect, request));
     }
 
-    @ApiOperation(value = "2.4 根据id移除某个收藏文档", notes = "根据id移除某个文档")
+    @ApiOperation(value = "根据id移除某个收藏文档", notes = "根据id移除某个文档")
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody CollectDTO collect, HttpServletRequest request) {
         return collectServiceImpl.remove(setRelationshipValue(collect, request));

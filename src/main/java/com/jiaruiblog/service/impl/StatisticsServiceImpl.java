@@ -8,9 +8,9 @@ import com.jiaruiblog.entity.vo.StatsVO;
 import com.jiaruiblog.entity.vo.TrendVO;
 import com.jiaruiblog.service.StatisticsService;
 import com.jiaruiblog.util.BaseApiResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,16 +26,16 @@ import java.util.stream.Collectors;
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
 
-    @Autowired
+    @Resource
     CategoryServiceImpl categoryServiceImpl;
 
-    @Autowired
+    @Resource
     FileServiceImpl fileServiceImpl;
 
-    @Autowired
+    @Resource
     TagServiceImpl tagServiceImpl;
 
-    @Autowired
+    @Resource
     CommentServiceImpl commentServiceImpl;
 
 

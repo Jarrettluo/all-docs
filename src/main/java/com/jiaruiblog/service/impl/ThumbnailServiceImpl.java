@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
+
 /**
  * @ClassName ThumbnailServiceImpl
  * @Description ThumbnailServiceImpl
@@ -21,7 +23,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
     private static final String THUMB_COLLECTION_NAME = "thumbCollection";
 
-    @Autowired
+    @Resource
     MongoTemplate mongoTemplate;
 
 
