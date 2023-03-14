@@ -341,12 +341,13 @@ public class CategoryServiceImpl implements CategoryService {
             criteria = Criteria.where("xyz.tagId").is(tagId);
         }
 
+        // 查询审核完毕的文档
+//        criteria.and("reviewing").is(false);
+
         if (StringUtils.hasText(keyword)) {
             criteria.andOperator(Criteria.where("name").regex(Pattern.compile(keyword, Pattern.CASE_INSENSITIVE)));
         }
 
-        // 查询审核完毕的文档
-//        criteria.and("reviewing").is(false);
 
         Aggregation countAggregation = Aggregation.newAggregation(
                 // 选择某些字段
@@ -355,7 +356,8 @@ public class CategoryServiceImpl implements CategoryService {
                         .as("id"),//新字段名称,
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", FILE_ID, "abc"),
                 Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", FILE_ID, "xyz"),
-                Aggregation.match(criteria)
+                Aggregation.match(criteria),
+                Aggregation.match(Criteria.where("reviewing").is(false))
         );
 
 

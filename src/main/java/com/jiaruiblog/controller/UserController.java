@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -54,7 +55,7 @@ public class UserController {
 
     @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")
-    public BaseApiResult insertObj(@RequestBody RegistryUserDTO userDTO) {
+    public BaseApiResult insertObj(@RequestBody @Valid RegistryUserDTO userDTO) {
         return userService.registry(userDTO);
     }
 

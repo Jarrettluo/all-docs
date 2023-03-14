@@ -42,6 +42,9 @@ public class RegistryUserDTO {
     String password;
 
     public String getEncodePassword() throws IllegalStateException{
+        if (password == null) {
+            return "";
+        }
         BigInteger sha;
         byte[] inputData = this.password.getBytes();
         try {
