@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,13 +28,13 @@ public class CollectServiceImpl implements CollectService {
 
     private static final String DOC_ID = "docId";
 
-    @Autowired
+    @Resource
     MongoTemplate mongoTemplate;
 
-    @Autowired
+    @Resource
     UserServiceImpl userServiceImpl;
 
-    @Autowired
+    @Resource
     FileServiceImpl fileServiceImpl;
 
     /**

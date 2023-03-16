@@ -1,5 +1,6 @@
 package com.jiaruiblog.config;
 
+import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,9 +19,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * @Date 2022/6/4 9:39 上午
  * @Version 1.0
  **/
-
 @Configuration
 @EnableSwagger2
+@EnableKnife4j
 public class SwaggerConfig {
 
     @Bean
@@ -44,9 +45,9 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 // 标题
-                .title("文档分享网站")
+                .title("全文档")
                 // 接口描述
-                .description("document sharing site")
+                .description("all-docs server")
                 // 版本信息
                 .version("1.0")
                 // 构建

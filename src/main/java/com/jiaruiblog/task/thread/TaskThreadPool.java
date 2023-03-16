@@ -15,8 +15,6 @@ import java.util.concurrent.*;
 @Slf4j
 public class TaskThreadPool {
 
-    private final ThreadPoolExecutor threadPoolExecutor;
-
     private final ListeningExecutorService listeningExecutorService;
 
     private static final TaskThreadPool INSTANCE = new TaskThreadPool(2, "Task_Thread_%d");
@@ -29,7 +27,7 @@ public class TaskThreadPool {
                 .setDaemon(true)
                 .setNameFormat(threadNameFormat)
                 .build();
-        threadPoolExecutor = new ThreadPoolExecutor(threadsNum,
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(threadsNum,
                 threadsNum,
                 60L,
                 TimeUnit.MICROSECONDS,
@@ -38,7 +36,7 @@ public class TaskThreadPool {
                 new ThreadPoolExecutor.AbortPolicy());
         // 让线程释放，释放资源
         threadPoolExecutor.allowCoreThreadTimeOut(true);
-        listeningExecutorService = MoreExecutors.listeningDecorator(this.threadPoolExecutor);
+        listeningExecutorService = MoreExecutors.listeningDecorator(threadPoolExecutor);
         mainTaskList = new LinkedList<>();
     }
 

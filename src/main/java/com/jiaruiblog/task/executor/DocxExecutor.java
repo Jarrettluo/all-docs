@@ -3,7 +3,6 @@ package com.jiaruiblog.task.executor;
 import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.util.MsExcelParse;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -14,13 +13,12 @@ import java.io.InputStream;
 public class DocxExecutor extends TaskExecutor{
 
     @Override
-    protected void readText(InputStream is, String textFilePath) throws IOException {
+    protected void readText(InputStream is, String textFilePath) {
         MsExcelParse.readPdfText(is, textFilePath);
     }
 
     @Override
-    protected void makeThumb(InputStream is, String picPath) throws IOException {
-        // TODO document why this method is empty
+    protected void makeThumb(InputStream is, String picPath) {
         // no action
     }
 

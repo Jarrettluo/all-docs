@@ -15,7 +15,6 @@ import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -51,7 +51,7 @@ public class CommentServiceImpl implements ICommentService {
 
     private static final String OBJECT_ID = "_id";
 
-    @Autowired
+    @Resource
     MongoTemplate template;
 
 

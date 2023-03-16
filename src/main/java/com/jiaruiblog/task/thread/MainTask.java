@@ -27,7 +27,7 @@ public class MainTask implements RunnableTask {
 
     private final TaskExecutor taskExecutor;
 
-    private TaskData taskData = new TaskData();
+    private final TaskData taskData = new TaskData();
 
     /**
      * @Author luojiarui

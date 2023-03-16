@@ -72,7 +72,7 @@ public class FileServiceImpl implements IFileService {
 
     private static final String CONTENT = "content";
 
-    private static final String[] EXCLUDE_FIELD = new String[]{"md5", "content", "contentType", "suffix", "description",
+    private static final String[] EXCLUDE_FIELD = new String[]{"md5", CONTENT, "contentType", "suffix", "description",
             "gridfsId", "thumbId", "textFileId", "errorMsg"};
 
     @Resource

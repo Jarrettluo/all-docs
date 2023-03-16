@@ -45,8 +45,8 @@ public class CommonExceptionHandler {
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public BaseApiResult dealMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        String defaultMessage = e.getBindingResult().getFieldError().getDefaultMessage();
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, defaultMessage);
+        e.printStackTrace();
+        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "参数异常");
     }
 
     /**
@@ -58,8 +58,8 @@ public class CommonExceptionHandler {
      **/
     @ExceptionHandler(BindException.class)
     public BaseApiResult handleValidation(BindException e) {
-        String defaultMessage = e.getFieldError().getDefaultMessage();
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, defaultMessage);
+        e.printStackTrace();
+        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "请求异常，请检查");
     }
 
     /**
@@ -79,6 +79,7 @@ public class CommonExceptionHandler {
      */
     @ExceptionHandler(HttpMessageConversionException.class)
     public BaseApiResult parameterTypeException(HttpMessageConversionException exception) {
+        exception.printStackTrace();
         return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "类型转换错误");
     }
 

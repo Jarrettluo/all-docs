@@ -43,7 +43,7 @@ public class DocLogServiceImpl implements IDocLogService {
     public enum Action {
         GET(),
         POST(),
-        DELETE();
+        DELETE()
     }
 
     @Override
@@ -66,7 +66,7 @@ public class DocLogServiceImpl implements IDocLogService {
         User user = userServiceImpl.queryById(userId);
         // 根据不同的用户进行查询
         Query query = new Query();
-        if (user.getUsername().equals("admin123") || user.getPermissionEnum().equals(PermissionEnum.USER)) {
+        if (user.getPermissionEnum().equals(PermissionEnum.USER)) {
             query.addCriteria(Criteria.where("userId").is(user.getId()));
         }
 

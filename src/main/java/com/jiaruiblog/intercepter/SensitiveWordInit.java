@@ -73,7 +73,7 @@ public class SensitiveWordInit {
         if (file.exists()) {
             return getStrings(new FileInputStream(file), ENCODING);
         } else  {
-            ClassPathResource classPathResource = new ClassPathResource("static/censorword.txt");
+            ClassPathResource classPathResource = new ClassPathResource("static/censorWord.txt");
             InputStream inputStream = classPathResource.getInputStream();
             return getStrings(inputStream, ENCODING);
         }

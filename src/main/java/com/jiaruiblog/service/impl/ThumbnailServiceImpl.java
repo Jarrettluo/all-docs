@@ -2,7 +2,6 @@ package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.entity.Thumbnail;
 import com.jiaruiblog.service.ThumbnailService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;

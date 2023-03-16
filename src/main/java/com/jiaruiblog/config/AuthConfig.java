@@ -8,6 +8,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
+import javax.annotation.Resource;
+
 /**
  * @ClassName AuthConfig
  * @Description 登录拦截器配置，参考地址
@@ -19,7 +21,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @Configuration
 public class AuthConfig extends WebMvcConfigurationSupport {
 
-    @Autowired
+    @Resource
     IUserService userService;
 
     /**

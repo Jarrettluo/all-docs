@@ -165,7 +165,6 @@ public class DocReviewServiceImpl implements DocReviewService {
      * @Description 管理员审核通过以后，对文档进行文本提取等工作
      * @Date 22:51 2023/3/9
      * @Param [fileDocument]
-     * @return void
      **/
     private void updateDocTxt(FileDocument fileDocument) {
         String originFileName = fileDocument.getName();

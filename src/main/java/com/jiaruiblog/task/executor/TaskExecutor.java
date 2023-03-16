@@ -104,7 +104,8 @@ public abstract class TaskExecutor {
         try {
             Files.delete(Paths.get(textFilePath));
         } catch (IOException e) {
-            log.error("删除文件路径{} ==> 失败信息{}", textFilePath, e);
+            log.error("删除文件路径{} ==> 失败信息{}", textFilePath, e.getCause());
+            e.printStackTrace();
         }
 
     }
@@ -214,7 +215,7 @@ public abstract class TaskExecutor {
     protected String saveFileToDFS(String filePath,
                                    FileFormatEnum fileFormatEnum,
                                    String prefix) {
-        String objId = null;
+        String objId;
         try (FileInputStream thumbIns = new FileInputStream(filePath)){
             // 存储到GridFS系统中
             IFileService fileService = SpringApplicationContext.getBean(IFileService.class);

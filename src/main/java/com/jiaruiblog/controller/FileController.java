@@ -7,14 +7,16 @@ import com.google.common.collect.Lists;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
+import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.AuthenticationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +25,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -34,6 +37,7 @@ import java.util.Optional;
 /**
  * @author jiarui.luo
  */
+@Api(tags = "查询文档详情的接口")
 @Slf4j
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -42,31 +46,32 @@ public class FileController {
 
     private static final String DOT = ".";
 
-    @Autowired
+    @Resource
     private IFileService fileService;
 
-    @Autowired
+    @Resource
     private TaskExecuteService taskExecuteService;
 
-
     /**
-     * 列表数据
-     *
-     * @param pageIndex
-     * @param pageSize
-     * @return
-     */
-    @RequestMapping("/list")
-    public List<FileDocument> list(int pageIndex, int pageSize) {
-        return fileService.listFilesByPage(pageIndex, pageSize);
+     * @Author luojiarui
+     * @Description 列表数据
+     * @Date 22:41 2023/3/15
+     * @Param [basePageDTO]
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
+     **/
+    @ApiOperation(value = "查询列表", notes = "已经变更！")
+    @GetMapping("/list")
+    public List<FileDocument> list(@ModelAttribute BasePageDTO basePageDTO) {
+        return fileService.listFilesByPage(basePageDTO.getPage(), basePageDTO.getRows());
     }
 
     /**
      * 在线显示文件
      *
      * @param id 文件id
-     * @return
+     * @return 查询结果返回
      */
+    @ApiOperation(value = "查询文档预览结果")
     @GetMapping("/view/{id}")
     public ResponseEntity<Object> serveFileOnline(@PathVariable String id) throws UnsupportedEncodingException {
         Optional<FileDocument> file = fileService.getById(id);
