@@ -26,7 +26,7 @@ jobs:
       run: mvn -B package --file pom.xml
 
     - name: Publish Docker
-      uses: elgohr/Publish-Docker-Github-Action@v4
+      uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         name: jarrettluo/all-docs
         username: ${{ secrets.DOCKER_USERNAME }}
