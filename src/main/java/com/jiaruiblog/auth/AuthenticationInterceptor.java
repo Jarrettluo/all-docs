@@ -74,6 +74,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
         // 此处根据自己的系统架构，通过Token或Cookie等获取用户信息。
         User userInfo = userService.queryById(userData.get("id").asString());
+        if (userInfo == null || userInfo.getPermissionEnum() == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
 
         // 获取该方法注解，优先级:方法注解>类注解
         PermissionEnum[] permissionEnums;
