@@ -25,5 +25,7 @@ public class CommentWithUserVO extends CommentDTO {
 
     private String userId;
 
+    private String userAvatarId;
+
     private String docName;
 }

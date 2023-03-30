@@ -10,6 +10,7 @@ import com.jiaruiblog.entity.dto.CommentWithUserDTO;
 import com.jiaruiblog.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.ICommentService;
+import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,9 @@ public class CommentServiceImpl implements ICommentService {
 
     @Resource
     MongoTemplate template;
+
+    @Resource
+    IUserService userService;
 
 
     @Override
@@ -155,9 +159,20 @@ public class CommentServiceImpl implements ICommentService {
         query.limit(comment.getRows());
         // 这里应该联合查询，根据评论的id查询到评论的用户，再根据用户查询头像信息
         List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
+        // 通过comment的id查询用户的头像信息
+        List<String> userId = comments.stream().map(Comment::getUserId).collect(Collectors.toList());
+        Map<String, String> userAvatarMap = userService.queryUserAvatarBatch(userId);
+        List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
+        for (Comment item : comments) {
+            CommentWithUserVO commentWithUserVO = new CommentWithUserVO();
+            BeanUtils.copyProperties(item, commentWithUserVO);
+            commentWithUserVO.setUserAvatarId(userAvatarMap.get(item.getUserId()));
+            commentWithUserVOList.add(commentWithUserVO);
+        }
+
         Map<String, Object> result = Maps.newHashMap();
         result.put("totalNum", totalNum);
-        result.put("comments", comments);
+        result.put("comments", commentWithUserVOList);
 
         return BaseApiResult.success(result);
     }
@@ -233,7 +248,7 @@ public class CommentServiceImpl implements ICommentService {
 
         log.info("查询的参数是：{}, {}", page, userId);
         Criteria criteria = new Criteria();
-        if (!isAdmin) {
+        if (Boolean.FALSE.equals(isAdmin)) {
             criteria = Criteria.where("userId").is(userId);
         }
 

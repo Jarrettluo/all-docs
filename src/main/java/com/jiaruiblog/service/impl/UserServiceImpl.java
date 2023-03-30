@@ -313,5 +313,22 @@ public class UserServiceImpl implements IUserService {
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 根据用户id批量查询用户的头像信息
+     * @Date 22:41 2023/3/30
+     * @Param [userIdList]
+     * @return java.util.List<java.lang.String>
+     **/
+    @Override
+    public Map<String, String> queryUserAvatarBatch(List<String> userIdList) {
+        if (CollectionUtils.isEmpty(userIdList) || userIdList.size() > 100) {
+            return new HashMap();
+        }
+        Query query = new Query(Criteria.where("_id").in(userIdList));
+        List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
+        return users.stream().collect(Collectors.toMap(User::getId, User::getAvatar, (v1,v2) -> v2));
+    }
+
 
 }

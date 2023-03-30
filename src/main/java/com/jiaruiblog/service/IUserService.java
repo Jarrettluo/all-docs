@@ -9,6 +9,7 @@ import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author jiarui.luo
@@ -75,5 +76,7 @@ public interface IUserService {
      * @return BaseApiResult
      */
     BaseApiResult deleteUserByIdBatch(List<String> userIdList, String adminUserId);
+
+    Map<String, String> queryUserAvatarBatch(List<String> userIdList);
 
 }
