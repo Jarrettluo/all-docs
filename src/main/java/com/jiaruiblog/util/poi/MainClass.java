@@ -12,8 +12,8 @@ import java.io.*;
 public class MainClass {
 
     public static void main(String[] args) throws Exception {
-
-        String inPath = "/Users/molly/Downloads/《如何与领导达成共识》-孙淑静.pptx";
+        // 中文文件依赖 linux 必须有字体包 https://blog.csdn.net/Darling_qi/article/details/120485688
+        String inPath = "/Users/molly/Downloads/2022年共青团“学习二十大、永远跟党走、奋进新征程”专题组织生活会.pptx";
         String outPath = "/Users/molly/Downloads/1x44x6.pdf";
         InputStream inStream = getInFileStream(inPath);
         OutputStream outStream = getOutFileStream(outPath);

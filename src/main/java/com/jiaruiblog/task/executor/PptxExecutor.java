@@ -27,7 +27,7 @@ public class PptxExecutor extends DocxExecutor{
         try {
             OutputStream outStream = getOutFileStream(taskData.getPreviewFilePath());
             boolean shouldShowMessages = true;
-            Converter converter = new PptxToPDFConverter(inStream, outStream, shouldShowMessages,
+            Converter converter = new PptxToPDFConverter(inStream, outStream, true,
                     true);
             converter.convert();
         } catch (Exception e) {

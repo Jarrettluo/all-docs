@@ -151,7 +151,7 @@ public class StatisticsController {
         top1.put("commentNum", documentVO.getCommentNum());
         top1.put("collectNum", documentVO.getCollectNum());
         top1.put("likeNum", (int) Math.round(redisService.score(RedisServiceImpl.DOC_KEY, topFileDocument.getId())));
-        top1.put("thumbId", documentVO.getThumbId());
+        top1.put("thumbId", topFileDocument.getThumbId());
 
 
         List<Object> others = new ArrayList<>();
