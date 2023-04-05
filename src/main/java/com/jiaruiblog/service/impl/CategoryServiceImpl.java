@@ -343,8 +343,6 @@ public class CategoryServiceImpl implements CategoryService {
             criteria = Criteria.where("xyz.tagId").is(tagId);
         }
 
-        // 查询审核完毕的文档
-//        criteria.and("reviewing").is(false);
 
         if (StringUtils.hasText(keyword)) {
             criteria.andOperator(Criteria.where("name").regex(Pattern.compile(keyword, Pattern.CASE_INSENSITIVE)));
@@ -353,7 +351,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Aggregation countAggregation = Aggregation.newAggregation(
                 // 选择某些字段
-                Aggregation.project("id", "name", UPDATE_DATE, "thumbId")
+                Aggregation.project("id", "name", UPDATE_DATE, "thumbId", "reviewing")
                         .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                         .as("id"),//新字段名称,
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", FILE_ID, "abc"),
@@ -365,12 +363,13 @@ public class CategoryServiceImpl implements CategoryService {
 
         Aggregation aggregation = Aggregation.newAggregation(
                 // 选择某些字段
-                Aggregation.project("id", "name", UPDATE_DATE, "thumbId")
+                Aggregation.project("id", "name", UPDATE_DATE, "thumbId", "reviewing")
                         .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
                         .as("id"),//新字段名称,
                 Aggregation.lookup(RELATE_COLLECTION_NAME, "id", FILE_ID, "abc"),
                 Aggregation.lookup(TagServiceImpl.RELATE_COLLECTION_NAME, "id", FILE_ID, "xyz"),
                 Aggregation.match(criteria),
+                Aggregation.match(Criteria.where("reviewing").is(false)),
                 Aggregation.sort(Sort.Direction.DESC, "uploadDate"),
                 Aggregation.skip(pageNum * pageSize),
                 Aggregation.limit(pageSize)
