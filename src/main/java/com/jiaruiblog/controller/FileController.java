@@ -346,7 +346,9 @@ public class FileController {
 
     @GetMapping(value = "/image2/{thumbId}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public byte[] previewThumb2(@PathVariable String thumbId) {
+    public byte[] previewThumb2(@PathVariable String thumbId, HttpServletResponse response) {
+        // 设置响应头，缓存 1 小时
+        response.setHeader("Cache-Control", "max-age=3600, public");
         return fileService.getFileBytes(thumbId);
     }
 

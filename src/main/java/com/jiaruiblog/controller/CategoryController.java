@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 /**
@@ -116,7 +117,10 @@ public class CategoryController {
 
     @ApiOperation(value = "3.7 查询所有的分类或者是标签", notes = "查询列表")
     @GetMapping(value = "/all")
-    public BaseApiResult list(@RequestParam FilterTypeEnum type) {
+    public BaseApiResult list(@RequestParam FilterTypeEnum type, HttpServletResponse response) {
+        // 设置响应头，缓存 1 小时
+        response.setHeader("Cache-Control", "max-age=3600, public");
+
         switch (type) {
             case CATEGORY:
                 return categoryService.list();
