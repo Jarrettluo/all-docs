@@ -23,7 +23,7 @@ import java.util.Optional;
 @Service
 public class CollectServiceImpl implements CollectService {
 
-    private static final String COLLECTION_NAME = "collectCollection";
+    public static final String COLLECTION_NAME = "collectCollection";
 
     private static final String DOC_ID = "docId";
 

@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
@@ -177,5 +178,23 @@ public class CategoryController {
     public BaseApiResult getDocByTagCateKeyWord(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO) {
         return categoryService.getDocByTagAndCate(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
                 Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()));
+    }
+
+    @ApiOperation(value = "查询所有我收藏的文档", notes = "查询文档列表信息")
+    @GetMapping(value = "/auth/getMyCollection")
+    public BaseApiResult getMyCollection(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
+        String userId = (String) request.getAttribute("id");
+        return categoryService.getMyCollection(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
+                Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()),
+                userId);
+    }
+
+    @ApiOperation(value = "查询所有我上传的文档", notes = "查询文档列表信息")
+    @GetMapping(value = "/auth/getMyUploaded")
+    public BaseApiResult getMyUploaded(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
+        String userId = (String) request.getAttribute("id");
+        return categoryService.getMyUploaded(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
+                Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()),
+                userId);
     }
 }
