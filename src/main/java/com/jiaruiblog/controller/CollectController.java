@@ -30,6 +30,14 @@ public class CollectController {
     @Resource
     CollectServiceImpl collectServiceImpl;
 
+    /**
+     * @Author luojiarui
+     * @Description 废弃该文档
+     * @Date 13:30 2023/4/5
+     * @Param [collect, request]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Deprecated
     @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/auth/insert")
     public BaseApiResult insert(@RequestBody CollectDTO collect, HttpServletRequest request) {

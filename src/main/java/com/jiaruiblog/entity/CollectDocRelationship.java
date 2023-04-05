@@ -1,5 +1,6 @@
 package com.jiaruiblog.entity;
 
+import com.jiaruiblog.enums.RedisActionEnum;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
@@ -17,6 +18,8 @@ public class CollectDocRelationship {
 
     @Id
     private String id;
+
+    private RedisActionEnum redisActionEnum;
 
     private String userId;
 

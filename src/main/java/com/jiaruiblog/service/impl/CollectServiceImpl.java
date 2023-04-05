@@ -5,7 +5,6 @@ import com.jiaruiblog.entity.CollectDocRelationship;
 import com.jiaruiblog.service.CollectService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -46,17 +45,26 @@ public class CollectServiceImpl implements CollectService {
      **/
     @Override
     public BaseApiResult insert(CollectDocRelationship collect) {
+        Boolean aBoolean = insertRelationShip(collect);
+        if (Boolean.FALSE.equals(aBoolean)) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        return BaseApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    @Override
+    public Boolean insertRelationShip(CollectDocRelationship collect) {
         // 必须经过userId和docId的校验，否则不予关注
         if (!userServiceImpl.isExist(collect.getUserId()) || !fileServiceImpl.isExist(collect.getDocId())) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return false;
         }
 
         CollectDocRelationship collectDb = getExistRelationship(collect);
         if (collectDb != null) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return false;
         }
         mongoTemplate.save(collect, COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return true;
     }
 
     /**

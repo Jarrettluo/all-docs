@@ -34,5 +34,12 @@ public interface LikeService {
      */
     int findEntityLikeStatus(String userId, Integer entityType, String entityId);
 
+    /**
+     * @Author luojiarui
+     * @Description 从Redis中同步数据到数据库中
+     * @Date 22:12 2023/4/3
+     * @Param []
+     **/
+    void transLikedFromRedis2DB();
 
 }
