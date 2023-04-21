@@ -34,6 +34,11 @@ public interface IFileService {
 
     BaseApiResult documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
 
+    BaseApiResult uploadBatch(String category, List<String> tags, Boolean skipError, MultipartFile[] files);
+
+    BaseApiResult uploadByUrl(String category, List<String> tags, String url);
+
+
     /**
      * 保存文件 - js文件流
      *

@@ -8,6 +8,8 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
 import com.jiaruiblog.entity.dto.BasePageDTO;
+import com.jiaruiblog.entity.dto.FileUploadDTO;
+import com.jiaruiblog.entity.dto.UrlUploadDTO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TaskExecuteService;
@@ -30,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -252,6 +255,48 @@ public class FileController {
         return fileService.documentUpload(file, userId, username);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 批量上传文件
+     * @Date 23:12 2023/4/21
+     * @Param [req, files]
+     * @return java.util.List<java.lang.String>
+     **/
+    @PostMapping("/uploadBatch")
+    public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO) {
+        String category = fileUploadDTO.getCategory();
+        List<String> tags = fileUploadDTO.getTags();
+        String description = fileUploadDTO.getDescription();
+        Boolean skipError = fileUploadDTO.getSkipError();
+        MultipartFile[] files = fileUploadDTO.getFiles();
+
+        List<String> pathStrs = new ArrayList<>();
+        if(files.length > 0){
+            //循环多次上传多个文件
+            for (MultipartFile file : files) {
+                if(!file.isEmpty()){
+                    System.out.println(file.getSize());
+                }
+            }
+        }
+        return fileService.uploadBatch(category, tags, skipError, files);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 通过url上传
+     * @Date 23:12 2023/4/21
+     * @Param [req, files]
+     * @return java.util.List<java.lang.String>
+     **/
+    @PostMapping("/uploadByUrl")
+    public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO) {
+        String category = urlUploadDTO.getCategory();
+        List<String> tags = urlUploadDTO.getTags();
+        String description = urlUploadDTO.getDescription();
+        String url = urlUploadDTO.getUrl();
+        return fileService.uploadByUrl(category, tags, url);
+    }
 
 
     /**
