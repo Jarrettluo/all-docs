@@ -112,6 +112,9 @@ public class FileServiceImpl implements IFileService {
     @Resource
     private IUserService userService;
 
+    List<String> availableSuffixList = com.google.common.collect.Lists
+            .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
+
 
     /**
      * js文件流上传附件
@@ -299,25 +302,99 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public BaseApiResult uploadBatch(String category, List<String> tags, String description,
-                                     Boolean skipError, MultipartFile[] files) {
-        return null;
+                                     Boolean skipError, MultipartFile[] files,
+                                     String userId, String username) {
+
+        FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
+        List<String> fileIds = new ArrayList<>();
+        //循环多次上传多个文件
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                try {
+                    FileDocument fileDocument = saveFileNew(file, userId, username);
+                    if (fileDocument != null) {
+                        fileIds.add(fileDocument.getId());
+                    }
+                } catch (IOException | RuntimeException e) {
+                    if (Boolean.FALSE.equals(skipError)) {
+                        if (e instanceof RuntimeException) {
+                            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, e.getMessage());
+                        } else {
+                            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+                        }
+                    }
+                }
+            }
+        }
+        categoryServiceImpl.addRelationShipDefault(fileUploadPO.getCategoryId(), fileIds);
+        tagServiceImpl.addTagRelationShip(fileUploadPO.getTagIds(), fileIds);
+        return BaseApiResult.success("共计保存了" + fileIds.size() + "文档");
     }
 
     @Override
     public BaseApiResult uploadByUrl(String category, List<String> tags, String name, String description,
-                                     String url) {
-        return null;
+                                     String url, String userId, String username) {
+        FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
+
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
+    private FileDocument saveFileNew(MultipartFile file, String userId, String username) throws IOException {
+        String originFileName = file.getOriginalFilename();
+        if (!StringUtils.hasText(originFileName)) {
+            throw new RuntimeException(MessageConstant.FORMAT_ERROR);
+        }
+        //获取文件后缀名
+        String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
+        if (!availableSuffixList.contains(suffix)) {
+            throw new RuntimeException(MessageConstant.FORMAT_ERROR);
+        }
+        String fileMd5 = SecureUtil.md5(file.getInputStream());
+
+        //已存在该文件，则拒绝保存
+        FileDocument fileDocumentInDb = getByMd5(fileMd5);
+        if (fileDocumentInDb != null) {
+            throw new RuntimeException(MessageConstant.DATA_DUPLICATE);
+        }
+        FileDocument fileDocument = saveToDb(fileMd5, file, userId, username);
+
+        // 目前支持这一类数据进行预览
+        // 进行全文的制作，索引，文本入库等
+        if (Boolean.TRUE.equals(systemConfig.getAdminReview())) {
+            return fileDocument;
+        } else {
+            // 如果已经关闭了管理员审核功能，则设置审核状态为关闭
+            fileDocument.setReviewing(false);
+        }
+        switch (suffix) {
+            case "pdf":
+            case "docx":
+            case "pptx":
+            case "xlsx":
+            case "html":
+            case "md":
+            case "txt":
+                taskExecuteService.execute(fileDocument);
+                break;
+            default:
+                break;
+        }
+        return fileDocument;
+    }
+
+    /**
+     * @return com.jiaruiblog.entity.po.FileUploadPO
+     * @Author luojiarui
+     * @Description 返回需要新建或者查询的分类和标签的列表信息
+     * @Date 16:09 2023/4/22
+     * @Param [category, tags]
+     **/
     private FileUploadPO saveOrUpdateCategory(String category, List<String> tags) {
         FileUploadPO fileUploadPO = new FileUploadPO();
-
         String categoryId = categoryServiceImpl.saveOrUpdateCate(category);
         fileUploadPO.setCategoryId(categoryId);
-
-
-
-
+        List<String> tagIdList = tagServiceImpl.saveOrUpdateBatch(tags);
+        fileUploadPO.setTagIds(tagIdList);
         return fileUploadPO;
     }
 

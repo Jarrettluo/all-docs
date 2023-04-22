@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -263,7 +264,11 @@ public class FileController {
      * @Param [req, files]
      **/
     @PostMapping("/uploadBatch")
-    public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO) {
+    public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO, HttpServletRequest request) {
+
+        String username = (String) request.getAttribute("username");
+        String userId = (String) request.getAttribute("id");
+
         String category = fileUploadDTO.getCategory();
         List<String> tags = fileUploadDTO.getTags();
         String description = fileUploadDTO.getDescription();
@@ -271,20 +276,19 @@ public class FileController {
         MultipartFile[] files = fileUploadDTO.getFiles();
 
         // 检查传递的参数是否正确
-        if (checkParam(tags, category, description, null).equals(Boolean.FALSE)) {
+        if (checkParam(tags, category, description, null).equals(Boolean.FALSE)
+                || files == null || files.length < 1) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
-
-        List<String> pathStrs = new ArrayList<>();
-        if (files.length > 0) {
-            //循环多次上传多个文件
-            for (MultipartFile file : files) {
-                if (!file.isEmpty()) {
-                    System.out.println(file.getSize());
-                }
-            }
+        // 最多只能添加10个标签
+        if (!CollectionUtils.isEmpty(tags)) {
+            tags = tags.subList(0, 10);
         }
-        return fileService.uploadBatch(category, tags, description, skipError, files);
+        // 当只上传一个文档的时候，跳过错误肯定是False
+        if (files.length <2) {
+            skipError = Boolean.FALSE;
+        }
+        return fileService.uploadBatch(category, tags, description, skipError, files, userId, username);
     }
 
     /**
@@ -295,7 +299,11 @@ public class FileController {
      * @Param [req, files]
      **/
     @PostMapping("/uploadByUrl")
-    public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO) {
+    public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO, HttpServletRequest request) {
+
+        String username = (String) request.getAttribute("username");
+        String userId = (String) request.getAttribute("id");
+
         String category = urlUploadDTO.getCategory();
         List<String> tags = urlUploadDTO.getTags();
         String description = urlUploadDTO.getDescription();
@@ -305,10 +313,20 @@ public class FileController {
         if (checkParam(tags, category, description, name).equals(Boolean.FALSE)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
-
-        return fileService.uploadByUrl(category, tags, name, description, url);
+        // 最多只能添加10个标签
+        if (!CollectionUtils.isEmpty(tags)) {
+            tags = tags.subList(0, 10);
+        }
+        return fileService.uploadByUrl(category, tags, name, description, url, userId, username);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 文件上传时的参数检查：长度要求；格式要求；敏感词要求
+     * @Date 16:14 2023/4/22
+     * @Param [tags, category, description, name]
+     * @return java.lang.Boolean
+     **/
     private static Boolean checkParam(List<String> tags, String category, String description, String name) {
 
         List<String> inputStrList = new ArrayList<>();
@@ -334,6 +352,9 @@ public class FileController {
         try {
 
             for (String s : inputStrList) {
+                if (s == null) {
+                    return Boolean.FALSE;
+                }
                 // STEP.2 正则检查，不能有换行，空字符串等
                 Matcher matcher = Pattern.compile("[\\s\\r\\n]+").matcher(s);
                 if (matcher.find()) {

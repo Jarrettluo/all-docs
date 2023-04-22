@@ -77,8 +77,25 @@ public class TagServiceImpl implements TagService {
     }
 
     public List<String> saveOrUpdateBatch(List<String> tags) {
+        List<Tag> existedTags = queryTagListByNameList(tags.toArray(new String[0]));
+        List<String> existedTagIdList = existedTags.stream().map(Tag::getId).collect(Collectors.toList());
+        List<String> existedTagNameList = existedTags.stream().map(Tag::getName).collect(Collectors.toList());
+        tags.removeAll(existedTagNameList);
+        List<String> newTagNameList = tags;
 
-        return new ArrayList<>();
+        // 批量新建不存在的tag信息
+        List<Tag> newTags = new ArrayList<>();
+        for (String s : newTagNameList) {
+            Tag tag = new Tag();
+            tag.setUpdateDate(new Date());
+            tag.setName(s);
+            tag.setCreateDate(new Date());
+            newTags.add(tag);
+        }
+        Collection<String> newTagIdList = mongoTemplate.insert(tags, COLLECTION_NAME);
+        existedTagIdList = Optional.ofNullable(existedTagIdList).orElse(new ArrayList<>());
+        existedTagIdList.addAll(newTagIdList);
+        return existedTagIdList;
     }
 
     /**
@@ -340,6 +357,23 @@ public class TagServiceImpl implements TagService {
         return mongoTemplate.find(query, Tag.class, COLLECTION_NAME);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 通过列表查询全部的标签信息
+     * @Date 15:56 2023/4/22
+     * @Param [name]
+     * @return java.util.List<com.jiaruiblog.entity.Tag>
+     *
+     * @param name
+     * */
+    public List<Tag> queryTagListByNameList(String... name) {
+        List<String> nameList = Arrays.asList(name);
+        if (CollectionUtils.isEmpty(nameList)) {
+            return Lists.newArrayList();
+        }
+        return mongoTemplate.find(Query.query(Criteria.where("name").in(nameList)), Tag.class, COLLECTION_NAME);
+    }
+
 
     /**
      * @Author luojiarui
@@ -396,12 +430,32 @@ public class TagServiceImpl implements TagService {
             tag = tags.get(0);
         }
         if (tag.getId() != null) {
-            TagDocRelationship tagDocRelationship = new TagDocRelationship();
-            tagDocRelationship.setTagId(tag.getId());
-            tagDocRelationship.setFileId(fileDocument.getId());
-            tagDocRelationship.setCreateDate(new Date());
-            tagDocRelationship.setUpdateDate(new Date());
-            addRelationShip(tagDocRelationship);
+            addRelationShip(getRelationInstance(tag.getId(), fileDocument.getId()));
+        }
+    }
+
+    private TagDocRelationship getRelationInstance(String tagId, String docId) {
+        TagDocRelationship tagDocRelationship = new TagDocRelationship();
+        tagDocRelationship.setTagId(tagId);
+        tagDocRelationship.setFileId(docId);
+        tagDocRelationship.setCreateDate(new Date());
+        tagDocRelationship.setUpdateDate(new Date());
+        return tagDocRelationship;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 批量保存数据
+     * @Date 17:05 2023/4/22
+     * @Param [tags, docIds]
+     * @return void
+     **/
+    @Async
+    public void addTagRelationShip(List<String> tags, List<String> docIds) {
+        for(String docId : docIds) {
+            for (String tag : tags) {
+                addRelationShip(getRelationInstance(tag, docId));
+            }
         }
     }
 
