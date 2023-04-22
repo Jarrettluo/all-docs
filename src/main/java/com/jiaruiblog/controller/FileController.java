@@ -265,6 +265,7 @@ public class FileController {
      * @Date 23:12 2023/4/21
      * @Param [req, files]
      **/
+    @ApiOperation(value = "用户批量上传文件", notes = "需要文件分类标签信息！")
     @PostMapping("/auth/uploadBatch")
     public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO, HttpServletRequest request) {
 
@@ -300,6 +301,7 @@ public class FileController {
      * @Date 23:12 2023/4/21
      * @Param [req, files]
      **/
+    @ApiOperation(value = "根据用户的提供的url进行上传", notes = "需要提供url和文件分类标签信息！")
     @PostMapping("/auth/uploadByUrl")
     public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO, HttpServletRequest request) {
 
