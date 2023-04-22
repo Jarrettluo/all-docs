@@ -8,9 +8,10 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
 import com.jiaruiblog.entity.dto.BasePageDTO;
-import com.jiaruiblog.entity.dto.FileUploadDTO;
-import com.jiaruiblog.entity.dto.UrlUploadDTO;
+import com.jiaruiblog.entity.dto.upload.FileUploadDTO;
+import com.jiaruiblog.entity.dto.upload.UrlUploadDTO;
 import com.jiaruiblog.enums.DocStateEnum;
+import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -32,10 +33,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author jiarui.luo
@@ -56,11 +56,11 @@ public class FileController {
     private TaskExecuteService taskExecuteService;
 
     /**
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      * @Author luojiarui
      * @Description 列表数据
      * @Date 22:41 2023/3/15
      * @Param [basePageDTO]
-     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      **/
     @ApiOperation(value = "查询列表", notes = "已经变更！")
     @GetMapping("/list")
@@ -188,7 +188,7 @@ public class FileController {
     /**
      * 表单上传文件
      * 当数据库中存在该md5值时，可以实现秒传功能
-     *
+     * <p>
      * 由于增加了用户登录后上传的验证，因此该方法废弃
      * 最新的上传方式使用：documentUpload
      *
@@ -256,11 +256,11 @@ public class FileController {
     }
 
     /**
+     * @return java.util.List<java.lang.String>
      * @Author luojiarui
      * @Description 批量上传文件
      * @Date 23:12 2023/4/21
      * @Param [req, files]
-     * @return java.util.List<java.lang.String>
      **/
     @PostMapping("/uploadBatch")
     public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO) {
@@ -270,24 +270,29 @@ public class FileController {
         Boolean skipError = fileUploadDTO.getSkipError();
         MultipartFile[] files = fileUploadDTO.getFiles();
 
+        // 检查传递的参数是否正确
+        if (checkParam(tags, category, description, null).equals(Boolean.FALSE)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+
         List<String> pathStrs = new ArrayList<>();
-        if(files.length > 0){
+        if (files.length > 0) {
             //循环多次上传多个文件
             for (MultipartFile file : files) {
-                if(!file.isEmpty()){
+                if (!file.isEmpty()) {
                     System.out.println(file.getSize());
                 }
             }
         }
-        return fileService.uploadBatch(category, tags, skipError, files);
+        return fileService.uploadBatch(category, tags, description, skipError, files);
     }
 
     /**
+     * @return java.util.List<java.lang.String>
      * @Author luojiarui
      * @Description 通过url上传
      * @Date 23:12 2023/4/21
      * @Param [req, files]
-     * @return java.util.List<java.lang.String>
      **/
     @PostMapping("/uploadByUrl")
     public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO) {
@@ -295,7 +300,57 @@ public class FileController {
         List<String> tags = urlUploadDTO.getTags();
         String description = urlUploadDTO.getDescription();
         String url = urlUploadDTO.getUrl();
-        return fileService.uploadByUrl(category, tags, url);
+        String name = urlUploadDTO.getName();
+
+        if (checkParam(tags, category, description, name).equals(Boolean.FALSE)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+
+        return fileService.uploadByUrl(category, tags, name, description, url);
+    }
+
+    private static Boolean checkParam(List<String> tags, String category, String description, String name) {
+
+        List<String> inputStrList = new ArrayList<>();
+        Optional.ofNullable(tags).ifPresent(value -> {
+            value.removeAll(Collections.singleton(null));
+            inputStrList.addAll(value);
+        });
+        Optional.ofNullable(category).ifPresent(inputStrList::add);
+        Optional.ofNullable(name).ifPresent(inputStrList::add);
+
+
+        // STEP.1 长度检查
+        for (String s : inputStrList) {
+            if (s.length() > 64) {
+                return Boolean.FALSE;
+            }
+        }
+        if (description != null && description.length() > 512) {
+            return Boolean.FALSE;
+        }
+        Optional.ofNullable(description).ifPresent(inputStrList::add);
+
+        try {
+
+            for (String s : inputStrList) {
+                // STEP.2 正则检查，不能有换行，空字符串等
+                Matcher matcher = Pattern.compile("[\\s\\r\\n]+").matcher(s);
+                if (matcher.find()) {
+                    return Boolean.FALSE;
+                }
+                // STEP.3 敏感词检查
+                SensitiveFilter filter = SensitiveFilter.getInstance();
+                int n = filter.checkSensitiveWord(s, 0, 1);
+                // 存在非法字符
+                if (n > 0) {
+                    return Boolean.FALSE;
+                }
+            }
+        } catch (IOException | NullPointerException e) {
+            return Boolean.TRUE;
+        }
+        return Boolean.TRUE;
     }
 
 
@@ -435,11 +490,11 @@ public class FileController {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 重建文档索引，继续加入到列表中
      * @Date 22:19 2022/11/14
      * @Param [docId]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @GetMapping("/rebuildIndex")
     public BaseApiResult rebuildIndex(@RequestParam("docId") String docId) {

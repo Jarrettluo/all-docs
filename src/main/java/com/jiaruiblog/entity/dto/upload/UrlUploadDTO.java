@@ -1,4 +1,4 @@
-package com.jiaruiblog.entity.dto;
+package com.jiaruiblog.entity.dto.upload;
 
 import com.jiaruiblog.common.MessageConstant;
 import lombok.Data;
@@ -20,6 +20,8 @@ public class UrlUploadDTO {
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     @Size(min = 1, max = 512, message = MessageConstant.PARAMS_LENGTH_REQUIRED)
     private String url;
+
+    private String name;
 
     private String category;
 

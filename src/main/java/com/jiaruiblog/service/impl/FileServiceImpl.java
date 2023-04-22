@@ -13,6 +13,7 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
+import com.jiaruiblog.entity.po.FileUploadPO;
 import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.enums.DocStateEnum;
@@ -294,6 +295,30 @@ public class FileServiceImpl implements IFileService {
             ex.printStackTrace();
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
+    }
+
+    @Override
+    public BaseApiResult uploadBatch(String category, List<String> tags, String description,
+                                     Boolean skipError, MultipartFile[] files) {
+        return null;
+    }
+
+    @Override
+    public BaseApiResult uploadByUrl(String category, List<String> tags, String name, String description,
+                                     String url) {
+        return null;
+    }
+
+    private FileUploadPO saveOrUpdateCategory(String category, List<String> tags) {
+        FileUploadPO fileUploadPO = new FileUploadPO();
+
+        String categoryId = categoryServiceImpl.saveOrUpdateCate(category);
+        fileUploadPO.setCategoryId(categoryId);
+
+
+
+
+        return fileUploadPO;
     }
 
     /**

@@ -23,10 +23,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -61,7 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public BaseApiResult insert(Category category) {
-        if (isNameExist(category.getName())) {
+        if (!isNameExist(category.getName()).isEmpty()) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(category, COLLECTION_NAME);
@@ -76,7 +73,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public BaseApiResult update(Category category) {
-        if (isNameExist(category.getName())) {
+        if (isNameExist(category.getName()).isEmpty()) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query();
@@ -89,16 +86,39 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
+     * @Author luojiarui
+     * @Description 有就返回分类的id；没有的话就新增后返回id
+     * @Date 10:32 2023/4/22
+     * @Param [cateName]
+     * @return java.lang.String
+     **/
+    public String saveOrUpdateCate(String cateName) {
+        List<Category> nameExist = isNameExist(cateName);
+        if (nameExist.isEmpty()) {
+            Category category = new Category();
+            category.setUpdateDate(new Date());
+            category.setCreateDate(new Date());
+            category.setName(cateName);
+            Category save = mongoTemplate.save(category, COLLECTION_NAME);
+            return save.getId();
+        } else {
+            return Optional.ofNullable(nameExist.get(0))
+                    .flatMap(category -> Optional.of(category.getId()))
+                    .orElse(null);
+        }
+    }
+
+    /**
      * @return boolean
      * @Author luojiarui
      * @Description // 判断该名字是否存在，如果是存在的则返回true，否则返回false
      * @Date 11:47 上午 2022/6/25
      * @Param [name]
      **/
-    private boolean isNameExist(String name) {
+    private List<Category> isNameExist(String name) {
         Query query = new Query(Criteria.where("name").is(name));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        return !categories.isEmpty();
+        return Optional.ofNullable(categories).orElse(new ArrayList<>());
     }
 
     /**

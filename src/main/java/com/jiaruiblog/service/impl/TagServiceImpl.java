@@ -76,6 +76,11 @@ public class TagServiceImpl implements TagService {
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
+    public List<String> saveOrUpdateBatch(List<String> tags) {
+
+        return new ArrayList<>();
+    }
+
     /**
      * @Author luojiarui
      * @Description 删除某个已经存在的tag信息

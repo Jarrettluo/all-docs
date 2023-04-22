@@ -1,4 +1,4 @@
-package com.jiaruiblog.entity.dto;
+package com.jiaruiblog.entity.dto.upload;
 
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
