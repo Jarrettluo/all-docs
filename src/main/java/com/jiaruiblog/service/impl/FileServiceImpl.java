@@ -42,6 +42,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -50,6 +52,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -267,7 +271,7 @@ public class FileServiceImpl implements IFileService {
                 if (fileDocumentInDb != null) {
                     return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_DUPLICATE);
                 }
-                FileDocument fileDocument = saveToDb(fileMd5, file, userId, username);
+                FileDocument fileDocument = saveToDb(fileMd5, file, userId, username, null);
 
                 // 目前支持这一类数据进行预览
                 // 进行全文的制作，索引，文本入库等
@@ -311,7 +315,7 @@ public class FileServiceImpl implements IFileService {
         for (MultipartFile file : files) {
             if (!file.isEmpty()) {
                 try {
-                    FileDocument fileDocument = saveFileNew(file, userId, username);
+                    FileDocument fileDocument = saveFileNew(file, userId, username, description);
                     if (fileDocument != null) {
                         fileIds.add(fileDocument.getId());
                     }
@@ -331,15 +335,61 @@ public class FileServiceImpl implements IFileService {
         return BaseApiResult.success("共计保存了" + fileIds.size() + "文档");
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 通过网络地址将文件保存下来
+     * @Date 19:09 2023/4/22
+     * @Param [category, tags, name, description, urlStr, userId, username]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @Override
     public BaseApiResult uploadByUrl(String category, List<String> tags, String name, String description,
-                                     String url, String userId, String username) {
-        FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
+                                     String urlStr, String userId, String username) {
 
+        FileDocument fileDocument = null;
+        try {
+            if (name == null) {
+                name = getFileName(urlStr);
+            }
+            URL url = new URL(urlStr);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            //设置超时间为5秒
+            conn.setConnectTimeout(5 * 1000);
+            //防止屏蔽程序抓取而返回403错误
+            conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+            //得到输入流
+            InputStream inputStream = conn.getInputStream();
+            MultipartFile file = new MockMultipartFile(name, name, MediaType.MULTIPART_FORM_DATA_VALUE, inputStream);
+            if (!file.isEmpty()) {
+                fileDocument = saveFileNew(file, userId, username, description);
+            }
+        } catch (IOException e) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        } catch (RuntimeException e) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, e.getMessage());
+        }
+        if (fileDocument == null) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
+        categoryServiceImpl.addRelationShipDefault(fileUploadPO.getCategoryId(), fileDocument.getId());
+        List<String> fileId = new ArrayList<>();
+        fileId.add(fileDocument.getId());
+        tagServiceImpl.addTagRelationShip(fileUploadPO.getTagIds(), fileId);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
-    private FileDocument saveFileNew(MultipartFile file, String userId, String username) throws IOException {
+    /**
+     * 从src文件路径获取文件名
+     *
+     * @param srcRealPath src文件路径
+     * @return 文件名
+     */
+    private static String getFileName(String srcRealPath) {
+        return org.apache.commons.lang3.StringUtils.substringAfterLast(srcRealPath, "/");
+    }
+
+    private FileDocument saveFileNew(MultipartFile file, String userId, String username, String desc) throws IOException {
         String originFileName = file.getOriginalFilename();
         if (!StringUtils.hasText(originFileName)) {
             throw new RuntimeException(MessageConstant.FORMAT_ERROR);
@@ -356,7 +406,7 @@ public class FileServiceImpl implements IFileService {
         if (fileDocumentInDb != null) {
             throw new RuntimeException(MessageConstant.DATA_DUPLICATE);
         }
-        FileDocument fileDocument = saveToDb(fileMd5, file, userId, username);
+        FileDocument fileDocument = saveToDb(fileMd5, file, userId, username, desc);
 
         // 目前支持这一类数据进行预览
         // 进行全文的制作，索引，文本入库等
@@ -405,7 +455,7 @@ public class FileServiceImpl implements IFileService {
      * @Date 12:12 2023/2/19
      * @Param [fileMd5, file]
      **/
-    private FileDocument saveToDb(String md5, MultipartFile file, String userId, String username) {
+    private FileDocument saveToDb(String md5, MultipartFile file, String userId, String username, String desc) {
         FileDocument fileDocument;
         String originFilename = file.getOriginalFilename();
         fileDocument = new FileDocument();
@@ -416,6 +466,7 @@ public class FileServiceImpl implements IFileService {
         fileDocument.setMd5(md5);
         fileDocument.setUserId(userId);
         fileDocument.setUserName(username);
+        fileDocument.setDescription(desc);
 
         if (StringUtils.hasText(originFilename)) {
             String suffix = originFilename.substring(originFilename.lastIndexOf("."));

@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = DocumentSharingSiteApplication.class)
@@ -59,5 +62,19 @@ public class FileServiceImplTest {
         String docId = "62b843695f74b25a63f5427b";
         FileDocument fileDocument = iFileService.queryById(docId);
         System.out.println(fileDocument);
+    }
+
+    @Test
+    public void uploadByUrlTest1() {
+        String category = "";
+        List<String> tags = new ArrayList<>();
+        String name = "";
+        String description = "";
+        String urlStr = "https://docs.spring.io/spring-framework/docs/1.0.0/license.txt";
+        String userId = "";
+        String username = "";
+        iFileService.uploadByUrl(category, tags, name, description, urlStr, userId, username);
+
+
     }
 }
