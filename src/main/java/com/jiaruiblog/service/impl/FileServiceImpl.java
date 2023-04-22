@@ -372,6 +372,7 @@ public class FileServiceImpl implements IFileService {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
+        System.out.println(fileUploadPO);
         categoryServiceImpl.addRelationShipDefault(fileUploadPO.getCategoryId(), fileDocument.getId());
         List<String> fileId = new ArrayList<>();
         fileId.add(fileDocument.getId());
@@ -410,12 +411,15 @@ public class FileServiceImpl implements IFileService {
 
         // 目前支持这一类数据进行预览
         // 进行全文的制作，索引，文本入库等
+        // 这里可能是空的
         if (Boolean.TRUE.equals(systemConfig.getAdminReview())) {
             return fileDocument;
         } else {
             // 如果已经关闭了管理员审核功能，则设置审核状态为关闭
             fileDocument.setReviewing(false);
         }
+        System.out.println(systemConfig.getAdminReview());
+        System.out.println(fileDocument);
         switch (suffix) {
             case "pdf":
             case "docx":

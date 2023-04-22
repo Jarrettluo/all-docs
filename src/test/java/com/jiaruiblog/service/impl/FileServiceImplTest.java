@@ -66,15 +66,26 @@ public class FileServiceImplTest {
 
     @Test
     public void uploadByUrlTest1() {
-        String category = "";
+        String category = null;
         List<String> tags = new ArrayList<>();
-        String name = "";
+        String name = null;
         String description = "";
         String urlStr = "https://docs.spring.io/spring-framework/docs/1.0.0/license.txt";
-        String userId = "";
-        String username = "";
+        String userId = "636f05ef852f7c3263f71d63";
+        String username = "admin123";
         iFileService.uploadByUrl(category, tags, name, description, urlStr, userId, username);
-
-
     }
+
+    @Test
+    public void uploadByUrlTest2() {
+        String category = "";
+        List<String> tags = new ArrayList<>();
+        String name = null;
+        String description = "";
+        String urlStr = "https://docs.spring.io/spring-framework/docs/4.2.0.RC1/spring-framework-reference/pdf//spring-framework-reference.pdf";
+        String userId = "636f05ef852f7c3263f71d63";
+        String username = "admin123";
+        iFileService.uploadByUrl(category, tags, name, description, urlStr, userId, username);
+    }
+
 }

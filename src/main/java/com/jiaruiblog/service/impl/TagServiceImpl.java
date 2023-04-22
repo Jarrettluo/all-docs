@@ -454,6 +454,9 @@ public class TagServiceImpl implements TagService {
     public void addTagRelationShip(List<String> tags, List<String> docIds) {
         for(String docId : docIds) {
             for (String tag : tags) {
+                if (tag == null) {
+                    continue;
+                }
                 addRelationShip(getRelationInstance(tag, docId));
             }
         }

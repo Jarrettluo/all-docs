@@ -207,6 +207,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Async
     public void addRelationShipDefault(String categoryId, String docId) {
+        if (categoryId == null) {
+            return;
+        }
         CateDocRelationship relationship = new CateDocRelationship();
         relationship.setCategoryId(categoryId);
         relationship.setCreateDate(new Date());
