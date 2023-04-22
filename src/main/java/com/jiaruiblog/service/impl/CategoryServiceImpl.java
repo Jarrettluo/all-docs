@@ -94,6 +94,9 @@ public class CategoryServiceImpl implements CategoryService {
      * @return java.lang.String
      **/
     public String saveOrUpdateCate(String cateName) {
+        if (!StringUtils.hasText(cateName)) {
+            return null;
+        }
         List<Category> nameExist = isNameExist(cateName);
         if (nameExist.isEmpty()) {
             Category category = new Category();

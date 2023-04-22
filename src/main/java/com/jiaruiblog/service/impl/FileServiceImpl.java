@@ -277,10 +277,8 @@ public class FileServiceImpl implements IFileService {
                 // 进行全文的制作，索引，文本入库等
                 if (Boolean.TRUE.equals(systemConfig.getAdminReview())) {
                     return BaseApiResult.success(fileDocument.getId());
-                } else {
-                    // 如果已经关闭了管理员审核功能，则设置审核状态为关闭
-                    fileDocument.setReviewing(false);
                 }
+
                 switch (suffix) {
                     case "pdf":
                     case "docx":
@@ -364,15 +362,18 @@ public class FileServiceImpl implements IFileService {
                 fileDocument = saveFileNew(file, userId, username, description);
             }
         } catch (IOException e) {
+            e.printStackTrace();
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, e.getMessage());
+        } catch (Exception e) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         if (fileDocument == null) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
-        System.out.println(fileUploadPO);
         categoryServiceImpl.addRelationShipDefault(fileUploadPO.getCategoryId(), fileDocument.getId());
         List<String> fileId = new ArrayList<>();
         fileId.add(fileDocument.getId());
@@ -418,8 +419,6 @@ public class FileServiceImpl implements IFileService {
             // 如果已经关闭了管理员审核功能，则设置审核状态为关闭
             fileDocument.setReviewing(false);
         }
-        System.out.println(systemConfig.getAdminReview());
-        System.out.println(fileDocument);
         switch (suffix) {
             case "pdf":
             case "docx":
@@ -471,6 +470,8 @@ public class FileServiceImpl implements IFileService {
         fileDocument.setUserId(userId);
         fileDocument.setUserName(username);
         fileDocument.setDescription(desc);
+        // 如果已经关闭了管理员审核功能，则设置审核状态为关闭
+        fileDocument.setReviewing(Boolean.TRUE.equals(systemConfig.getAdminReview()));
 
         if (StringUtils.hasText(originFilename)) {
             String suffix = originFilename.substring(originFilename.lastIndexOf("."));

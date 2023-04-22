@@ -34,8 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,6 +49,8 @@ import java.util.regex.Pattern;
 public class FileController {
 
     private static final String DOT = ".";
+
+    private static final String USERNAME = "username";
 
     @Resource
     private IFileService fileService;
@@ -248,12 +248,12 @@ public class FileController {
      * 当数据库中存在该md5值时，可以实现秒传功能
      *
      * @param file 文件
-     * @return
+     * @return BaseApiResult
      */
     @PostMapping("auth/upload")
     public BaseApiResult documentUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request)
             throws AuthenticationException {
-        String username = (String) request.getAttribute("username");
+        String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
         return fileService.documentUpload(file, userId, username);
     }
@@ -265,10 +265,10 @@ public class FileController {
      * @Date 23:12 2023/4/21
      * @Param [req, files]
      **/
-    @PostMapping("/uploadBatch")
+    @PostMapping("/auth/uploadBatch")
     public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO, HttpServletRequest request) {
 
-        String username = (String) request.getAttribute("username");
+        String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
 
         String category = fileUploadDTO.getCategory();
@@ -300,10 +300,10 @@ public class FileController {
      * @Date 23:12 2023/4/21
      * @Param [req, files]
      **/
-    @PostMapping("/uploadByUrl")
+    @PostMapping("/auth/uploadByUrl")
     public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO, HttpServletRequest request) {
 
-        String username = (String) request.getAttribute("username");
+        String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
 
         String category = urlUploadDTO.getCategory();

@@ -18,7 +18,7 @@ public class SystemConfig {
 
     private Boolean userUpload;
 
-    private Boolean adminReview;
+    private Boolean adminReview = true;
 
     private Boolean prohibitedWord;
 

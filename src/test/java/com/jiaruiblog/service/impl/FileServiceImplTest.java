@@ -1,6 +1,7 @@
 package com.jiaruiblog.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.jiaruiblog.DocumentSharingSiteApplication;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.DocumentDTO;
@@ -73,7 +74,10 @@ public class FileServiceImplTest {
         String urlStr = "https://docs.spring.io/spring-framework/docs/1.0.0/license.txt";
         String userId = "636f05ef852f7c3263f71d63";
         String username = "admin123";
-        iFileService.uploadByUrl(category, tags, name, description, urlStr, userId, username);
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(iFileService.uploadByUrl(category, tags, name, description,
+                urlStr, userId, username));
+
+        System.out.println(jsonObject);
     }
 
     @Test

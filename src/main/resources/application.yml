@@ -61,7 +61,7 @@ cloud:
 all-docs:
   config:
     user-upload: ${AD_USER_UPLOAD:true}
-    admin-peview: ${AD_ADMIN_REVIEW:true}
+    admin-review: ${AD_ADMIN_REVIEW:false}
     prohibited-word: ${AD_PROHIBITED_WORD:true}
     user-registry: ${AD_USER_REGISTRY:false}
     initial-username: ${AD_INITIAL_USERNAME:admin123}

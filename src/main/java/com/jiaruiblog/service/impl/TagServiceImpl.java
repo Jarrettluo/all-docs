@@ -77,6 +77,13 @@ public class TagServiceImpl implements TagService {
     }
 
     public List<String> saveOrUpdateBatch(List<String> tags) {
+        if (CollectionUtils.isEmpty(tags)) {
+            return new ArrayList<>();
+        }
+        tags = tags.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(tags)) {
+            return new ArrayList<>();
+        }
         List<Tag> existedTags = queryTagListByNameList(tags.toArray(new String[0]));
         List<String> existedTagIdList = existedTags.stream().map(Tag::getId).collect(Collectors.toList());
         List<String> existedTagNameList = existedTags.stream().map(Tag::getName).collect(Collectors.toList());
@@ -92,7 +99,8 @@ public class TagServiceImpl implements TagService {
             tag.setCreateDate(new Date());
             newTags.add(tag);
         }
-        Collection<String> newTagIdList = mongoTemplate.insert(tags, COLLECTION_NAME);
+        Collection<Tag> insertedTags = mongoTemplate.insert(newTags, COLLECTION_NAME);
+        List<String> newTagIdList = insertedTags.stream().map(Tag::getId).collect(Collectors.toList());
         existedTagIdList = Optional.ofNullable(existedTagIdList).orElse(new ArrayList<>());
         existedTagIdList.addAll(newTagIdList);
         return existedTagIdList;

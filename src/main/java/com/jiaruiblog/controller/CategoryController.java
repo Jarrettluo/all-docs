@@ -119,7 +119,7 @@ public class CategoryController {
     @GetMapping(value = "/all")
     public BaseApiResult list(@RequestParam FilterTypeEnum type, HttpServletResponse response) {
         // 设置响应头，缓存 1 小时
-        response.setHeader("Cache-Control", "max-age=3600, public");
+//        response.setHeader("Cache-Control", "max-age=3600, public");
 
         switch (type) {
             case CATEGORY:
