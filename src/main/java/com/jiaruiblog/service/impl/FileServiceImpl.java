@@ -334,11 +334,11 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
      * @Description 通过网络地址将文件保存下来
      * @Date 19:09 2023/4/22
      * @Param [category, tags, name, description, urlStr, userId, username]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
     public BaseApiResult uploadByUrl(String category, List<String> tags, String name, String description,
@@ -346,7 +346,7 @@ public class FileServiceImpl implements IFileService {
 
         FileDocument fileDocument = null;
         try {
-            if (name == null) {
+            if (!StringUtils.hasText(name)) {
                 name = getFileName(urlStr);
             }
             URL url = new URL(urlStr);
@@ -357,6 +357,9 @@ public class FileServiceImpl implements IFileService {
             conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
             //得到输入流
             InputStream inputStream = conn.getInputStream();
+            if (!StringUtils.hasText(name)) {
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            }
             MultipartFile file = new MockMultipartFile(name, name, MediaType.MULTIPART_FORM_DATA_VALUE, inputStream);
             if (!file.isEmpty()) {
                 fileDocument = saveFileNew(file, userId, username, description);

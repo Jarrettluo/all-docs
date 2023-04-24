@@ -318,7 +318,7 @@ public class FileController {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         // 最多只能添加10个标签
-        if (!CollectionUtils.isEmpty(tags)) {
+        if (!CollectionUtils.isEmpty(tags) && tags.size() > 10) {
             tags = tags.subList(0, 10);
         }
         return fileService.uploadByUrl(category, tags, name, description, url, userId, username);
