@@ -139,6 +139,11 @@ https://github.com/Jarrettluo/document-sharing-site.git
 
 加入微信群，一起玩😄
 
+<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/WechatIMG78.jpeg" alt="imGroup" width="200">
+
+> 如果有二次开发或者私有部署需求，请联系我
+
+(添加微信请备注"全文档")
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/Wechat.jpeg" alt="imGroup" width="200">
 
 
