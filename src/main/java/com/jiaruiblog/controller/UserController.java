@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ConfigConstant;
@@ -8,6 +9,7 @@ import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.*;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
+import com.jiaruiblog.util.JwtUtil;
 import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,12 +18,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -153,6 +157,26 @@ public class UserController {
     @PostMapping("/login")
     public BaseApiResult login(@RequestBody RegistryUserDTO user) {
         return userService.login(user);
+    }
+
+    /**
+     * 模拟用户 登录
+     */
+    @ApiOperation(value = "用户登录")
+    @GetMapping("/checkLoginState")
+    public BaseApiResult checkLoginState(HttpServletRequest request, HttpServletResponse response) {
+        // 缓存一分钟
+        response.setHeader("Cache-Control", "max-age=60, public");
+        //获取 header里的token
+        final String token = request.getHeader("authorization");
+        if (!StringUtils.hasText(token)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        Map<String, Claim> userData = JwtUtil.verifyToken(token);
+        if (CollectionUtils.isEmpty(userData)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
