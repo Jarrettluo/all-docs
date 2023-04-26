@@ -284,7 +284,7 @@ public class FileController {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         // 最多只能添加10个标签
-        if (!CollectionUtils.isEmpty(tags)) {
+        if (!CollectionUtils.isEmpty(tags) && tags.size() > 10) {
             tags = tags.subList(0, 10);
         }
         // 当只上传一个文档的时候，跳过错误肯定是False
