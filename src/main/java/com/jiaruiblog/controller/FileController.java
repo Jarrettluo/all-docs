@@ -278,8 +278,6 @@ public class FileController {
         Boolean skipError = fileUploadDTO.getSkipError();
         MultipartFile[] files = fileUploadDTO.getFiles();
 
-        System.out.println(fileUploadDTO);
-
         // 检查传递的参数是否正确
         if (checkParam(tags, category, description, null).equals(Boolean.FALSE)
                 || files == null || files.length < 1) {

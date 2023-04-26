@@ -308,7 +308,6 @@ public class FileServiceImpl implements IFileService {
                                      String userId, String username) {
 
         FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
-        System.out.println(fileUploadPO);
         List<String> fileIds = new ArrayList<>();
         //循环多次上传多个文件
         for (MultipartFile file : files) {
