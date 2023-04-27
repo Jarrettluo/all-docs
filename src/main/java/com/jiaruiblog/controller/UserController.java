@@ -166,7 +166,7 @@ public class UserController {
     @GetMapping("/checkLoginState")
     public BaseApiResult checkLoginState(HttpServletRequest request, HttpServletResponse response) {
         // 缓存一分钟
-        response.setHeader("Cache-Control", "max-age=60, public");
+        response.setHeader("Cache-Control", "max-age=5, public");
         //获取 header里的token
         final String token = request.getHeader("authorization");
         if (!StringUtils.hasText(token)) {

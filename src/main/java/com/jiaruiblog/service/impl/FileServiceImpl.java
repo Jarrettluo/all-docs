@@ -464,6 +464,10 @@ public class FileServiceImpl implements IFileService {
     private FileDocument saveToDb(String md5, MultipartFile file, String userId, String username, String desc) {
         FileDocument fileDocument;
         String originFilename = file.getOriginalFilename();
+        if (originFilename.contains("/")) {
+            String[] split = originFilename.split("/");
+            originFilename = split[split.length-1];
+        }
         fileDocument = new FileDocument();
         fileDocument.setName(originFilename);
         fileDocument.setSize(file.getSize());
