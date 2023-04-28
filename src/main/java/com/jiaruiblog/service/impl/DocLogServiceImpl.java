@@ -32,7 +32,7 @@ public class DocLogServiceImpl implements IDocLogService {
 
     public static final String DOC_LOG_COLLECTION = "docLog";
 
-    public static final String RESULT = "操作成功了 %d 项目";
+    public static final String RESULT = "操作成功了 %d 项目!";
 
     @Resource
     private UserServiceImpl userServiceImpl;
@@ -88,6 +88,7 @@ public class DocLogServiceImpl implements IDocLogService {
     public BaseApiResult deleteDocLogBatch(List<String> logIds, String userId) {
         User user = userServiceImpl.queryById(userId);
         Query query = new Query();
+        query.addCriteria(Criteria.where("_id").in(logIds));
         if (user.getPermissionEnum().equals(PermissionEnum.USER)) {
             query.addCriteria(Criteria.where("userId").is(user.getId()));
         }
