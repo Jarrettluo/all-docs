@@ -166,7 +166,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public BaseApiResult blockUser(String userId) {
         User user = queryById(userId);
-        if ( user == null) {
+        if (user == null) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query();
@@ -314,11 +314,11 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
+     * @return java.util.List<java.lang.String>
      * @Author luojiarui
      * @Description 根据用户id批量查询用户的头像信息
      * @Date 22:41 2023/3/30
      * @Param [userIdList]
-     * @return java.util.List<java.lang.String>
      **/
     @Override
     public Map<String, String> queryUserAvatarBatch(List<String> userIdList) {
@@ -327,7 +327,8 @@ public class UserServiceImpl implements IUserService {
         }
         Query query = new Query(Criteria.where("_id").in(userIdList));
         List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
-        return users.stream().collect(Collectors.toMap(User::getId, User::getAvatar, (v1,v2) -> v2));
+        return users.stream().filter(item -> item.getId() != null && item.getAvatar() != null)
+                .collect(Collectors.toMap(User::getId, User::getAvatar, (v1, v2) -> v2));
     }
 
 
