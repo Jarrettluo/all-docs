@@ -5,6 +5,7 @@ import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.*;
 import com.jiaruiblog.service.IUserService;
@@ -56,10 +57,16 @@ public class UserController {
     @Resource
     private MongoTemplate template;
 
+    @Resource
+    SystemConfig systemConfig;
+
 
     @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")
     public BaseApiResult insertObj(@RequestBody @Valid RegistryUserDTO userDTO) {
+        if (Boolean.FALSE.equals(systemConfig.getUserRegistry())) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         return userService.registry(userDTO);
     }
 
