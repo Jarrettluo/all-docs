@@ -17,10 +17,7 @@ import com.jiaruiblog.entity.po.FileUploadPO;
 import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.enums.DocStateEnum;
-import com.jiaruiblog.service.IFileService;
-import com.jiaruiblog.service.IUserService;
-import com.jiaruiblog.service.RedisService;
-import com.jiaruiblog.service.TaskExecuteService;
+import com.jiaruiblog.service.*;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.PdfUtil;
@@ -116,6 +113,9 @@ public class FileServiceImpl implements IFileService {
     @Resource
     private IUserService userService;
 
+    @Resource
+    private DocReviewService docReviewService;
+
     List<String> availableSuffixList = com.google.common.collect.Lists
             .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
 
@@ -140,8 +140,6 @@ public class FileServiceImpl implements IFileService {
         fileDocument.setGridfsId(gridfsId);
 
         fileDocument = mongoTemplate.save(fileDocument, COLLECTION_NAME);
-
-        // TODO 在这里进行异步操作
 
         return fileDocument;
     }
@@ -604,8 +602,8 @@ public class FileServiceImpl implements IFileService {
             fileDocument.setSize(fsFile.getLength());
             fileDocument.setName(fsFile.getFilename());
 
-            if (fsFile == null || fsFile.getObjectId() == null) {
-                return Optional.empty();
+            if (fsFile != null) {
+                fsFile.getObjectId();
             }
 
             // 开启文件下载
@@ -804,16 +802,24 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public BaseApiResult remove(String id) {
+    public BaseApiResult remove(FileDocument fileDocument) {
+        String id = fileDocument.getId();
         if (!isExist(id)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 删除评论信息，删除分类关系，删除标签关系
+        // 删除dfs的文件；删除es的索引；删除审核的消息
         removeFile(id, true);
         commentServiceImpl.removeByDocId(id);
         categoryServiceImpl.removeRelateByDocId(id);
         collectServiceImpl.removeRelateByDocId(id);
         tagServiceImpl.removeRelateByDocId(id);
+
+        ArrayList<String> docIds = Lists.newArrayList();
+        docIds.add(id);
+        docReviewService.removeReviews(docIds);
+        // 删除文档
+        elasticServiceImpl.removeByDocId(fileDocument.getMd5());
 
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }

@@ -53,7 +53,6 @@ public class UserController {
     @Resource
     IUserService userService;
 
-
     @Resource
     private MongoTemplate template;
 
@@ -311,6 +310,13 @@ public class UserController {
 
     private boolean patternMatch(String s, String regex) {
         return Pattern.compile(regex).matcher(s).matches();
+    }
+
+    @ApiOperation(value = "重置用户密码", notes = "管理员对用户进行密码重置")
+    @PostMapping("auth/resetUserPwd")
+    public BaseApiResult resetUserPwd(@RequestBody String userId, HttpServletRequest request) {
+        String adminId = (String) request.getAttribute("id");
+        return userService.resetUserPwd(userId, adminId);
     }
 
 }

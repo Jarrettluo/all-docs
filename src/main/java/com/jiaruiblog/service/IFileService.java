@@ -165,7 +165,7 @@ public interface IFileService {
      * @param id -> Long
      * @return ApiResult
      */
-    BaseApiResult remove(String id);
+    BaseApiResult remove(FileDocument fileDocument);
 
     BaseApiResult listWithCategory(DocumentDTO documentDTO);
 

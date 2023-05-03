@@ -332,4 +332,27 @@ public class UserServiceImpl implements IUserService {
     }
 
 
+    @Override
+    public BaseApiResult resetUserPwd(String userId, String adminId) {
+        User user = mongoTemplate.findById(adminId, User.class, COLLECTION_NAME);
+        User resetUser = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
+        // 如果管理者是空的，或者管理者权限不够，均不能对用户进行重置！
+        if (user == null || user.getId() == null || user.getId().equals(userId)
+                || !PermissionEnum.ADMIN.equals(user.getPermissionEnum())
+                || resetUser == null
+        ) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+
+        RegistryUserDTO userDTO = new RegistryUserDTO();
+        userDTO.setPassword(systemConfig.getInitialPassword());
+
+        Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
+        Update update = new Update();
+        update.set("password", userDTO.getEncodePassword());
+        mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
+
+        return BaseApiResult.success(MessageConstant.SUCCESS);
+    }
+
 }

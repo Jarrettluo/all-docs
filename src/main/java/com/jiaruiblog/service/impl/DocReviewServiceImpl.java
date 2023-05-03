@@ -241,4 +241,12 @@ public class DocReviewServiceImpl implements DocReviewService {
         result.put("pageSize", page.getRows());
         return BaseApiResult.success(result);
     }
+
+    @Override
+    public void removeReviews(List<String> docIds){
+        if (CollectionUtils.isEmpty(docIds)) {
+        }
+        Query query = new Query(Criteria.where("docId").in(docIds));
+        DeleteResult remove = mongoTemplate.remove(query, DocReview.class, DOC_REVIEW_COLLECTION);
+    }
 }

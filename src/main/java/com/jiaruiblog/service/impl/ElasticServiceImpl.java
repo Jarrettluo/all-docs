@@ -7,6 +7,8 @@ import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.service.ElasticService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -22,6 +24,7 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -54,6 +57,7 @@ public class ElasticServiceImpl implements ElasticService {
      * 1.文件的名字
      * 2.文件type
      * 3.文件的data 64编码
+     * 添加文档
      */
     public void upload(FileObj file) throws IOException {
         IndexRequest indexRequest = new IndexRequest(INDEX_NAME);
@@ -170,6 +174,25 @@ public class ElasticServiceImpl implements ElasticService {
 
         stringBuilder.append("查询到").append(count).append("条记录");
         return fileDocumentList;
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 根据文档的id删除文档
+     * @Date 22:52 2023/5/3
+     * @Param [docMd5]
+     * @return void
+     **/
+    void removeByDocId(String docMd5) {
+        if (!StringUtils.hasText(docMd5)) {
+            return;
+        }
+        try {
+            DeleteRequest deleteRequest = new DeleteRequest(INDEX_NAME, docMd5);
+            DeleteResponse delete = client.delete(deleteRequest, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
