@@ -91,7 +91,7 @@ public class DocumentController {
         user.setUsername(username);
         user.setId(userId);
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.DELETE);
-        return iFileService.remove(FileDocument fileDocument);
+        return iFileService.remove(fileDocument);
     }
 
 
