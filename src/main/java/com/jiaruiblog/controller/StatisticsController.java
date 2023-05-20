@@ -7,10 +7,7 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.dto.SearchKeyDTO;
 import com.jiaruiblog.entity.vo.DocumentVO;
-import com.jiaruiblog.service.IFileService;
-import com.jiaruiblog.service.RedisService;
-import com.jiaruiblog.service.StatisticsService;
-import com.jiaruiblog.service.TagService;
+import com.jiaruiblog.service.*;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
@@ -244,4 +241,14 @@ public class StatisticsController {
         tagMap.put("docList", docList);
         return tagMap;
     }
+
+    @GetMapping("monthStat")
+    private BaseApiResult getMonthStat() {
+        return statisticsService.getMonthStat();
+    }
+
+//    @GetMapping("")
+//    private BaseApiResult getWordStat() {
+//        return ElasticService.getWordStat();
+//    }
 }
