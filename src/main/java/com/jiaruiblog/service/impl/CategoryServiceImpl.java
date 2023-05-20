@@ -4,6 +4,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.dto.FileDocumentDTO;
+import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.enums.RedisActionEnum;
 import com.jiaruiblog.service.CategoryService;
@@ -149,9 +150,23 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public BaseApiResult list() {
         // 需要查询全部的信息
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, UPDATE_DATE));
-        List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        return BaseApiResult.success(categories);
+        Aggregation aggregation = Aggregation.newAggregation(
+                // 选择某些字段
+                Aggregation.project("id", "name", "createDate", "updateDate")
+                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                        .as("id"),//新字段名称,
+                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "categoryId", "abc"),
+                Aggregation.project("id", "name", "createDate", "updateDate")
+                        .and("abc")
+                        .size()
+                        .as("num"),
+                Aggregation.sort(Sort.Direction.DESC, "updateDate")
+        );
+
+        AggregationResults<CateOrTagVO> result = mongoTemplate.aggregate(
+                aggregation, COLLECTION_NAME, CateOrTagVO.class);
+        List<CateOrTagVO> resultList = result.getMappedResults();
+        return BaseApiResult.success(resultList);
     }
 
     /**

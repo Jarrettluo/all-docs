@@ -5,6 +5,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
+import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -12,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -160,8 +164,23 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public BaseApiResult list() {
-        List<Tag> tags = mongoTemplate.findAll(Tag.class, COLLECTION_NAME);
-        return BaseApiResult.success(tags);
+        Aggregation aggregation = Aggregation.newAggregation(
+                // 选择某些字段
+                Aggregation.project("id", "name", "createDate", "updateDate")
+                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                        .as("id"),//新字段名称,
+                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "tagId", "abc"),
+                Aggregation.project("id", "name", "createDate", "updateDate")
+                        .and("abc")
+                        .size()
+                        .as("num"),
+                Aggregation.sort(Sort.Direction.DESC, "updateDate")
+        );
+
+        AggregationResults<CateOrTagVO> result = mongoTemplate.aggregate(
+                aggregation, COLLECTION_NAME, CateOrTagVO.class);
+        List<CateOrTagVO> resultList = result.getMappedResults();
+        return BaseApiResult.success(resultList);
     }
 
     /**

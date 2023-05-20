@@ -24,14 +24,14 @@ import java.util.Date;
 public class Category {
 
     @Id
-    private String id;
+    protected String id;
 
     @NotBlank(message = "")
-    private String name;
+    protected String name;
 
-    private Date createDate;
+    protected Date createDate;
 
-    private Date updateDate;
+    protected Date updateDate;
 
     @Override
     public String toString () {
