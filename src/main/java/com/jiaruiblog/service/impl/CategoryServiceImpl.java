@@ -160,7 +160,7 @@ public class CategoryServiceImpl implements CategoryService {
                         .and("abc")
                         .size()
                         .as("num"),
-                Aggregation.sort(Sort.Direction.DESC, "updateDate")
+                Aggregation.sort(Sort.Direction.ASC, "updateDate")
         );
 
         AggregationResults<CateOrTagVO> result = mongoTemplate.aggregate(

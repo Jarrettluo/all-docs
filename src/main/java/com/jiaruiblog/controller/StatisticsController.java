@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,9 @@ public class StatisticsController {
 
     @Resource
     TagService tagService;
+
+    @Resource
+    ElasticService elasticService;
 
     @ApiOperation(value = "查询热度榜", notes = "查询列表")
     @GetMapping(value = "/trend")
@@ -247,8 +251,8 @@ public class StatisticsController {
         return statisticsService.getMonthStat();
     }
 
-//    @GetMapping("")
-//    private BaseApiResult getWordStat() {
-//        return ElasticService.getWordStat();
-//    }
+    @GetMapping("")
+    private BaseApiResult getWordStat() throws IOException {
+        return elasticService.getWordStat();
+    }
 }
