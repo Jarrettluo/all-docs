@@ -45,6 +45,7 @@ public class TagServiceImpl implements TagService {
     private static final String FILE_ID = "fileId";
 
     private static final String TAG_ID = "tagId";
+    public static final String DOC_ID = "docId";
 
     @Resource
     MongoTemplate mongoTemplate;
@@ -409,10 +410,8 @@ public class TagServiceImpl implements TagService {
      * @Param [docId]
      **/
     public void removeRelateByDocId(String docId) {
-        Query query = new Query(Criteria.where("docId").is(docId));
-        List<TagDocRelationship> relationships = mongoTemplate.find(query, TagDocRelationship.class,
-                RELATE_COLLECTION_NAME);
-        relationships.forEach(this::cancelTagRelationship);
+        Query query = new Query(Criteria.where(DOC_ID).is(docId));
+        mongoTemplate.remove(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
     }
 
     /**

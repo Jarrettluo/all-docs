@@ -10,7 +10,6 @@ import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -186,7 +185,6 @@ public class ElasticServiceImpl implements ElasticService {
      * @Description 根据文档的id删除文档
      * @Date 22:52 2023/5/3
      * @Param [docMd5]
-     * @return void
      **/
     void removeByDocId(String docMd5) {
         if (!StringUtils.hasText(docMd5)) {
@@ -194,7 +192,7 @@ public class ElasticServiceImpl implements ElasticService {
         }
         try {
             DeleteRequest deleteRequest = new DeleteRequest(INDEX_NAME, docMd5);
-            DeleteResponse delete = client.delete(deleteRequest, RequestOptions.DEFAULT);
+            client.delete(deleteRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             e.printStackTrace();
         }

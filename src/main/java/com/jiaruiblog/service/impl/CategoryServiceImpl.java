@@ -47,6 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     private static final String UPDATE_DATE = "uploadDate";
 
     private static final String FILE_ID = "fileId";
+    public static final String DOC_ID = "docId";
 
     @Resource
     MongoTemplate mongoTemplate;
@@ -338,10 +339,9 @@ public class CategoryServiceImpl implements CategoryService {
      * @Param [docId]
      **/
     public void removeRelateByDocId(String docId) {
-        Query query = new Query(Criteria.where("docId").is(docId));
-        List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class,
-                RELATE_COLLECTION_NAME);
-        relationships.forEach(this::cancelCategoryRelationship);
+        Query query = new Query(Criteria.where(DOC_ID).is(docId));
+        // 根据文档id进行文档关系的删除
+        mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
     }
 
     /**

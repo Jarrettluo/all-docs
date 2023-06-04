@@ -214,15 +214,13 @@ public class CommentServiceImpl implements ICommentService {
 
     /**
      * @Author luojiarui
-     * @Description //根据文档进行删除评论信息
+     * @Description 根据文档进行删除评论信息
      * @Date 11:14 上午 2022/6/25
      * @Param [docId]
      **/
     public void removeByDocId(String docId) {
         Query query = new Query(Criteria.where(DOC_ID).is(docId));
-        List<Comment> commentDb = template.find(query, Comment.class, COLLECTION_NAME);
-        commentDb.forEach(item -> template.remove(item, COLLECTION_NAME));
-
+        template.remove(query, Comment.class, COLLECTION_NAME);
     }
 
     /**

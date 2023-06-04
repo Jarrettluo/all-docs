@@ -810,16 +810,23 @@ public class FileServiceImpl implements IFileService {
         // 删除评论信息，删除分类关系，删除标签关系
         // 删除dfs的文件；删除es的索引；删除审核的消息
         removeFile(id, true);
+
+        // 删除评论信息
         commentServiceImpl.removeByDocId(id);
+        // 删除分类关系
         categoryServiceImpl.removeRelateByDocId(id);
+        // 删除收藏关系
         collectServiceImpl.removeRelateByDocId(id);
+        // 删除标签
         tagServiceImpl.removeRelateByDocId(id);
 
-        ArrayList<String> docIds = Lists.newArrayList();
-        docIds.add(id);
-        docReviewService.removeReviews(docIds);
-        // 删除文档
+        // 删除文档评审关系
+        docReviewService.removeReviews(Collections.singletonList(id));
+        // 删除文档的索引内容
         elasticServiceImpl.removeByDocId(fileDocument.getMd5());
+
+        // 删除redis中对于文档的统计信息
+        redisService.removeByDocId(id);
 
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }

@@ -162,7 +162,7 @@ public interface IFileService {
     /**
      * 删除掉已经存在的文档
      *
-     * @param id -> Long
+     * @param fileDocument -> 文档信息
      * @return ApiResult
      */
     BaseApiResult remove(FileDocument fileDocument);
