@@ -13,6 +13,7 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
+import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.entity.po.FileUploadPO;
 import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.DocumentVO;
@@ -43,6 +44,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,6 +78,7 @@ public class FileServiceImpl implements IFileService {
 
     private static final String[] EXCLUDE_FIELD = new String[]{"md5", CONTENT, "contentType", "suffix", "description",
             "gridfsId", "thumbId", "textFileId", "errorMsg"};
+    public static final String DOT = ".";
 
     @Resource
     SystemConfig systemConfig;
@@ -545,6 +548,44 @@ public class FileServiceImpl implements IFileService {
                 gridFsTemplate.delete(deleteQuery);
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public BaseApiResult updateInfo(UpdateInfoDTO updateInfoDTO) {
+        String docId = updateInfoDTO.getId();
+        Query query = new Query().addCriteria(Criteria.where("_id").is(docId));
+        FileDocument document = mongoTemplate.findById(updateInfoDTO.getId(), FileDocument.class, COLLECTION_NAME);
+        if (Objects.isNull(document)) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        // 保存文档和分类/标签的关系
+        List<String> fileIds = com.google.common.collect.Lists.newArrayList(docId);
+        String categoryId = updateInfoDTO.getCategoryId();
+        List<String> tags = updateInfoDTO.getTags();
+        FileUploadPO fileUploadPO = saveOrUpdateCategory(null, tags);
+        if (Objects.nonNull(categoryId)) {
+            categoryServiceImpl.addRelationShipDefault(categoryId, fileIds);
+        }
+        tagServiceImpl.addTagRelationShip(fileUploadPO.getTagIds(), fileIds);
+
+        // 更新文档的名称和描述信息
+        String name = updateInfoDTO.getName();
+        String desc = updateInfoDTO.getDesc();
+
+        String[] split = name.split(DOT);
+        List<String> stringList = Arrays.asList(split);
+        if (!CollectionUtils.isEmpty(stringList) && stringList.size() > 1) {
+            stringList.remove(stringList.size() -1);
+        }
+        String originName = String.join(DOT, stringList);
+
+        Update update = new Update();
+        update.set("name", originName);
+        update.set("description", desc);
+        mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
+
+        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

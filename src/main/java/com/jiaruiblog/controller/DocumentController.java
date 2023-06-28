@@ -1,10 +1,13 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.auth.Permission;
+import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.RemoveObjectDTO;
+import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IDocLogService;
@@ -92,6 +95,13 @@ public class DocumentController {
         user.setId(userId);
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.DELETE);
         return iFileService.remove(fileDocument);
+    }
+
+    @ApiOperation(value = "3.2 管理员修改文档基本信息", notes = "管理员修改某个文档信息")
+    @PutMapping(value="/auth/updateInfo")
+    @Permission(value = PermissionEnum.ADMIN)
+    public BaseApiResult updateInfo(@RequestBody UpdateInfoDTO updateInfoDTO) {
+        return iFileService.updateInfo(updateInfoDTO);
     }
 
 
