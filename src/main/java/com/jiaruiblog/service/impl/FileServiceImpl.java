@@ -550,12 +550,19 @@ public class FileServiceImpl implements IFileService {
         }
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 对文档的名称，标签，分类，描述进行修改
+     * @Date 09:51 2023/7/2
+     * @Param [updateInfoDTO]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @Override
-    @Transactional
+//    @Transactional  应该是不生效
     public BaseApiResult updateInfo(UpdateInfoDTO updateInfoDTO) {
         String docId = updateInfoDTO.getId();
         Query query = new Query().addCriteria(Criteria.where("_id").is(docId));
-        FileDocument document = mongoTemplate.findById(updateInfoDTO.getId(), FileDocument.class, COLLECTION_NAME);
+        FileDocument document = mongoTemplate.findById(docId, FileDocument.class, COLLECTION_NAME);
         if (Objects.isNull(document)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
