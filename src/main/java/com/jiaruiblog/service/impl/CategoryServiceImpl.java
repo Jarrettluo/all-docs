@@ -334,12 +334,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @Author luojiarui
-     * @Description // 根据文档的id进行分类和文档的关系删除
+     * @Description // 根据文档的id进行分类和文档的关系删除，这里文档的id是fileId
      * @Date 11:20 上午 2022/6/25
      * @Param [docId]
      **/
     public void removeRelateByDocId(String docId) {
-        Query query = new Query(Criteria.where(DOC_ID).is(docId));
+        Query query = new Query(Criteria.where("fileId").is(docId));
         // 根据文档id进行文档关系的删除
         mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
     }

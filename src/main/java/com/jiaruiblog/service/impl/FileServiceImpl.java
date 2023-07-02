@@ -77,7 +77,8 @@ public class FileServiceImpl implements IFileService {
 
     private static final String[] EXCLUDE_FIELD = new String[]{"md5", CONTENT, "contentType", "suffix", "description",
             "gridfsId", "thumbId", "textFileId", "errorMsg"};
-    public static final String DOT = ".";
+    // 以点分割必须经过转译
+    public static final String DOT = "\\.";
 
     @Resource
     SystemConfig systemConfig;
@@ -565,11 +566,18 @@ public class FileServiceImpl implements IFileService {
         if (Objects.isNull(document)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
+        // 清除全部的标签和分类信息
+        // 删除分类关系
+        categoryServiceImpl.removeRelateByDocId(docId);
+        // 删除标签
+        tagServiceImpl.removeRelateByDocId(docId);
+
         // 保存文档和分类/标签的关系
         List<String> fileIds = com.google.common.collect.Lists.newArrayList(docId);
         String categoryId = updateInfoDTO.getCategoryId();
         List<String> tags = updateInfoDTO.getTags();
         FileUploadPO fileUploadPO = saveOrUpdateCategory(null, tags);
+
         if (Objects.nonNull(categoryId)) {
             categoryServiceImpl.addRelationShipDefault(categoryId, fileIds);
         }
@@ -583,7 +591,7 @@ public class FileServiceImpl implements IFileService {
         String[] split = originName.split(DOT);
         if (split.length > 1) {
             String suffix = split[split.length - 1];
-            name = name + DOT + suffix;
+            name = name + "." + suffix;
         }
         Update update = new Update();
         update.set("name", name);
