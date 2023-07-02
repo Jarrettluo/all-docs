@@ -44,7 +44,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -580,15 +579,14 @@ public class FileServiceImpl implements IFileService {
         String name = updateInfoDTO.getName();
         String desc = updateInfoDTO.getDesc();
 
-        String[] split = name.split(DOT);
-        List<String> stringList = Arrays.asList(split);
-        if (!CollectionUtils.isEmpty(stringList) && stringList.size() > 1) {
-            stringList.remove(stringList.size() -1);
+        String originName = document.getName();
+        String[] split = originName.split(DOT);
+        if (split.length > 1) {
+            String suffix = split[split.length - 1];
+            name = name + DOT + suffix;
         }
-        String originName = String.join(DOT, stringList);
-
         Update update = new Update();
-        update.set("name", originName);
+        update.set("name", name);
         update.set("description", desc);
         mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
 
