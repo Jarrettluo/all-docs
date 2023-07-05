@@ -53,6 +53,8 @@ public class User {
 
     private PermissionEnum permissionEnum;
 
+    private Date lastLogin;
+
     private Date createDate;
 
     private Date updateDate;

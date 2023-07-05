@@ -101,6 +101,13 @@ public class UserServiceImpl implements IUserService {
         result.put(AVATAR, dbUser.getAvatar());
         result.put(USERNAME, dbUser.getUsername());
         result.put("type", dbUser.getPermissionEnum() != null ? dbUser.getPermissionEnum().toString() : null);
+
+        // 登录以后记录登录时间
+        Query query1 = new Query(Criteria.where("_id").is(dbUser.getId()));
+        Update update = new Update();
+        update.set("lastLogin", new Date());
+        mongoTemplate.updateFirst(query1, update, User.class, COLLECTION_NAME);
+
         return BaseApiResult.success(result);
 
     }
