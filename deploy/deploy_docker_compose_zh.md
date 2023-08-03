@@ -28,13 +28,13 @@
 git clone https://github.com/Jarrettluo/document-sharing-site.git
 ```
 
-文件夹的结果如下：其中data中是各类中间件的数据文件夹，数据存储位置即该文件夹；esplugin 对应的是elasticsearch的插件文件夹；其他文件是辅助文件。
+文件夹的结构如下：其中data中是各类中间件的数据文件夹，数据存储位置即该文件夹；esplugin 对应的是elasticsearch的插件文件夹；其他文件是辅助文件。
 
 ![](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/assets/2023-03-07-20-31-13-image.png)
 
-将安装文件夹自行打包后上传到服务器指定文件夹。建议放置的位置最好是空间比较大的数据盘。
+将安装文件夹<em>自行打包</em>后上传到服务器指定文件夹。建议放置的位置最好是空间比较大的数据盘。
 
-例如打包为all-docs-docker.zip后，在服务器上使用unzip进行解压。注意打包文件夹只是为了一次性把所需文件上传到服务器，也可以使用其他办法。
+例如打包为`all-docs-docker.zip`后，在服务器上使用unzip进行解压。注意打包文件夹只是为了一次性把所需文件上传到服务器，也可以使用其他办法。
 
 ```shell
 unzip all-docs-docker.zip
@@ -52,7 +52,7 @@ cd all-docs-docker && ls
 
 #### 拉取全文档应用的镜像
 
-全文档的镜像包括前后端两个镜像。可以对源码打包all-docs、all-docs-web的docker镜像。
+全文档的镜像包括前端和后端两个镜像。可以对源码打包all-docs、all-docs-web的docker镜像。
 
 本项目在GitHub已经设置了自动推送镜像到Dockerhub，所以您也可以按照如下指令拉取最新的公共镜像：
 
@@ -72,9 +72,12 @@ docker pull kibana:7.9.3
 docker pull mongo
 ```
 
+> 这里使用的redis和mongo保持最新版本即可，或者选择已有的版本。
+> es和kibana选择与docker-compose.yml中对应文件
+
 #### Elasticsearch
 
-- 需要设置系统内核参数，否则会因为内存不足无法启动。
+- 需要设置系统内核参数，否则会因为内存不足无法启动。在即将部署的机器上运行执行如下设置。
 
 ```shell
 # 改变设置
@@ -83,11 +86,12 @@ sysctl -w vm.max_map_count=262144
 sysctl -p
 ```
 
-- 检查安装目录下存在文件夹`/data/elasticsearch/data` ，如果缺少，请创建。目录并设置权限，否则会因为无权限访问而启动失败。
+- 检查安装目录下存在文件夹`/data/elasticsearch/data` ，如果缺少，请创建目录并设置权限，否则会因为无权限访问而启动失败。
 
 ```shell
 # 创建目录
 mkdir data/elasticsearch/data/
+
 # 创建并改变该目录权限
 chmod 777 data/elasticsearch/data
 ```
@@ -97,6 +101,7 @@ chmod 777 data/elasticsearch/data
 #### 环境变量
 
 docker-compose.yml依赖环境变量，默认使用`.env`环境变量。用户可以对环境变量进行查看及修改。默认情况下无需修改。
+在本仓库的部署文件夹下包含了一个`install.conf`的配置文件，用户可打开查看。
 
 ```shell
 # 重命名安装配置文件为环境变量文件
@@ -211,12 +216,20 @@ services:
       - ad_server
 ```
 
-
+yml文件配置完毕以后，接下来指定文件运行容器。
 
 ```shell
 docker-compose -f docker-compose.yml up -d
 ```
 
+启动完毕以后应该可以看到一系列的容器出现`start`状态。
+可以查看容器的日志。
+```shell
+# 查看全部的docker-compose 日志
+docker-compose logs
+```
+
+[注意] 这里查看的日志不能出现error一类的报错，特别注意redis和mongo 是否已经连接上。
 
 
 ### 对依赖服务进行以下设置
@@ -230,8 +243,10 @@ docker-compose -f docker-compose.yml up -d
 ```shell
 # 在安装目录的esplugin中创建文件夹
 cd esplugin && mkdir analysis-ik
+
 # 退出到安装目录
 cd ..
+
 # 解压缩到指定文件夹
 unzip elasticsearch-analysis-ik-7.9.3.zip -d ./esplugin/analysis-ik/
 ```
@@ -268,7 +283,9 @@ docker restart ad_elasticsearch
 
 ### kibana
 
-定义文本抽取管道
+默认情况下，浏览器下访问：http://xxx:5601，可查看到kibana。
+> 关于kibana的时候请自行查询相关资料。
+定义文本抽取管道。
 
 ```shell
 PUT /_ingest/pipeline/attachment

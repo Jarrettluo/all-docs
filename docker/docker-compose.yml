@@ -34,7 +34,7 @@ services:
       - ${AD_ES_PORT}:9200
 
   kibana:
-    image: kibana:7.17.1
+    image: kibana:7.9.3
     container_name: ad_kibana
     links:
       - ad_elasticsearch:elasticsearch #可以用es这个域名访问elasticsearch服务

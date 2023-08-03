@@ -252,8 +252,8 @@ public class FileServiceImpl implements IFileService {
         if (Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
             throw new AuthenticationException();
         }
-        List<String> availableSuffixList = com.google.common.collect.Lists
-                .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
+//        List<String> availableSuffixList = com.google.common.collect.Lists
+//                .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
         try {
             if (file != null && !file.isEmpty()) {
                 String originFileName = file.getOriginalFilename();
@@ -262,9 +262,9 @@ public class FileServiceImpl implements IFileService {
                 }
                 //获取文件后缀名
                 String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
-                if (!availableSuffixList.contains(suffix)) {
-                    return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.FORMAT_ERROR);
-                }
+//                if (!availableSuffixList.contains(suffix)) {
+//                    return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.FORMAT_ERROR);
+//                }
                 String fileMd5 = SecureUtil.md5(file.getInputStream());
 
                 //已存在该文件，则拒绝保存

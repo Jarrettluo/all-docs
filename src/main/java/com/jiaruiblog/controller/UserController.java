@@ -108,6 +108,7 @@ public class UserController {
         update.set("male", user.getMale());
         update.set("description", user.getDescription());
         update.set("updateDate", new Date());
+        update.set("birthtime", user.getBirthtime());
         UpdateResult updateResult1 = template.updateFirst(query, update, User.class, COLLECTION_NAME);
         if (updateResult1.getMatchedCount() > 0) {
             return BaseApiResult.success("更新成功！");

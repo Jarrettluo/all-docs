@@ -123,6 +123,7 @@ public class UserServiceImpl implements IUserService {
             user.setPassword(userDTO.getEncodePassword());
             user.setCreateDate(new Date());
             user.setUpdateDate(new Date());
+            user.setLastLogin(new Date());
             mongoTemplate.save(user, COLLECTION_NAME);
             return BaseApiResult.success(MessageConstant.SUCCESS);
         }

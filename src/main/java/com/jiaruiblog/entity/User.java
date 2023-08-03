@@ -48,6 +48,8 @@ public class User {
 
     private String avatar;
 
+    private Date birthtime;
+
     // 封禁状态
     private Boolean banning = false;
 
