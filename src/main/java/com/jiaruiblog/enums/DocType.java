@@ -17,6 +17,10 @@ public enum DocType {
     HTML,
     MD,
     TXT,
+    // pic类的文档
+    JPG,
+    JPEG,
+    PNG,
     // unknown
     UNKNOWN;
 
@@ -36,6 +40,12 @@ public enum DocType {
                 return HTML;
             case ".txt":
                 return TXT;
+            case ".jpeg":
+                return JPEG;
+            case ".jpg":
+                return JPG;
+            case ".png":
+                return PNG;
             default:
                 return UNKNOWN;
         }
