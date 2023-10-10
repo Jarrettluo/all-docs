@@ -74,7 +74,6 @@ else
   docker pull mongo:latest
 fi
 
-
 # 检查是否已经存在 Docker Compose 文件
 if [ ! -f "docker-compose.yml" ]; then
   echo "未找到 docker-compose.yml 文件。请将 Docker Compose 文件放置在当前目录中后再运行此脚本。"
@@ -101,7 +100,7 @@ docker-compose up -d
 echo "Waiting for services to start..."
 # 在这里可以添加等待服务启动的逻辑，比如等待MongoDB、Elasticsearch和Redis准备就绪
 # 检查每个服务是否正常运行
-services=("service1" "service2" "service3" "service4")  # 替换为服务名称
+services=("ad_mongo" "ad_elasticsearch" "ad_redis" "ad_server", "ad_web")  # 替换为服务名称
 
 for service in "${services[@]}"; do
   if docker-compose ps -q "$service" > /dev/null; then
@@ -114,6 +113,19 @@ done
 
 #----------------------------------------------------------#
 
+# 在安装目录的esplugin中创建文件夹
+cd esplugin && mkdir analysis-ik
+
+# 退出到安装目录
+cd ..
+
+# 解压缩到指定文件夹
+unzip elasticsearch-analysis-ik-7.9.3.zip -d ./esplugin/analysis-ik/
+
+docker restart ad_elasticsearch
+
+#----------------------------------------------------------#
+
 # 安装Elasticsearch插件（如果有的话）
 echo "Installing Elasticsearch plugins..."
 # 在这里可以添加安装Elasticsearch插件的命令，比如使用Elasticsearch的REST API或官方提供的命令行工具安装插件
@@ -121,7 +133,7 @@ echo "Installing Elasticsearch plugins..."
 docker-compose exec elasticsearch bash
 
 # 在容器中安装插件，例如插件名称为插件名
-bin/elasticsearch-plugin install 插件名
+./bin/elasticsearch-plugin install ingest-attachment
 
 #----------------------------------------------------------#
 
@@ -174,8 +186,6 @@ curl -X PUT "http://localhost:9200/my_index" -H "Content-Type: application/json"
     }
   }
 }'
-
-
 
 #----------------------------------------------------------#
 

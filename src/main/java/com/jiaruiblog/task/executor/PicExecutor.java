@@ -1,5 +1,6 @@
 package com.jiaruiblog.task.executor;
 
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.task.data.TaskData;
 
 import javax.imageio.ImageIO;
@@ -21,6 +22,11 @@ public class PicExecutor extends TaskExecutor{
     public static final String PNG = "png";
     public static final Integer TARGET_WIDTH = 120;
     public static final Integer TARGET_HEIGHT = 200;
+
+    @Override
+    public void uploadFileToEs(InputStream is, FileDocument fileDocument, TaskData taskData) {
+        // do nothing for pic file
+    }
 
     @Override
     protected void readText(InputStream is, String textFilePath) throws IOException {
