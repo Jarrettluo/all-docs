@@ -55,6 +55,23 @@
 
 > 管理员账号：admin123 管理员密码： admin123
 
+## 快捷部署
+> 在ubuntu 18.04 环境下测试通过
+```shell
+# 克隆项目
+git clone https://github.com/Jarrettluo/document-sharing-site.git
+
+# 切换为管理员
+su root
+
+# 切换到工作目录
+cd document-sharing-site && cd docker
+
+# 启动脚本
+sudo ./auto.sh
+
+```
+
 ## 预览图
 
 <p align="center">

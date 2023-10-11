@@ -53,6 +53,23 @@ In small teams, there is often a large number of collaborative documents. For ex
 
 > administrator account：admin123, administrator password： admin123
 
+## QUICK START
+> test on ubuntu 18.04
+```shell
+# clone project
+git clone https://github.com/Jarrettluo/document-sharing-site.git
+
+# switch user to root
+su root
+
+# switch work directory
+cd document-sharing-site && cd docker
+
+# start shell script
+sudo ./auto.sh
+
+```
+
 ## PREVIEW
 
 <p align="center">

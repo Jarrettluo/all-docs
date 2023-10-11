@@ -18,16 +18,20 @@ if ! command -v docker &> /dev/null; then
     apt install -y apt-transport-https ca-certificates curl software-properties-common
 
     # 添加 Docker 的官方 GPG 密钥
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    # curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+    # 使用镜像
+    curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
 
     # 添加 Docker 的稳定存储库
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+    # echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+    add-apt-repository "deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
 
     # 更新软件包列表，以获取 Docker CE 版本信息
     apt update
 
     # 安装 Docker CE
-    apt install -y docker-ce docker-ce-cli containerd.io
+    apt install -y docker-ce
 
     # 启动 Docker 服务并设置开机启动
     systemctl start docker
@@ -46,9 +50,14 @@ fi
 
 if ! command -v docker-compose &> /dev/null; then
     echo "Installing Docker Compose..."
+    # cd /usr/local/bin
+    # mkdir docker-compose
+
     # 安装Docker Compose的命令
     # 下载最新版本的Docker Compose二进制文件
-    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    # sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+    sudo curl -SL "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
 
     # 添加可执行权限
     sudo chmod +x /usr/local/bin/docker-compose
@@ -80,6 +89,9 @@ if [ ! -f "docker-compose.yml" ]; then
   exit 1
 fi
 
+# 创建环境变量文件
+cp install.conf .env
+
 
 # 检查是否存在环境变量文件
 if [ -f ".env" ]; then
@@ -89,6 +101,9 @@ else
   echo "未找到环境变量文件 .env。请将 .env 文件放置在当前目录中后再运行此脚本。"
   exit 1
 fi
+
+# es 要求为映射的文件夹赋权
+chmod 777 ./data/elasticsearch/**
 
 # 启动Docker Compose服务
 echo "Starting services with Docker Compose..."
@@ -100,7 +115,7 @@ docker-compose up -d
 echo "Waiting for services to start..."
 # 在这里可以添加等待服务启动的逻辑，比如等待MongoDB、Elasticsearch和Redis准备就绪
 # 检查每个服务是否正常运行
-services=("ad_mongo" "ad_elasticsearch" "ad_redis" "ad_server", "ad_web")  # 替换为服务名称
+services=("ad_mongo" "ad_elasticsearch" "ad_redis" "ad_server" "ad_web")  # 替换为服务名称
 
 for service in "${services[@]}"; do
   if docker-compose ps -q "$service" > /dev/null; then
@@ -112,29 +127,29 @@ for service in "${services[@]}"; do
 done
 
 #----------------------------------------------------------#
+# 安装Elasticsearch插件（如果有的话）
+echo "Installing Elasticsearch plugins..."
+
+mkdir esplugins
 
 # 在安装目录的esplugin中创建文件夹
-cd esplugin && mkdir analysis-ik
-
+cd esplugins && mkdir analysis-ik
 # 退出到安装目录
 cd ..
 
-# 解压缩到指定文件夹
-unzip elasticsearch-analysis-ik-7.9.3.zip -d ./esplugin/analysis-ik/
+# 解压缩到指定文件夹， 安装插件
+unzip elasticsearch-analysis-ik-7.9.3.zip -d ./esplugins/analysis-ik/
 
+# 使用文件安装插件以后就要重启服务
 docker restart ad_elasticsearch
 
 #----------------------------------------------------------#
-
-# 安装Elasticsearch插件（如果有的话）
-echo "Installing Elasticsearch plugins..."
 # 在这里可以添加安装Elasticsearch插件的命令，比如使用Elasticsearch的REST API或官方提供的命令行工具安装插件
 # 进入 Elasticsearch 服务容器
-docker-compose exec elasticsearch bash
+docker-compose exec ad_elasticsearch ./bin/elasticsearch-plugin install ingest-attachment
 
-# 在容器中安装插件，例如插件名称为插件名
-./bin/elasticsearch-plugin install ingest-attachment
-
+# 查看已经安装的插件及版本
+curl -XGET 'http://localhost:9200/_cat/plugins?v&s=name'
 #----------------------------------------------------------#
 
 # 创建索引（如果需要）
@@ -159,6 +174,8 @@ curl -X PUT "http://localhost:9200/_ingest/pipeline/attachment" -H "Content-Type
         }
     ]
 }'
+
+docker restart ad_elasticsearch
 
 # 在这里使用curl或其他HTTP客户端库发送HTTP请求来创建索引
 # 示例使用curl命令来创建名为"my_index"的索引
