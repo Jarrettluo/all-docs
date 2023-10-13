@@ -120,6 +120,7 @@ fi
 
 # es 要求为映射的文件夹赋权
 chmod 777 ./data/elasticsearch/**
+chmod 777 data/elasticsearch/data
 
 # 启动Docker Compose服务
 echo "Starting services with Docker Compose..."
@@ -229,10 +230,13 @@ fi
 
 echo "等待es服务启动"
 
+# 等待60秒
+sleep 60
+
 echo "查看可用的插件信息"
 
 # 查看已经安装的插件及版本
-curl -XGET 'http://localhost:9200/_cat/plugins?v&s=name'
+curl -m 30 -XGET 'http://localhost:9200/_cat/plugins?v&s=name'
 #----------------------------------------------------------#
 
 # 创建索引（如果需要）
@@ -241,7 +245,7 @@ echo "Setting up Elasticsearch indices..."
 
 
 # 示例使用curl命令来定义文本抽取管道
-curl -X PUT "http://localhost:9200/_ingest/pipeline/attachment" -H "Content-Type: application/json" -d '{
+curl -m 30 -X PUT "http://localhost:9200/_ingest/pipeline/attachment" -H "Content-Type: application/json" -d '{
     "description": "Extract attachment information",
     "processors": [
         {
@@ -258,7 +262,7 @@ curl -X PUT "http://localhost:9200/_ingest/pipeline/attachment" -H "Content-Type
     ]
 }'
 
-echo "创建索引信息"
+echo "开始创建索引信息"
 
 # 在这里使用curl或其他HTTP客户端库发送HTTP请求来创建索引
 # 示例使用curl命令来创建名为"my_index"的索引
