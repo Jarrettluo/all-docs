@@ -66,6 +66,22 @@ if ! command -v docker-compose &> /dev/null; then
     sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 fi
 
+
+# 指定要检查的Docker容器名称或ID的列表
+container_list=("ad_mongo" "ad_elasticsearch" "ad_redis" "ad_server" "ad_web")
+
+for container_name_or_id in "${container_list[@]}"; do
+    # 检查容器是否存在
+    if docker ps -a --format "{{.Names}}" | grep -q "$container_name_or_id"; then
+        # 如果容器存在，停止并删除容器
+        docker stop "$container_name_or_id"
+        docker rm "$container_name_or_id"
+        echo "容器 $container_name_or_id 已停止并删除。"
+    else
+        echo "容器 $container_name_or_id 不存在，无需停止和删除。"
+    fi
+done
+
 #----------------------------------------------------------#
 # 检查本地是否有 Redis 镜像
 if docker image inspect redis:latest &> /dev/null; then
@@ -126,9 +142,27 @@ for service in "${services[@]}"; do
   fi
 done
 
+
+# 改变es的设置
+sysctl -w vm.max_map_count=262144
+# 使之立即生效
+sysctl -p
+
 #----------------------------------------------------------#
 # 安装Elasticsearch插件（如果有的话）
 echo "Installing Elasticsearch plugins..."
+
+# 指定要删除的文件夹的路径
+folder_path="esplugins"
+
+# 检查文件夹是否存在
+if [ -d "$folder_path" ]; then
+    # 如果存在，删除文件夹
+    rm -r "$folder_path"
+    echo "文件夹 $folder_path 已删除。"
+else
+    echo "文件夹 $folder_path 不存在，无需删除。"
+fi
 
 mkdir esplugins
 
@@ -136,6 +170,16 @@ mkdir esplugins
 cd esplugins && mkdir analysis-ik
 # 退出到安装目录
 cd ..
+
+# 检查是否已安装 unzip
+if ! command -v unzip &> /dev/null; then
+    # 如果未安装，则使用 apt 安装
+    sudo apt update
+    sudo apt install unzip -y
+    echo "unzip 已安装"
+else
+    echo "unzip 已经安装"
+fi
 
 # 解压缩到指定文件夹， 安装插件
 unzip elasticsearch-analysis-ik-7.9.3.zip -d ./esplugins/analysis-ik/
@@ -147,6 +191,45 @@ docker restart ad_elasticsearch
 # 在这里可以添加安装Elasticsearch插件的命令，比如使用Elasticsearch的REST API或官方提供的命令行工具安装插件
 # 进入 Elasticsearch 服务容器
 docker-compose exec ad_elasticsearch ./bin/elasticsearch-plugin install ingest-attachment
+
+
+
+# 指定要重启的Docker容器的名称或ID
+container_name_or_id="ad_elasticsearch"
+
+# 重启Docker容器
+docker restart "$container_name_or_id"
+
+# 等待容器变为可用状态
+echo "等待容器 $container_name_or_id 可用..."
+
+# 设置一个等待循环来检查容器状态
+max_retries=30
+retry_count=0
+container_ready=false
+
+while [ $retry_count -lt $max_retries ]; do
+    container_status=$(docker ps -f "name=$container_name_or_id" --format "{{.Status}}")
+
+    if [[ $container_status == *"Up"* ]]; then
+        container_ready=true
+        break
+    fi
+
+    sleep 5
+    retry_count=$((retry_count + 1))
+done
+
+# 如果容器可用，打印消息
+if [ "$container_ready" = true ]; then
+    echo "容器 $container_name_or_id 已经可用。"
+else
+    echo "无法等待容器 $container_name_or_id 变为可用。"
+fi
+
+echo "等待es服务启动"
+
+echo "查看可用的插件信息"
 
 # 查看已经安装的插件及版本
 curl -XGET 'http://localhost:9200/_cat/plugins?v&s=name'
@@ -175,11 +258,11 @@ curl -X PUT "http://localhost:9200/_ingest/pipeline/attachment" -H "Content-Type
     ]
 }'
 
-docker restart ad_elasticsearch
+echo "创建索引信息"
 
 # 在这里使用curl或其他HTTP客户端库发送HTTP请求来创建索引
 # 示例使用curl命令来创建名为"my_index"的索引
-curl -X PUT "http://localhost:9200/my_index" -H "Content-Type: application/json" -d '{
+curl -X PUT "http://localhost:9200/docwrite" -H "Content-Type: application/json" -d '{
   "mappings": {
     "properties": {
       "id":{

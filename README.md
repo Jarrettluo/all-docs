@@ -65,6 +65,9 @@ su root
 # switch work directory
 cd document-sharing-site && cd docker
 
+# chmod
+chmod +x auto.sh
+
 # start shell script
 sudo ./auto.sh
 

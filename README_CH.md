@@ -67,6 +67,9 @@ su root
 # 切换到工作目录
 cd document-sharing-site && cd docker
 
+# 修改文件权限
+chmod +x auto.sh
+
 # 启动脚本
 sudo ./auto.sh
 
