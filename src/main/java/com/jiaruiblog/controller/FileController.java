@@ -534,4 +534,56 @@ public class FileController {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
     }
+
+    @PostMapping("/temporaryFileDownloadLink")
+    public BaseApiResult temporaryFileDownloadLink() {
+
+//
+//        public class TemporaryFileDownloadLink {
+//
+//            private static final String REDIS_HOST = "localhost"; // Redis 服务器地址
+//            private static final int REDIS_PORT = 6379; // Redis 端口
+//
+//            public static void main(String[] args) {
+//                Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT);
+//
+//                // 生成一个随机的下载链接令牌
+//                String downloadToken = generateRandomToken();
+//
+//                // 设置下载链接有效期（例如，1小时，单位秒）
+//                int expirationSeconds = 3600;
+//
+//                // 存储下载链接信息到 Redis 中，包括文件信息和过期时间
+//                String fileKey = "download:" + downloadToken; // 使用前缀以区分不同类型的链接
+//                String fileUrl = "https://example.com/files/sample.pdf"; // 文件的实际下载链接
+
+        // jedis.setex 是 Redis 客户端库 Jedis 提供的方法，用于设置 Redis 中的键的过期时间。
+//                jedis.setex(fileKey, expirationSeconds, fileUrl);
+//
+//                System.out.println("Temporary download link: " + downloadToken);
+//
+//                // 模拟用户访问下载链接
+//                String userToken = "your_user_token"; // 用户提供的令牌
+//
+//                if (jedis.exists("download:" + userToken)) {
+//                    String downloadUrl = jedis.get("download:" + userToken);
+//                    System.out.println("Accessing download link: " + downloadUrl);
+//                    // 此时可以重定向用户到 downloadUrl 进行文件下载
+//                } else {
+//                    System.out.println("Invalid or expired download link.");
+//                }
+//
+//                jedis.close();
+//            }
+//
+//            private static String generateRandomToken() {
+//                // 生成一个随机的UUID作为下载链接令牌
+//                return UUID.randomUUID().toString();
+//            }
+//        }
+
+
+
+        return BaseApiResult.success();
+    }
 }
