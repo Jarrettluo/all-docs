@@ -49,6 +49,11 @@ public class TaskExecutorFactory {
             case TXT:
                 taskExecutor = new TxtExecutor();
                 break;
+            case JPG:
+            case JPEG:
+            case PNG:
+                taskExecutor = new PicExecutor();
+                break;
             default:
                 break;
         }

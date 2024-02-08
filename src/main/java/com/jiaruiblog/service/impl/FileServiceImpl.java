@@ -285,8 +285,14 @@ public class FileServiceImpl implements IFileService {
                     case "pptx":
                     case "xlsx":
                     case "html":
+                    case "xhtml":
+                    case "xht":
+                    case "htm":
                     case "md":
                     case "txt":
+                    case "jpeg":
+                    case "jpg":
+                    case "png":
                         taskExecuteService.execute(fileDocument);
                         break;
                     default:

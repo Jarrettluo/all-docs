@@ -1,5 +1,7 @@
 package com.jiaruiblog.enums;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @Author Jarrett Luo
  * @Date 2022/10/24 11:39
@@ -17,10 +19,17 @@ public enum DocType {
     HTML,
     MD,
     TXT,
+    // pic类的文档
+    JPG,
+    JPEG,
+    PNG,
     // unknown
     UNKNOWN;
 
     public static DocType getDocType(String suffixName) {
+        if (StringUtils.isNoneBlank(suffixName)) {
+            suffixName = StringUtils.toRootLowerCase(suffixName);
+        }
         switch (suffixName) {
             case ".pdf":
                 return PDF;
@@ -33,9 +42,18 @@ public enum DocType {
             case ".md":
                 return MD;
             case ".html":
+            case ".xhtml":
+            case ".xht":
+            case ".htm":
                 return HTML;
             case ".txt":
                 return TXT;
+            case ".jpeg":
+                return JPEG;
+            case ".jpg":
+                return JPG;
+            case ".png":
+                return PNG;
             default:
                 return UNKNOWN;
         }
