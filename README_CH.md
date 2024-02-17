@@ -158,11 +158,9 @@ https://github.com/Jarrettluo/document-sharing-site.git
 <!-- CONTRIBUTING -->
 ## 提交代码
 
-目前仍然存在很多问题，欢迎一起来贡献！
+欢迎加入微信交流群，一起玩😄，如果微信群二维码失效，可以加我微信拉你进群。
 
-加入微信群，一起玩😄
-
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/WechatIMG112.jpeg" alt="imGroup" width="200">
+<img src="https://github.com/Jarrettluo/all-docs-vue/blob/master/images/WechatIMG349.jpg" alt="imGroup" width="200">
 
 > 如果有二次开发或者私有部署需求，请联系我
 
@@ -193,9 +191,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 Jarrett Luo - luojiarui2@163.com
 
 如果您觉得项目不错，欢迎赞赏支持！
-
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.jpg" alt="wechat" width="200">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.jpg" alt="wechat" width="200">
+<img src="https://github.com/Jarrettluo/all-docs-vue/blob/master/images/WechatIMG351.jpg" alt="imGroup" width="200">
 
 
 

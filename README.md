@@ -156,7 +156,7 @@ read [open issues](https://github.com/othneildrew/Best-README-Template/issues) ã
 
 You can join our Wechat group if you are interested.
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/WechatIMG112.jpeg" alt="imGroup" width="200">
+<img src="https://github.com/Jarrettluo/all-docs-vue/blob/master/images/WechatIMG349.jpg" alt="imGroup" width="200">
 
 > If you have any requirements for customization or private deployment, please feel free to contact me.
 
@@ -188,8 +188,7 @@ Jarrett Luo - luojiarui2@163.com
 
 If you find the project valuable, your support and appreciation are welcome!
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.jpg" alt="wechat" width="200">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.jpg" alt="wechat" width="200">
+<img src="https://github.com/Jarrettluo/all-docs-vue/blob/master/images/WechatIMG351.jpg" alt="imGroup" width="200">
 
 
 
