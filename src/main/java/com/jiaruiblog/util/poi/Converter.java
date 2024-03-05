@@ -6,13 +6,12 @@ import java.io.OutputStream;
 
 /**
  * @ClassName Converter
- * @Description TODO
+ * @Description 转换的抽象类
  * @Author luojiarui
  * @Date 2023/2/22 22:58
  * @Version 1.0
  **/
 public abstract class Converter {
-
 
     private final String LOADING_FORMAT = "\nLoading stream\n\n";
     private final String PROCESSING_FORMAT = "Load completed in %1$dms, now converting...\n\n";
@@ -27,7 +26,7 @@ public abstract class Converter {
     protected boolean showOutputMessages = false;
     protected boolean closeStreamsWhenComplete = true;
 
-    public Converter(InputStream inStream, OutputStream outStream,
+    protected Converter(InputStream inStream, OutputStream outStream,
                      boolean showMessages, boolean closeStreamsWhenComplete){
         this.inStream = inStream;
         this.outStream = outStream;

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 /**
  * @ClassName PptxExecutor
- * @Description TODO
+ * @Description Pptx转换执行器
  * @Author luojiarui
  * @Date 2023/2/25 17:24
  * @Version 1.0
@@ -26,7 +26,6 @@ public class PptxExecutor extends DocxExecutor{
         taskData.setPreviewFilePath(UUID.randomUUID() + ".pdf");
         try {
             OutputStream outStream = getOutFileStream(taskData.getPreviewFilePath());
-            boolean shouldShowMessages = true;
             Converter converter = new PptxToPDFConverter(inStream, outStream, true,
                     true);
             converter.convert();
@@ -51,9 +50,10 @@ public class PptxExecutor extends DocxExecutor{
             //Ignore error since it means not parent directories
         }
 
-        outFile.createNewFile();
-        FileOutputStream oStream = new FileOutputStream(outFile);
-        return oStream;
+        if (!outFile.createNewFile()) {
+            throw new TaskRunException("create file is error!");
+        }
+        return new FileOutputStream(outFile);
     }
 
 }

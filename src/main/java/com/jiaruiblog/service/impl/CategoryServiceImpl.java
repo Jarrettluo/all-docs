@@ -83,6 +83,10 @@ public class CategoryServiceImpl implements CategoryService {
         update.set("name", category.getName());
         update.set("updateTime", category.getUpdateDate());
         mongoTemplate.updateFirst(query, update, Category.class, COLLECTION_NAME);
+        // TODO
+        // 异步更新该分类下的文本信息，避免出现已经被删除的文档还放在该分类中
+        // 联合查询关系表和文档表；如果类型下的文档是存在的，则返回true，否则进行删除分类下的文档信息
+
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 

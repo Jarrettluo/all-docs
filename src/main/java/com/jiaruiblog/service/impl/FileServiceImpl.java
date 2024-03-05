@@ -400,7 +400,10 @@ public class FileServiceImpl implements IFileService {
         return org.apache.commons.lang3.StringUtils.substringAfterLast(srcRealPath, "/");
     }
 
-    private FileDocument saveFileNew(MultipartFile file, String userId, String username, String desc) throws IOException {
+    private FileDocument saveFileNew(MultipartFile file,
+                                     String userId,
+                                     String username,
+                                     String desc) throws IOException {
         String originFileName = file.getOriginalFilename();
         if (!StringUtils.hasText(originFileName)) {
             throw new RuntimeException(MessageConstant.FORMAT_ERROR);

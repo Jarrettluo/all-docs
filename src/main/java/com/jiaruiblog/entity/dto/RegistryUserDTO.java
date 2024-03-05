@@ -29,12 +29,14 @@ public class RegistryUserDTO {
     但是SHA仍然是公认的安全加密算法，较之MD5更为安全*/
     public static final String KEY_SHA = "SHA";
 
+    // todo 用户注册的用户名为空
     @ApiModelProperty(value = "用户名", notes = "最小3个字符， 最长32个字符", required = true)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     @Size(min = 3, max = 32, message = MessageConstant.PARAMS_LENGTH_REQUIRED)
     @Pattern(regexp = RegexConstant.NUM_WORD_REG, message = MessageConstant.PARAMS_FORMAT_ERROR)
     String username;
 
+    // todo 用户的密码是： [Slc281335++..] 报错了
     @ApiModelProperty(value = "用户密码", notes = "最小3个字符， 最长32个字符", required = true)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     @Size(min = 3, max = 32, message = MessageConstant.PARAMS_LENGTH_REQUIRED)

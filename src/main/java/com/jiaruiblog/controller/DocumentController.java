@@ -61,6 +61,8 @@ public class DocumentController {
             int n = filter.checkSensitiveWord(filterWord, 0, 1);
             //存在非法字符
             if (n > 0) {
+                // todo 非法字符的计算可能不准确：
+                // NullPointer， Null， java， on
                 log.error("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
             } else {
                 redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
