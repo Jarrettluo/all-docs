@@ -4,9 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Sets;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
+import com.jiaruiblog.entity.data.WordCloudItem;
 import com.jiaruiblog.service.ElasticService;
+import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -17,11 +20,15 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -54,6 +61,7 @@ public class ElasticServiceImpl implements ElasticService {
      * 1.文件的名字
      * 2.文件type
      * 3.文件的data 64编码
+     * 添加文档
      */
     public void upload(FileObj file) throws IOException {
         IndexRequest indexRequest = new IndexRequest(INDEX_NAME);
@@ -172,5 +180,74 @@ public class ElasticServiceImpl implements ElasticService {
         return fileDocumentList;
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 根据文档的id删除文档
+     * @Date 22:52 2023/5/3
+     * @Param [docMd5]
+     **/
+    void removeByDocId(String docMd5) {
+        if (!StringUtils.hasText(docMd5)) {
+            return;
+        }
+        try {
+            DeleteRequest deleteRequest = new DeleteRequest(INDEX_NAME, docMd5);
+            client.delete(deleteRequest, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    /**
+     * @Author luojiarui
+     * @Description 词云的聚合只能是Keyword 类型
+     * 使用了attachment.content字段来进行词云聚合，这是因为Attachment Processor插件会将提取的文本内容存储在名为attachment.content的字段中。
+     * ES 的Text 字段不能进行聚合
+     * @Date 10:15 2023/5/21
+     * @Param []
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Override
+    public BaseApiResult getWordStat() throws IOException {
+        SearchRequest searchRequest = new SearchRequest(INDEX_NAME);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+
+        // 创建词云聚合
+        TermsAggregationBuilder aggregation = AggregationBuilders.terms("word_cloud")
+                .field("attachment.content")
+                .size(100); // 限制返回的词云数量
+
+        searchSourceBuilder.aggregation(aggregation);
+        searchRequest.source(searchSourceBuilder);
+
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+//        SearchResponse searchResponse = client.search(searchSourceBuilder, RequestOptions.DEFAULT);
+
+        Terms wordCloudAggregation = searchResponse.getAggregations().get("word_cloud");
+
+        List<? extends Terms.Bucket> buckets = wordCloudAggregation.getBuckets();
+
+        // 自定义处理词云数据
+        List<WordCloudItem> wordCloudItems = new ArrayList<>();
+
+        for (Terms.Bucket bucket : buckets) {
+            String keyword = bucket.getKeyAsString();
+            long count = bucket.getDocCount();
+            WordCloudItem wordCloudItem = new WordCloudItem(keyword, count);
+            wordCloudItems.add(wordCloudItem);
+        }
+
+        // 根据词云数量排序
+        wordCloudItems.sort(Comparator.comparingLong(WordCloudItem::getCount).reversed());
+
+        // 打印词云结果
+        for (WordCloudItem item : wordCloudItems) {
+            System.out.println("Keyword: " + item.getWord() + ", Count: " + item.getCount());
+        }
+
+        return BaseApiResult.success(wordCloudItems);
+    }
 }

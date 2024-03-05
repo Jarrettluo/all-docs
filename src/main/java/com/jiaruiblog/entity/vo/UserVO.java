@@ -28,16 +28,22 @@ public class UserVO {
 
     private String mail;
 
-    private Boolean male = false;
+    private Boolean male = null;
 
     private String description;
 
     private String avatar;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date birthtime;
+
     // 封禁状态
     private Boolean banning = false;
 
     private PermissionEnum permissionEnum;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date lastLogin;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createDate;

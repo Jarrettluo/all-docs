@@ -230,4 +230,8 @@ public class RedisServiceImpl implements RedisService {
         return 1;
     }
 
+    @Override
+    public void removeByDocId(String docId) {
+        delKey(docId, DOC_KEY);
+    }
 }

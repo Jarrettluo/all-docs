@@ -1,6 +1,6 @@
 version: '2.1'
 services:
-  ad_mongodb:
+  ad_mongo:
     image: mongo
     container_name: ad_mongo
     restart: always
@@ -33,8 +33,8 @@ services:
     ports:
       - ${AD_ES_PORT}:9200
 
-  kibana:
-    image: kibana:7.17.1
+  ad_kibana:
+    image: kibana:7.9.3
     container_name: ad_kibana
     links:
       - ad_elasticsearch:elasticsearch #可以用es这个域名访问elasticsearch服务
@@ -81,7 +81,7 @@ services:
       timeout: 10s
       retries: 20
     depends_on:
-      - ad_mongodb
+      - ad_mongo
       - ad_redis
 
   ad_web:

@@ -22,6 +22,8 @@
 [![MIT License][license-shield]][license-url]
 <!--[![LinkedIn][linkedin-shield]][linkedin-url]-->
 
+- [English version Readme_en.md](https://github.com/Jarrettluo/document-sharing-site/blob/main/README.md)
+- [中文版 Readme.md](https://github.com/Jarrettluo/document-sharing-site/blob/main/README_CH.md)
 
 <!-- PROJECT LOGO -->
 <br />
@@ -30,10 +32,10 @@
     <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/banner.png" alt="Logo" width="300" height="300">
   </a>
 
-<h3 align="center">全文档</h3>
+<h3 align="center">All Docs</h3>
 
   <p align="center">
-    支持全文检索的文档分享、存储系统。
+    Document sharing and storage system with full-text search support.
     <br />
   </p>
 </p>
@@ -43,142 +45,156 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## 关于全文档
+## ABOUT THE PROJECT
 
-在小团队中往往会产生大量的协作文档。例如，我们会将各类文档放在网盘、svn等软件中，但是存在文档内的内容无法快速搜索的问题。因此，专门开发了一个用于存储ppt、word、png等文档的，支持私有部属的知识库的检索。
+In small teams, there is often a large number of collaborative documents. For example, we place various types of documents in cloud storage, SVN, and other software, but there is a problem with the inability to quickly search for content within the documents. Therefore, we have developed a dedicated knowledge base for storing documents such as PPT, Word, PNG, etc., which supports private deployment and retrieval.
 
+<p>Experience URL：<a href="http://81.69.247.172/#/">http://81.69.247.172/#/</a></p>
 
-<p>体验地址：<a href="http://81.69.247.172/#/">http://81.69.247.172/#/</a></p>
+> administrator account：admin123, administrator password： admin123
 
-## 预览图
+## QUICK START
+> test on ubuntu 18.04
+```shell
+# clone project
+git clone https://github.com/Jarrettluo/document-sharing-site.git
+
+# switch user to root
+su root
+
+# switch work directory
+cd document-sharing-site && cd docker
+
+# chmod
+chmod +x auto.sh
+
+# start shell script
+sudo ./auto.sh
+
+```
+
+## PREVIEW
 
 <p align="center">
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/homepage.png" alt="homepage" height="400">
 <p align="center">
-全文档首页图
+homepage
 </p>
 </p>
 
 <p align="center">
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/docList.png" alt="docList" height="400">
 <p align="center">
-文档列表
+list of documents
 </p>
 </p>
 
 <p align="center">
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/searchPage.png" alt="searchPage" height="400">
 <p align="center">
-文档搜索页面
+page of search 
 </p>
 </p>
 
 <p align="center">
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/fileUpload.png" alt="fileUpload" height="400">
 <p align="center">
-文档上传页面
+upload page
 </p>
 </p>
 
 <p align="center">
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/userPage.png" alt="userPage" height="400">
 <p align="center">
-用户个人信息页面
+user's info page
 </p>
 </p>
 
-### 开源地址
+### Repository URL
 
-前端项目
+frontend project:
 <a href="https://github.com/Jarrettluo/all-documents-vue.git">
 https://github.com/Jarrettluo/all-documents-vue.git
 </a>
 
 
-后端项目 
+backend project:
 <a href="https://github.com/Jarrettluo/document-sharing-site.git">
 https://github.com/Jarrettluo/document-sharing-site.git
 </a>
 
-选择MongoDB作为主要的数据库，存储文档和文件。
+We choose MongoDB as the primary database to store documents and files.
 
-后端技术：SpringBoot + MongoDB + ES
+Backend：SpringBoot + MongoDB + ES
 
-前端技术：Vue + axios
+Frontend：Vue + axios
 
-### 项目部署
+### PROJECT DEPLOYMENT
 
-- [全文档在Windows环境下部署](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/depoly_win_zh.md)
-- [全文档在Linux环境下部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_linux_zh.md)
-- [全文档使用Docker部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_zh.md)
-- [全文档使用Docker-Compose部署--最新发布](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_compose_zh.md)
+- [Deploy on Windows](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/depoly_win_zh.md)
+- [Deploy on Linux](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_linux_zh.md)
+- [Deploy by Docker](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_zh.md)
+- [Deploy by Docker Compose](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_compose_zh.md)
 
 <!-- ROADMAP -->
-## 路线图
+## ROADMAP
 
-准备做的事情
+- Record the last page number read by the user 🌟
+- Revamp the search page style 🌟🌟
+- Allow users to bookmark documents 🌟
+- Support video files 🌟
+- Support permission management 🌟
+- Support file tree 🌟
+- Support Mobi files 🌟
 
-- 记录用户上次阅读的页数 🌟
-- 用户收藏文档的查询 🌟🌟🌟
-- 用户上传文档的查询 🌟🌟🌟
-- 搜索页面样式改造 🌟🌟
-- 用户对文档进行标记 🌟
-- 支持视频文件 🌟
-- 支持权限划分 🌟
-- 支持文件树 🌟
-- 支持Mobi文件 🌟
-
-查看 [open issues](https://github.com/othneildrew/Best-README-Template/issues) 。
+read [open issues](https://github.com/othneildrew/Best-README-Template/issues) 。
 
 
 
 <!-- CONTRIBUTING -->
-## 提交代码
+## CONTRIBUTING
 
-目前仍然存在很多问题，欢迎一起来贡献！
+You can join our Wechat group if you are interested.
 
-加入微信群，一起玩😄
+<img src="https://github.com/Jarrettluo/all-docs-vue/blob/master/images/WechatIMG349.jpg" alt="imGroup" width="200">
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/WechatIMG78.jpeg" alt="imGroup" width="200">
+> If you have any requirements for customization or private deployment, please feel free to contact me.
 
-> 如果有二次开发或者私有部署需求，请联系我
-
-(添加微信请备注"全文档")
+(Please add me on WeChat and kindly mention 'All Docs' in the request.)
 
 
 <img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/Wechat.jpeg" alt="imGroup" width="200">
 
 
-1. `Fork` 该项目
-2. 创建自己的分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交你的功能 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开一个PR
-
-
-
-<!-- LICENSE -->
-## 许可证
-
-查看 `LICENSE` 文件。
+1. `Fork` This project
+2. create a branch  (`git checkout -b feature/AmazingFeature`)
+3. commit you feature (`git commit -m 'Add some AmazingFeature'`)
+4. push the commit (`git push origin feature/AmazingFeature`)
+5. open a pull request
 
 
 
 <!-- CONTACT -->
-## 联系我
+## CONTACT
+
+Read `LICENSE` file。
+
+
+
+<!-- CONTACT -->
+## CONTACT
 
 Jarrett Luo - luojiarui2@163.com
 
-如果您觉得项目不错，欢迎赞赏支持！
+If you find the project valuable, your support and appreciation are welcome!
 
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/wechat.jpg" alt="wechat" width="200">
-<img src="https://github.com/Jarrettluo/document-sharing-site/blob/main/images/alipay.jpg" alt="alipay" width="200">
+<img src="https://github.com/Jarrettluo/all-docs-vue/blob/master/images/WechatIMG351.jpg" alt="imGroup" width="200">
 
 
 
 <!-- ACKNOWLEDGEMENTS -->
-## 致谢
-- 暂无
+## ACKNOWLEDGEMENTS
+- YOU
 
 
 

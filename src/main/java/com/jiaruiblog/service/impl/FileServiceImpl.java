@@ -13,14 +13,12 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
+import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.entity.po.FileUploadPO;
 import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.enums.DocStateEnum;
-import com.jiaruiblog.service.IFileService;
-import com.jiaruiblog.service.IUserService;
-import com.jiaruiblog.service.RedisService;
-import com.jiaruiblog.service.TaskExecuteService;
+import com.jiaruiblog.service.*;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.PdfUtil;
@@ -81,6 +79,8 @@ public class FileServiceImpl implements IFileService {
 
     private static final String[] EXCLUDE_FIELD = new String[]{"md5", CONTENT, "contentType", "suffix", "description",
             "gridfsId", "thumbId", "textFileId", "errorMsg"};
+    // 以点分割必须经过转译
+    public static final String DOT = "\\.";
 
     @Resource
     SystemConfig systemConfig;
@@ -118,6 +118,9 @@ public class FileServiceImpl implements IFileService {
     @Resource
     private IUserService userService;
 
+    @Resource
+    private DocReviewService docReviewService;
+
     List<String> availableSuffixList = com.google.common.collect.Lists
             .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
 
@@ -142,8 +145,6 @@ public class FileServiceImpl implements IFileService {
         fileDocument.setGridfsId(gridfsId);
 
         fileDocument = mongoTemplate.save(fileDocument, COLLECTION_NAME);
-
-        // TODO 在这里进行异步操作
 
         return fileDocument;
     }
@@ -253,8 +254,8 @@ public class FileServiceImpl implements IFileService {
         if (Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
             throw new AuthenticationException();
         }
-        List<String> availableSuffixList = com.google.common.collect.Lists
-                .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
+//        List<String> availableSuffixList = com.google.common.collect.Lists
+//                .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
         try {
             if (file != null && !file.isEmpty()) {
                 String originFileName = file.getOriginalFilename();
@@ -263,9 +264,9 @@ public class FileServiceImpl implements IFileService {
                 }
                 //获取文件后缀名
                 String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
-                if (!availableSuffixList.contains(suffix)) {
-                    return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.FORMAT_ERROR);
-                }
+//                if (!availableSuffixList.contains(suffix)) {
+//                    return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.FORMAT_ERROR);
+//                }
                 String fileMd5 = SecureUtil.md5(file.getInputStream());
 
                 //已存在该文件，则拒绝保存
@@ -536,6 +537,10 @@ public class FileServiceImpl implements IFileService {
     private FileDocument saveToDb(String md5, MultipartFile file, String userId, String username, String desc) {
         FileDocument fileDocument;
         String originFilename = file.getOriginalFilename();
+        if (originFilename.contains("/")) {
+            String[] split = originFilename.split("/");
+            originFilename = split[split.length-1];
+        }
         fileDocument = new FileDocument();
         fileDocument.setName(originFilename);
         fileDocument.setSize(file.getSize());
@@ -618,6 +623,57 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @Author luojiarui
+     * @Description 对文档的名称，标签，分类，描述进行修改
+     * @Date 09:51 2023/7/2
+     * @Param [updateInfoDTO]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @Override
+//    @Transactional  应该是不生效
+    public BaseApiResult updateInfo(UpdateInfoDTO updateInfoDTO) {
+        String docId = updateInfoDTO.getId();
+        Query query = new Query().addCriteria(Criteria.where("_id").is(docId));
+        FileDocument document = mongoTemplate.findById(docId, FileDocument.class, COLLECTION_NAME);
+        if (Objects.isNull(document)) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        // 清除全部的标签和分类信息
+        // 删除分类关系
+        categoryServiceImpl.removeRelateByDocId(docId);
+        // 删除标签
+        tagServiceImpl.removeRelateByDocId(docId);
+
+        // 保存文档和分类/标签的关系
+        List<String> fileIds = com.google.common.collect.Lists.newArrayList(docId);
+        String categoryId = updateInfoDTO.getCategoryId();
+        List<String> tags = updateInfoDTO.getTags();
+        FileUploadPO fileUploadPO = saveOrUpdateCategory(null, tags);
+
+        if (Objects.nonNull(categoryId)) {
+            categoryServiceImpl.addRelationShipDefault(categoryId, fileIds);
+        }
+        tagServiceImpl.addTagRelationShip(fileUploadPO.getTagIds(), fileIds);
+
+        // 更新文档的名称和描述信息
+        String name = updateInfoDTO.getName();
+        String desc = updateInfoDTO.getDesc();
+
+        String originName = document.getName();
+        String[] split = originName.split(DOT);
+        if (split.length > 1) {
+            String suffix = split[split.length - 1];
+            name = name + "." + suffix;
+        }
+        Update update = new Update();
+        update.set("name", name);
+        update.set("description", desc);
+        mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
+
+        return BaseApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    /**
      * 查询附件
      *
      * @param id 文件id
@@ -672,8 +728,8 @@ public class FileServiceImpl implements IFileService {
             fileDocument.setSize(fsFile.getLength());
             fileDocument.setName(fsFile.getFilename());
 
-            if (fsFile == null || fsFile.getObjectId() == null) {
-                return Optional.empty();
+            if (fsFile != null) {
+                fsFile.getObjectId();
             }
 
             // 开启文件下载
@@ -872,16 +928,31 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public BaseApiResult remove(String id) {
+    public BaseApiResult remove(FileDocument fileDocument) {
+        String id = fileDocument.getId();
         if (!isExist(id)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 删除评论信息，删除分类关系，删除标签关系
+        // 删除dfs的文件；删除es的索引；删除审核的消息
         removeFile(id, true);
+
+        // 删除评论信息
         commentServiceImpl.removeByDocId(id);
+        // 删除分类关系
         categoryServiceImpl.removeRelateByDocId(id);
+        // 删除收藏关系
         collectServiceImpl.removeRelateByDocId(id);
+        // 删除标签
         tagServiceImpl.removeRelateByDocId(id);
+
+        // 删除文档评审关系
+        docReviewService.removeReviews(Collections.singletonList(id));
+        // 删除文档的索引内容
+        elasticServiceImpl.removeByDocId(fileDocument.getMd5());
+
+        // 删除redis中对于文档的统计信息
+        redisService.removeByDocId(id);
 
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }

@@ -3,6 +3,7 @@ package com.jiaruiblog.service;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
+import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.BaseApiResult;
@@ -162,10 +163,20 @@ public interface IFileService {
     /**
      * 删除掉已经存在的文档
      *
-     * @param id -> Long
+     * @param fileDocument -> 文档信息
      * @return ApiResult
      */
-    BaseApiResult remove(String id);
+    BaseApiResult remove(FileDocument fileDocument);
+
+    /**
+     * @Author luojiarui
+     * @Description 管理员对文档的基本信息进行修改
+     * @Date 23:17 2023/6/28
+     * @Param [updateInfoDTO]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    BaseApiResult updateInfo(UpdateInfoDTO updateInfoDTO);
+
 
     BaseApiResult listWithCategory(DocumentDTO documentDTO);
 

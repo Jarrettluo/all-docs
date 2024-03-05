@@ -64,4 +64,6 @@ public interface DocReviewService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     BaseApiResult queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin);
+
+    void removeReviews(List<String> docIds);
 }

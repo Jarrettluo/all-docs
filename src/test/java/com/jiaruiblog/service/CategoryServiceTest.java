@@ -41,7 +41,10 @@ public class CategoryServiceTest {
     }
 
     @Test
-    public void list() {
+    public void listTest() {
+        JSONObject jsonObject = (JSONObject) JSON.toJSON( categoryServiceImpl.list());
+        System.out.println(jsonObject);
+        Assert.assertEquals(200, jsonObject.get("code"));
     }
 
     @Test

@@ -11,7 +11,6 @@ import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
@@ -132,34 +131,4 @@ public class SystemConfigController {
             e.printStackTrace();
         }
     }
-
-    /**
-     * 判断文件的编码格式
-     * TODO
-     * @param inputStream :file
-     * @return 文件编码格式
-     * @throws IOException IO异常
-     */
-    public static String codeString(InputStream inputStream) throws IOException {
-        BufferedInputStream bin = new BufferedInputStream(inputStream);
-        int p = (bin.read() << 8) + bin.read();
-        String code;
-
-        switch (p) {
-            case 0xefbb:
-                code = "UTF-8";
-                break;
-            case 0xfffe:
-                code = "Unicode";
-                break;
-            case 0xfeff:
-                code = "UTF-16BE";
-                break;
-            default:
-                code = "GBK";
-        }
-        IOUtils.closeQuietly(bin);
-        return code;
-    }
-
 }

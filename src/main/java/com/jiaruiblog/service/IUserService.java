@@ -79,4 +79,13 @@ public interface IUserService {
 
     Map<String, String> queryUserAvatarBatch(List<String> userIdList);
 
+    /**
+     * @Author luojiarui
+     * @Description 重置密码
+     * @Date 20:08 2023/5/3
+     * @Param [userId, adminId] 被充值的用户id， 管理者的id
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    BaseApiResult resetUserPwd(String userId, String adminId);
+
 }

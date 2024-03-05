@@ -63,7 +63,7 @@ all-docs:
     user-upload: ${AD_USER_UPLOAD:true}
     admin-review: ${AD_ADMIN_REVIEW:false}
     prohibited-word: ${AD_PROHIBITED_WORD:true}
-    user-registry: ${AD_USER_REGISTRY:false}
+    user-registry: ${AD_USER_REGISTRY:true}
     initial-username: ${AD_INITIAL_USERNAME:admin123}
     initial-password: ${AD_INITIAL_PASSWORD:admin123}
     cover-admin: ${COVER_ADMIN:true}

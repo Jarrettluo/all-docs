@@ -4,6 +4,7 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.dto.FileDocumentDTO;
+import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.enums.RedisActionEnum;
 import com.jiaruiblog.service.CategoryService;
@@ -46,6 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     private static final String UPDATE_DATE = "uploadDate";
 
     private static final String FILE_ID = "fileId";
+    public static final String DOC_ID = "docId";
 
     @Resource
     MongoTemplate mongoTemplate;
@@ -153,9 +155,23 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public BaseApiResult list() {
         // 需要查询全部的信息
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, UPDATE_DATE));
-        List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        return BaseApiResult.success(categories);
+        Aggregation aggregation = Aggregation.newAggregation(
+                // 选择某些字段
+                Aggregation.project("id", "name", "createDate", "updateDate")
+                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
+                        .as("id"),//新字段名称,
+                Aggregation.lookup(RELATE_COLLECTION_NAME, "id", "categoryId", "abc"),
+                Aggregation.project("id", "name", "createDate", "updateDate")
+                        .and("abc")
+                        .size()
+                        .as("num"),
+                Aggregation.sort(Sort.Direction.ASC, "updateDate")
+        );
+
+        AggregationResults<CateOrTagVO> result = mongoTemplate.aggregate(
+                aggregation, COLLECTION_NAME, CateOrTagVO.class);
+        List<CateOrTagVO> resultList = result.getMappedResults();
+        return BaseApiResult.success(resultList);
     }
 
     /**
@@ -322,15 +338,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @Author luojiarui
-     * @Description // 根据文档的id进行分类和文档的关系删除
+     * @Description // 根据文档的id进行分类和文档的关系删除，这里文档的id是fileId
      * @Date 11:20 上午 2022/6/25
      * @Param [docId]
      **/
     public void removeRelateByDocId(String docId) {
-        Query query = new Query(Criteria.where("docId").is(docId));
-        List<CateDocRelationship> relationships = mongoTemplate.find(query, CateDocRelationship.class,
-                RELATE_COLLECTION_NAME);
-        relationships.forEach(this::cancelCategoryRelationship);
+        Query query = new Query(Criteria.where("fileId").is(docId));
+        // 根据文档id进行文档关系的删除
+        mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
     }
 
     /**

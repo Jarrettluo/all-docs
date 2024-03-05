@@ -72,5 +72,7 @@ public interface RedisService {
      */
     int incrementScore(String searchKey);
 
+    void removeByDocId(String docId);
+
 
 }

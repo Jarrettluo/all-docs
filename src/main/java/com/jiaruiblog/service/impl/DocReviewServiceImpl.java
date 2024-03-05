@@ -44,6 +44,7 @@ public class DocReviewServiceImpl implements DocReviewService {
 
     public static final String RESULT = "操作成功了 %d 项目";
     public static final String USER_ID = "userId";
+    public static final String DOC_ID = "docId";
 
     @Resource
     private IFileService fileService;
@@ -240,5 +241,14 @@ public class DocReviewServiceImpl implements DocReviewService {
         result.put("pageNum", page.getPage());
         result.put("pageSize", page.getRows());
         return BaseApiResult.success(result);
+    }
+
+    @Override
+    public void removeReviews(List<String> docIds){
+        if (CollectionUtils.isEmpty(docIds)) {
+            return;
+        }
+        Query query = new Query(Criteria.where(DOC_ID).in(docIds));
+        mongoTemplate.remove(query, DocReview.class, DOC_REVIEW_COLLECTION);
     }
 }

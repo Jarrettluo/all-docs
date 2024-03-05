@@ -5,6 +5,7 @@ import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.*;
 import com.jiaruiblog.service.IUserService;
@@ -52,14 +53,19 @@ public class UserController {
     @Resource
     IUserService userService;
 
-
     @Resource
     private MongoTemplate template;
+
+    @Resource
+    SystemConfig systemConfig;
 
 
     @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")
     public BaseApiResult insertObj(@RequestBody @Valid RegistryUserDTO userDTO) {
+        if (Boolean.FALSE.equals(systemConfig.getUserRegistry())) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
         return userService.registry(userDTO);
     }
 
@@ -102,6 +108,7 @@ public class UserController {
         update.set("male", user.getMale());
         update.set("description", user.getDescription());
         update.set("updateDate", new Date());
+        update.set("birthtime", user.getBirthtime());
         UpdateResult updateResult1 = template.updateFirst(query, update, User.class, COLLECTION_NAME);
         if (updateResult1.getMatchedCount() > 0) {
             return BaseApiResult.success("更新成功！");
@@ -156,6 +163,8 @@ public class UserController {
     @ApiOperation(value = "用户登录")
     @PostMapping("/login")
     public BaseApiResult login(@RequestBody RegistryUserDTO user) {
+
+
         return userService.login(user);
     }
 
@@ -165,8 +174,8 @@ public class UserController {
     @ApiOperation(value = "用户登录")
     @GetMapping("/checkLoginState")
     public BaseApiResult checkLoginState(HttpServletRequest request, HttpServletResponse response) {
-        // 缓存一分钟
-        response.setHeader("Cache-Control", "max-age=60, public");
+        // 缓存 2s; 避免前端频繁刷新
+        response.setHeader("Cache-Control", "max-age=2, public");
         //获取 header里的token
         final String token = request.getHeader("authorization");
         if (!StringUtils.hasText(token)) {
@@ -304,6 +313,34 @@ public class UserController {
 
     private boolean patternMatch(String s, String regex) {
         return Pattern.compile(regex).matcher(s).matches();
+    }
+
+    @ApiOperation(value = "重置用户密码", notes = "管理员对用户进行密码重置")
+    @PostMapping("auth/resetUserPwd")
+    public BaseApiResult resetUserPwd(@RequestBody String userId, HttpServletRequest request) {
+        String adminId = (String) request.getAttribute("id");
+        return userService.resetUserPwd(userId, adminId);
+    }
+
+    @ApiOperation(value = "用户发起找回密码的请求，发送token给邮箱")
+    @PostMapping("/generateResetToken")
+    public BaseApiResult generateResetToken() {
+        // 用户发送邮件信息
+        // 查找相应的用户名；如果用户名不存在则报错
+        // 用户名找到以后发送对应的重置邮箱给用户
+        // 使用88 邮箱给邮件发消息
+        return BaseApiResult.success();
+    }
+
+    @ApiOperation(value = "用户重置密码")
+    @PostMapping("/resetPassword")
+    public BaseApiResult resetPassword() {
+        // 用户发送邮件/token/新密码
+        // 首先验证token是否存在，不存在则禁止
+        // 如果令牌有效，允许用户重置密码，并在成功后从 Redis 中删除令牌。
+        // 其次根据邮箱找到对应的用户信息，修改用户密码
+        // 用户自动登录
+        return BaseApiResult.success();
     }
 
 }

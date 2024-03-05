@@ -7,10 +7,7 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.dto.SearchKeyDTO;
 import com.jiaruiblog.entity.vo.DocumentVO;
-import com.jiaruiblog.service.IFileService;
-import com.jiaruiblog.service.RedisService;
-import com.jiaruiblog.service.StatisticsService;
-import com.jiaruiblog.service.TagService;
+import com.jiaruiblog.service.*;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
@@ -24,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +55,9 @@ public class StatisticsController {
 
     @Resource
     TagService tagService;
+
+    @Resource
+    ElasticService elasticService;
 
     @ApiOperation(value = "查询热度榜", notes = "查询列表")
     @GetMapping(value = "/trend")
@@ -243,5 +244,15 @@ public class StatisticsController {
         tagMap.put("tagId", tagId);
         tagMap.put("docList", docList);
         return tagMap;
+    }
+
+    @GetMapping("monthStat")
+    private BaseApiResult getMonthStat() {
+        return statisticsService.getMonthStat();
+    }
+
+    @GetMapping("")
+    private BaseApiResult getWordStat() throws IOException {
+        return elasticService.getWordStat();
     }
 }
