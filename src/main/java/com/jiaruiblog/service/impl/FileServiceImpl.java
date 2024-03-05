@@ -51,9 +51,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -339,6 +341,14 @@ public class FileServiceImpl implements IFileService {
         return BaseApiResult.success("共计保存了" + fileIds.size() + "文档");
     }
 
+    //证书信任
+    public final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+        @Override
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    };
+
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
@@ -356,7 +366,21 @@ public class FileServiceImpl implements IFileService {
                 name = getFileName(urlStr);
             }
             URL url = new URL(urlStr);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            HttpURLConnection conn;
+            //证书信任
+            //关键代码
+            if ("HTTPS".equals(url.getProtocol().toUpperCase())) {
+                trustAllHosts();
+                HttpsURLConnection https = (HttpsURLConnection) url
+                        .openConnection();
+                https.setHostnameVerifier(DO_NOT_VERIFY);
+                conn = https;
+            } else {
+                conn = (HttpURLConnection) url.openConnection();
+            }
+
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             //设置超时间为5秒
             conn.setConnectTimeout(5 * 1000);
             //防止屏蔽程序抓取而返回403错误
@@ -390,6 +414,35 @@ public class FileServiceImpl implements IFileService {
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
+
+    public static void trustAllHosts() {
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+
+            }
+
+            @Override
+            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[]{};
+            }
+        }};
+        // Install the all-trusting trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection
+                    .setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 从src文件路径获取文件名
      *
@@ -397,6 +450,16 @@ public class FileServiceImpl implements IFileService {
      * @return 文件名
      */
     private static String getFileName(String srcRealPath) {
+        // 如果是包含中文的src需要将其转换为标准名称
+        String decoderUrl = null;
+        try {
+            decoderUrl = URLDecoder.decode(srcRealPath, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        if (org.apache.commons.lang3.StringUtils.isNoneBlank(decoderUrl)) {
+            srcRealPath = decoderUrl;
+        }
         return org.apache.commons.lang3.StringUtils.substringAfterLast(srcRealPath, "/");
     }
 
