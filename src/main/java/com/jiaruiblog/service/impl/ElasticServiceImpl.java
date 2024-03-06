@@ -152,6 +152,10 @@ public class ElasticServiceImpl implements ElasticService {
 
             StringBuilder stringBuilder1 = new StringBuilder();
             for (Text fragment : highlightField.getFragments()) {
+                if (stringBuilder1.length()>0) {
+                    stringBuilder1.append("<br/>");
+                }
+                stringBuilder1.append("📖 ");
                 stringBuilder1.append(fragment.toString());
             }
             String abstractString = stringBuilder1.toString();

@@ -163,8 +163,6 @@ public class UserController {
     @ApiOperation(value = "用户登录")
     @PostMapping("/login")
     public BaseApiResult login(@RequestBody RegistryUserDTO user) {
-
-
         return userService.login(user);
     }
 
