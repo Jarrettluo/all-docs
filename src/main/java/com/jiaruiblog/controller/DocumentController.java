@@ -77,6 +77,32 @@ public class DocumentController {
         return iFileService.list(documentDTO);
     }
 
+    @ApiOperation(value = "2.1 查询文档的分页列表页,限制了分类和标签", notes = "根据参数查询文档列表")
+    @PostMapping(value = "/listNew")
+    public BaseApiResult listNew(@RequestBody DocumentDTO documentDTO)
+            throws IOException {
+        String userId = documentDTO.getUserId();
+        if (StringUtils.hasText(documentDTO.getFilterWord()) &&
+                documentDTO.getType() == FilterTypeEnum.FILTER) {
+            String filterWord = documentDTO.getFilterWord();
+            //非法敏感词汇判断
+            SensitiveFilter filter = SensitiveFilter.getInstance();
+            int n = filter.checkSensitiveWord(filterWord, 0, 1);
+            //存在非法字符
+            if (n > 0) {
+                // todo 非法字符的计算可能不准确：
+                // NullPointer， Null， java， on
+                log.error("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
+            } else {
+                redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
+                if (StringUtils.hasText(userId)) {
+                    redisService.addSearchHistoryByUserId(userId, filterWord);
+                }
+            }
+        }
+        return iFileService.listNew(documentDTO);
+    }
+
     @ApiOperation(value = "2.2 查询文档的详细信息", notes = "查询文档的详细信息")
     @GetMapping(value = "/detail")
     public BaseApiResult detail(@RequestParam(value = "docId") String id) {

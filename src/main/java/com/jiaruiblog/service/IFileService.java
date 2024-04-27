@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 /**
@@ -111,6 +112,8 @@ public interface IFileService {
      */
     FileDocument getByMd5(String md5);
 
+    List<FileDocument> getByMd5Set(Set<String> md5Set);
+
     /**
      * queryById
      * @param docId String
@@ -151,6 +154,13 @@ public interface IFileService {
      * @return result
      */
     BaseApiResult list(DocumentDTO documentDTO);
+
+    /**
+     * 分页检索目前的文档信息
+     * @param documentDTO DocumentDTO
+     * @return result
+     */
+    BaseApiResult listNew(DocumentDTO documentDTO);
 
     /**
      *根据文档的详情，查询该文档的详细信息

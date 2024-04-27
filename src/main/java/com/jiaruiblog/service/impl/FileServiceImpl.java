@@ -17,6 +17,7 @@ import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.entity.po.FileUploadPO;
 import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.DocumentVO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.service.*;
 import com.jiaruiblog.task.exception.TaskRunException;
@@ -765,6 +766,21 @@ public class FileServiceImpl implements IFileService {
         return mongoTemplate.findOne(query, FileDocument.class, COLLECTION_NAME);
     }
 
+    /**
+     * 根据md5获取文件对象
+     *
+     * @param md5Set String
+     * @return -> FileDocument
+     */
+    @Override
+    public List<FileDocument> getByMd5Set(Set<String> md5Set) {
+        if (Objects.isNull(md5Set)) {
+            return null;
+        }
+        Query query = new Query().addCriteria(Criteria.where("md5").in(md5Set));
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+    }
+
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"))
@@ -881,6 +897,131 @@ public class FileServiceImpl implements IFileService {
                     totalNum = fileDocuments.size();
                 }
                 break;
+            case CATEGORY:
+                Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
+                if (category == null) {
+                    break;
+                }
+                List<String> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
+                fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
+                if (CollectionUtils.isEmpty(fileIdList)) {
+                    break;
+                }
+                Query query1 = new Query().addCriteria(Criteria.where("_id").in(fileIdList));
+                totalNum = countFileByQuery(query1);
+                break;
+            default:
+                return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+        }
+        documentVos = convertDocuments(fileDocuments);
+        Map<String, Object> result = new HashMap<>(8);
+        result.put("totalNum", totalNum);
+        result.put("documents", documentVos);
+        return BaseApiResult.success(result);
+    }
+
+    /**
+     * 过滤的时候限制分类，只能在某个分类下进行检索
+     * @return com.jiaruiblog.utils.ApiResult
+     * @Author luojiarui
+     * @Description 列表；过滤；检索等
+     * @Date 11:49 2022/8/6
+     * @Param [documentDTO]
+     **/
+    @Override
+    public BaseApiResult listNew(DocumentDTO documentDTO) {
+        List<DocumentVO> documentVos;
+        List<FileDocument> fileDocuments = Lists.newArrayList();
+
+        long totalNum = 0L;
+
+        switch (documentDTO.getType()) {
+            case ALL:
+                fileDocuments = listFilesByPage(documentDTO.getPage(), documentDTO.getRows());
+                totalNum = countAllFile();
+                break;
+            case TAG:
+                Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
+                if (tag == null) {
+                    break;
+                }
+                List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
+                fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
+                if (CollectionUtils.isEmpty(fileIdList1)) {
+                    break;
+                }
+                Query query = new Query().addCriteria(Criteria.where("_id").in(fileIdList1));
+                totalNum = countFileByQuery(query);
+                break;
+            case FILTER:
+                Set<String> docIdSet = new HashSet<>();
+                String keyWord = Optional.of(documentDTO).map(DocumentDTO::getFilterWord).orElse("");
+                // 模糊查询 分类
+                docIdSet.addAll(categoryServiceImpl.fuzzySearchDoc(keyWord));
+                // 模糊查询 标签
+                docIdSet.addAll(tagServiceImpl.fuzzySearchDoc(keyWord));
+                // 模糊查询 文件标题
+                docIdSet.addAll(fuzzySearchDoc(keyWord));
+                // 模糊查询 评论内容
+                docIdSet.addAll(commentServiceImpl.fuzzySearchDoc(keyWord));
+
+                List<DocumentVO> esDocVO = Lists.newArrayList();
+                // 用户进行检索的分类id
+                String categoryId = documentDTO.getCategoryId();
+
+                List<String> targetFileIdList = new ArrayList<>();
+                if (org.apache.commons.lang3.StringUtils.isNoneBlank(categoryId)) {
+                    Category category = new Category();
+                    category.setId(categoryId);
+                    // 得到这个分类下的文档的md5信息，这里的数据容易爆掉
+                    targetFileIdList = categoryServiceImpl.queryDocListByCategory(category);
+                }
+                try {
+                    Map<String, List<PageVO>> search = elasticServiceImpl.search(keyWord, new HashSet<>());
+                    Set<String> md5Set = search.keySet();
+                    List<FileDocument> esDoc  = getByMd5Set(md5Set);
+                    if (!CollectionUtils.isEmpty(esDoc)) {
+                        List<String> finalTargetFileIdList = targetFileIdList;
+                        if (!finalTargetFileIdList.isEmpty()) {
+                            esDoc = esDoc.stream().filter(item -> finalTargetFileIdList.contains(item.getId()))
+                                    .collect(Collectors.toList());
+                        }
+                        Set<String> existIds = esDoc.stream().map(FileDocument::getId).collect(Collectors.toSet());
+                        docIdSet.removeAll(existIds);
+                        for (FileDocument fileDocument : esDoc) {
+                            DocumentVO documentVO = new DocumentVO();
+                            String md5 = fileDocument.getMd5();
+                            List<PageVO> pageVOList = search.get(md5);
+                            documentVO.setPageVOList(pageVOList);
+                            DocumentVO documentVO1 = convertDocumentNew(documentVO, fileDocument);
+                            esDocVO.add(documentVO1);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (!targetFileIdList.isEmpty()) {
+                    Iterator<String> iterator = docIdSet.iterator();
+                    while (iterator.hasNext()) {
+                        if (!targetFileIdList.contains(iterator.next())) {
+                            iterator.remove();
+                        }
+                    }
+                }
+
+                fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), docIdSet);
+                fileDocuments = Optional.ofNullable(fileDocuments).orElse(new ArrayList<>());
+                for (FileDocument fileDocument : fileDocuments) {
+                    DocumentVO documentVO = new DocumentVO();
+                    documentVO.setPageVOList(new ArrayList<>());
+                    DocumentVO documentVO2 = convertDocumentNew(documentVO, fileDocument);
+                    esDocVO.add(documentVO2);
+                }
+                esDocVO.sort(Comparator.comparingInt((DocumentVO obj) ->obj.getPageVOList().size()).reversed());
+                Map<String, Object> result = new HashMap<>(16);
+                result.put("totalNum", esDocVO.size());
+                result.put("documents", esDocVO);
+                return BaseApiResult.success(result);
             case CATEGORY:
                 Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
                 if (category == null) {
@@ -1112,6 +1253,40 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
+     * @return com.jiaruiblog.entity.vo.DocumentVO
+     * @Author luojiarui
+     * @Description convertDocument
+     * @Date 10:24 下午 2022/6/21
+     * @Param [documentVO, fileDocument]
+     **/
+    public DocumentVO convertDocumentNew(DocumentVO documentVO, FileDocument fileDocument) {
+        documentVO = Optional.ofNullable(documentVO).orElse(new DocumentVO());
+        if (fileDocument == null) {
+            return documentVO;
+        }
+        String username = fileDocument.getUserName();
+        if (!StringUtils.hasText(username)) {
+            username = "未知用户";
+        }
+        documentVO.setId(fileDocument.getId());
+        documentVO.setSize(fileDocument.getSize());
+        documentVO.setTitle(fileDocument.getName());
+        documentVO.setDescription(fileDocument.getDescription());
+        documentVO.setUserName(username);
+        documentVO.setCreateTime(fileDocument.getUploadDate());
+        documentVO.setThumbId(fileDocument.getThumbId());
+        // 根据文档的id进行查询 评论， 收藏，分类， 标签
+        // 略
+        // 查询文档的信息:新增文档地址，文档错误信息，文本id
+        documentVO.setDocState(fileDocument.getDocState());
+        documentVO.setErrorMsg(fileDocument.getErrorMsg());
+        documentVO.setTxtId(fileDocument.getTextFileId());
+        documentVO.setPreviewFileId(fileDocument.getPreviewFileId());
+
+        return documentVO;
+    }
+
+    /**
      * 模糊搜索
      *
      * @param keyWord 关键字
@@ -1156,7 +1331,6 @@ public class FileServiceImpl implements IFileService {
     public FileDocument queryById(String docId) {
         return mongoTemplate.findById(docId, FileDocument.class, COLLECTION_NAME);
     }
-
 
     /**
      * @return java.lang.Integer

@@ -1,10 +1,12 @@
 package com.jiaruiblog.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.entity.data.WordCloudItem;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
@@ -182,6 +184,77 @@ public class ElasticServiceImpl implements ElasticService {
 
         stringBuilder.append("查询到").append(count).append("条记录");
         return fileDocumentList;
+    }
+
+    @Override
+    public Map<String, List<PageVO>> search(String keyword, Set<String> docIdSet) throws IOException {
+        // 查询es后返回的内容
+        Map<String, List<PageVO>> result = new HashMap<>();
+        SearchRequest searchRequest = new SearchRequest(INDEX_NAME);
+        // 使用lk分词器查询，会把插入的字段分词，然后进行处理
+        SearchSourceBuilder srb = new SearchSourceBuilder();
+        srb.query(QueryBuilders.matchPhraseQuery(PIPELINE_NAME, keyword));
+
+        // 每页10个数据
+        srb.size(10);
+        // 起始位置从0开始
+        srb.from(0);
+
+        //设置highlighting
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        HighlightBuilder.Field highlightContent = new HighlightBuilder.Field(PIPELINE_NAME);
+        highlightContent.fragmentSize(100); // 设置片段大小为最大值，即返回全部片段
+        highlightContent.highlighterType("unified");
+        highlightBuilder.field(highlightContent);
+        highlightBuilder.preTags("<em>");
+        highlightBuilder.postTags("</em>");
+        highlightBuilder.numOfFragments(100);
+
+        //highlighting会自动返回匹配到的文本，所以就不需要再次返回文本了
+        String[] includeFields = new String[]{"name", "id"};
+        String[] excludeFields = new String[]{PIPELINE_NAME};
+        srb.fetchSource(includeFields, excludeFields);
+
+        //把刚才设置的值导入进去
+        srb.highlighter(highlightBuilder);
+        searchRequest.source(srb);
+        SearchResponse res;
+        try {
+            res = client.search(searchRequest, RequestOptions.DEFAULT);
+        } catch (ConnectException e) {
+            log.error("连接es失败！", e.getCause());
+            res = null;
+        }
+
+        if (res == null || res.getHits() == null) {
+            return Maps.newHashMap();
+        }
+        //获取hits，这样就可以获取查询到的记录了
+        SearchHits hits = res.getHits();
+
+        //hits是一个迭代器，所以需要迭代返回每一个hits
+        for (SearchHit hit : hits) {
+            //获取返回的字段
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            //这个就会把匹配到的文本返回，而且只返回匹配到的部分文本
+            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+            HighlightField highlightField = highlightFields.get(PIPELINE_NAME);
+
+            List<PageVO> pageVOList = new ArrayList<>();
+            for (Text fragment : highlightField.getFragments()) {
+                PageVO pageVO = new PageVO();
+                pageVO.setContent(fragment.string());
+                pageVOList.add(pageVO);
+            }
+
+            if (sourceAsMap.containsKey("id")) {
+                String id = (String) sourceAsMap.get("id");
+                if (Objects.nonNull(id)) {
+                    result.put(id, pageVOList);
+                }
+            }
+        }
+        return result;
     }
 
     /**

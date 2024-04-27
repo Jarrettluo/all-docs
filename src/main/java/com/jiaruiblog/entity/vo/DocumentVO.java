@@ -46,4 +46,6 @@ public class DocumentVO {
 
     private Date createTime;
 
+    private List<PageVO> pageVOList;
+
 }
