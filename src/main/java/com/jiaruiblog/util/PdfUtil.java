@@ -46,7 +46,9 @@ public class PdfUtil {
                 stripper.setStartPage(p);
                 stripper.setEndPage(p);
                 String text = stripper.getText(document);
-                text = text.replace("\n", "");
+                text = text.replaceAll("  ", ",");
+                text = text.replaceAll("\n", "");
+                text = text.replaceAll(" ", "");
                 fileWriter.write(text.trim());
             }
         } catch (Exception e) {
