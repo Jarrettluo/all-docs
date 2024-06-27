@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.service.LikeService;
 import com.jiaruiblog.util.BaseApiResult;
@@ -53,7 +54,9 @@ public class LikeController{
     public BaseApiResult like(@RequestParam("entityType") int entityType,
                               @RequestParam("entityId") String entityId,
                               HttpServletRequest request) {
-
+        if (!StpUtil.hasPermission("like.insert")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         if (entityType != 1 && entityType != 2) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
@@ -100,6 +103,9 @@ public class LikeController{
     @GetMapping("queryLikeInfo")
     public BaseApiResult queryLikeInfo(@RequestParam("entityId") String entityId,
                                        HttpServletRequest request) {
+        if (!StpUtil.hasPermission("like.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         // 获取到当前用户
         String userId = (String) request.getAttribute("id");
         // 返回的结果，封装成一个Map集合

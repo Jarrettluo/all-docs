@@ -55,6 +55,8 @@ public class User {
 
     private PermissionEnum permissionEnum;
 
+    private List<String> roleIds = new ArrayList<>();
+
     private Date lastLogin;
 
     private Date createDate;

@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.io.IoUtil;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
@@ -51,10 +52,13 @@ public class SystemConfigController {
     @Value("${all-docs.file-path.sensitive-file}")
     private String userDefinePath;
 
-    @Permission(PermissionEnum.ADMIN)
+    // @Permission(PermissionEnum.ADMIN)
     @GetMapping("getConfig")
     @ApiOperation(value = "管理员获取系统设置", notes = "只有管理员有权限修改系统的设置信息")
     public BaseApiResult getSystemConfig() {
+        if (!StpUtil.hasPermission("system.config.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return BaseApiResult.success(systemConfig);
     }
 
@@ -62,6 +66,9 @@ public class SystemConfigController {
     @ApiOperation(value = "管理员修改系统设置", notes = "只有管理员有权限修改系统的设置信息")
     @PutMapping("updateConfig")
     public BaseApiResult systemConfig(@RequestBody SystemConfig userSetting) {
+        if (!StpUtil.hasPermission("system.config.update")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         if (userSetting.getUserUpload() == null || userSetting.getUserRegistry() == null
                 || userSetting.getAdminReview() == null || userSetting.getProhibitedWord() == null) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
@@ -96,6 +103,9 @@ public class SystemConfigController {
     @ApiOperation(value = "管理员更新违禁词")
     @PostMapping(value = "updateProhibitedWord")
     public BaseApiResult updateProhibitedWord(@RequestParam("file") MultipartFile file) {
+        if (!StpUtil.hasPermission("system.config.update")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         if (file == null || file.isEmpty() || file.getSize() > 20000) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }

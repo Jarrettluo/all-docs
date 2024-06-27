@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
@@ -47,24 +48,36 @@ public class CommentController {
     })
     @GetMapping("queryDocReviewList")
     public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+        if (!StpUtil.hasPermission("comment.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return BaseApiResult.success();
     }
 
     @ApiOperation(value = "新增单个评论", notes = "新增单个评论")
     @PostMapping(value = "/auth/insert")
     public BaseApiResult insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("comment.insert")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return commentService.insert(getComment(commentDTO, request));
     }
 
     @ApiOperation(value = "更新评论", notes = "更新评论")
     @PostMapping(value = "/auth/update")
     public BaseApiResult update(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("comment.update")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return commentService.update(getComment(commentDTO, request));
     }
 
     @ApiOperation(value = "根据id移除某个评论", notes = "根据id移除某个评论")
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody Comment comment, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("comment.remove")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String userId = (String) request.getAttribute("id");
         if (!StringUtils.hasText(comment.getId())) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
@@ -76,6 +89,9 @@ public class CommentController {
     @ApiOperation(value = "根据id列表移除批量评论", notes = "管理员才能进行此项操作根据id移除批量评论")
     @DeleteMapping(value = "/auth/removeBatch")
     public BaseApiResult removeBatch(@RequestBody BatchIdDTO batchIdDTO) {
+        if (!StpUtil.hasPermission("comment.remove")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         List<String> commentIdList = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(commentIdList)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
@@ -86,6 +102,9 @@ public class CommentController {
     @ApiOperation(value = "根据文档id查询相关评论", notes = "根据id查询某个评论")
     @PostMapping(value = "/list")
     public BaseApiResult queryById(@RequestBody CommentListDTO comment) {
+        if (!StpUtil.hasPermission("comment.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return commentService.queryById(comment);
     }
 
@@ -116,6 +135,9 @@ public class CommentController {
     @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")
     @PostMapping(value = "/auth/myComments")
     public BaseApiResult queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("comment.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String userId = (String) request.getAttribute("id");
         return commentService.queryAllComments(pageDTO, userId, false);
     }
@@ -131,6 +153,9 @@ public class CommentController {
     @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")
     @PostMapping(value = "/auth/allComments")
     public BaseApiResult queryAllComments(@RequestBody BasePageDTO pageDTO) {
+        if (!StpUtil.hasRole("role.admin")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return commentService.queryAllComments(pageDTO, null, true);
     }
 }

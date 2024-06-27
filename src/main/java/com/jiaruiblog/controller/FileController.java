@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -80,6 +81,9 @@ public class FileController {
     @ApiOperation(value = "查询文档预览结果")
     @GetMapping("/view/{id}")
     public ResponseEntity<Object> serveFileOnline(@PathVariable String id) throws UnsupportedEncodingException {
+        if (!StpUtil.hasPermission("file.query")) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(MessageConstant.NOT_PERMISSION);
+        }
         Optional<FileDocument> file = fileService.getById(id);
         if (file.isPresent()) {
             return ResponseEntity.ok()
@@ -102,6 +106,9 @@ public class FileController {
      */
     @GetMapping("/view2/{id}")
     public ResponseEntity<Object> previewFileOnline(@PathVariable String id) throws UnsupportedEncodingException {
+        if (!StpUtil.hasPermission("file.preview")) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(MessageConstant.NOT_PERMISSION);
+        }
         Optional<FileDocument> file = fileService.getPreviewById(id);
         if (file.isPresent()) {
             return ResponseEntity.ok()
@@ -125,6 +132,9 @@ public class FileController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Object> downloadFileById(@PathVariable String id) throws UnsupportedEncodingException {
+        if (!StpUtil.hasPermission("file.download")) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(MessageConstant.NOT_PERMISSION);
+        }
         Optional<FileDocument> file = fileService.getById(id);
         if (file.isPresent()) {
             return ResponseEntity.ok()
@@ -201,6 +211,12 @@ public class FileController {
     @Deprecated
     @PostMapping("/upload")
     public ResponseModel formUpload(@RequestParam("file") MultipartFile file) throws IOException {
+        if (!StpUtil.hasPermission("file.upload")) {
+            ResponseModel model = ResponseModel.getInstance();
+            model.setCode(MessageConstant.AUTH_ERROR_CODE + "");
+            model.setMessage(MessageConstant.NOT_PERMISSION);
+            return model;
+        }
         List<String> availableSuffixList = Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");
         ResponseModel model = ResponseModel.getInstance();
         try {
@@ -253,6 +269,9 @@ public class FileController {
     @PostMapping("auth/upload")
     public BaseApiResult documentUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request)
             throws AuthenticationException {
+        if (!StpUtil.hasPermission("file.upload")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
         return fileService.documentUpload(file, userId, username);
@@ -268,7 +287,9 @@ public class FileController {
     @ApiOperation(value = "用户批量上传文件", notes = "需要文件分类标签信息！")
     @PostMapping("/auth/uploadBatch")
     public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO, HttpServletRequest request) {
-
+        if (!StpUtil.hasPermission("file.upload")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
 
@@ -304,7 +325,9 @@ public class FileController {
     @ApiOperation(value = "根据用户的提供的url进行上传", notes = "需要提供url和文件分类标签信息！")
     @PostMapping("/auth/uploadByUrl")
     public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO, HttpServletRequest request) {
-
+        if (!StpUtil.hasPermission("file.upload")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
 
@@ -387,6 +410,12 @@ public class FileController {
      */
     @DeleteMapping("/{id}")
     public ResponseModel deleteFile(@PathVariable String id) {
+        if (!StpUtil.hasPermission("file.remove")) {
+            ResponseModel model = ResponseModel.getInstance();
+            model.setCode(MessageConstant.AUTH_ERROR_CODE + "");
+            model.setMessage(MessageConstant.NOT_PERMISSION);
+            return model;
+        }
         ResponseModel model = ResponseModel.getInstance();
         if (!StrUtil.isEmpty(id)) {
             fileService.removeFile(id, true);
@@ -407,6 +436,12 @@ public class FileController {
      */
     @GetMapping("/delete/{id}")
     public ResponseModel deleteFileByGetMethod(@PathVariable String id) {
+        if (!StpUtil.hasPermission("file.remove")) {
+            ResponseModel model = ResponseModel.getInstance();
+            model.setCode(MessageConstant.AUTH_ERROR_CODE + "");
+            model.setMessage(MessageConstant.NOT_PERMISSION);
+            return model;
+        }
         ResponseModel model = ResponseModel.getInstance();
         if (!StrUtil.isEmpty(id)) {
             fileService.removeFile(id, true);

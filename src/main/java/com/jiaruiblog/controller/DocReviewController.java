@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
@@ -50,10 +51,13 @@ public class DocReviewController {
      *
      * @return BaseApiResult
      */
-    @Permission({PermissionEnum.ADMIN})
+    // @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "查询需要评审的文档列表", notes = "查询需要评审的文档列表")
     @GetMapping("queryDocForReview")
     public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
+        if (!StpUtil.hasPermission("doc.view.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return fileService.queryFileDocumentResult(pageParams, true);
     }
 
@@ -65,10 +69,14 @@ public class DocReviewController {
      *
      * @return BaseApiResult
      */
-    @Permission({PermissionEnum.ADMIN, PermissionEnum.USER})
+    // @Permission({PermissionEnum.ADMIN, PermissionEnum.USER})
     @ApiOperation(value = "修改已读", notes = "修改已读功能只有普通用户有此权限")
     @PutMapping("userRead")
     public BaseApiResult updateDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("doc.view.status")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
+
         String userId = (String) request.getAttribute("id");
         return docReviewService.userRead(batchIdDTO.getIds(), userId);
     }
@@ -80,10 +88,13 @@ public class DocReviewController {
      * @Date 21:12 2022/11/30
      * @Param [docId, reason]
      **/
-    @Permission({PermissionEnum.ADMIN})
+    // @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员拒绝某个文档", notes = "管理员拒绝某个文档，只有管理员有操作该文档的权限")
     @PostMapping("refuse")
     public BaseApiResult refuse(@RequestBody @Validated RefuseDTO refuseDTO) {
+        if (!StpUtil.hasPermission("doc.view.refuse")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String docId = refuseDTO.getDocId();
         String reason = refuseDTO.getReason();
         return docReviewService.refuse(docId, reason);
@@ -96,10 +107,13 @@ public class DocReviewController {
      * @Date 21:12 2022/11/30
      * @Param [docIds]
      **/
-    @Permission({PermissionEnum.ADMIN})
+    // @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员拒绝一批文档", notes = "管理员拒绝一批文档，只有管理员有操作该文档的权限")
     @PostMapping("refuseBatch")
     public BaseApiResult refuseBatch(@RequestBody @Valid RefuseBatchDTO refuseBatchDTO) {
+        if (!StpUtil.hasPermission("doc.view.refuse")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return docReviewService.refuseBatch(refuseBatchDTO.getIds(), refuseBatchDTO.getReason());
     }
 
@@ -114,6 +128,9 @@ public class DocReviewController {
     @ApiOperation(value = "同意某一批文档", notes = "管理员同意某一批文档")
     @PostMapping("approve")
     public BaseApiResult approve(@RequestBody @Valid BatchIdDTO batchIdDTO) {
+        if (!StpUtil.hasPermission("doc.view.approve")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return docReviewService.approveBatch(batchIdDTO.getIds());
     }
 
@@ -128,6 +145,9 @@ public class DocReviewController {
     @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
     @GetMapping("queryReviewResultList")
     public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
+        if (!StpUtil.hasPermission("doc.view.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return docReviewService.queryReviewLog(pageParams, null, true);
     }
 
@@ -138,11 +158,14 @@ public class DocReviewController {
      * @Date 21:15 2022/11/30
      * @Param [pageParams, request]
      **/
-    @Permission({PermissionEnum.USER, PermissionEnum.ADMIN})
+    // @Permission({PermissionEnum.USER, PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
     @GetMapping("queryMyReviewResultList")
     public BaseApiResult queryMyReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
                                                HttpServletRequest request) {
+        if (!StpUtil.hasPermission("doc.view.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"), false);
     }
 
@@ -154,6 +177,9 @@ public class DocReviewController {
     @ApiOperation(value = "删除评审日志", notes = "管理员和普通用户都可以删除评审结果")
     @DeleteMapping("removeDocReview")
     public BaseApiResult removeDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("doc.view.log.remove")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         if (CollectionUtils.isEmpty(batchIdDTO.getIds())) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }

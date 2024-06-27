@@ -1,5 +1,7 @@
 package com.jiaruiblog.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
+import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CollectDocRelationship;
 import com.jiaruiblog.entity.dto.CollectDTO;
 import com.jiaruiblog.service.impl.CollectServiceImpl;
@@ -41,12 +43,18 @@ public class CollectController {
     @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/auth/insert")
     public BaseApiResult insert(@RequestBody CollectDTO collect, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("collect.insert")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return collectServiceImpl.insert(setRelationshipValue(collect, request));
     }
 
     @ApiOperation(value = "根据id移除某个收藏文档", notes = "根据id移除某个文档")
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody CollectDTO collect, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("collect.remove")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return collectServiceImpl.remove(setRelationshipValue(collect, request));
     }
 

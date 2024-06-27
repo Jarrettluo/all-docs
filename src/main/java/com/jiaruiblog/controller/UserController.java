@@ -1,8 +1,7 @@
 package com.jiaruiblog.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.auth0.jwt.interfaces.Claim;
-import com.jiaruiblog.auth.Permission;
-import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
@@ -63,6 +62,9 @@ public class UserController {
     @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
     @PostMapping(value = "/insert")
     public BaseApiResult insertObj(@RequestBody @Valid RegistryUserDTO userDTO) {
+        if (!StpUtil.hasPermission("user.insert")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         if (Boolean.FALSE.equals(systemConfig.getUserRegistry())) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
@@ -72,6 +74,9 @@ public class UserController {
     @ApiOperation(value = "批量新增用户", notes = "批量新增用户")
     @PostMapping(value = "/batchInsert")
     public BaseApiResult batchInsert(@RequestBody List<User> users) {
+        if (!StpUtil.hasPermission("user.insert")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         log.info("批量新增用户入参=={}", users.toString());
         for (User item : users) {
             template.save(item, COLLECTION_NAME);
@@ -82,6 +87,9 @@ public class UserController {
     @ApiOperation(value = "根据id查询", notes = "批量新增用户")
     @PostMapping(value = "/getById")
     public BaseApiResult getById(@RequestBody User user) {
+        if (!StpUtil.hasPermission("user.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         Query query = new Query(Criteria.where("_id").is(user.getId()));
         User one = template.findOne(query, User.class, COLLECTION_NAME);
         return BaseApiResult.success(one);
@@ -90,6 +98,9 @@ public class UserController {
     @ApiOperation(value = "根据用户名称查询", notes = "根据用户名称查询")
     @PostMapping(value = "/getByUsername")
     public BaseApiResult getByUsername(@RequestBody User user) {
+        if (!StpUtil.hasPermission("user.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         Query query = new Query(Criteria.where("username").is(user.getUsername()));
         User one = template.findOne(query, User.class, COLLECTION_NAME);
         return BaseApiResult.success(one);
@@ -98,6 +109,9 @@ public class UserController {
     @ApiOperation(value = "更新用户hobby和company", notes = "更新用户hobby和company")
     @PutMapping(value = "/updateUser")
     public BaseApiResult updateUser(@RequestBody User user) {
+        if (!StpUtil.hasPermission("user.update")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         Query query = new Query(Criteria.where("_id").is(user.getId()));
         Update update = new Update();
         if (StringUtils.hasText(user.getPassword())) {
@@ -123,10 +137,13 @@ public class UserController {
      * @Date 22:40 2023/1/12
      * @Param [user, request]
      **/
-    @Permission(PermissionEnum.ADMIN)
+    // @Permission(PermissionEnum.ADMIN)
     @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
     @DeleteMapping(value = "/auth/deleteByID")
     public BaseApiResult deleteById(@RequestBody User removeUser, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("user.remove")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String userId = (String) request.getAttribute(REQUEST_USER_ID);
         // 不能删除自己的账号
         String removeUserId = removeUser.getId();
@@ -144,9 +161,12 @@ public class UserController {
      * @Param [user, request]
      **/
     @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
-    @Permission(value = PermissionEnum.ADMIN)
+    // @Permission(value = PermissionEnum.ADMIN)
     @DeleteMapping(value = "/auth/deleteByIDBatch")
     public BaseApiResult deleteByIdBatch(@RequestBody BatchIdDTO batchIdDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("user.remove")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         // 用户只能删除自己，不能删除其他人的信息
         String adminUserId = (String) request.getAttribute(REQUEST_USER_ID);
         List<String> userIdList = Optional.ofNullable(batchIdDTO.getIds()).orElse(new ArrayList<>());
@@ -194,22 +214,28 @@ public class UserController {
      * @Param []
      **/
     @ApiOperation(value = "管理员查询全部用户信息", notes = "只有管理员有权限进行用户列表查询")
-    @Permission(PermissionEnum.ADMIN)
+    // @Permission(PermissionEnum.ADMIN)
     @GetMapping("/allUsers")
     public BaseApiResult allUsers(@ModelAttribute("pageDTO") BasePageDTO pageDTO) {
+        if (!StpUtil.hasPermission("user.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return userService.getUserList(pageDTO);
     }
 
     @ApiOperation(value = "改变用户权限", notes = "管理员能够调整其他人的角色，不能调整自己的角色")
-    @Permission(PermissionEnum.ADMIN)
+    // @Permission(PermissionEnum.ADMIN)
     @PutMapping("changeUserRole")
     public BaseApiResult changeUserRole(@RequestBody UserRoleDTO userRoleDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("user.roles")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String adminUserId = (String) request.getAttribute(REQUEST_USER_ID);
         // 不能屏蔽自己的账号
         if (userRoleDTO.getUserId().equals(adminUserId)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return userService.changeUserRole(userRoleDTO);
+        return userService.updateUserRoles(userRoleDTO.getUserId(), userRoleDTO.getRoleIds());
     }
 
     /**
@@ -220,9 +246,12 @@ public class UserController {
      * @Param [userId]
      **/
     @ApiOperation(value = "管理员屏蔽用户", notes = "管理员不能屏蔽自己的账号")
-    @Permission(PermissionEnum.ADMIN)
+    // @Permission(PermissionEnum.ADMIN)
     @GetMapping("blockUser")
     public BaseApiResult blockUser(@RequestParam("userId") String userId, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("user.block")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         if (!StringUtils.hasText(userId)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
@@ -316,6 +345,9 @@ public class UserController {
     @ApiOperation(value = "重置用户密码", notes = "管理员对用户进行密码重置")
     @PostMapping("auth/resetUserPwd")
     public BaseApiResult resetUserPwd(@RequestBody String userId, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("user.password.reset")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String adminId = (String) request.getAttribute("id");
         return userService.resetUserPwd(userId, adminId);
     }
@@ -339,6 +371,15 @@ public class UserController {
         // 其次根据邮箱找到对应的用户信息，修改用户密码
         // 用户自动登录
         return BaseApiResult.success();
+    }
+
+    @PostMapping("/getUserRoleInfo")
+    @ApiOperation(value = "获取当前用户所有角色信息")
+    public BaseApiResult getUserRoleInfo(String userId) {
+        if (!StpUtil.hasPermission("user.role.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
+        return BaseApiResult.success(userService.getUserRoles(userId));
     }
 
 }

@@ -38,6 +38,8 @@ https://www.cnblogs.com/caizhaokai/p/11037610.html
 
 ./mongod --dbpath=/data/mongo --logpath=/usr/local/mongodb4/db.log --fork
 
+// mongodb 中执行 mongo-perm.js, 系统中的所有权限
+
 
 启动es
 ```shell

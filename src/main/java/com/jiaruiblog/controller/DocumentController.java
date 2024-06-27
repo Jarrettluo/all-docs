@@ -1,7 +1,6 @@
 package com.jiaruiblog.controller;
 
-import com.jiaruiblog.auth.Permission;
-import com.jiaruiblog.auth.PermissionEnum;
+import cn.dev33.satoken.stp.StpUtil;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
@@ -55,6 +54,9 @@ public class DocumentController {
     @PostMapping(value = "/list")
     public BaseApiResult list(@RequestBody DocumentDTO documentDTO)
             throws IOException {
+        if (!StpUtil.hasPermission("doc.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String userId = documentDTO.getUserId();
         if (StringUtils.hasText(documentDTO.getFilterWord()) &&
                 documentDTO.getType() == FilterTypeEnum.FILTER) {
@@ -81,6 +83,9 @@ public class DocumentController {
     @PostMapping(value = "/listNew")
     public BaseApiResult listNew(@RequestBody DocumentDTO documentDTO)
             throws IOException {
+        if (!StpUtil.hasPermission("doc.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         String userId = documentDTO.getUserId();
         if (StringUtils.hasText(documentDTO.getFilterWord()) &&
                 documentDTO.getType() == FilterTypeEnum.FILTER) {
@@ -106,12 +111,18 @@ public class DocumentController {
     @ApiOperation(value = "2.2 查询文档的详细信息", notes = "查询文档的详细信息")
     @GetMapping(value = "/detail")
     public BaseApiResult detail(@RequestParam(value = "docId") String id) {
+        if (!StpUtil.hasPermission("doc.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return iFileService.detail(id);
     }
 
     @ApiOperation(value = "3.2 删除某个文档", notes = "删除某个文档")
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("doc.remove")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         FileDocument fileDocument = iFileService.queryById(removeObjectDTO.getId());
         if (fileDocument == null) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
@@ -127,8 +138,11 @@ public class DocumentController {
 
     @ApiOperation(value = "3.2 管理员修改文档基本信息", notes = "管理员修改某个文档信息")
     @PutMapping(value="/auth/updateInfo")
-    @Permission(value = PermissionEnum.ADMIN)
+    // @Permission(value = PermissionEnum.ADMIN)
     public BaseApiResult updateInfo(@RequestBody UpdateInfoDTO updateInfoDTO) {
+        if (!StpUtil.hasPermission("doc.update")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return iFileService.updateInfo(updateInfoDTO);
     }
 
@@ -136,6 +150,9 @@ public class DocumentController {
     @ApiOperation(value = "2.3 指定分类时，查询文档的分页列表页", notes = "根据参数查询文档列表")
     @GetMapping(value = "/listWithCategory")
     public BaseApiResult listWithCategory(@ModelAttribute("documentDTO") DocumentDTO documentDTO) {
+        if (!StpUtil.hasPermission("doc.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         FilterTypeEnum filterType = documentDTO.getType();
         if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG)) {
             return iFileService.listWithCategory(documentDTO);

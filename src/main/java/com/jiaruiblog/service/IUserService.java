@@ -1,6 +1,7 @@
 package com.jiaruiblog.service;
 
 import com.jiaruiblog.auth.PermissionEnum;
+import com.jiaruiblog.entity.Role;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
@@ -88,4 +89,22 @@ public interface IUserService {
      **/
     BaseApiResult resetUserPwd(String userId, String adminId);
 
+
+
+    /**
+     * @author zys
+     * @since 2024-06-27
+     * @param userId 管理者的id
+     * @param roleIds 角色 ID 列表
+     * @return com.jiaruiblog.util.BaseApiResult
+     */
+    BaseApiResult updateUserRoles(String userId, List<String> roleIds);
+
+    /**
+     * @author zys
+     * @since 2024-06-27
+     * @param userId 管理者的id
+     * @return com.jiaruiblog.util.BaseApiResult
+     */
+	 List<Role> getUserRoles(String userId);
 }

@@ -148,6 +148,8 @@ PUT /_ingest/pipeline/attachment
 
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676024224157-e8d3c605-9ef5-427b-adab-b0afa4fb930d.png#averageHue=%23262525&clientId=u4c71546f-fd35-4&from=paste&id=uf575537b&name=image.png&originHeight=512&originWidth=979&originalType=url&ratio=1&rotation=0&showTitle=false&size=37844&status=done&style=none&taskId=u2c947d67-0053-4e22-9d88-7a0f550f60b&title=)
 
+- 执行 docs/mongo-perm.js, 添加系统的所有权限
+
 - 如果需要移除MongoDB服务，只需使用管理员权限运行cmd工具，并输入如下命令。
 ```shell
 

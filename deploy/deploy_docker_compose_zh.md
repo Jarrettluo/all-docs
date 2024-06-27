@@ -228,8 +228,10 @@ docker-compose -f docker-compose.yml up -d
 # 查看全部的docker-compose 日志
 docker-compose logs
 ```
+- 执行 docs/mongo-perm.js, 添加系统的所有权限
 
 [注意] 这里查看的日志不能出现error一类的报错，特别注意redis和mongo 是否已经连接上。
+
 
 
 ### 对依赖服务进行以下设置

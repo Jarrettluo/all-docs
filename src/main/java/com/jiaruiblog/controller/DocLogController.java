@@ -1,7 +1,6 @@
 package com.jiaruiblog.controller;
 
-import com.jiaruiblog.auth.Permission;
-import com.jiaruiblog.auth.PermissionEnum;
+import cn.dev33.satoken.stp.StpUtil;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
@@ -42,10 +41,13 @@ public class DocLogController {
      * @Date 21:16 2022/11/30
      * @Param [pageParams]
      **/
-    @Permission({PermissionEnum.ADMIN})
+    // @Permission({PermissionEnum.ADMIN})
     @ApiOperation(value = "管理员查询系统日志信息", notes = "只有管理员有权限查询日志列表")
     @GetMapping("queryLogList")
     public BaseApiResult queryLogList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("doc.log.query")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         return docLogService.queryDocLogs(pageParams, (String) request.getAttribute("id"));
     }
 
@@ -56,10 +58,12 @@ public class DocLogController {
      * @Date 21:16 2022/11/30
      * @Param [logIds]
      **/
-    @Permission(PermissionEnum.ADMIN)
     @ApiOperation(value = "管理员删除文档信息", notes = "只有管理员有权限删除文档的日志")
     @DeleteMapping("removeLog")
     public BaseApiResult removeLog(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
+        if (!StpUtil.hasPermission("doc.log.remove")) {
+            return BaseApiResult.error(MessageConstant.AUTH_ERROR_CODE, MessageConstant.NOT_PERMISSION);
+        }
         List<String> logIds = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(logIds)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);

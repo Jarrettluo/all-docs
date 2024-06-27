@@ -69,3 +69,12 @@ all-docs:
     cover-admin: ${COVER_ADMIN:true}
   file-path:
     sensitive-file: sensitive.txt
+
+sa-token:
+  token-name: authorization
+  timeout: 2592000
+  active-timeout: -1
+  is-concurrent: true
+  is-share: true
+  is-log: false
+

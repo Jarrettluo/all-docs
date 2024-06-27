@@ -1,17 +1,20 @@
 package com.jiaruiblog.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
+import com.jiaruiblog.entity.Permission;
+import com.jiaruiblog.entity.Role;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserRoleDTO;
 import com.jiaruiblog.entity.vo.UserVO;
 import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.IRoleService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
-import com.jiaruiblog.util.JwtUtil;
 import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -54,26 +57,48 @@ public class UserServiceImpl implements IUserService {
     @Resource
     private SystemConfig systemConfig;
 
+    @Resource
+    private IRoleService roleService;
+
     @Override
     public void initFirstUser() {
         RegistryUserDTO userDTO = new RegistryUserDTO();
         userDTO.setUsername(systemConfig.getInitialUsername());
         userDTO.setPassword(systemConfig.getInitialPassword());
+
         Query query = new Query().addCriteria(Criteria.where(USERNAME).is(userDTO.getUsername()));
         List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
         if (CollectionUtils.isEmpty(users)) {
+            List<Permission> permissions = mongoTemplate.findAll(Permission.class, "permission");
+            List<String> permIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
+            Role role = new Role();
+            role.setRoleKey("role.admin");
+            role.setRoleName("超级管理员");
+            role.setPermIds(permIds);
+            mongoTemplate.save(role, "role");
+
+            Query query1 = new Query().addCriteria(Criteria.where("permKey").regex("^.*query$"));
+            permissions = mongoTemplate.find(query1, Permission.class);
+            permIds = permissions.stream().map(Permission::getId).collect(Collectors.toList());
+            role = new Role();
+            role.setRoleKey("role.normal");
+            role.setRoleName("普通用户");
+            role.setPermIds(permIds);
+            mongoTemplate.save(role, "role");
+
             User user = new User();
-            user.setPermissionEnum(PermissionEnum.ADMIN);
             user.setUsername(systemConfig.getInitialUsername());
             user.setPassword(userDTO.getEncodePassword());
             user.setCreateDate(new Date());
             user.setUpdateDate(new Date());
+            user.setRoleIds(roleService.allRoles().stream().map(Role::getId).collect(Collectors.toList()));
             mongoTemplate.save(user, COLLECTION_NAME);
+
             return;
         }
         if (Boolean.TRUE.equals(systemConfig.getCoverAdmin())) {
             Update update = new Update();
-            update.set(ROLE, PermissionEnum.ADMIN);
+            update.set("roleIds", roleService.allRoles().stream().map(Role::getId).collect(Collectors.toList()));
             update.set("password", userDTO.getEncodePassword());
             update.set(UPDATE_TIME, new Date());
             mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
@@ -94,12 +119,13 @@ public class UserServiceImpl implements IUserService {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.USER_HAS_BANNED);
         }
 
-        String token = JwtUtil.createToken(dbUser);
-        Map<String, String> result = new HashMap<>(8);
-        result.put("token", token);
+        StpUtil.login(dbUser.getId());
+        Map<String, Object> result = new HashMap<>(8);
+        result.put("token", StpUtil.getTokenValue());
         result.put("userId", dbUser.getId());
         result.put(AVATAR, dbUser.getAvatar());
         result.put(USERNAME, dbUser.getUsername());
+        result.put("roles", getUserRoles(dbUser.getId()));
         result.put("type", dbUser.getPermissionEnum() != null ? dbUser.getPermissionEnum().toString() : null);
 
         // 登录以后记录登录时间
@@ -107,9 +133,7 @@ public class UserServiceImpl implements IUserService {
         Update update = new Update();
         update.set("lastLogin", new Date());
         mongoTemplate.updateFirst(query1, update, User.class, COLLECTION_NAME);
-
         return BaseApiResult.success(result);
-
     }
 
     @Override
@@ -363,4 +387,33 @@ public class UserServiceImpl implements IUserService {
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
+    @Override
+    public BaseApiResult updateUserRoles(String userId, List<String> roleIds) {
+        User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
+        if (user == null) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        }
+        Criteria criteria = Criteria.where("_id").in(roleIds);
+        Query query = Query.query(criteria);
+        List<Role> roles = mongoTemplate.find(query, Role.class, "role");
+        List<String> roleIds1 = roles.stream().map(Role::getId).collect(Collectors.toList());
+        user.setRoleIds(roleIds1);
+
+        Query query1 = new Query().addCriteria(Criteria.where("_id").is(userId));
+        Update update = new Update();
+        update.set("roleIds", roleIds1);
+        mongoTemplate.updateFirst(query1, update, COLLECTION_NAME);
+        return BaseApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    @Override
+    public List<Role> getUserRoles(String userId) {
+        User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
+        if (user == null) {
+            return Collections.emptyList();
+        }
+        Criteria criteria = Criteria.where("_id").in(user.getRoleIds());
+        Query query = Query.query(criteria);
+        return mongoTemplate.find(query, Role.class, "role");
+    }
 }

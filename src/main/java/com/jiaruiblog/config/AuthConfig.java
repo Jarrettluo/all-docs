@@ -33,8 +33,8 @@ public class AuthConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
         //注册TestInterceptor拦截器
-        registry.addInterceptor(new AuthenticationInterceptor(userService))
-                .addPathPatterns("/**");
+        // registry.addInterceptor(new AuthenticationInterceptor(userService))
+        //         .addPathPatterns("/**");
     }
 
     /**

@@ -15,6 +15,7 @@ public class MessageConstant {
 
     public static final Integer PARAMS_ERROR_CODE = 1201;
     public static final Integer PROCESS_ERROR_CODE = 1202;
+    public static final Integer AUTH_ERROR_CODE = 1203;
 
     public static final String PARAMS_IS_NOT_NULL = "参数是必需的！";
     public static final String PARAMS_LENGTH_REQUIRED = "参数的长度必须符合要求！";
@@ -31,6 +32,8 @@ public class MessageConstant {
 
     public static final String OPERATE_FAILED = "操作失败！";
     public static final String SUCCESS = "SUCCESS";
+
+    public static final String NOT_PERMISSION = "无权限";
 
     public static final String FILE_NOT_FOUND = "File was not found";
 }
