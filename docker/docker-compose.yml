@@ -10,6 +10,7 @@ services:
       - ./data/mongo/configdb:/data/configdb
       - ./data/mongo/db:/data/db
       - ./data/mongodb/log:/var/log/mongodb  # 挂载日志目录
+      -  ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     # command: mongod --auth # 如果要设置密码请开启
     #初始化管理员用户名和密码
     environment:
