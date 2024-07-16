@@ -164,6 +164,41 @@ sc.exe delete MongoDB
 
   ![image-20230212113153077](https://cdn.nlark.com/yuque/0/2023/png/2413981/1676177096923-f73ccf79-4161-40d4-96d8-6e46fa08ed29.png#averageHue=%232d2c2b&clientId=u58c11836-cadc-4&from=ui&id=uc4f28230&name=image-20230212113153077.png&originHeight=626&originWidth=1370&originalType=binary&ratio=2&rotation=0&showTitle=false&size=117319&status=done&style=none&taskId=ue9c54ae0-9fe4-4a72-9d7f-069dbd056f5&title=)
 
+- 看到不到更多的日志？
+
+```yaml
+logging:
+  level:
+    root: ${LOGGING_LEVEL:ERROR}
+```
+默认情况下，`application.yml`文件中设置的日志级别是ERROR，可选的其他配置是：WARNING, INFO。
+
+- 系统的默认配置
+
+以下是`application.yml`文件中提供的默认配置文件。如果有必要可以对参数进行修改。
+
+其中大写的部分是环境变量参数，可以在jar启动的时候进行动态配置。
+```yaml
+all-docs:
+  config:
+    # 普通用户可以自行上传文档，默认true，可选为false。
+    user-upload: ${AD_USER_UPLOAD:true}
+    # 上传的文档必须经过管理员审核，默认false，可选为true。
+    admin-review: ${AD_ADMIN_REVIEW:false}
+    # 敏感词过滤功能，默认为true，可选为false。
+    prohibited-word: ${AD_PROHIBITED_WORD:true}
+    # 新用户注册功能，默认为true，可选为false。
+    user-registry: ${AD_USER_REGISTRY:true}
+    # 系统初始的管理员账号，默认为admin123，可自由设置字符串。
+    initial-username: ${AD_INITIAL_USERNAME:admin123}
+    # 系统初始的管理员密码，默认为admin123，可自由设置为字符串
+    initial-password: ${AD_INITIAL_PASSWORD:admin123}
+    # 系统重新启动的时候，是否重置数据库中管理员密码。
+    # 例如安装好以后对初始密码进行修改，无法登录了，可以通过此参数进行覆盖。
+    cover-admin: ${COVER_ADMIN:true}
+  file-path:
+    sensitive-file: sensitive.txt
+```
 
 - 接口文档地址：http://localhost:8082/api/v1.0/swagger-ui.html
   (注意接口文档并不完善，请见谅)
