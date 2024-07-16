@@ -55,6 +55,9 @@ In small teams, there is often a large number of collaborative documents. For ex
 
 ## QUICK START
 > test on ubuntu 18.04
+> wait me for centos, thank you.
+
+‼️ 受dockerhub拉取镜像影响，此部署方法暂时失效！‼️
 ```shell
 # clone project
 git clone https://github.com/Jarrettluo/document-sharing-site.git

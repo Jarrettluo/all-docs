@@ -57,6 +57,10 @@
 
 ## 快捷部署
 > 在ubuntu 18.04 环境下测试通过
+> 
+> centos 的安装脚本暂时没有
+
+‼️ 受dockerhub拉取镜像影响，此部署方法暂时失效！‼️
 ```shell
 # 克隆项目
 git clone https://github.com/Jarrettluo/document-sharing-site.git
