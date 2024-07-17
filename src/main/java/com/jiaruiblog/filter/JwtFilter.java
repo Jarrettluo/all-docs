@@ -32,7 +32,7 @@ public class JwtFilter implements Filter
     /**
      * 安全的url，不需要令牌; 游客可以访问的
      */
-    private static final List<String> SAFE_URL_LIST = Arrays.asList("/userInfo/login", "/userInfo/register");
+    private static final List<String> SAFE_URL_LIST = Arrays.asList("*/user/login", "*/user/register");
 
 
 
@@ -44,7 +44,9 @@ public class JwtFilter implements Filter
         response.setCharacterEncoding("UTF-8");
         String url = request.getRequestURI().substring(request.getContextPath().length());
         // 登录和注册等请求不需要令牌
-        if (SAFE_URL_LIST.contains(url)) {
+        if (url.contains("login") || url.contains("register") || url.contains("files")) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            chain.doFilter(request, response);
             return;
         }
 

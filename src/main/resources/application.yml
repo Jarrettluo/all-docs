@@ -49,7 +49,7 @@ spring:
 
 logging:
   level:
-    root: ${LOGGING_LEVEL:ERROR}
+    root: ${LOGGING_LEVEL:INFO}
 
 cloud:
   elasticsearch:
