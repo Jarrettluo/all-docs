@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * @ClassName AuthenticationInterceptor
- * @Description 权限校验，拦截器
+ * @Description 权限校验，拦截器Interceptor, 拦截器在过滤器Filter之后
  * 参考文章： 注解式权限校验 https://blog.csdn.net/LitongZero/article/details/103628706
  * @Author luojiarui
  * @Date 2022/12/7 20:24
