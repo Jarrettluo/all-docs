@@ -88,4 +88,7 @@ public interface IUserService {
      **/
     BaseApiResult resetUserPwd(String userId, String adminId);
 
+
+    boolean isExist(String userId);
+
 }

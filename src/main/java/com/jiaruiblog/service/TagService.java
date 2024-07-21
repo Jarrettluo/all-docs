@@ -1,8 +1,11 @@
 package com.jiaruiblog.service;
 
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
+import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.util.BaseApiResult;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
 import java.util.Map;
@@ -85,5 +88,26 @@ public interface TagService {
      * @return boolean
      **/
     boolean relateExist(String tagId, String fileId);
+
+    long countAllFile();
+
+    @Async
+    void saveTagWhenSaveDoc(FileDocument fileDocument);
+
+    void removeRelateByDocId(String docId);
+
+    void addTagRelationShip(List<String> tags, List<String> docIds);
+
+    Tag queryByTagId(String id);
+
+    List<String> queryDocIdListByTagId(String tagId);
+
+    void clearInvalidTagRelationship(String tagId);
+
+    List<String> fuzzySearchDoc(String keyWord);
+
+    List<TagVO> queryByDocId(String id);
+
+    List<String> saveOrUpdateBatch(List<String> tags);
 
 }

@@ -189,6 +189,7 @@ public class CommentServiceImpl implements ICommentService {
      * @Param [docId]
      * @return java.lang.Long
      **/
+    @Override
     public Long commentNum(String docId) {
         Query query = new Query().addCriteria(Criteria.where(DOC_ID).is(docId));
         return template.count(query, Comment.class, COLLECTION_NAME);
@@ -199,6 +200,7 @@ public class CommentServiceImpl implements ICommentService {
      * @param keyWord 关键字
      * @return 文档的id信息
      */
+    @Override
     public List<String> fuzzySearchDoc(String keyWord) {
         if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return Lists.newArrayList();
@@ -218,6 +220,7 @@ public class CommentServiceImpl implements ICommentService {
      * @Date 11:14 上午 2022/6/25
      * @Param [docId]
      **/
+    @Override
     public void removeByDocId(String docId) {
         Query query = new Query(Criteria.where(DOC_ID).is(docId));
         template.remove(query, Comment.class, COLLECTION_NAME);
@@ -230,6 +233,7 @@ public class CommentServiceImpl implements ICommentService {
      * @Param []
      * @return java.lang.Integer
      **/
+    @Override
     public long countAllFile() {
         return template.getCollection(COLLECTION_NAME).estimatedDocumentCount();
     }

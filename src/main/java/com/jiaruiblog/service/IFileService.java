@@ -217,6 +217,15 @@ public interface IFileService {
 
     /**
      * @Author luojiarui
+     * @Description // 通过文档id查询文档详情信息
+     * @Date 22:28 2024/7/21
+     * @Param [docId]
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
+     **/
+    List<FileDocument> queryByDocIds(String ...docId);
+
+    /**
+     * @Author luojiarui
      * @Description 查询并删除某个文档
      * @Date 10:01 2022/12/10
      * @Param [docId]
@@ -250,4 +259,8 @@ public interface IFileService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     BaseApiResult queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing);
+
+    long countAllFile();
+
+    boolean isExist(String docId);
 }

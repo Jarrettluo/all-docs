@@ -7,7 +7,7 @@ import com.jiaruiblog.entity.vo.DocVO;
 import com.jiaruiblog.entity.vo.MonthStatVO;
 import com.jiaruiblog.entity.vo.StatsVO;
 import com.jiaruiblog.entity.vo.TrendVO;
-import com.jiaruiblog.service.StatisticsService;
+import com.jiaruiblog.service.*;
 import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -34,16 +34,16 @@ import java.util.stream.Collectors;
 public class StatisticsServiceImpl implements StatisticsService {
 
     @Resource
-    CategoryServiceImpl categoryServiceImpl;
+    CategoryService categoryService;
 
     @Resource
-    FileServiceImpl fileServiceImpl;
+    IFileService fileService;
 
     @Resource
-    TagServiceImpl tagServiceImpl;
+    TagService tagService;
 
     @Resource
-    CommentServiceImpl commentServiceImpl;
+    ICommentService commentService;
 
     @Resource
     private MongoTemplate mongoTemplate;
@@ -58,7 +58,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      **/
     @Override
     public BaseApiResult trend() {
-        List<Category> categoryList = categoryServiceImpl.getRandom();
+        List<Category> categoryList = categoryService.getRandom();
         List<TrendVO> trendVos = new ArrayList<>(3);
 
         for (Category category : categoryList) {
@@ -70,9 +70,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 
             if (category.getId() != null) {
                 List<FileDocument> documents;
-                List<CateDocRelationship> relationships = categoryServiceImpl.getRelateByCateId(category.getId());
+                List<CateDocRelationship> relationships = categoryService.getRelateByCateId(category.getId());
                 List<String> ids = relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
-                documents = fileServiceImpl.listAndFilterByPage(0, 4, ids);
+                documents = fileService.listAndFilterByPage(0, 4, ids);
                 documents = Optional.ofNullable(documents).orElse(new ArrayList<>(8));
                 for (FileDocument document : documents) {
                     document = Optional.ofNullable(document).orElse(new FileDocument());
@@ -99,10 +99,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public BaseApiResult all() {
         StatsVO statsVO = new StatsVO();
-        statsVO.setDocNum(fileServiceImpl.countAllFile());
-        statsVO.setCommentNum(commentServiceImpl.countAllFile());
-        statsVO.setCategoryNum(categoryServiceImpl.countAllFile());
-        statsVO.setTagNum(tagServiceImpl.countAllFile());
+        statsVO.setDocNum(fileService.countAllFile());
+        statsVO.setCommentNum(commentService.countAllFile());
+        statsVO.setCategoryNum(categoryService.countAllFile());
+        statsVO.setTagNum(tagService.countAllFile());
         return BaseApiResult.success(statsVO);
     }
 

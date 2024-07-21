@@ -3,6 +3,8 @@ package com.jiaruiblog.service.impl;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CollectDocRelationship;
 import com.jiaruiblog.service.CollectService;
+import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -31,10 +33,10 @@ public class CollectServiceImpl implements CollectService {
     MongoTemplate mongoTemplate;
 
     @Resource
-    UserServiceImpl userServiceImpl;
+    IUserService userService;
 
     @Resource
-    FileServiceImpl fileServiceImpl;
+    IFileService iFileService;
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
@@ -55,7 +57,7 @@ public class CollectServiceImpl implements CollectService {
     @Override
     public Boolean insertRelationShip(CollectDocRelationship collect) {
         // 必须经过userId和docId的校验，否则不予关注
-        if (!userServiceImpl.isExist(collect.getUserId()) || !fileServiceImpl.isExist(collect.getDocId())) {
+        if (!userService.isExist(collect.getUserId()) || !iFileService.isExist(collect.getDocId())) {
             return false;
         }
 
@@ -110,6 +112,7 @@ public class CollectServiceImpl implements CollectService {
      * @Date 22:35 2022/9/24
      * @Param [docId]
      **/
+    @Override
     public Long collectNum(String docId) {
         Query query = new Query().addCriteria(Criteria.where(DOC_ID).is(docId));
         return mongoTemplate.count(query, CollectDocRelationship.class, COLLECTION_NAME);
@@ -121,6 +124,7 @@ public class CollectServiceImpl implements CollectService {
      * @Date 11:17 上午 2022/6/25
      * @Param [docId]
      **/
+    @Override
     public void removeRelateByDocId(String docId) {
         Query query = new Query(Criteria.where(DOC_ID).is(docId));
         List<CollectDocRelationship> relationships = mongoTemplate.find(query, CollectDocRelationship.class,

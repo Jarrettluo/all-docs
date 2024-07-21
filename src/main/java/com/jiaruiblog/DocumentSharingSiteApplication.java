@@ -15,6 +15,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * @Date 2022/6/2 10:58 下午
  * @Version 1.0
  **/
+//@EnableAsync(proxyTargetClass=true)
 @ServletComponentScan(basePackages = "com.jiaruiblog.filter")
 @SpringBootApplication
 public class DocumentSharingSiteApplication {

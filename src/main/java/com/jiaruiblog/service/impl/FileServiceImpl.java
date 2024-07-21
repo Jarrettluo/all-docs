@@ -96,16 +96,16 @@ public class FileServiceImpl implements IFileService {
     private GridFSBucket gridFsBucket;
 
     @Resource
-    private CategoryServiceImpl categoryServiceImpl;
+    private CategoryService categoryService;
 
     @Resource
-    private CommentServiceImpl commentServiceImpl;
+    private ICommentService commentService;
 
     @Resource
-    private CollectServiceImpl collectServiceImpl;
+    private CollectService collectService;
 
     @Resource
-    private TagServiceImpl tagServiceImpl;
+    private TagService tagService;
 
     @Resource
     private ElasticServiceImpl elasticServiceImpl;
@@ -233,7 +233,7 @@ public class FileServiceImpl implements IFileService {
             ex.printStackTrace();
         }
         // 异步保存数据标签
-        tagServiceImpl.saveTagWhenSaveDoc(fileDocument);
+        tagService.saveTagWhenSaveDoc(fileDocument);
 
         return fileDocument;
     }
@@ -338,8 +338,8 @@ public class FileServiceImpl implements IFileService {
                 }
             }
         }
-        categoryServiceImpl.addRelationShipDefault(fileUploadPO.getCategoryId(), fileIds);
-        tagServiceImpl.addTagRelationShip(fileUploadPO.getTagIds(), fileIds);
+        categoryService.addRelationShipDefault(fileUploadPO.getCategoryId(), fileIds);
+        tagService.addTagRelationShip(fileUploadPO.getTagIds(), fileIds);
         return BaseApiResult.success("共计保存了" + fileIds.size() + "文档");
     }
 
@@ -409,10 +409,10 @@ public class FileServiceImpl implements IFileService {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
-        categoryServiceImpl.addRelationShipDefault(fileUploadPO.getCategoryId(), fileDocument.getId());
+        categoryService.addRelationShipDefault(fileUploadPO.getCategoryId(), fileDocument.getId());
         List<String> fileId = new ArrayList<>();
         fileId.add(fileDocument.getId());
-        tagServiceImpl.addTagRelationShip(fileUploadPO.getTagIds(), fileId);
+        tagService.addTagRelationShip(fileUploadPO.getTagIds(), fileId);
         return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
@@ -521,9 +521,9 @@ public class FileServiceImpl implements IFileService {
      **/
     private FileUploadPO saveOrUpdateCategory(String category, List<String> tags) {
         FileUploadPO fileUploadPO = new FileUploadPO();
-        String categoryId = categoryServiceImpl.saveOrUpdateCate(category);
+        String categoryId = categoryService.saveOrUpdateCate(category);
         fileUploadPO.setCategoryId(categoryId);
-        List<String> tagIdList = tagServiceImpl.saveOrUpdateBatch(tags);
+        List<String> tagIdList = tagService.saveOrUpdateBatch(tags);
         fileUploadPO.setTagIds(tagIdList);
         return fileUploadPO;
     }
@@ -567,7 +567,7 @@ public class FileServiceImpl implements IFileService {
             ex.printStackTrace();
         }
         // 异步保存数据标签
-        tagServiceImpl.saveTagWhenSaveDoc(fileDocument);
+        tagService.saveTagWhenSaveDoc(fileDocument);
 
         return fileDocument;
 
@@ -641,9 +641,9 @@ public class FileServiceImpl implements IFileService {
         }
         // 清除全部的标签和分类信息
         // 删除分类关系
-        categoryServiceImpl.removeRelateByDocId(docId);
+        categoryService.removeRelateByDocId(docId);
         // 删除标签
-        tagServiceImpl.removeRelateByDocId(docId);
+        tagService.removeRelateByDocId(docId);
 
         // 保存文档和分类/标签的关系
         List<String> fileIds = com.google.common.collect.Lists.newArrayList(docId);
@@ -652,9 +652,9 @@ public class FileServiceImpl implements IFileService {
         FileUploadPO fileUploadPO = saveOrUpdateCategory(null, tags);
 
         if (Objects.nonNull(categoryId)) {
-            categoryServiceImpl.addRelationShipDefault(categoryId, fileIds);
+            categoryService.addRelationShipDefault(categoryId, fileIds);
         }
-        tagServiceImpl.addTagRelationShip(fileUploadPO.getTagIds(), fileIds);
+        tagService.addTagRelationShip(fileUploadPO.getTagIds(), fileIds);
 
         // 更新文档的名称和描述信息
         String name = updateInfoDTO.getName();
@@ -857,29 +857,36 @@ public class FileServiceImpl implements IFileService {
                 totalNum = countAllFile();
                 break;
             case TAG:
-                Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
+                long startTime = System.currentTimeMillis();
+                Tag tag = tagService.queryByTagId(documentDTO.getTagId());
                 if (tag == null) {
                     break;
                 }
-                List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
+                List<String> fileIdList1 = tagService.queryDocIdListByTagId(tag.getId());
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
                 if (CollectionUtils.isEmpty(fileIdList1)) {
                     break;
                 }
                 Query query = new Query().addCriteria(Criteria.where("_id").in(fileIdList1));
                 totalNum = countFileByQuery(query);
+                long endTime1 = System.currentTimeMillis();
+                // 异步执行清理无效的标签关系
+                tagService.clearInvalidTagRelationship(documentDTO.getTagId());
+                long endTime2 = System.currentTimeMillis();
+                log.info("查询数据花费时间" + (endTime1 - startTime));
+                log.info("清理异常数据" + (endTime2 - startTime));
                 break;
             case FILTER:
                 Set<String> docIdSet = new HashSet<>();
                 String keyWord = Optional.of(documentDTO).map(DocumentDTO::getFilterWord).orElse("");
                 // 模糊查询 分类
-                docIdSet.addAll(categoryServiceImpl.fuzzySearchDoc(keyWord));
+                docIdSet.addAll(categoryService.fuzzySearchDoc(keyWord));
                 // 模糊查询 标签
-                docIdSet.addAll(tagServiceImpl.fuzzySearchDoc(keyWord));
+                docIdSet.addAll(tagService.fuzzySearchDoc(keyWord));
                 // 模糊查询 文件标题
                 docIdSet.addAll(fuzzySearchDoc(keyWord));
                 // 模糊查询 评论内容
-                docIdSet.addAll(commentServiceImpl.fuzzySearchDoc(keyWord));
+                docIdSet.addAll(commentService.fuzzySearchDoc(keyWord));
                 List<FileDocument> esDoc = null;
                 try {
                     esDoc = elasticServiceImpl.search(keyWord);
@@ -898,11 +905,11 @@ public class FileServiceImpl implements IFileService {
                 }
                 break;
             case CATEGORY:
-                Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
+                Category category = categoryService.queryById(documentDTO.getCategoryId());
                 if (category == null) {
                     break;
                 }
-                List<String> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
+                List<String> fileIdList = categoryService.queryDocListByCategory(category);
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
                 if (CollectionUtils.isEmpty(fileIdList)) {
                     break;
@@ -941,11 +948,11 @@ public class FileServiceImpl implements IFileService {
                 totalNum = countAllFile();
                 break;
             case TAG:
-                Tag tag = tagServiceImpl.queryByTagId(documentDTO.getTagId());
+                Tag tag = tagService.queryByTagId(documentDTO.getTagId());
                 if (tag == null) {
                     break;
                 }
-                List<String> fileIdList1 = tagServiceImpl.queryDocIdListByTagId(tag.getId());
+                List<String> fileIdList1 = tagService.queryDocIdListByTagId(tag.getId());
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList1);
                 if (CollectionUtils.isEmpty(fileIdList1)) {
                     break;
@@ -957,13 +964,13 @@ public class FileServiceImpl implements IFileService {
                 Set<String> docIdSet = new HashSet<>();
                 String keyWord = Optional.of(documentDTO).map(DocumentDTO::getFilterWord).orElse("");
                 // 模糊查询 分类
-                docIdSet.addAll(categoryServiceImpl.fuzzySearchDoc(keyWord));
+                docIdSet.addAll(categoryService.fuzzySearchDoc(keyWord));
                 // 模糊查询 标签
-                docIdSet.addAll(tagServiceImpl.fuzzySearchDoc(keyWord));
+                docIdSet.addAll(tagService.fuzzySearchDoc(keyWord));
                 // 模糊查询 文件标题
                 docIdSet.addAll(fuzzySearchDoc(keyWord));
                 // 模糊查询 评论内容
-                docIdSet.addAll(commentServiceImpl.fuzzySearchDoc(keyWord));
+                docIdSet.addAll(commentService.fuzzySearchDoc(keyWord));
 
                 List<DocumentVO> esDocVO = Lists.newArrayList();
                 // 用户进行检索的分类id
@@ -974,7 +981,7 @@ public class FileServiceImpl implements IFileService {
                     Category category = new Category();
                     category.setId(categoryId);
                     // 得到这个分类下的文档的md5信息，这里的数据容易爆掉
-                    targetFileIdList = categoryServiceImpl.queryDocListByCategory(category);
+                    targetFileIdList = categoryService.queryDocListByCategory(category);
                 }
                 try {
                     Map<String, List<PageVO>> search = elasticServiceImpl.search(keyWord, new HashSet<>());
@@ -1023,11 +1030,11 @@ public class FileServiceImpl implements IFileService {
                 result.put("documents", esDocVO);
                 return BaseApiResult.success(result);
             case CATEGORY:
-                Category category = categoryServiceImpl.queryById(documentDTO.getCategoryId());
+                Category category = categoryService.queryById(documentDTO.getCategoryId());
                 if (category == null) {
                     break;
                 }
-                List<String> fileIdList = categoryServiceImpl.queryDocListByCategory(category);
+                List<String> fileIdList = categoryService.queryDocListByCategory(category);
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), fileIdList);
                 if (CollectionUtils.isEmpty(fileIdList)) {
                     break;
@@ -1079,13 +1086,13 @@ public class FileServiceImpl implements IFileService {
         removeFile(id, true);
 
         // 删除评论信息
-        commentServiceImpl.removeByDocId(id);
+        commentService.removeByDocId(id);
         // 删除分类关系
-        categoryServiceImpl.removeRelateByDocId(id);
+        categoryService.removeRelateByDocId(id);
         // 删除收藏关系
-        collectServiceImpl.removeRelateByDocId(id);
+        collectService.removeRelateByDocId(id);
         // 删除标签
-        tagServiceImpl.removeRelateByDocId(id);
+        tagService.removeRelateByDocId(id);
 
         // 删除文档评审关系
         docReviewService.removeReviews(Collections.singletonList(id));
@@ -1119,14 +1126,14 @@ public class FileServiceImpl implements IFileService {
             case CATEGORY:
                 restrictId = documentDTO.getCategoryId();
                 for (FileDocument fileDocument : fileDocuments) {
-                    boolean relateExist = categoryServiceImpl.relateExist(restrictId, fileDocument.getId());
+                    boolean relateExist = categoryService.relateExist(restrictId, fileDocument.getId());
                     documentVos.add(entityTransfer(relateExist, fileDocument));
                 }
                 break;
             case TAG:
                 restrictId = documentDTO.getTagId();
                 for (FileDocument fileDocument : fileDocuments) {
-                    boolean relateExist = tagServiceImpl.relateExist(restrictId, fileDocument.getId());
+                    boolean relateExist = tagService.relateExist(restrictId, fileDocument.getId());
                     documentVos.add(entityTransfer(relateExist, fileDocument));
                 }
                 break;
@@ -1184,11 +1191,11 @@ public class FileServiceImpl implements IFileService {
         DocWithCateVO doc = new DocWithCateVO();
         String docId = fileDocument.getId();
         doc.setId(docId);
-        doc.setCategoryVO(categoryServiceImpl.queryByDocId(docId));
+        doc.setCategoryVO(categoryService.queryByDocId(docId));
         doc.setSize(fileDocument.getSize());
         doc.setCreateTime(fileDocument.getUploadDate());
         doc.setTitle(fileDocument.getName());
-        doc.setTagVOList(tagServiceImpl.queryByDocId(docId));
+        doc.setTagVOList(tagService.queryByDocId(docId));
         doc.setUserName("admin");
         doc.setChecked(checkState);
         return doc;
@@ -1239,10 +1246,10 @@ public class FileServiceImpl implements IFileService {
         documentVO.setThumbId(fileDocument.getThumbId());
         // 根据文档的id进行查询 评论， 收藏，分类， 标签
         String docId = fileDocument.getId();
-        documentVO.setCommentNum(commentServiceImpl.commentNum(docId));
-        documentVO.setCollectNum(collectServiceImpl.collectNum(docId));
-        documentVO.setCategoryVO(categoryServiceImpl.queryByDocId(docId));
-        documentVO.setTagVOList(tagServiceImpl.queryByDocId(docId));
+        documentVO.setCommentNum(commentService.commentNum(docId));
+        documentVO.setCollectNum(collectService.collectNum(docId));
+        documentVO.setCategoryVO(categoryService.queryByDocId(docId));
+        documentVO.setTagVOList(tagService.queryByDocId(docId));
         // 查询文档的信息:新增文档地址，文档错误信息，文本id
         documentVO.setDocState(fileDocument.getDocState());
         documentVO.setErrorMsg(fileDocument.getErrorMsg());
@@ -1313,6 +1320,7 @@ public class FileServiceImpl implements IFileService {
      * @param docId 文档id
      * @return boolean
      */
+    @Override
     public boolean isExist(String docId) {
         if (!StringUtils.hasText(docId)) {
             return false;
@@ -1339,6 +1347,7 @@ public class FileServiceImpl implements IFileService {
      * @Date 4:40 下午 2022/6/26
      * @Param []
      **/
+    @Override
     public long countAllFile() {
         return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
     }
@@ -1441,6 +1450,23 @@ public class FileServiceImpl implements IFileService {
      **/
     public long countFileByQuery(Query query) {
         return mongoTemplate.count(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description // 根据文档idid查询文档
+     * @Date 22:28 2024/7/21
+     * @Param [docId]
+     * @return java.util.List<com.jiaruiblog.entity.FileDocument>
+     **/
+    @Override
+    public List<FileDocument> queryByDocIds(String ...docId) {
+        List<String> docIds = Arrays.asList(docId);
+        if (CollectionUtils.isEmpty(docIds)) {
+            return Collections.emptyList();
+        }
+        Query query = new Query(Criteria.where("_id").in(docIds));
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
     }
 
     /**

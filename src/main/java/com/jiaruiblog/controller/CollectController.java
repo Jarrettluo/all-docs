@@ -2,7 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.entity.CollectDocRelationship;
 import com.jiaruiblog.entity.dto.CollectDTO;
-import com.jiaruiblog.service.impl.CollectServiceImpl;
+import com.jiaruiblog.service.CollectService;
 import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +28,7 @@ import java.util.Date;
 public class CollectController {
 
     @Resource
-    CollectServiceImpl collectServiceImpl;
+    CollectService collectService;
 
     /**
      * @Author luojiarui
@@ -41,13 +41,13 @@ public class CollectController {
     @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/auth/insert")
     public BaseApiResult insert(@RequestBody CollectDTO collect, HttpServletRequest request) {
-        return collectServiceImpl.insert(setRelationshipValue(collect, request));
+        return collectService.insert(setRelationshipValue(collect, request));
     }
 
     @ApiOperation(value = "根据id移除某个收藏文档", notes = "根据id移除某个文档")
     @DeleteMapping(value = "/auth/remove")
     public BaseApiResult remove(@RequestBody CollectDTO collect, HttpServletRequest request) {
-        return collectServiceImpl.remove(setRelationshipValue(collect, request));
+        return collectService.remove(setRelationshipValue(collect, request));
     }
 
     /**

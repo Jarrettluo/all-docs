@@ -66,4 +66,12 @@ public interface ICommentService {
      **/
     BaseApiResult queryAllComments(BasePageDTO pageDTO, String userId, Boolean isAdmin);
 
+    long countAllFile();
+
+    List<String> fuzzySearchDoc(String keyWord);
+
+    void removeByDocId(String docId);
+
+    Long commentNum(String docId);
+
 }

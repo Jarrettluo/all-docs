@@ -99,6 +99,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @Param [cateName]
      * @return java.lang.String
      **/
+    @Override
     public String saveOrUpdateCate(String cateName) {
         if (!StringUtils.hasText(cateName)) {
             return null;
@@ -229,6 +230,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Async
+    @Override
     public void addRelationShipDefault(String categoryId, String docId) {
         if (categoryId == null) {
             return;
@@ -241,6 +243,7 @@ public class CategoryServiceImpl implements CategoryService {
         addDocRelate(relationship);
     }
 
+    @Override
     public void addRelationShipDefault(String categoryId, List<String> docIds) {
         for (String docId : docIds) {
             addRelationShipDefault(categoryId, docId);
@@ -267,6 +270,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @param categoryDb -> Category
      * @return -> List<String>
      */
+    @Override
     public List<String> queryDocListByCategory(Category categoryDb) {
         Query query = new Query(Criteria.where(CATEGORY_ID).is(categoryDb.getId()));
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
@@ -282,6 +286,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @param id -> String
      * @return -> Category
      */
+    @Override
     public Category queryById(String id) {
         if (id == null || "".equals(id)) {
             return null;
@@ -296,6 +301,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @Date 10:52 下午 2022/6/22
      * @Param [docId]
      **/
+    @Override
     public CategoryVO queryByDocId(String docId) {
 
         Query query1 = new Query().addCriteria(Criteria.where(FILE_ID).is(docId));
@@ -320,6 +326,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @param keyWord 关键字
      * @return 文档的id信息
      */
+    @Override
     public List<String> fuzzySearchDoc(String keyWord) {
         if (!StringUtils.hasText(keyWord)) {
             return Lists.newArrayList();
@@ -342,6 +349,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @Date 11:20 上午 2022/6/25
      * @Param [docId]
      **/
+    @Override
     public void removeRelateByDocId(String docId) {
         Query query = new Query(Criteria.where("fileId").is(docId));
         // 根据文档id进行文档关系的删除
@@ -355,6 +363,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @Date 4:58 下午 2022/6/26
      * @Param []
      **/
+    @Override
     public List<Category> getRandom() {
         int pageIndex = 1;
         int pageSize = 3;
@@ -372,6 +381,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @Date 5:00 下午 2022/6/26
      * @Param [cateId]
      **/
+    @Override
     public List<CateDocRelationship> getRelateByCateId(String cateId) {
         long pageIndex = 0;
         int pageSize = 7;
@@ -390,6 +400,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @Date 4:40 下午 2022/6/26
      * @Param []
      **/
+    @Override
     public long countAllFile() {
         return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
     }

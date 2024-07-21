@@ -32,4 +32,9 @@ public interface CollectService {
      * @return -> ApiResult
      */
     BaseApiResult remove(CollectDocRelationship collect);
+
+
+    void removeRelateByDocId(String docId);
+
+    Long collectNum(String docId);
 }

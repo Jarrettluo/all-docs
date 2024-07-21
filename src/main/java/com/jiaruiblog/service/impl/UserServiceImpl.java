@@ -193,6 +193,7 @@ public class UserServiceImpl implements IUserService {
      * @param userId 用户信息
      * @return 返回布尔
      */
+    @Override
     public boolean isExist(String userId) {
         if (userId == null || "".equals(userId)) {
             return false;
