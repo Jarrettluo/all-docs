@@ -47,6 +47,7 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
+# log leve, you can set: 1. DEBUG 2. INFO 3. WARNING 4. ERROR 5. CRITICAL
 logging:
   level:
     root: ${LOGGING_LEVEL:INFO}
@@ -60,12 +61,18 @@ cloud:
 
 all-docs:
   config:
+    # user can upload document to all-docs. You can set true or false.
     user-upload: ${AD_USER_UPLOAD:true}
+    # all documents be reviewed by administrator. You can set true or false
     admin-review: ${AD_ADMIN_REVIEW:false}
+    # prohibited word.
     prohibited-word: ${AD_PROHIBITED_WORD:true}
+    # users can registry account by self.
     user-registry: ${AD_USER_REGISTRY:true}
     initial-username: ${AD_INITIAL_USERNAME:admin123}
     initial-password: ${AD_INITIAL_PASSWORD:admin123}
+    # reset admin password when reboot system.
     cover-admin: ${COVER_ADMIN:true}
   file-path:
+    # sensitive file name
     sensitive-file: sensitive.txt
