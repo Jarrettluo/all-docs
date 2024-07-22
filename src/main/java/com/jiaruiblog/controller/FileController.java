@@ -3,6 +3,7 @@ package com.jiaruiblog.controller;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.auth0.jwt.interfaces.Claim;
 import com.google.common.collect.Lists;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
@@ -16,6 +17,7 @@ import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
+import com.jiaruiblog.util.JwtUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -79,14 +81,24 @@ public class FileController {
      */
     @ApiOperation(value = "查询文档预览结果")
     @GetMapping("/view/{id}")
-    public ResponseEntity<Object> serveFileOnline(@PathVariable String id) throws UnsupportedEncodingException {
+    public ResponseEntity<Object> serveFileOnline(@PathVariable String id,
+                                                  @RequestParam("token") String token,
+                                                  HttpServletResponse response)
+            throws UnsupportedEncodingException {
+        Map<String, Claim> userData = JwtUtil.verifyToken(token);
+        if (CollectionUtils.isEmpty(userData)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return null;
+        }
         Optional<FileDocument> file = fileService.getById(id);
         if (file.isPresent()) {
             return ResponseEntity.ok()
                     // 这里需要进行中文编码
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8"))
                     .header(HttpHeaders.CONTENT_TYPE, file.get().getContentType())
-                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "").header("Connection", "close")
+                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
+                    .header("Connection", "close")
                     .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
                     .body(file.get().getContent());
         } else {
@@ -98,7 +110,7 @@ public class FileController {
      * 在线显示文件
      *
      * @param id 文件id
-     * @return
+     * @return ResponseEntity<Object> 返回实体
      */
     @GetMapping("/view2/{id}")
     public ResponseEntity<Object> previewFileOnline(@PathVariable String id) throws UnsupportedEncodingException {
@@ -119,8 +131,8 @@ public class FileController {
     /**
      * 下载附件
      *
-     * @param id
-     * @return
+     * @param id 请求文件id
+     * @return ResponseEntity<Object>
      * @throws UnsupportedEncodingException
      */
     @GetMapping("/{id}")
@@ -288,7 +300,7 @@ public class FileController {
             tags = tags.subList(0, 10);
         }
         // 当只上传一个文档的时候，跳过错误肯定是False
-        if (files.length <2) {
+        if (files.length < 2) {
             skipError = Boolean.FALSE;
         }
         return fileService.uploadBatch(category, tags, description, skipError, files, userId, username);
@@ -325,11 +337,11 @@ public class FileController {
     }
 
     /**
+     * @return java.lang.Boolean
      * @Author luojiarui
      * @Description 文件上传时的参数检查：长度要求；格式要求；敏感词要求
      * @Date 16:14 2023/4/22
      * @Param [tags, category, description, name]
-     * @return java.lang.Boolean
      **/
     private static Boolean checkParam(List<String> tags, String category, String description, String name) {
 
@@ -427,7 +439,14 @@ public class FileController {
      **/
     @GetMapping(value = "/image/{thumbId}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public byte[] previewThumb(@PathVariable String thumbId) throws Exception {
+    public byte[] previewThumb(@PathVariable String thumbId,
+                               @RequestParam("token") String token,
+                               HttpServletResponse response) throws Exception {
+        Map<String, Claim> userData = JwtUtil.verifyToken(token);
+        if (CollectionUtils.isEmpty(userData)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return new byte[]{};
+        }
         InputStream inputStream = fileService.getFileThumb(thumbId);
         FileInputStream fileInputStream = (FileInputStream) (inputStream);
         if (inputStream == null) {
@@ -471,7 +490,14 @@ public class FileController {
 
     @GetMapping(value = "/image2/{thumbId}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public byte[] previewThumb2(@PathVariable String thumbId, HttpServletResponse response) {
+    public byte[] previewThumb2(@PathVariable String thumbId,
+                                @RequestParam("token") String token,
+                                HttpServletResponse response) {
+        Map<String, Claim> userData = JwtUtil.verifyToken(token);
+        if (CollectionUtils.isEmpty(userData)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return new byte[]{};
+        }
         // 设置响应头，缓存 1 小时
         response.setHeader("Cache-Control", "max-age=3600, public");
         return fileService.getFileBytes(thumbId);
@@ -581,7 +607,6 @@ public class FileController {
 //                return UUID.randomUUID().toString();
 //            }
 //        }
-
 
 
         return BaseApiResult.success();
