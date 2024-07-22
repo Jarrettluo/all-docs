@@ -10,6 +10,7 @@ import com.jiaruiblog.entity.vo.TagVO;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.util.BaseApiResult;
+import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.compress.utils.Lists;
@@ -508,9 +509,9 @@ public class TagServiceImpl implements TagService {
     @Override
     public void clearInvalidTagRelationship(String tagId) {
         Query query = new Query(Criteria.where(TAG_ID).is(tagId));
-        List<TagDocRelationship> intList = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
+        List<TagDocRelationship> relationshipList = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
         // 对列表关系进行分批
-        List<List<TagDocRelationship>> partition = ListUtils.partition(intList, 50);
+        List<List<TagDocRelationship>> partition = ListUtils.partition(relationshipList, 50);
 
         List<String> invalidRelationship = new ArrayList<>();
 
@@ -526,19 +527,19 @@ public class TagServiceImpl implements TagService {
 
             if (docIdList.size() != docIdListInDB.size()) {
                 // 剩下在列表中的是无效的列表信息
-                boolean b = docIdList.removeAll(docIdListInDB);
-                if (b) {
-                    List<String> invalidList = relationships.stream()
-                            .filter(item -> docIdList.contains(item.getFileId()))
-                            .map(TagDocRelationship::getId)
-                            .collect(Collectors.toList());
-                    invalidRelationship.addAll(invalidList);
-                }
+                docIdList.removeAll(docIdListInDB);
+                List<String> invalidList = relationships.stream()
+                        .filter(item -> docIdList.contains(item.getFileId()))
+                        .map(TagDocRelationship::getId)
+                        .collect(Collectors.toList());
+                invalidRelationship.addAll(invalidList);
             }
         }
-
-        Query deleteQuery = new Query(Criteria.where(OBJECT_ID).in(invalidRelationship));
-        mongoTemplate.remove(deleteQuery, TagDocRelationship.class, RELATE_COLLECTION_NAME);
+        if (!invalidRelationship.isEmpty()) {
+            Query deleteQuery = new Query(Criteria.where(OBJECT_ID).in(invalidRelationship));
+            DeleteResult remove = mongoTemplate.remove(deleteQuery, TagDocRelationship.class, RELATE_COLLECTION_NAME);
+            log.info("查询的无效id：" + tagId + "删除结果数量：" + remove.getDeletedCount());
+        }
     }
 
 }
