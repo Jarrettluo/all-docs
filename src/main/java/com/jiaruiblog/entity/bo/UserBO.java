@@ -1,16 +1,18 @@
-package com.jiaruiblog.entity.dto;
+package com.jiaruiblog.entity.bo;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
- * @ClassName UserDTO
- * @Description 注册用户信息
+ * @ClassName UserBO
+ * @Description TODO
  * @Author luojiarui
- * @Date 2022/12/18 12:56
+ * @Date 2024/7/23 17:37
  * @Version 1.0
  **/
 @Data
-public class UserDTO {
+public class UserBO {
 
     private String id;
 
@@ -20,8 +22,9 @@ public class UserDTO {
 
     private String mail;
 
-    private boolean male = false;
+    private Boolean male = false;
 
     private String description;
 
+    private Date birthtime;
 }

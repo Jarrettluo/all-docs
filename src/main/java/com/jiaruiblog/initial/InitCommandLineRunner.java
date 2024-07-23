@@ -16,7 +16,6 @@ import javax.annotation.Resource;
 @Component
 public class InitCommandLineRunner implements CommandLineRunner {
 
-
     @Resource
     IUserService userService;
 

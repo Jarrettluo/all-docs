@@ -2,6 +2,7 @@ package com.jiaruiblog.service;
 
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.bo.UserBO;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserRoleDTO;
@@ -90,5 +91,14 @@ public interface IUserService {
 
 
     boolean isExist(String userId);
+
+    /**
+     * @Author luojiarui
+     * @Description 用户自行对自己的信息进行修改
+     * @Date 17:49 2024/7/23
+     * @Param [userBO] 传入的参数已经是经过校验的了
+     * @return boolean 更新个人信息结果
+     **/
+    boolean updateUserBySelf(UserBO userBO);
 
 }

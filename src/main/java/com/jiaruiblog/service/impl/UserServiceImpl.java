@@ -4,6 +4,7 @@ import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.bo.UserBO;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserRoleDTO;
@@ -21,6 +22,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -54,6 +56,13 @@ public class UserServiceImpl implements IUserService {
     @Resource
     private SystemConfig systemConfig;
 
+    /*
+     * @Author luojiarui
+     * @Description 初始化第一个用户，默认从配置中取到第一个管理员账号密码
+     * @Date 17:30 2024/7/23
+     * @Param []
+     * @return void
+     **/
     @Override
     public void initFirstUser() {
         RegistryUserDTO userDTO = new RegistryUserDTO();
@@ -200,6 +209,24 @@ public class UserServiceImpl implements IUserService {
         }
         User user = queryById(userId);
         return user != null;
+    }
+
+    @Override
+    public boolean updateUserBySelf(UserBO user) {
+        Query query = new Query(Criteria.where("_id").is(user.getId()));
+        Update update = new Update();
+        if (StringUtils.hasText(user.getPassword())) {
+            update.set("password", user.getPassword());
+        }
+        update.set("phone", user.getPhone());
+        update.set("mail", user.getMail());
+        update.set("male", user.getMale());
+        update.set("description", user.getDescription());
+        update.set("updateDate", new Date());
+        update.set("birthtime", user.getBirthtime());
+        UpdateResult updateResult1 = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
+
+        return updateResult1.getModifiedCount() > 0;
     }
 
     /**

@@ -7,18 +7,18 @@ import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
+import com.jiaruiblog.entity.bo.UserBO;
 import com.jiaruiblog.entity.dto.*;
 import com.jiaruiblog.service.IUserService;
+import com.jiaruiblog.transformer.DTO2BO;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JwtUtil;
-import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +48,17 @@ public class UserController {
     private static final String COLLECTION_NAME = "user";
 
     private static final String REQUEST_USER_ID = "id";
+
+    static final Map<String, String> fieldRegx = new HashMap<>(8);
+
+    static {
+        // 1-64个数字字母下划线
+        fieldRegx.put("password", "^[0-9a-z_]{1,64}$");
+        fieldRegx.put("phone", "/^1(3\\d|4[5-9]|5[0-35-9]|6[567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$/");
+        fieldRegx.put("mail", "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
+        // 1-140个任意字符
+        fieldRegx.put("description", "(.*){1,140}");
+    }
 
 
     @Resource
@@ -97,21 +108,12 @@ public class UserController {
 
     @ApiOperation(value = "更新用户hobby和company", notes = "更新用户hobby和company")
     @PutMapping(value = "/updateUser")
-    public BaseApiResult updateUser(@RequestBody User user) {
-        Query query = new Query(Criteria.where("_id").is(user.getId()));
-        Update update = new Update();
-        if (StringUtils.hasText(user.getPassword())) {
-            update.set("password", user.getPassword());
-        }
-        update.set("phone", user.getPhone());
-        update.set("mail", user.getMail());
-        update.set("male", user.getMale());
-        update.set("description", user.getDescription());
-        update.set("updateDate", new Date());
-        update.set("birthtime", user.getBirthtime());
-        UpdateResult updateResult1 = template.updateFirst(query, update, User.class, COLLECTION_NAME);
-        if (updateResult1.getMatchedCount() > 0) {
-            return BaseApiResult.success("更新成功！");
+    public BaseApiResult updateUser(@RequestBody UserDTO userDTO) {
+        // 检查修改参数信息
+        UserBO userBO = DTO2BO.userDTO2BO(userDTO);
+        boolean result = userService.updateUserBySelf(userBO);
+        if (result) {
+            return BaseApiResult.success("更新成功!");
         }
         return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
     }
@@ -245,18 +247,6 @@ public class UserController {
         return "当前用户信息id=" + id + ",userName=" + userName + ",password=" + password;
     }
 
-    static final Map<String, String> fieldRegx = new HashMap<>(8);
-
-    static {
-        // 1-64个数字字母下划线
-        fieldRegx.put("password", "^[0-9a-z_]{1,64}$");
-        fieldRegx.put("phone", "/^1(3\\d|4[5-9]|5[0-35-9]|6[567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$/");
-        fieldRegx.put("mail", "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$");
-        // 1-140个任意字符
-        fieldRegx.put("description", "(.*){1,140}");
-    }
-
-
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @Author luojiarui
@@ -273,18 +263,18 @@ public class UserController {
             }
         }
         if (StringUtils.hasText(userDTO.getMail())) {
-            if (!patternMatch(userDTO.getPassword(), fieldRegx.get("mail"))) {
+            if (!patternMatch(userDTO.getMail(), fieldRegx.get("mail"))) {
                 return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
             }
         }
 
         if (StringUtils.hasText(userDTO.getPhone())) {
-            if (!patternMatch(userDTO.getPassword(), fieldRegx.get("phone"))) {
+            if (!patternMatch(userDTO.getPhone(), fieldRegx.get("phone"))) {
                 return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
             }
         }
         if (StringUtils.hasText(userDTO.getDescription())) {
-            if (!patternMatch(userDTO.getPassword(), fieldRegx.get("description"))) {
+            if (!patternMatch(userDTO.getDescription(), fieldRegx.get("description"))) {
                 return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
             }
         }
@@ -292,7 +282,7 @@ public class UserController {
         return BaseApiResult.success();
     }
 
-
+    @ApiOperation(value = "上传用户的头像", notes = "上传当前登录用户的头像")
     @PostMapping("/auth/uploadUserAvatar")
     public BaseApiResult uploadUserAvatar(@RequestParam(value = "img") MultipartFile file, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
@@ -304,6 +294,7 @@ public class UserController {
         return userService.uploadUserAvatar(userId, file);
     }
 
+    @ApiOperation(value = "删除用户头像", notes = "删除当前登录用户的头像")
     @DeleteMapping("/auth/removeUserAvatar")
     public BaseApiResult removeUserAvatar(HttpServletRequest request) {
         return userService.removeUserAvatar((String) request.getAttribute("id"));
