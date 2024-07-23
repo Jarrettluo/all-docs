@@ -2,6 +2,8 @@ package com.jiaruiblog.entity.dto;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @ClassName UserDTO
  * @Description 注册用户信息
@@ -23,5 +25,7 @@ public class UserDTO {
     private boolean male = false;
 
     private String description;
+
+    private Date birthtime;
 
 }

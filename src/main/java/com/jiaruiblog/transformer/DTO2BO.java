@@ -25,6 +25,7 @@ public class DTO2BO {
         userBO.setPhone(userDTO.getPhone());
         userBO.setMail(userDTO.getMail());
         userBO.setMale(userDTO.isMale());
+        userBO.setBirthtime(userDTO.getBirthtime());
         userBO.setDescription(userDTO.getDescription());
         return userBO;
     }

@@ -45,6 +45,8 @@ public interface IUserService {
 
     User queryById(String userId);
 
+    User queryByUsername(String username);
+
     boolean checkPermissionForUser(User user, PermissionEnum[] permissionEnums);
 
     /**

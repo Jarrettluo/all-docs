@@ -137,7 +137,6 @@ public class UserServiceImpl implements IUserService {
             return BaseApiResult.success(MessageConstant.SUCCESS);
         }
         return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_HAS_EXIST);
-
     }
 
     @Override
@@ -225,7 +224,6 @@ public class UserServiceImpl implements IUserService {
         update.set("updateDate", new Date());
         update.set("birthtime", user.getBirthtime());
         UpdateResult updateResult1 = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
-
         return updateResult1.getModifiedCount() > 0;
     }
 
@@ -238,6 +236,13 @@ public class UserServiceImpl implements IUserService {
     @Override
     public User queryById(String userId) {
         return mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public User queryByUsername(String username) {
+        Query query = new Query(Criteria.where("username").is(username));
+        User one = mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
+        return one;
     }
 
     /**
