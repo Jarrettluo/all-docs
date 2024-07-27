@@ -164,7 +164,6 @@ public class UserServiceImpl implements IUserService {
         return BaseApiResult.success(result);
     }
 
-
     @Override
     public BaseApiResult changeUserRole(UserRoleDTO userRoleDTO) {
         User user = mongoTemplate.findById(userRoleDTO.getUserId(), User.class, COLLECTION_NAME);
@@ -213,16 +212,16 @@ public class UserServiceImpl implements IUserService {
     @Override
     public boolean updateUserBySelf(UserBO user) {
         Query query = new Query(Criteria.where("_id").is(user.getId()));
-        Update update = new Update();
-        if (StringUtils.hasText(user.getPassword())) {
-            update.set("password", user.getPassword());
-        }
-        update.set("phone", user.getPhone());
-        update.set("mail", user.getMail());
-        update.set("male", user.getMale());
-        update.set("description", user.getDescription());
-        update.set("updateDate", new Date());
-        update.set("birthtime", user.getBirthtime());
+        Update update = getUserUpdate(user);
+        UpdateResult updateResult1 = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
+        return updateResult1.getModifiedCount() > 0;
+    }
+
+    @Override
+    public boolean updateUserByAdmin(UserBO userBO) {
+        Query query = new Query().addCriteria(Criteria.where("_id").is(userBO.getId()));
+        Update update = getUserUpdate(userBO);
+        update.set(ROLE, Optional.ofNullable(userBO.getRole()).orElse(PermissionEnum.USER));
         UpdateResult updateResult1 = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         return updateResult1.getModifiedCount() > 0;
     }
@@ -394,6 +393,27 @@ public class UserServiceImpl implements IUserService {
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
 
         return BaseApiResult.success(MessageConstant.SUCCESS);
+    }
+
+    /**
+     * @Author luojiarui
+     * @Description 用户自行更新或者管理员更新用户信息的时候操作
+     * @Date 23:47 2024/7/26
+     * @Param [user]
+     * @return org.springframework.data.mongodb.core.query.Update
+     **/
+    private Update getUserUpdate(UserBO user) {
+        Update update = new Update();
+        if (StringUtils.hasText(user.getPassword())) {
+            update.set("password", user.getPassword());
+        }
+        update.set("phone", user.getPhone());
+        update.set("mail", user.getMail());
+        update.set("male", user.getMale());
+        update.set("description", user.getDescription());
+        update.set(UPDATE_TIME, new Date());
+        update.set("birthtime", user.getBirthtime());
+        return update;
     }
 
 }

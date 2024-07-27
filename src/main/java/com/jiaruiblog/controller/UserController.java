@@ -94,6 +94,13 @@ public class UserController {
         return BaseApiResult.success(one);
     }
 
+    /**
+     * @Author luojiarui
+     * @Description 仅限普通用户对自身的信息进行更新；不能更新其权限信息
+     * @Date 23:25 2024/7/26
+     * @Param [userDTO]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @ApiOperation(value = "更新用户hobby和company", notes = "更新用户hobby和company")
     @PutMapping(value = "/updateUser")
     public BaseApiResult updateUser(@RequestBody UserDTO userDTO) {
@@ -103,6 +110,7 @@ public class UserController {
         }
         // 检查修改参数信息
         UserBO userBO = DTO2BO.userDTO2BO(userDTO);
+        // 个人用户对自己的信息进行更改
         boolean result = userService.updateUserBySelf(userBO);
         if (result) {
             return BaseApiResult.success("更新成功!");
@@ -247,14 +255,14 @@ public class UserController {
      * @Param [userDTO]
      **/
     @Permission(PermissionEnum.ADMIN)
-    @PutMapping("updateUserInfo")
+    @PutMapping("/auth/updateUserInfo")
     public BaseApiResult updateUserInfo(@RequestBody UserDTO userDTO) {
         // 传入的参数数据不对，则返回参数不正确
         if (checkUserDTOParams(userDTO)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         UserBO userBO = DTO2BO.userDTO2BO(userDTO);
-        boolean b = userService.updateUserBySelf(userBO);
+        boolean b = userService.updateUserByAdmin(userBO);
         if (b) {
             return BaseApiResult.success(MessageConstant.SUCCESS);
         }
@@ -277,10 +285,6 @@ public class UserController {
     @DeleteMapping("/auth/removeUserAvatar")
     public BaseApiResult removeUserAvatar(HttpServletRequest request) {
         return userService.removeUserAvatar((String) request.getAttribute("id"));
-    }
-
-    private boolean patternMatch(String s, String regex) {
-        return !Pattern.compile(regex).matcher(s).matches();
     }
 
     @ApiOperation(value = "重置用户密码", notes = "管理员对用户进行密码重置")
@@ -311,6 +315,10 @@ public class UserController {
         return BaseApiResult.success();
     }
 
+    private static boolean patternMatch(String s, String regex) {
+        return !Pattern.compile(regex).matcher(s).matches();
+    }
+
     /**
      * @Author luojiarui
      * @Description 检查用户更新的信息符合要求
@@ -318,20 +326,22 @@ public class UserController {
      * @Param [userDTO]
      * @return boolean 符合要求返回true，不符合要求返回false
      **/
-    private boolean checkUserDTOParams(UserDTO userDTO) {
+    public static boolean checkUserDTOParams(UserDTO userDTO) {
         if (StringUtils.hasText(userDTO.getPassword())
-                && patternMatch(userDTO.getPassword(), fieldRegx.get("password"))) {
-            return true;
+                && !patternMatch(userDTO.getPassword(), fieldRegx.get("password"))) {
+            return false;
         }
-        if (StringUtils.hasText(userDTO.getMail()) && patternMatch(userDTO.getMail(), fieldRegx.get("mail"))) {
-            return true;
+        if (StringUtils.hasText(userDTO.getMail())
+                && !patternMatch(userDTO.getMail(), fieldRegx.get("mail"))) {
+            return false;
         }
 
-        if (StringUtils.hasText(userDTO.getPhone()) && patternMatch(userDTO.getPhone(), fieldRegx.get("phone"))) {
-            return true;
+        if (StringUtils.hasText(userDTO.getPhone())
+                && !patternMatch(userDTO.getPhone(), fieldRegx.get("phone"))) {
+            return false;
         }
-        return StringUtils.hasText(userDTO.getDescription())
-                && patternMatch(userDTO.getDescription(), fieldRegx.get("description"));
+        return !(StringUtils.hasText(userDTO.getDescription())
+                && !patternMatch(userDTO.getDescription(), fieldRegx.get("description")));
     }
 
 }

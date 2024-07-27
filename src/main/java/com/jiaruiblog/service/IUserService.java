@@ -102,5 +102,14 @@ public interface IUserService {
      * @return boolean 更新个人信息结果
      **/
     boolean updateUserBySelf(UserBO userBO);
+    
+    /**
+     * @Author luojiarui
+     * @Description 管理员对某个用户的信息进行修改
+     * @Date 23:34 2024/7/26
+     * @Param [userBO]
+     * @return boolean
+     **/
+    boolean updateUserByAdmin(UserBO userBO);
 
 }

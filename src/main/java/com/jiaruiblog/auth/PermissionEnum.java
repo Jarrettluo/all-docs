@@ -2,6 +2,7 @@ package com.jiaruiblog.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 @AllArgsConstructor
@@ -29,5 +30,17 @@ public enum PermissionEnum {
      * 权限名称
      */
     private final String msg;
+
+    public static PermissionEnum getRoleByName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
+        for (PermissionEnum value : PermissionEnum.values()) {
+            if (value.name().equals(name)) {
+                return value;
+            }
+        }
+        return null;
+    }
 
 }

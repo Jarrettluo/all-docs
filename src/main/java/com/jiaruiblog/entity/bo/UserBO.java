@@ -1,5 +1,6 @@
 package com.jiaruiblog.entity.bo;
 
+import com.jiaruiblog.auth.PermissionEnum;
 import lombok.Data;
 
 import java.util.Date;
@@ -27,4 +28,6 @@ public class UserBO {
     private String description;
 
     private Date birthtime;
+
+    private PermissionEnum role;
 }

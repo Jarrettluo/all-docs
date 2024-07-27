@@ -28,4 +28,6 @@ public class UserDTO {
 
     private Date birthtime;
 
+    private String role;
+
 }

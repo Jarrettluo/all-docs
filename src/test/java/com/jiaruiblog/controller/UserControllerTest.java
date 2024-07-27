@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jiaruiblog.DocumentSharingSiteApplication;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
+import com.jiaruiblog.entity.dto.UserDTO;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.Charset;
+import java.util.Date;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = DocumentSharingSiteApplication.class)
@@ -246,5 +248,19 @@ public class UserControllerTest {
 
     @Test
     public void testLogin() {
+    }
+
+    @Test
+    public void testCheckUserDTOParams() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId("6662d1f26238ff0284d4c957");
+        userDTO.setPhone("123456789098");
+        userDTO.setMail("jiarui.luo@163.com");
+        userDTO.setMale(false);
+        userDTO.setDescription("这是我的个人签名");
+        userDTO.setBirthtime(new Date());
+
+        boolean b = UserController.checkUserDTOParams(userDTO);
+        Assert.assertEquals(true, b);
     }
 }
