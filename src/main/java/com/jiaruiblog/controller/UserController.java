@@ -84,6 +84,10 @@ public class UserController {
     @PostMapping(value = "/getById")
     public BaseApiResult getById(@RequestBody UserDTO user) {
         User one = userService.queryById(user.getId());
+        // 增加对无效用户的判断
+        if (Objects.isNull(one)) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+        }
         return BaseApiResult.success(one);
     }
 
