@@ -44,13 +44,7 @@ public class JwtFilter implements Filter
         response.setCharacterEncoding("UTF-8");
         String url = request.getRequestURI().substring(request.getContextPath().length());
         // 登录和注册等请求不需要令牌
-//        if (url.contains("login") || url.contains("/user/insert") || url.contains("files")) {
-//            response.setStatus(HttpServletResponse.SC_OK);
-//            chain.doFilter(request, response);
-//            return;
-//        }
-
-        if (url.contains("login") || url.contains("/user/insert")) {
+        if (url.contains("login") || url.contains("/user/insert") || url.contains("view")) {
             response.setStatus(HttpServletResponse.SC_OK);
             chain.doFilter(request, response);
             return;
