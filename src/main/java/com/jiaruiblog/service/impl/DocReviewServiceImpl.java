@@ -8,7 +8,6 @@ import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.service.DocReviewService;
-import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.DuplicateKeyException;
@@ -25,7 +24,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,9 +43,6 @@ public class DocReviewServiceImpl implements DocReviewService {
     public static final String RESULT = "操作成功了 %d 项目";
     public static final String USER_ID = "userId";
     public static final String DOC_ID = "docId";
-
-    @Resource
-    private IFileService fileService;
 
     @Resource
     MongoTemplate mongoTemplate;
@@ -72,17 +67,9 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     @Override
-    public BaseApiResult refuse(String docId, String reason) {
-        if (docIdExist(Collections.singletonList(docId))) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-        }
-        // 校验某个文档是否存在, 查询并删除某个文档
-        List<FileDocument> fileDocumentList = fileService.queryAndRemove(docId);
-        if (CollectionUtils.isEmpty(fileDocumentList)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-        }
+    public BaseApiResult refuse(FileDocument fileDocument, String reason) {
         // 删除某个文档
-        DocReview docReview = docReviewInstance(fileDocumentList.get(0), reason, false);
+        DocReview docReview = docReviewInstance(fileDocument, reason, false);
         if (docReview == null) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
@@ -117,14 +104,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     @Override
-    public BaseApiResult refuseBatch(List<String> docIds, String reason) {
-        if (docIdExist(docIds)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-        }
-        List<FileDocument> fileDocumentList = fileService.queryAndRemove(docIds.toArray(new String[0]));
-        if (CollectionUtils.isEmpty(fileDocumentList)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-        }
+    public BaseApiResult refuseBatch( List<FileDocument> fileDocumentList, String reason) {
         List<DocReview> docReviews = Lists.newArrayList();
         for (FileDocument fileDocument : fileDocumentList) {
             docReviews.add(docReviewInstance(fileDocument, reason, false));
@@ -139,14 +119,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     @Override
-    public BaseApiResult approveBatch(List<String> docIds) {
-        if (docIdExist(docIds)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-        }
-        List<FileDocument> fileDocumentList = fileService.queryAndUpdate(docIds.toArray(new String[0]));
-        if (CollectionUtils.isEmpty(fileDocumentList)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-        }
+    public BaseApiResult approveBatch(List<FileDocument> fileDocumentList) {
         List<DocReview> docReviews = Lists.newArrayList();
         for (FileDocument fileDocument : fileDocumentList) {
             updateDocTxt(fileDocument);
@@ -193,7 +166,8 @@ public class DocReviewServiceImpl implements DocReviewService {
      * @Param [docIds]
      * @return boolean
      **/
-    private boolean docIdExist(List<String> docIds) {
+    @Override
+    public boolean docIdExist(List<String> docIds) {
         Query query = new Query(Criteria.where("docId").in(docIds));
         return mongoTemplate.count(query, DocReview.class, DOC_REVIEW_COLLECTION) > 0;
     }

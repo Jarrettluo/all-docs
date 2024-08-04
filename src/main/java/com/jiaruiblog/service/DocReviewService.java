@@ -1,6 +1,7 @@
 package com.jiaruiblog.service;
 
 
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.util.BaseApiResult;
 
@@ -18,6 +19,8 @@ public interface DocReviewService {
      **/
     BaseApiResult userRead(List<String> ids, String userId);
 
+    boolean docIdExist(List<String> docIds);
+
     /**
      * @Author luojiarui
      * @Description 拒绝文档
@@ -25,7 +28,7 @@ public interface DocReviewService {
      * @Param [docId, reason] 文档的id 和 拒绝的原因
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult refuse(String docId, String reason);
+    BaseApiResult refuse(FileDocument fileDocument, String reason);
 
     /**
      * @Author luojiarui
@@ -34,16 +37,16 @@ public interface DocReviewService {
      * @Param [docId] 文档列表的id
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult refuseBatch(List<String> docIds, String reason);
+    BaseApiResult refuseBatch(List<FileDocument> fileDocumentList, String reason);
 
     /**
      * @Author luojiarui
      * @Description 管理员同意一批文档
      * @Date 22:04 2022/12/9
-     * @Param [docIds]
+     * @Param [fileDocumentList]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult approveBatch(List<String> docIds);
+    BaseApiResult approveBatch(List<FileDocument> fileDocumentList);
 
 
     /**

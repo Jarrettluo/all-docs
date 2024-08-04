@@ -29,6 +29,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -44,6 +45,7 @@ import java.util.*;
  * @Version 1.0
  **/
 @Slf4j
+@Lazy
 @Service
 public class ElasticServiceImpl implements ElasticService {
 
@@ -54,8 +56,13 @@ public class ElasticServiceImpl implements ElasticService {
     @Autowired
     private RestHighLevelClient client;
 
-    @Autowired
     private FileServiceImpl fileServiceImpl;
+
+    // 通过属性注入的方式避免循环依赖
+    @Autowired
+    private void setFileServiceImpl(FileServiceImpl fileService) {
+        this.fileServiceImpl = fileService;
+    }
 
 
     /**

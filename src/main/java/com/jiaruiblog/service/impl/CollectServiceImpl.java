@@ -3,8 +3,6 @@ package com.jiaruiblog.service.impl;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CollectDocRelationship;
 import com.jiaruiblog.service.CollectService;
-import com.jiaruiblog.service.IFileService;
-import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -32,12 +30,6 @@ public class CollectServiceImpl implements CollectService {
     @Resource
     MongoTemplate mongoTemplate;
 
-    @Resource
-    IUserService userService;
-
-    @Resource
-    IFileService iFileService;
-
     /**
      * @return com.jiaruiblog.utils.ApiResult
      * @Author luojiarui
@@ -56,11 +48,6 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public Boolean insertRelationShip(CollectDocRelationship collect) {
-        // 必须经过userId和docId的校验，否则不予关注
-        if (!userService.isExist(collect.getUserId()) || !iFileService.isExist(collect.getDocId())) {
-            return false;
-        }
-
         CollectDocRelationship collectDb = getExistRelationship(collect);
         if (collectDb != null) {
             return false;
@@ -95,7 +82,6 @@ public class CollectServiceImpl implements CollectService {
      **/
     private CollectDocRelationship getExistRelationship(CollectDocRelationship collect) {
         collect = Optional.ofNullable(collect).orElse(new CollectDocRelationship());
-
         Query query = new Query()
                 .addCriteria(Criteria.where(DOC_ID).is(collect.getDocId())
                         .and("userId").is(collect.getUserId()));

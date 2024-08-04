@@ -4,13 +4,11 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.google.common.collect.Maps;
-import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
-import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
@@ -30,6 +28,8 @@ import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.http.auth.AuthenticationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -67,6 +67,7 @@ import java.util.stream.Collectors;
  * @author jiarui.luo
  */
 @Slf4j
+@Lazy
 @Service
 public class FileServiceImpl implements IFileService {
 
@@ -104,20 +105,25 @@ public class FileServiceImpl implements IFileService {
     @Resource
     private CollectService collectService;
 
-    @Resource
     private TagService tagService;
 
-    @Resource
+    @Autowired
+    private void setTagService(@Lazy TagService tagService) {
+        this.tagService = tagService;
+    }
+
     private ElasticServiceImpl elasticServiceImpl;
+
+    @Autowired
+    private void setElasticServiceImpl(@Lazy ElasticServiceImpl elasticServiceImpl) {
+        this.elasticServiceImpl = elasticServiceImpl;
+    }
 
     @Resource
     private RedisService redisService;
 
     @Resource
     private TaskExecuteService taskExecuteService;
-
-    @Resource
-    private IUserService userService;
 
     @Resource
     private DocReviewService docReviewService;
@@ -247,14 +253,6 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
     public BaseApiResult documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException {
-        User user = userService.queryById(userId);
-        if (user == null) {
-            throw new AuthenticationException();
-        }
-        // 用户非管理员且普通用户禁止
-        if (Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
-            throw new AuthenticationException();
-        }
 //        List<String> availableSuffixList = com.google.common.collect.Lists
 //                .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
         try {

@@ -5,15 +5,19 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.auth0.jwt.interfaces.Claim;
 import com.google.common.collect.Lists;
+import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
+import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.upload.FileUploadDTO;
 import com.jiaruiblog.entity.dto.upload.UrlUploadDTO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
@@ -59,6 +63,12 @@ public class FileController {
 
     @Resource
     private TaskExecuteService taskExecuteService;
+
+    @Resource
+    private IUserService userService;
+
+    @Resource
+    SystemConfig systemConfig;
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
@@ -267,6 +277,16 @@ public class FileController {
             throws AuthenticationException {
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
+
+        User user = userService.queryById(userId);
+        if (user == null) {
+            throw new AuthenticationException();
+        }
+        // 用户非管理员且普通用户禁止
+        if (Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
+            throw new AuthenticationException();
+        }
+
         return fileService.documentUpload(file, userId, username);
     }
 

@@ -58,7 +58,6 @@ public class CommentServiceImpl implements ICommentService {
     @Resource
     IUserService userService;
 
-
     @Override
     public BaseApiResult insert(Comment comment) {
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {

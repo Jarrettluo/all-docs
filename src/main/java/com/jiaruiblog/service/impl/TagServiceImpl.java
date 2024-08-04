@@ -14,6 +14,8 @@ import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.compress.utils.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
  * @Version 1.0
  */
 @Slf4j
+@Lazy
 @Service
 public class TagServiceImpl implements TagService {
 
@@ -56,8 +59,13 @@ public class TagServiceImpl implements TagService {
     @Resource
     MongoTemplate mongoTemplate;
 
-    @Resource
     private IFileService fileService;
+
+    // 通过属性注入，防止循环依赖
+    @Autowired
+    private void setFileService(IFileService iFileService) {
+        this.fileService = iFileService;
+    }
 
     @Override
     public BaseApiResult insert(Tag tag) {

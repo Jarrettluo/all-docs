@@ -1,8 +1,11 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CollectDocRelationship;
 import com.jiaruiblog.entity.dto.CollectDTO;
 import com.jiaruiblog.service.CollectService;
+import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +31,13 @@ import java.util.Date;
 public class CollectController {
 
     @Resource
-    CollectService collectService;
+    private CollectService collectService;
+
+    @Resource
+    private IUserService userService;
+
+    @Resource
+    private IFileService fileService;
 
     /**
      * @Author luojiarui
@@ -41,7 +50,12 @@ public class CollectController {
     @ApiOperation(value = "新增一个收藏文档", notes = "新增单个收藏文档")
     @PostMapping(value = "/auth/insert")
     public BaseApiResult insert(@RequestBody CollectDTO collect, HttpServletRequest request) {
-        return collectService.insert(setRelationshipValue(collect, request));
+        CollectDocRelationship relationship = setRelationshipValue(collect, request);
+        // 必须经过userId和docId的校验，否则不予关注
+        if (!userService.isExist(relationship.getUserId()) || !fileService.isExist(relationship.getDocId())) {
+            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        }
+        return collectService.insert(relationship);
     }
 
     @ApiOperation(value = "根据id移除某个收藏文档", notes = "根据id移除某个文档")
