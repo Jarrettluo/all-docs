@@ -138,7 +138,7 @@ https://github.com/Jarrettluo/document-sharing-site.git
 ### 项目部署
 
 - [全文档在Windows环境下部署](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/depoly_win_zh.md)
-- [全文档在Linux环境下部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_linux_zh.md)
+- [全文档在Linux环境下部署](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_linux_zh.md)
 - [全文档使用Docker部署--待补充](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_zh.md)
 - [全文档使用Docker-Compose部署--最新发布](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/deploy_docker_compose_zh.md)
 
