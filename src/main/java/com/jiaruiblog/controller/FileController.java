@@ -16,9 +16,11 @@ import com.jiaruiblog.entity.dto.upload.FileUploadDTO;
 import com.jiaruiblog.entity.dto.upload.UrlUploadDTO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.intercepter.SensitiveFilter;
+import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.service.TaskExecuteService;
+import com.jiaruiblog.service.impl.DocLogServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
 import com.jiaruiblog.util.JwtUtil;
@@ -26,6 +28,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.AuthenticationException;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -69,6 +72,9 @@ public class FileController {
 
     @Resource
     SystemConfig systemConfig;
+
+    @Resource
+    private IDocLogService docLogService;
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
@@ -114,6 +120,56 @@ public class FileController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
         }
+    }
+
+    /*
+     * @Author luojiarui
+     * @Description 用户下载文件前生成一个存储日志
+     * @Date 00:03 2024/8/16
+     * @Param [request]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
+    @GetMapping("/downloadFile")
+    public BaseApiResult downloadFile( HttpServletRequest request) {
+        String username = (String) request.getAttribute("username");
+        String userId = (String) request.getAttribute("id");
+        User user = new User();
+        user.setUsername(username);
+        user.setId(userId);
+        FileDocument fileDocument = new FileDocument();
+        docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.DOWNLOAD);
+        return BaseApiResult.success();
+    }
+
+    /*
+     * @Author luojiarui
+     * @Description 用户下载
+     * @Date 00:05 2024/8/16
+     * @Param [id, token, downloadId, response]
+     * @return org.springframework.http.ResponseEntity<org.springframework.core.io.ByteArrayResource>
+     **/
+    @GetMapping("/download/{fileName}")
+    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String id,
+                                                          @RequestParam("token") String token,
+                                                          @RequestParam("downloadId") String downloadId,
+                                                          HttpServletResponse response) {
+        Map<String, Claim> userData = JwtUtil.verifyToken(token);
+        if (CollectionUtils.isEmpty(userData)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return null;
+        }
+        // 校验downloadId
+
+        Optional<FileDocument> file = fileService.getById(id);
+        if (!file.isPresent()) {
+            return null;
+        }
+        FileDocument fileDocument = file.get();
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(fileDocument.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDocument.getName() + "\"")
+                .body(new ByteArrayResource(fileDocument.getContent()));
     }
 
     /**

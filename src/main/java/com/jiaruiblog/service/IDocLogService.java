@@ -24,7 +24,7 @@ public interface IDocLogService {
      * @Date 22:54 2023/1/11
      * @Param [user, document, action]
      **/
-    void addLog(User user, FileDocument document, DocLogServiceImpl.Action action);
+    String addLog(User user, FileDocument document, DocLogServiceImpl.Action action);
 
     /**
      * query Doc Logs

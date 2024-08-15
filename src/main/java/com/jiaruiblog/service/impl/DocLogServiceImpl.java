@@ -41,13 +41,14 @@ public class DocLogServiceImpl implements IDocLogService {
     private MongoTemplate mongoTemplate;
 
     public enum Action {
+        DOWNLOAD(),
         GET(),
         POST(),
         DELETE()
     }
 
     @Override
-    public void addLog(User user, FileDocument document, Action action) {
+    public String addLog(User user, FileDocument document, Action action) {
         DocLog docLog = new DocLog();
         docLog.setUserId(user.getId());
         docLog.setUserName(user.getUsername());
@@ -57,7 +58,7 @@ public class DocLogServiceImpl implements IDocLogService {
         docLog.setCreateDate(new Date());
         docLog.setUpdateDate(new Date());
         mongoTemplate.save(docLog, DOC_LOG_COLLECTION);
-
+        return docLog.getId();
     }
 
 
