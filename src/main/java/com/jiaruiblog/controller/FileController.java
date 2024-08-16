@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -164,8 +165,11 @@ public class FileController {
         // 使用hmacKey作为Redis的key，存储fileId，设置短时有效期
         redisTemplate.opsForValue().set(hmacKey, fileId, Duration.ofMinutes(10));
 
+        // URL Encode HMAC
+        String encodedHmac = URLEncoder.encode(hmacKey, StandardCharsets.UTF_8.toString());
+
         // 返回下载链接
-        return BaseApiResult.success(hmacKey);
+        return BaseApiResult.success(encodedHmac);
     }
 
     /*
