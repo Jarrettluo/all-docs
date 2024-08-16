@@ -76,3 +76,7 @@ all-docs:
   file-path:
     # sensitive file name
     sensitive-file: sensitive.txt
+
+hmac:
+  secret:
+    key: AllDocs

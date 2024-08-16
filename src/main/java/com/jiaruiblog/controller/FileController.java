@@ -23,12 +23,15 @@ import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.service.impl.DocLogServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
+import com.jiaruiblog.util.HmacUtil;
 import com.jiaruiblog.util.JwtUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.AuthenticationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,6 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -122,6 +126,13 @@ public class FileController {
         }
     }
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private HmacUtil hmacUtil;
+
+
     /*
      * @Author luojiarui
      * @Description 用户下载文件前生成一个存储日志
@@ -129,16 +140,32 @@ public class FileController {
      * @Param [request]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    @GetMapping("/downloadFile")
-    public BaseApiResult downloadFile( HttpServletRequest request) {
+    @GetMapping("/generateDownloadLink")
+    public BaseApiResult generateDownloadLink(@RequestParam String fileId,
+                                              HttpServletRequest request) throws Exception {
+        if (org.apache.commons.lang3.StringUtils.isEmpty(fileId)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+        }
+        FileDocument fileDocument = fileService.queryById(fileId);
+        if (Objects.isNull(fileDocument)) {
+            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+        }
+
         String username = (String) request.getAttribute("username");
         String userId = (String) request.getAttribute("id");
+
         User user = new User();
         user.setUsername(username);
         user.setId(userId);
-        FileDocument fileDocument = new FileDocument();
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.DOWNLOAD);
-        return BaseApiResult.success();
+
+        String hmacKey = hmacUtil.generateHmac(userId + fileId);
+
+        // 使用hmacKey作为Redis的key，存储fileId，设置短时有效期
+        redisTemplate.opsForValue().set(hmacKey, fileId, Duration.ofMinutes(10));
+
+        // 返回下载链接
+        return BaseApiResult.success(hmacKey);
     }
 
     /*
@@ -148,28 +175,29 @@ public class FileController {
      * @Param [id, token, downloadId, response]
      * @return org.springframework.http.ResponseEntity<org.springframework.core.io.ByteArrayResource>
      **/
-    @GetMapping("/download/{fileName}")
-    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String id,
-                                                          @RequestParam("token") String token,
-                                                          @RequestParam("downloadId") String downloadId,
-                                                          HttpServletResponse response) {
-        Map<String, Claim> userData = JwtUtil.verifyToken(token);
-        if (CollectionUtils.isEmpty(userData)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
-        }
-        // 校验downloadId
+    @GetMapping("/downloadFile")
+    public ResponseEntity<ByteArrayResource> downloadFile(@RequestParam String fileId,
+                                                          @RequestParam String hmac,
+                                                          @RequestParam String userId) throws Exception {
+        String storedFileId = redisTemplate.opsForValue().get(hmac);
 
-        Optional<FileDocument> file = fileService.getById(id);
-        if (!file.isPresent()) {
-            return null;
-        }
-        FileDocument fileDocument = file.get();
+        if (storedFileId != null && storedFileId.equals(fileId) && hmacUtil.validateHmac(userId + fileId, hmac)) {
+            // 删除Redis中的HMAC密钥，防止重复下载
+            redisTemplate.delete(hmac);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(fileDocument.getContentType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDocument.getName() + "\"")
-                .body(new ByteArrayResource(fileDocument.getContent()));
+            Optional<FileDocument> file = fileService.getById(fileId);
+            if (!file.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            FileDocument fileDocument = file.get();
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(fileDocument.getContentType()))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDocument.getName() + "\"")
+                    .body(new ByteArrayResource(fileDocument.getContent()));
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     /**
