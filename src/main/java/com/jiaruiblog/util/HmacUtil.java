@@ -17,8 +17,10 @@ public class HmacUtil {
         Mac mac = Mac.getInstance("HmacSHA256");
         SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "HmacSHA256");
         mac.init(secretKeySpec);
-        byte[] hmacData = mac.doFinal(data.getBytes());
-        return Base64.getEncoder().encodeToString(hmacData);
+        byte[] hmacBytes = mac.doFinal(data.getBytes());
+
+        // 使用Base64进行URL安全的编码，生成的 hmac 是 URL 安全的，不会包含 `+`, `/` 或 `=`
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(hmacBytes);
     }
 
     public boolean validateHmac(String data, String hmac) throws Exception {

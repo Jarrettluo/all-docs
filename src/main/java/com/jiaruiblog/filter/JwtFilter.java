@@ -41,6 +41,10 @@ public class JwtFilter implements Filter
         final HttpServletRequest request = (HttpServletRequest) req;
         final HttpServletResponse response = (HttpServletResponse) res;
 
+        // 在响应中添加必要的头部信息
+        response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+
+
         response.setCharacterEncoding("UTF-8");
         String url = request.getRequestURI().substring(request.getContextPath().length());
         // 登录和注册等请求不需要令牌

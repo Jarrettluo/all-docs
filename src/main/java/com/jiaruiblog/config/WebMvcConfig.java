@@ -4,6 +4,7 @@ import com.jiaruiblog.util.converter.IntegerCodeToEnumConverterFactory;
 import com.jiaruiblog.util.converter.StringCodeToEnumConverterFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -25,5 +26,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addConverterFactory(new StringCodeToEnumConverterFactory());
     }
 
-
+    /**
+     * CORS 配置，允许前端访问 Content-Disposition 头部信息
+     */
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("*")  // 根据需要调整允许的前端域名
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*")
+                .exposedHeaders("Content-Disposition"); // 允许前端访问 Content-Disposition
+    }
 }

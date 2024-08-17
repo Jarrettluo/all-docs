@@ -46,7 +46,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -173,12 +172,8 @@ public class FileController {
 
         // 使用hmacKey作为Redis的key，存储fileId，设置短时有效期
         redisTemplate.opsForValue().set(hmacKey, fileId, Duration.ofMinutes(10));
-
-        // URL Encode HMAC
-        String encodedHmac = URLEncoder.encode(hmacKey, StandardCharsets.UTF_8.toString());
-
         // 返回下载链接
-        return BaseApiResult.success(encodedHmac);
+        return BaseApiResult.success(hmacKey);
     }
 
     /*
@@ -205,8 +200,9 @@ public class FileController {
             FileDocument fileDocument = file.get();
 
             return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; fileName=" + URLEncoder.encode(fileDocument.getName(), "utf-8"))
                     .contentType(MediaType.parseMediaType(fileDocument.getContentType()))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDocument.getName() + "\"")
                     .body(new ByteArrayResource(fileDocument.getContent()));
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
