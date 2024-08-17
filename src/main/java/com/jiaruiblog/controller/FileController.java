@@ -112,19 +112,28 @@ public class FileController {
             return null;
         }
         Optional<FileDocument> file = fileService.getById(id);
-        if (file.isPresent()) {
-            return ResponseEntity.ok()
-                    // 这里需要进行中文编码
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8"))
-                    .header(HttpHeaders.CONTENT_TYPE, file.get().getContentType())
-                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
-                    .header("Connection", "close")
-                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
-                    .body(file.get().getContent());
-        } else {
+        if (!file.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
         }
+
+        String userId = userData.get("id").asString();
+        String username = userData.get("username").asString();
+        User user = new User();
+        user.setId(userId);
+        user.setUsername(username);
+
+        FileDocument fileDocument1 = file.get();
+        docLogService.addLog(user, fileDocument1, DocLogServiceImpl.Action.PREVIEW);
+
+        return ResponseEntity.ok()
+                // 这里需要进行中文编码
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8"))
+                .header(HttpHeaders.CONTENT_TYPE, file.get().getContentType())
+                .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
+                .header("Connection", "close")
+                .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
+                .body(file.get().getContent());
     }
 
     @Autowired
@@ -361,7 +370,8 @@ public class FileController {
      * @return BaseApiResult
      */
     @PostMapping("auth/upload")
-    public BaseApiResult documentUpload(@RequestParam("file") MultipartFile file, HttpServletRequest request)
+    public BaseApiResult documentUpload(@RequestParam("file") MultipartFile file,
+                                        HttpServletRequest request)
             throws AuthenticationException {
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");

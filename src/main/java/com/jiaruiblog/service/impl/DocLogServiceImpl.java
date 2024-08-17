@@ -41,6 +41,8 @@ public class DocLogServiceImpl implements IDocLogService {
     private MongoTemplate mongoTemplate;
 
     public enum Action {
+        PREVIEW,
+        UPLOAD,
         DOWNLOAD(),
         GET(),
         POST(),
@@ -61,18 +63,20 @@ public class DocLogServiceImpl implements IDocLogService {
         return docLog.getId();
     }
 
-
+    /*
+     * @Author luojiarui
+     * @Description 查询系统的各类日志信息
+     *              此接口用于管理员查询全量的数据
+     * @Date 10:35 2024/8/17
+     * @Param [page, userId]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @Override
-    public BaseApiResult queryDocLogs(BasePageDTO page, String userId) {
-        User user = userServiceImpl.queryById(userId);
+    public Map<String, Object> queryDocLogs(BasePageDTO page) {
         // 根据不同的用户进行查询
         Query query = new Query();
-        if (user.getPermissionEnum().equals(PermissionEnum.USER)) {
-            query.addCriteria(Criteria.where("userId").is(user.getId()));
-        }
-
+        // 查询总数
         long count = mongoTemplate.count(query, DocLog.class, DOC_LOG_COLLECTION);
-
         query.skip((long) (page.getPage() - 1) * page.getRows());
         query.limit(page.getRows());
         query.with(Sort.by(Sort.Direction.DESC, "createDate"));
@@ -82,7 +86,7 @@ public class DocLogServiceImpl implements IDocLogService {
         Map<String, Object> result = Maps.newHashMap();
         result.put("total", count);
         result.put("data", docLogList);
-        return BaseApiResult.success(result);
+        return result;
     }
 
     @Override

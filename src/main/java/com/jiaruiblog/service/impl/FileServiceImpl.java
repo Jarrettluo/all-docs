@@ -9,6 +9,7 @@ import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
+import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
@@ -104,6 +105,9 @@ public class FileServiceImpl implements IFileService {
 
     @Resource
     private CollectService collectService;
+
+    @Resource
+    private IDocLogService docLogService;
 
     private TagService tagService;
 
@@ -274,6 +278,11 @@ public class FileServiceImpl implements IFileService {
                     return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_DUPLICATE);
                 }
                 FileDocument fileDocument = saveToDb(fileMd5, file, userId, username, null);
+
+                User user = new User();
+                user.setId(userId);
+                user.setUsername(username);
+                docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.UPLOAD);
 
                 // 目前支持这一类数据进行预览
                 // 进行全文的制作，索引，文本入库等

@@ -7,6 +7,7 @@ import com.jiaruiblog.service.impl.DocLogServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName IDocLogService
@@ -35,7 +36,7 @@ public interface IDocLogService {
      * @Param user String
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult queryDocLogs(BasePageDTO page, String userId);
+    Map<String, Object> queryDocLogs(BasePageDTO page);
 
     /**
      * delete doc logs in batches

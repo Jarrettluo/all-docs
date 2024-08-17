@@ -2,7 +2,9 @@ package com.jiaruiblog.transformer;
 
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.entity.bo.UserBO;
+import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserDTO;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
@@ -23,7 +25,12 @@ public class DTO2BO {
             return userBO;
         }
         userBO.setId(userDTO.getId());
-        userBO.setPassword(userDTO.getPassword());
+        // 对传入的DTO密码进行加密处理
+        if (StringUtils.isNoneBlank(userDTO.getPassword())) {
+            RegistryUserDTO registryUserDTO = new RegistryUserDTO();
+            registryUserDTO.setPassword(userDTO.getPassword());
+            userBO.setPassword(registryUserDTO.getEncodePassword());
+        }
         userBO.setPhone(userDTO.getPhone());
         userBO.setMail(userDTO.getMail());
         userBO.setMale(userDTO.isMale());

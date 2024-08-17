@@ -212,6 +212,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public boolean updateUserBySelf(UserBO user) {
         Query query = new Query(Criteria.where("_id").is(user.getId()));
+        // 这里准备更新的user的密码已经经过了编码处理
         Update update = getUserUpdate(user);
         UpdateResult updateResult1 = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         return updateResult1.getModifiedCount() > 0;
@@ -371,13 +372,20 @@ public class UserServiceImpl implements IUserService {
                 .collect(Collectors.toMap(User::getId, User::getAvatar, (v1, v2) -> v2));
     }
 
-
+    /*
+     * @Author luojiarui
+     * @Description 管理员对用户进行密码重置，重置的密码是初始密码
+     * @Date 11:43 2024/8/17
+     * @Param [userId, adminId]
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @Override
     public BaseApiResult resetUserPwd(String userId, String adminId) {
         User user = mongoTemplate.findById(adminId, User.class, COLLECTION_NAME);
         User resetUser = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
         // 如果管理者是空的，或者管理者权限不够，均不能对用户进行重置！
-        if (user == null || user.getId() == null || user.getId().equals(userId)
+        if (user == null
+                || user.getId() == null
                 || !PermissionEnum.ADMIN.equals(user.getPermissionEnum())
                 || resetUser == null
         ) {
