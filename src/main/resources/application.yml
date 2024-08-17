@@ -33,6 +33,18 @@ spring:
         max-wait: 1000
     testOnBorrow: true
 
+  # LDAP server URL
+  ldap:
+    urls: ldap://localhost:8389
+    # Base DN
+    base: dc=springframework,dc=org
+    # User DN
+    username: uid=admin,ou=system
+    # User Password
+    password: password
+    # User DN patterns
+    user-dn-patterns: uid={0},ou=people
+
   servlet:
     multipart:
       max-file-size: 300MB
