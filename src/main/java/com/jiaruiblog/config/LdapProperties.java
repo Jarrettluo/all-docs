@@ -11,7 +11,13 @@ public class LdapProperties {
     private String base;
     private String username;
     private String password;
+
+    // DN（Distinguished Name）：
+    // DN是每个条目在目录中的唯一标识符，由一系列与目录结构相关的名称组成。
+    // DN通常是一个层次结构，例如"cn=john,ou=users,dc=example,dc=com"。
     private String[] userDnPatterns;
+
+
     private String groupSearchBase;
 
     // Getters and Setters
