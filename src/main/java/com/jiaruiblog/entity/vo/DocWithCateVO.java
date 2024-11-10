@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @ClassName DocWithCateVO
  * @Description 专门用于分类和标签的备选列表
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/11/15 22:24
  * @Version 1.0
  **/

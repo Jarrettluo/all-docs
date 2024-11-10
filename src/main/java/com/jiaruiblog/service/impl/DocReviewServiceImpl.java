@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * @ClassName DocReviewServiceImpl
  * @Description 文档评审
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/11/30 21:02
  * @Version 1.0
  **/
@@ -79,7 +79,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 创建一条文档评审的实例
      * @Date 10:24 2022/12/10
      * @Param [fileDocument, reason, approve]
@@ -135,7 +135,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员审核通过以后，对文档进行文本提取等工作
      * @Date 22:51 2023/3/9
      * @Param [fileDocument]
@@ -160,7 +160,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 判断这个文档是否已经存在于评审列表中
      * @Date 11:26 2022/12/10
      * @Param [docIds]

@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * 文档评审，日志查询
  *
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/11/25 15:56
  * @Version 1.0
  */
@@ -78,7 +78,7 @@ public class DocReviewController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 单个进行拒绝
      * @Date 21:12 2022/11/30
      * @Param [docId, reason]
@@ -102,7 +102,7 @@ public class DocReviewController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量进行拒绝，并删除文档
      * @Date 21:12 2022/11/30
      * @Param [docIds]
@@ -124,7 +124,7 @@ public class DocReviewController {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description  缺少同意文档的信息
      * @Date 22:04 2022/12/9
      * @Param [batchIdDTO]
@@ -147,7 +147,7 @@ public class DocReviewController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员和普通用户分别查询
      * @Date 21:15 2022/11/30
      * @Param [pageParams, request]
@@ -161,7 +161,7 @@ public class DocReviewController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员和普通用户分别查询
      * @Date 21:15 2022/11/30
      * @Param [pageParams, request]

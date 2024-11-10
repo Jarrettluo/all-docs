@@ -11,7 +11,7 @@ import javax.annotation.Resource;
 /**
  * @ClassName LikeTask
  * @Description 点赞的定时任务
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/4/3 22:10
  * @Version 1.0
  **/

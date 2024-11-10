@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @ClassName MongoConfig
  * @Description mongodb 配置
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/12 10:30 下午
  * @Version 1.0
  **/

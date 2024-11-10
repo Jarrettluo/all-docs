@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * @ClassName LikeController
  * @Description TODO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/2 22:05
  * @Version 1.0
  * 点赞功能参考地址：https://blog.csdn.net/qq_45243783/article/details/128221372

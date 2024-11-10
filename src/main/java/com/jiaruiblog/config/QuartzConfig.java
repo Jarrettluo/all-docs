@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @ClassName QuartzConfig
  * @Description 定时任务 Quartz
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/4/3 22:07
  * @Version 1.0
  **/

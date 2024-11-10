@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @ClassName UpdateInfoDTO
  * @Description TODO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/6/28 23:08
  * @Version 1.0
  **/

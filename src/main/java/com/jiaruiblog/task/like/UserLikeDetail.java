@@ -6,7 +6,7 @@ import lombok.Data;
 /**
  * @ClassName UserLikeDetail
  * @Description 用户通过redis点赞的信息实体
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/4/5 11:52
  * @Version 1.0
  **/

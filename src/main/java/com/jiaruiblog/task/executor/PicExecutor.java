@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 /**
  * @ClassName PicExecutor
  * @Description jepg, jpg, gif ... to png
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/10/6 23:36
  * @Version 1.0
  **/

@@ -14,7 +14,7 @@ import java.io.IOException;
  * Downloads are available here https://github.com/ollydev/libtesseract/releases
  * @ClassName OCRUtil
  * @Description orc 离线识别
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/16 10:23 下午
  * @Version 1.0
  **/

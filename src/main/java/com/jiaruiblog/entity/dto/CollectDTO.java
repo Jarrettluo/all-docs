@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @ClassName CollectDTO
  * @Description 收藏的dto
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/19 5:22 下午
  * @Version 1.0
  **/

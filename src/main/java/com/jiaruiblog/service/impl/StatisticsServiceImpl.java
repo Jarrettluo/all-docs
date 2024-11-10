@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 /**
  * @ClassName StatisticsServiceImpl
  * @Description StatisticsServiceImpl
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/26 2:28 下午
  * @Version 1.0
  **/
@@ -51,7 +51,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 统计随机的三个分类
      * @Date 2:29 下午 2022/6/26
      * @Param []
@@ -91,7 +91,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 统计数量
      * @Date 2:29 下午 2022/6/26
      * @Param []
@@ -107,7 +107,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 统计过去一个月每天的数据
      * @Date 17:13 2023/5/20
      * @Param []

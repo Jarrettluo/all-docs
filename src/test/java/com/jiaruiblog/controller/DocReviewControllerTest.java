@@ -49,7 +49,7 @@ public class DocReviewControllerTest {
 
     /**
      * 正常用例
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 仅仅有管理员可以进行评审
      * 正常参数
      * @Date 22:37 2022/12/6
@@ -73,7 +73,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例：page为负数
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 仅仅有管理员可以进行评审, page为负数
      * @Date 22:37 2022/12/6
      * @Param []
@@ -96,7 +96,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例： page 超过限制
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 仅仅有管理员可以进行评审， page 超过限制
      * @Date 22:37 2022/12/6
      * @Param []
@@ -120,7 +120,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例： 请求方法不对，Get请求使用了post请求
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 仅仅有管理员可以进行评审， page 超过限制
      * @Date 22:37 2022/12/6
      * @Param []
@@ -144,7 +144,7 @@ public class DocReviewControllerTest {
 
     /**
      * 正例
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更新文档为已读状态
      * @Date 22:17 2022/12/8
      * @Param []
@@ -170,7 +170,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例1： 传递字符串
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更新文档为已读状态，参数格式错误
      * @Date 22:17 2022/12/8
      * @Param []
@@ -194,7 +194,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例2： 不具有ids
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更新文档为已读状态，不具备ids的key值
      * @Date 22:17 2022/12/8
      * @Param []
@@ -221,7 +221,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例3： 传递的参数是空的，正常返回，不过数据是空的
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更新文档为已读状态，传递的参数是空的
      * @Date 22:17 2022/12/8
      * @Param []
@@ -247,7 +247,7 @@ public class DocReviewControllerTest {
 
     /**
      * 正常
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员拒绝文档
      * @Date 21:06 2022/12/8
      * @Param []
@@ -272,7 +272,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例1： reason 参数为空
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员拒绝文档
      * @Date 21:06 2022/12/8
      * @Param []
@@ -298,7 +298,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例2： docId 的参数为空
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员拒绝文档
      * @Date 21:06 2022/12/8
      * @Param []
@@ -323,7 +323,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例3： docId 空字符串
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员拒绝文档
      * @Date 21:06 2022/12/8
      * @Param []
@@ -350,7 +350,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例4： reason 为空字符串
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员拒绝文档
      * @Date 21:06 2022/12/8
      * @Param []
@@ -376,7 +376,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例5： docId超过字符限制
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员拒绝文档
      * @Date 21:06 2022/12/8
      * @Param []
@@ -403,7 +403,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例6： reason 超过字符串限制
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员拒绝文档
      * @Date 21:06 2022/12/8
      * @Param []
@@ -429,7 +429,7 @@ public class DocReviewControllerTest {
 
     /**
      * 正例： 正常返回
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量拒绝文档的上传
      * @Date 22:33 2022/12/8
      **/
@@ -454,7 +454,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例1： reason 属性缺少
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量拒绝文档的上传
      * 没有参数, 类型转换错误
      * @Date 22:33 2022/12/8
@@ -482,7 +482,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例2： ids 属性缺失
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量拒绝文档的上传
      * 没有参数, 类型转换错误
      * @Date 22:33 2022/12/8
@@ -509,7 +509,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例3：类型不正确
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量拒绝文档的上传
      * 没有参数, 类型转换错误
      * @Date 22:33 2022/12/8
@@ -533,7 +533,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例4： reason 长度不正确
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量拒绝文档的上传
      * 没有参数, 类型转换错误
      * @Date 22:33 2022/12/8
@@ -562,7 +562,7 @@ public class DocReviewControllerTest {
 
     /**
      * 反例5： id长度不正确
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量拒绝文档的上传
      * 没有参数, 类型转换错误
      * @Date 22:33 2022/12/8

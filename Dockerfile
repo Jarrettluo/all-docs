@@ -11,7 +11,7 @@ RUN apk add --update ttf-dejavu fontconfig  && rm -rf /var/cache/apk/*
 
 
 # 将当前目录下的jar包复制到docker容器的/目录下
-ADD ./target/document-sharing-site-1.0-SNAPSHOT.jar /app.jar
+ADD ./target/all-docs-1.0-SNAPSHOT.jar /app.jar
 
 # 运行过程中创建一个app.jar文件
 #RUN bash -c 'touch /app.jar'

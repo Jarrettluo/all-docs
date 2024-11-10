@@ -26,7 +26,7 @@ import java.util.Date;
 /**
  * @ClassName CategoryController
  * @Description 分类的控制器
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/4 3:10 下午
  * @Version 1.0
  **/

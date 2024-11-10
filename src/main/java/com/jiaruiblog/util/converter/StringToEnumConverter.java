@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * @ClassName StringToEnumConverter
  * @Description StringToEnumConverter
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/19 5:07 下午
  * @Version 1.0
  **/

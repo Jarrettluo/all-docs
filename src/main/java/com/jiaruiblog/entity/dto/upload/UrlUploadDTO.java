@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @ClassName UrlUploadDTO
  * @Description 通过url上传的参数
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/4/21 23:49
  * @Version 1.0
  **/

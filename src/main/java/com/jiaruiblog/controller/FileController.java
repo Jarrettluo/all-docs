@@ -82,7 +82,7 @@ public class FileController {
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 列表数据
      * @Date 22:41 2023/3/15
      * @Param [basePageDTO]
@@ -143,7 +143,7 @@ public class FileController {
 
 
     /*
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 用户下载文件前生成一个存储日志
      * @Date 00:03 2024/8/16
      * @Param [request]
@@ -177,7 +177,7 @@ public class FileController {
     }
 
     /*
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 用户下载
      * @Date 00:05 2024/8/16
      * @Param [id, token, downloadId, response]
@@ -386,7 +386,7 @@ public class FileController {
 
     /**
      * @return java.util.List<java.lang.String>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量上传文件
      * @Date 23:12 2023/4/21
      * @Param [req, files]
@@ -422,7 +422,7 @@ public class FileController {
 
     /**
      * @return java.util.List<java.lang.String>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 通过url上传
      * @Date 23:12 2023/4/21
      * @Param [req, files]
@@ -452,7 +452,7 @@ public class FileController {
 
     /**
      * @return java.lang.Boolean
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 文件上传时的参数检查：长度要求；格式要求；敏感词要求
      * @Date 16:14 2023/4/22
      * @Param [tags, category, description, name]
@@ -546,7 +546,7 @@ public class FileController {
 
     /**
      * @return byte[]
-     * @Author luojiarui
+     * @author luojiarui
      * @Description previewThumb
      * @Date 8:02 下午 2022/7/24
      * @Param [thumbId]
@@ -656,7 +656,7 @@ public class FileController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 重建文档索引，继续加入到列表中
      * @Date 22:19 2022/11/14
      * @Param [docId]

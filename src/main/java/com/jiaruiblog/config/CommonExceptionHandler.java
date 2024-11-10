@@ -52,7 +52,7 @@ public class CommonExceptionHandler {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description validation 效验post or get 方式表单方式提交转对象，效验出错
      * @Date 21:50 2022/12/8
      * @Param [e]
@@ -86,7 +86,7 @@ public class CommonExceptionHandler {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 请求方法不正确
      * @Date 21:18 2022/12/9
      * @Param [e]
@@ -100,7 +100,7 @@ public class CommonExceptionHandler {
 
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员设置的禁止操作的错误
      * @Date 21:18 2022/12/9
      * @Param [e]
@@ -111,7 +111,7 @@ public class CommonExceptionHandler {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员设置的禁止操作的错误
      * @Date 21:18 2022/12/9
      * @Param [e]

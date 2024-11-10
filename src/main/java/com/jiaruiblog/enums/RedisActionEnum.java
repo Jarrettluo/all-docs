@@ -5,7 +5,7 @@ import com.jiaruiblog.util.converter.BaseEnum;
 /**
  * @ClassName RedisActionEnum
  * @Description Redis缓存的动作
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/4/5 12:13
  * @Version 1.0
  **/

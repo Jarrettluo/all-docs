@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @ClassName BasePageDTO
  * @Description 页码查询的参数
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/11/29 23:26
  * @Version 1.0
  **/

@@ -3,7 +3,7 @@ package com.jiaruiblog.enums;
 /**
  * @ClassName ThumbnailEnum
  * @Description ThumbnailEnum
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/23 5:58 下午
  * @Version 1.0
  **/

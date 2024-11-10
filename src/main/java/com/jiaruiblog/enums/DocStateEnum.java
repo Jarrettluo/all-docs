@@ -3,7 +3,7 @@ package com.jiaruiblog.enums;
 /**
  * @ClassName DocStateEnum
  * @Description 文档建立索引时候的状态
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/11/13 14:32
  * @Version 1.0
  **/

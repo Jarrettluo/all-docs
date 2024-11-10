@@ -3,7 +3,7 @@ package com.jiaruiblog.entity.dto;
 import lombok.Data;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/6/20 16:44
  * @Version 1.0
  */

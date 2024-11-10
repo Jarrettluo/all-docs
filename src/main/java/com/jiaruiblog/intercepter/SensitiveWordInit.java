@@ -23,7 +23,7 @@ import java.util.Set;
  * @Description 过滤不雅词汇，加上@Configuration在项目启动的时候加载一下; 屏蔽敏感词初始化
  * https://blog.csdn.net/weixin_39610631/article/details/113039391
  * @Bean > @Value > @Configuration 加载顺序
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/8/14 16:09
  * @Version 1.0
  **/

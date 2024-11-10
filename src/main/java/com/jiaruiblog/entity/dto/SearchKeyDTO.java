@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @ClassName SearchKeyDTO
  * @Description 查询信息
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/25 11:20
  * @Version 1.0
  **/

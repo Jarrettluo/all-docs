@@ -40,7 +40,7 @@ import java.util.*;
 /**
  * @ClassName ElasticServiceImpl
  * @Description ElasticServiceImpl
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/12 10:54 下午
  * @Version 1.0
  **/
@@ -265,7 +265,7 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 根据文档的id删除文档
      * @Date 22:52 2023/5/3
      * @Param [docMd5]
@@ -283,7 +283,7 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 词云的聚合只能是Keyword 类型
      * 使用了attachment.content字段来进行词云聚合，这是因为Attachment Processor插件会将提取的文本内容存储在名为attachment.content的字段中。
      * ES 的Text 字段不能进行聚合

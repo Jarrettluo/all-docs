@@ -6,7 +6,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/24 11:27
  * @Version 1.0
  */

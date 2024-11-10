@@ -18,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/20 17:59
  * @Version 1.0
  */
@@ -30,7 +30,7 @@ public class MainTask implements RunnableTask {
     private final TaskData taskData = new TaskData();
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 初始化任务，指定一个
      * @Date 15:43 2022/11/13
      * @Param [fileDocument]
@@ -46,7 +46,7 @@ public class MainTask implements RunnableTask {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 成功以后更新文件
      * @Date 18:17 2022/11/13
      * @Param []
@@ -131,7 +131,7 @@ public class MainTask implements RunnableTask {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 删除已经存在的文本文件和缩略图文件
      * @Date 18:19 2022/11/13
      * @Param []

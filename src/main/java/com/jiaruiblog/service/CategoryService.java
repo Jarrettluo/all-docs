@@ -8,7 +8,7 @@ import com.jiaruiblog.util.BaseApiResult;
 import java.util.List;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/6/7 11:38
  * @Version 1.0
  */
@@ -64,7 +64,7 @@ public interface CategoryService {
     BaseApiResult cancelCategoryRelationship(CateDocRelationship relationship);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 排查某个分类和文档是否存在关系
      * @Date 22:20 2022/11/16
      * @Param [categoryId, fileId]
@@ -73,7 +73,7 @@ public interface CategoryService {
     boolean relateExist(String categoryId, String fileId);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更具文档的分类和标签、关键字进行联合查询
      * @Date 23:20 2023/1/4
      * @Param []
@@ -83,7 +83,7 @@ public interface CategoryService {
                                      Long pageNum, Long pageSize);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更具文档的分类和标签、关键字进行联合查询
      * @Date 23:20 2023/1/4
      * @Param []
@@ -93,7 +93,7 @@ public interface CategoryService {
                                      Long pageNum, Long pageSize, String userId);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更具文档的分类和标签、关键字进行联合查询
      * @Date 23:20 2023/1/4
      * @Param []

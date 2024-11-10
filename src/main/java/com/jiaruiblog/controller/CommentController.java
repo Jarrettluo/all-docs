@@ -27,7 +27,7 @@ import java.util.Optional;
 /**
  * @ClassName CommentController
  * @Description 评论系统的控制器
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/4 3:11 下午
  * @Version 1.0
  **/
@@ -91,7 +91,7 @@ public class CommentController {
 
     /**
      * @return com.jiaruiblog.entity.Comment
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 类型转换
      * @Date 10:18 下午 2022/6/23
      * @Param [commentDTO, request]
@@ -108,7 +108,7 @@ public class CommentController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询全部的用户评论列表
      * @Date 14:38 2022/12/10
      * @Param [pageDTO, request]
@@ -122,7 +122,7 @@ public class CommentController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询全部的用户评论列表
      * @Date 14:38 2022/12/10
      * @Param [pageDTO, request]

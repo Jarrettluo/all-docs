@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * @ClassName DocLogController
  * @Description 文档日志的查询等
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/10 11:10
  * @Version 1.0
  **/
@@ -41,7 +41,7 @@ public class DocLogController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 系统用户日志查询
      * @Date 21:16 2022/11/30
      * @Param [pageParams]
@@ -61,7 +61,7 @@ public class DocLogController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 删除用户日志
      * @Date 21:16 2022/11/30
      * @Param [logIds]

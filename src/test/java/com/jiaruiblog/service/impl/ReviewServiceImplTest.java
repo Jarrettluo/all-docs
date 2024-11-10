@@ -9,7 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/11/29 16:34
  * @Version 1.0
  */

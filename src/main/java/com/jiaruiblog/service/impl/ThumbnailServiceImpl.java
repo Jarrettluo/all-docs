@@ -13,7 +13,7 @@ import javax.annotation.Resource;
 /**
  * @ClassName ThumbnailServiceImpl
  * @Description ThumbnailServiceImpl
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/23 6:06 下午
  * @Version 1.0
  **/

@@ -6,7 +6,7 @@ import org.springframework.data.annotation.Id;
 import java.util.Date;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/11/25 15:39
  * @Version 1.0
  */

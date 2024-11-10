@@ -45,7 +45,7 @@ public class SystemConfigControllerTest {
     SystemConfig systemConfig;
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询系统设置信息
      * @Date 22:12 2023/1/27
      * @Param []
@@ -66,7 +66,7 @@ public class SystemConfigControllerTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 自定义设置用户配置
      * @Date 22:12 2023/1/27
      * @Param []
@@ -93,7 +93,7 @@ public class SystemConfigControllerTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 提交用户设置，反例
      * @Date 22:12 2023/1/27
      * @Param []

@@ -1,7 +1,7 @@
 package com.jiaruiblog.task.exception;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/26 17:57
  * @Version 1.0
  */

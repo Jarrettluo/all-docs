@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * @ClassName DocLogServiceImpl
  * @Description 文档日志的查询和删除
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/10 11:05
  * @Version 1.0
  **/
@@ -64,7 +64,7 @@ public class DocLogServiceImpl implements IDocLogService {
     }
 
     /*
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询系统的各类日志信息
      *              此接口用于管理员查询全量的数据
      * @Date 10:35 2024/8/17

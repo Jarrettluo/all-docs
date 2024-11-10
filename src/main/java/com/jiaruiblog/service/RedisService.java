@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @ClassName RedisService
  * @Description REDIS SERVICE
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/8/14 17:03
  * @Version 1.0
  **/

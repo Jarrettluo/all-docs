@@ -15,7 +15,7 @@ import java.util.Date;
 /**
  * @ClassName PDFUtil
  * @Description pdf 准换工具
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/13 7:55 下午
  * @Version 1.0
  **/
@@ -58,7 +58,7 @@ public class PdfUtil {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // pdf 转为png
      * @Date 10:01 下午 2022/7/16
      * @Param [pdfPath]
@@ -84,7 +84,7 @@ public class PdfUtil {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description //根据文件输入流和图片地址保存缩略图
      * @Date 7:22 下午 2022/7/24
      * @Param [inputStream, picPath]

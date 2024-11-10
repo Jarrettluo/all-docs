@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/6/7 11:40
  * @Version 1.0
  */
@@ -78,7 +78,7 @@ public class TagServiceImpl implements TagService {
     }
     
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更新tag的信息
      * @Date 16:55 2022/9/3
      * @Param [tag]
@@ -129,7 +129,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 删除某个已经存在的tag信息
      * @Date 16:55 2022/9/3
      * @Param [tag]
@@ -163,7 +163,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 根据tag的id查询全部的tag列表
      * @Date 22:13 2022/9/17
      * @Param [tagIds]
@@ -202,7 +202,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 根据id进行检索
      * @Date 11:15 下午 2022/6/22
      * @Param [id]
@@ -247,7 +247,7 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 备用query 语句 // Query query1 = new Query().addCriteria(Criteria.where("_id").is(relationship.getTagId()));
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 根据文档的信息找到全部的tag信息
      * @Date 11:05 下午 2022/6/22
      * @Param [id]
@@ -277,7 +277,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询最近的tag分页
      * @Date 22:23 2022/9/17
      * @Param []
@@ -298,7 +298,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 默认查询两个最近的tag
      * @Date 22:24 2022/9/17
      * @Param []
@@ -310,7 +310,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 判断某个标签是否和文件存在关系
      * @Date 22:22 2022/11/16
      * @Param [tagId, fileId]
@@ -326,7 +326,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 分页查询相关的关系列表
      * 1、tagId 为null 的时候不进行tag相关检索；2、page和size 进行分页
      * @Date 22:22 2022/9/17
@@ -345,7 +345,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 根据tag的id 查询所有的相关的文档id列表
      * @Date 11:19 下午 2022/6/22
      * @Param [tagId]
@@ -407,7 +407,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 通过列表查询全部的标签信息
      * @Date 15:56 2023/4/22
      * @Param [name]
@@ -425,7 +425,7 @@ public class TagServiceImpl implements TagService {
 
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 根据文档的id解除掉标签和文档的关系
      * @Date 11:22 上午 2022/6/25
      * @Param [docId]
@@ -437,7 +437,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 统计总数
      * @Date 4:40 下午 2022/6/26
      * @Param []
@@ -449,7 +449,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 保存文章的时候保存标签和文档的关系
      * @Date 12:15 2023/2/19
      * @Param [fileDocument]
@@ -494,7 +494,7 @@ public class TagServiceImpl implements TagService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量保存数据
      * @Date 17:05 2023/4/22
      * @Param [tags, docIds]

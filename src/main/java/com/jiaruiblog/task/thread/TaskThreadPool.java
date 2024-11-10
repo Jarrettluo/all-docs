@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/20 17:37
  * @Version 1.0
  */

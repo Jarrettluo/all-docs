@@ -8,7 +8,7 @@ import java.util.Date;
 /**
  * @ClassName UserBO
  * @Description TODO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2024/7/23 17:37
  * @Version 1.0
  **/

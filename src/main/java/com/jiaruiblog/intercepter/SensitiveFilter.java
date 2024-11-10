@@ -16,7 +16,7 @@ import java.util.Set;
  * AE%9E%E7%8E%B0%E7%AE%97%E6%B3%95%E3%80%82,DFA%20%E5%8D%B3Determin
  * istic%20Finite%20Automaton%EF%BC%8C%E4%B9%9F%E5%B0%B1%E6%98%AF%E7
  * %A1%AE%E5%AE%9A%E6%9C%89%E7%A9%B7%E8%87%AA%E5%8A%A8%E6%9C%BA
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/8/14 16:17
  * @Version 1.0
  **/

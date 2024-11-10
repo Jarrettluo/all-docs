@@ -47,7 +47,7 @@ public class UserControllerTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 参数为空
      * @Date 22:28 2023/3/14
      * @Param []
@@ -73,7 +73,7 @@ public class UserControllerTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 用户名长度不足
      * @Date 22:29 2023/3/14
      * @Param []
@@ -102,7 +102,7 @@ public class UserControllerTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 用户名长度超长
      * @Date 22:33 2023/3/14
      * @Param []
@@ -132,7 +132,7 @@ public class UserControllerTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 密码长度不足
      * @Date 22:29 2023/3/14
      * @Param []
@@ -161,7 +161,7 @@ public class UserControllerTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 密码长度超长
      * @Date 22:33 2023/3/14
      * @Param []
@@ -190,7 +190,7 @@ public class UserControllerTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 密码格式不对
      * @Date 22:33 2023/3/14
      * @Param []

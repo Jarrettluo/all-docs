@@ -21,7 +21,7 @@ public interface StatisticsService {
     BaseApiResult all();
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 统计各月的数据
      * @Date 17:10 2023/5/20
      * @Param []

@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 public class SensitiveWordInitTest {
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 从静态资源中加载敏感词库
      * @Date 16:51 2022/8/14
      * @Param []

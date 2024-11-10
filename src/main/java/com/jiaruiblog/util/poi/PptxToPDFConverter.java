@@ -18,7 +18,7 @@ import java.io.OutputStream;
  * TODO 解决ppt 转 pdf 乱码的问题：https://developer.aliyun.com/article/112289
  * @ClassName PptxToPDFConverter
  * @Description pptx转换为pdf
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/22 22:59
  * @Version 1.0
  **/

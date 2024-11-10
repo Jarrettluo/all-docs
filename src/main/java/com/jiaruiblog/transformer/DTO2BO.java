@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * @ClassName UserDTO2BO
  * @Description TODO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2024/7/23 17:34
  * @Version 1.0
  **/

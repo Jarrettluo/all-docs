@@ -7,7 +7,7 @@ import com.jiaruiblog.task.thread.TaskThreadPool;
 import org.springframework.stereotype.Service;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/20 18:04
  * @Version 1.0
  */

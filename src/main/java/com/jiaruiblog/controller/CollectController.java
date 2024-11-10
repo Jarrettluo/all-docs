@@ -19,7 +19,7 @@ import java.util.Date;
 /**
  * @ClassName CollectController
  * @Description user collection module
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/4 3:11 下午
  * @Version 1.0
  **/
@@ -40,7 +40,7 @@ public class CollectController {
     private IFileService fileService;
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 废弃该文档
      * @Date 13:30 2023/4/5
      * @Param [collect, request]
@@ -66,7 +66,7 @@ public class CollectController {
 
     /**
      * @return com.jiaruiblog.entity.CollectDocRelationship
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 创建一个关系实体
      * @Date 9:36 下午 2022/6/23
      * @Param [collect, request]

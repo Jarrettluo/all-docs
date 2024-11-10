@@ -16,7 +16,7 @@ import java.util.Base64;
 /**
  * @ClassName FileObj
  * @Description FileObj
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/3 10:47 下午
  * @Version 1.0
  **/

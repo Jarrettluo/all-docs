@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/6/7 11:39
  * @Version 1.0
  */
@@ -80,7 +80,7 @@ public interface TagService {
 
     /**
      * 判断标签和文档的关系是否存在
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 某个标签是否文档存在关系
      * @Date 22:21 2022/11/16
      * @param tagId 标签id

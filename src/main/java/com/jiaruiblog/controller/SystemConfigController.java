@@ -32,7 +32,7 @@ import static com.jiaruiblog.controller.FileController.extracted;
 /**
  * @ClassName SystemConfigController
  * @Description 管理员获取系统设置的配置信息，查询当前的用户配置信息
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/10 11:12
  * @Version 1.0
  **/

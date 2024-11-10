@@ -3,7 +3,7 @@ package com.jiaruiblog.service;
 /**
  * @ClassName LikeService
  * @Description 用户对某个文档进行点赞或者收藏的操作
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/2 22:07
  * @Version 1.0
  **/
@@ -35,7 +35,7 @@ public interface LikeService {
     int findEntityLikeStatus(String userId, Integer entityType, String entityId);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 从Redis中同步数据到数据库中
      * @Date 22:12 2023/4/3
      * @Param []

@@ -9,7 +9,7 @@ import javax.annotation.Resource;
 /**
  * @ClassName InitCommandLineRunner
  * @Description TODO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/20 22:27
  * @Version 1.0
  **/
@@ -20,7 +20,7 @@ public class InitCommandLineRunner implements CommandLineRunner {
     IUserService userService;
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 系统启动时，执行初始化操作
      * @Date 22:39 2023/2/20
      * @Param [args]

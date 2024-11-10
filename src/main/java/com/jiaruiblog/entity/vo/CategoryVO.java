@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @ClassName CategoryVO
  * @Description CategoryVO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/21 9:16 下午
  * @Version 1.0
  **/

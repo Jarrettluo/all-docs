@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @ClassName QueryDocByTagCateDTO
  * @Description 根据分类或标签查询文档列表
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/1/6 21:54
  * @Version 1.0
  **/

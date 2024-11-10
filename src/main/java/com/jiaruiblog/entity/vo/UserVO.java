@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * @ClassName UserVO
  * @Description 返回查询的用户结果
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/18 00:14
  * @Version 1.0
  **/

@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 /**
  * @ClassName UserController
  * @Description 关于用户的所有请求关系
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/4 9:38 上午
  * @Version 1.0
  **/
@@ -99,7 +99,7 @@ public class UserController {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 仅限普通用户对自身的信息进行更新；不能更新其权限信息
      * @Date 23:25 2024/7/26
      * @Param [userDTO]
@@ -124,7 +124,7 @@ public class UserController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 删除用户的时候必须要删除其头像信息
      * @Date 22:40 2023/1/12
      * @Param [user, request]
@@ -144,7 +144,7 @@ public class UserController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员批量删除， 注意删除用户的时候必须要删除其头像信息
      * @Date 22:40 2023/1/12
      * @Param [user, request]
@@ -194,7 +194,7 @@ public class UserController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 根据分页参数查询用户列表
      * @Date 21:21 2023/1/10
      * @Param []
@@ -220,7 +220,7 @@ public class UserController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 屏蔽用户，使用户不可登录；再次调用此接口则取消屏蔽
      * @Date 20:30 2023/2/12
      * @Param [userId]
@@ -253,7 +253,7 @@ public class UserController {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 更新用户的基本信息，只有管理员具有修改权限
      * @Date 13:07 2022/12/18
      * @Param [userDTO]
@@ -324,7 +324,7 @@ public class UserController {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 检查用户更新的信息符合要求
      * @Date 23:04 2024/7/23
      * @Param [userDTO]

@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/6/7 11:39
  * @Version 1.0
  */
@@ -93,7 +93,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 有就返回分类的id；没有的话就新增后返回id
      * @Date 10:32 2023/4/22
      * @Param [cateName]
@@ -121,7 +121,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @return boolean
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 判断该名字是否存在，如果是存在的则返回true，否则返回false
      * @Date 11:47 上午 2022/6/25
      * @Param [name]
@@ -296,7 +296,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @return com.jiaruiblog.entity.Category
-     * @Author luojiarui
+     * @author luojiarui
      * @Description //根据文档的信息返回分类信息
      * @Date 10:52 下午 2022/6/22
      * @Param [docId]
@@ -344,7 +344,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 根据文档的id进行分类和文档的关系删除，这里文档的id是fileId
      * @Date 11:20 上午 2022/6/25
      * @Param [docId]
@@ -358,7 +358,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.Category>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description //热度随机产生
      * @Date 4:58 下午 2022/6/26
      * @Param []
@@ -376,7 +376,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.CateDocRelationship>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 根据总类查询关系
      * @Date 5:00 下午 2022/6/26
      * @Param [cateId]
@@ -395,7 +395,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @return java.lang.Integer
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 统计总数
      * @Date 4:40 下午 2022/6/26
      * @Param []
@@ -407,7 +407,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @return boolean
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 某个分类和文档是否存在关系
      * @Date 22:19 2022/11/16
      * @Param [categoryId, fileId]
@@ -423,7 +423,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 根据分类id， 标签id，搜索内容联合查询文档
      * @Date 21:50 2023/1/6
      * @Param [cateId, tagId, keyword, pageNum, pageSize]

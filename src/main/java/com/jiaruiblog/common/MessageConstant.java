@@ -3,7 +3,7 @@ package com.jiaruiblog.common;
 /**
  * @ClassName MessageConstant
  * @Description 接口返回的各类常量信息
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/4 5:12 下午
  * @Version 1.0
  **/

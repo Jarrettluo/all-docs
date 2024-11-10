@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/20 18:23
  * @Version 1.0
  */
@@ -54,7 +54,7 @@ public abstract class TaskExecutor {
 
     /**
      * @return byte[]
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 从gridFS 系统中下载文件为字节流
      * @Date 15:02 2022/11/13
      * @Param [gridFsId]
@@ -111,7 +111,7 @@ public abstract class TaskExecutor {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 设置描述内容
      * @Date 18:54 2022/11/13
      * @Param [textFilePath, fileDocument]
@@ -157,7 +157,7 @@ public abstract class TaskExecutor {
     protected abstract void makePreviewFile(InputStream is, TaskData taskData);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 上传整备好的文本文件进行上传到es中
      * @Date 15:11 2022/11/13
      * @Param [fileObj]
@@ -168,7 +168,7 @@ public abstract class TaskExecutor {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 上传文件的缩略图
      * @Date 17:48 2022/11/13
      * @Param [inputStream, fileDocument]
@@ -206,9 +206,9 @@ public abstract class TaskExecutor {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 某个文件中存储到dfs系统中
-     * @Date 21:40 2023/2/25
+     * @date 21:40 2023/2/25
      * @Param [filePath, fileFormatEnum]
      * @return java.lang.String
      **/

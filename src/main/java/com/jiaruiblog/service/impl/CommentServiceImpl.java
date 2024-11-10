@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * @ClassName CommentServiceImpl
  * @Description comment service impl
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/4 5:23 下午
  * @Version 1.0
  **/
@@ -120,7 +120,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 删除批量的评论列表
      * @Date 20:51 2023/2/12
      * @Param [commentIdList]
@@ -137,7 +137,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 根据文档的id查询相关的评论列表
      * @Date 11:57 2022/9/4
      * @Param [comment]
@@ -182,7 +182,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description //根据文档的id 查询评论的数量
      * @Date 10:47 下午 2022/6/22
      * @Param [docId]
@@ -214,7 +214,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 根据文档进行删除评论信息
      * @Date 11:14 上午 2022/6/25
      * @Param [docId]
@@ -226,7 +226,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 统计总数
      * @Date 4:40 下午 2022/6/26
      * @Param []
@@ -238,7 +238,7 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 分页查询评论信息
      * @Date 14:47 2022/12/10
      * @Param [page, userId]

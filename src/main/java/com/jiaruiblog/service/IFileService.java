@@ -56,7 +56,7 @@ public interface IFileService {
 
     /**
      * update file
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 重建索引和缩略图的时候专用的
      * @Date 18:05 2022/11/13
      * @Param fileDocument FileDocument
@@ -64,7 +64,7 @@ public interface IFileService {
     void updateFile(FileDocument fileDocument);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 更新文档状态
      * @Date 15:41 2022/11/13
      * @Param [fileDocument, state]
@@ -72,7 +72,7 @@ public interface IFileService {
     void updateState(FileDocument fileDocument, DocStateEnum state, String errorMsg) throws TaskRunException;
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 删除GridFS系统中的文件
      * @Date 18:02 2022/11/13
      * @Param [id]
@@ -179,7 +179,7 @@ public interface IFileService {
     BaseApiResult remove(FileDocument fileDocument);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员对文档的基本信息进行修改
      * @Date 23:17 2023/6/28
      * @Param [updateInfoDTO]
@@ -200,7 +200,7 @@ public interface IFileService {
 
     /**
      * getFileThumb
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 查询缩略图信息
      * @Date 8:00 下午 2022/7/24
      * @param thumbId String
@@ -216,7 +216,7 @@ public interface IFileService {
     String uploadFileToGridFs(String prefix, InputStream in, String contentType);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 通过文档id查询文档详情信息
      * @Date 22:28 2024/7/21
      * @Param [docId]
@@ -225,7 +225,7 @@ public interface IFileService {
     List<FileDocument> queryByDocIds(String ...docId);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询并删除某个文档
      * @Date 10:01 2022/12/10
      * @Param [docId]
@@ -234,7 +234,7 @@ public interface IFileService {
     List<FileDocument> queryAndRemove(String ...docId);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 文档查询并通过文档审批
      * @Date 10:27 2022/12/10
      * @Param [docId]
@@ -243,7 +243,7 @@ public interface IFileService {
     List<FileDocument> queryAndUpdate(String ...docId);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询是否在评审的文档
      * @Date 12:02 2022/12/10
      * @Param [pageDTO, reviewing]
@@ -252,7 +252,7 @@ public interface IFileService {
     List<FileDocument> queryFileDocument(BasePageDTO pageDTO, boolean reviewing);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询文档评审的列表, 实际是查询文档的信息
      * @Date 20:45 2022/11/30
      * @Param [page, user]

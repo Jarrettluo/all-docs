@@ -24,7 +24,7 @@ public interface IUserService {
     BaseApiResult registry(RegistryUserDTO userDTO);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询用户列表
      * @Date 21:36 2023/1/10
      * @Param [pageDTO]
@@ -35,7 +35,7 @@ public interface IUserService {
     BaseApiResult changeUserRole(UserRoleDTO userRoleDTO);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 屏蔽掉某个用户
      * @Date 21:37 2023/1/10
      * @Param [userId]
@@ -50,7 +50,7 @@ public interface IUserService {
     boolean checkPermissionForUser(User user, PermissionEnum[] permissionEnums);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 上传用户的头像信息
      * @Date 22:26 2023/1/12
      * @Param []
@@ -83,7 +83,7 @@ public interface IUserService {
     Map<String, String> queryUserAvatarBatch(List<String> userIdList);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 重置密码
      * @Date 20:08 2023/5/3
      * @Param [userId, adminId] 被充值的用户id， 管理者的id
@@ -95,7 +95,7 @@ public interface IUserService {
     boolean isExist(String userId);
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 用户自行对自己的信息进行修改
      * @Date 17:49 2024/7/23
      * @Param [userBO] 传入的参数已经是经过校验的了
@@ -104,7 +104,7 @@ public interface IUserService {
     boolean updateUserBySelf(UserBO userBO);
     
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员对某个用户的信息进行修改
      * @Date 23:34 2024/7/26
      * @Param [userBO]

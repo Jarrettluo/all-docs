@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 /**
  * @ClassName Thumbnail
  * @Description 缩略图相关的类
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/23 5:57 下午
  * @Version 1.0
  **/

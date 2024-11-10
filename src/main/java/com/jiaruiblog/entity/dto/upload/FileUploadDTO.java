@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @ClassName FileUploadDTO
  * @Description 文件批量上传的参数
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/4/21 23:12
  * @Version 1.0
  **/

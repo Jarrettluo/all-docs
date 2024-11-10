@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * @ClassName DocLogVO
  * @Description TODO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2024/8/17 10:40
  * @Version 1.0
  **/

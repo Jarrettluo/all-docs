@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/6/7 11:40
  * @Version 1.0
  */
@@ -32,7 +32,7 @@ public class CollectServiceImpl implements CollectService {
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 对某个文档进行关注
      * @Date 9:31 下午 2022/6/23
      * @Param [collect]
@@ -58,7 +58,7 @@ public class CollectServiceImpl implements CollectService {
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 删除收藏关系
      * @Date 9:43 下午 2022/6/23
      * @Param [collect]
@@ -75,7 +75,7 @@ public class CollectServiceImpl implements CollectService {
 
     /**
      * @return com.jiaruiblog.entity.CollectDocRelationship
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 查询已经存在的关系
      * @Date 9:37 下午 2022/6/23
      * @Param []
@@ -93,7 +93,7 @@ public class CollectServiceImpl implements CollectService {
 
     /**
      * @return java.lang.Long
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询某个文档下面的点赞数量
      * @Date 22:35 2022/9/24
      * @Param [docId]
@@ -105,7 +105,7 @@ public class CollectServiceImpl implements CollectService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 根据文档的id删除掉点赞的关系
      * @Date 11:17 上午 2022/6/25
      * @Param [docId]

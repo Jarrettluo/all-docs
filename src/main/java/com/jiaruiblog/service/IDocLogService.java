@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * @ClassName IDocLogService
  * @Description 文档日志的信息
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/10 11:04
  * @Version 1.0
  **/
@@ -20,7 +20,7 @@ public interface IDocLogService {
 
     /**
      * add logs
-     * @Author luojiarui
+     * @author luojiarui
      * @Description add logs
      * @Date 22:54 2023/1/11
      * @Param [user, document, action]
@@ -29,7 +29,7 @@ public interface IDocLogService {
 
     /**
      * query Doc Logs
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 分页查询文档日志
      * @Date 20:57 2022/11/30
      * @Param page BasePageDTO
@@ -40,7 +40,7 @@ public interface IDocLogService {
 
     /**
      * delete doc logs in batches
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 批量删除文档的日志
      * @Date 20:57 2022/11/30
      * @Param ids 文档的id列表

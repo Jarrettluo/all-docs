@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @ClassName RedisUtil
  * @Description RedisUtil
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/8/14 17:14
  * @Version 1.0
  **/

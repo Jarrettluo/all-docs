@@ -13,7 +13,7 @@ import javax.annotation.Resource;
  * @ClassName AuthConfig
  * @Description 登录拦截器配置，参考地址
  * https://cloud.tencent.com/developer/article/1860615
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/7 20:39
  * @Version 1.0
  **/
@@ -24,7 +24,7 @@ public class AuthConfig extends WebMvcConfigurationSupport {
     IUserService userService;
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 使用.excludePathPatterns(); 可剔除掉部分内容
      * @Date 21:08 2022/12/7
      * @Param [registry]

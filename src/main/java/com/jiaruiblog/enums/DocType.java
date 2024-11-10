@@ -3,7 +3,7 @@ package com.jiaruiblog.enums;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/24 11:39
  * @Version 1.0
  */

@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.MongoTransactionManager;
  * @Description 添加配置类，开启MongoDb事务
  * doc https://docs.spring.io/spring-data/mongodb/docs/current
  * /api/org/springframework/data/mongodb/MongoDatabaseFactory.html
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/3/14 22:12
  * @Version 1.0
  **/

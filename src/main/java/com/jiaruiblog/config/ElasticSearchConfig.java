@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @ClassName ElasticSearchConfig
  * @Description ES的配置信息
  * https://blog.csdn.net/wdz985721191/article/details/122866091
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/12 10:50 下午
  * @Version 1.0
  **/

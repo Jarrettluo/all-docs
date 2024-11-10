@@ -5,7 +5,7 @@ import com.jiaruiblog.enums.DocType;
 import lombok.Data;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/26 17:30
  * @Version 1.0
  */

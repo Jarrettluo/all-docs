@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/6/24 13:48
  * @Version 1.0
  */
@@ -57,7 +57,7 @@ public class UserServiceImpl implements IUserService {
     private SystemConfig systemConfig;
 
     /*
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 初始化第一个用户，默认从配置中取到第一个管理员账号密码
      * @Date 17:30 2024/7/23
      * @Param []
@@ -247,7 +247,7 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * @return boolean
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 检查某个用户是否具有某种权限
      * @Date 21:28 2022/12/7
      * @Param [user, permissionEnum]
@@ -260,7 +260,7 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 上传头像到文件的avatar中，保存了多个用户的信息
      * @Date 22:40 2023/1/12
      * @Param [userId, file]
@@ -297,7 +297,7 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 删除某个用户的信息
      * @Date 23:00 2023/1/12
      * @Param [userId]
@@ -317,7 +317,7 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员根据用户的id批量删除用户
      * @Date 20:28 2023/2/12
      * @Param [userIdList, adminUserId]
@@ -356,7 +356,7 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * @return java.util.List<java.lang.String>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 根据用户id批量查询用户的头像信息
      * @Date 22:41 2023/3/30
      * @Param [userIdList]
@@ -373,7 +373,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     /*
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 管理员对用户进行密码重置，重置的密码是初始密码
      * @Date 11:43 2024/8/17
      * @Param [userId, adminId]
@@ -404,7 +404,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 用户自行更新或者管理员更新用户信息的时候操作
      * @Date 23:47 2024/7/26
      * @Param [user]

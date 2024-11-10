@@ -57,7 +57,7 @@ public class CategoryServiceTest {
 
     /**
      * @return void
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 无参数查找
      * @Date 21:45 2023/1/3
      * @Param []
@@ -78,7 +78,7 @@ public class CategoryServiceTest {
 
     /**
      * @return void
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 通过标签id进行查找
      * @Date 21:45 2023/1/3
      * @Param []
@@ -98,7 +98,7 @@ public class CategoryServiceTest {
 
     /**
      * @return void
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 通过分类id进行查找
      * @Date 21:46 2023/1/3
      * @Param []
@@ -118,7 +118,7 @@ public class CategoryServiceTest {
 
     /**
      * @return void
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 联合查找
      * @Date 21:46 2023/1/3
      * @Param []
@@ -137,7 +137,7 @@ public class CategoryServiceTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 联合查找
      * @Date 21:46 2023/1/3
      * @Param []
@@ -156,7 +156,7 @@ public class CategoryServiceTest {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 联合查找
      * @Date 21:46 2023/1/3
      * @Param []

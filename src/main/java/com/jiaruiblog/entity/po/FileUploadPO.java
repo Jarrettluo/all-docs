@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @ClassName FileUploadPO
  * @Description 文档上传时指定的分类id和标签id列表
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/4/21 23:46
  * @Version 1.0
  **/

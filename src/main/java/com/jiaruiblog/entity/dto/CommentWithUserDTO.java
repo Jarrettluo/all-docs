@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @ClassName CommentWithUserDTO
  * @Description 查询用户的评论信息
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/1/8 22:58
  * @Version 1.0
  **/

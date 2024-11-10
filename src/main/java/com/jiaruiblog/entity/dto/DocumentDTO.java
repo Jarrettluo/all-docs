@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @ClassName documentDTO
  * @Description 文档的dto
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/19 5:15 下午
  * @Version 1.0
  **/

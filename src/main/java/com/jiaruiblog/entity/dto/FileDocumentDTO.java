@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * @ClassName FileDocumentDTO
  * @Description 多表联查返回结果
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/1/1 15:34
  * @Version 1.0
  **/

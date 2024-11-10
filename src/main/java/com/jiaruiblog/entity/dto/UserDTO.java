@@ -7,7 +7,7 @@ import java.util.Date;
 /**
  * @ClassName UserDTO
  * @Description 注册用户信息
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/18 12:56
  * @Version 1.0
  **/

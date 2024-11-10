@@ -3,7 +3,7 @@ package com.jiaruiblog.util;
 /**
  * @ClassName RedisKeyUtils
  * @Description RedisKeyUtils
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/8/14 17:13
  * @Version 1.0
  **/

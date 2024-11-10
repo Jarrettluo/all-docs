@@ -6,7 +6,7 @@ import lombok.Data;
 /**
  * @ClassName CateOrTagVO
  * @Description TODO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/5/20 16:28
  * @Version 1.0
  **/

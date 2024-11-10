@@ -1,7 +1,7 @@
 package com.jiaruiblog.task.thread;
 
 /**
- * @Author Jarrett Luo
+ * @author Jarrett Luo
  * @Date 2022/10/20 18:00
  * @Version 1.0
  */

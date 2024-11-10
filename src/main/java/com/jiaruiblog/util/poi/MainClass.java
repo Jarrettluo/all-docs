@@ -5,7 +5,7 @@ import java.io.*;
 /**
  * @ClassName MainClass
  * @Description 参考自：https://github.com/yeokm1/docs-to-pdf-converter
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/22 23:04
  * @Version 1.0
  **/

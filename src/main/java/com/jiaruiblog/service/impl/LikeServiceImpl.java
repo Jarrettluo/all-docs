@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 /**
  * @ClassName LikeServiceImpl
  * @Description 参考文档： https://bbs.huaweicloud.com/blogs/345948
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/2 22:07
  * @Version 1.0
  **/
@@ -90,7 +90,7 @@ public class LikeServiceImpl implements LikeService {
 
     /**
      * @return java.util.List
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 从redis中获取获取点赞和收藏的数据
      * @Date 11:56 2023/4/5
      * @Param []

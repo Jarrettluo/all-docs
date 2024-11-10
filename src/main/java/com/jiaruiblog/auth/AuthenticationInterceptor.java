@@ -19,7 +19,7 @@ import java.util.Map;
  * @ClassName AuthenticationInterceptor
  * @Description 权限校验，拦截器Interceptor, 拦截器在过滤器Filter之后
  * 参考文章： 注解式权限校验 https://blog.csdn.net/LitongZero/article/details/103628706
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/7 20:24
  * @Version 1.0
  **/
@@ -104,7 +104,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 请求处理之后进行调用，但是在视图被渲染之前（Controller方法调用之后）
      * @Date 20:26 2022/12/7
      * @Param [request, response, handler, modelAndView]
@@ -116,7 +116,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 在整个请求结束之后被调用，也就是在DispatcherServlet 渲染了对应的视图之后执行（主要是用于进行资源清理工作）
      * @Date 20:27 2022/12/7
      * @Param [request, response, handler, ex]

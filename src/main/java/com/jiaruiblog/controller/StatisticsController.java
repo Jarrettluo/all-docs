@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * @ClassName StatisticsController
  * @Description 统计模块
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/26 2:24 下午
  * @Version 1.0
  **/
@@ -73,7 +73,7 @@ public class StatisticsController {
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询推荐的搜索记录
      * @Date 15:46 2022/9/11
      * @Param []
@@ -115,7 +115,7 @@ public class StatisticsController {
      * invalidDocs.add(s);
      *
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查看热榜
      * @Date 15:51 2022/9/11
      * @Param []
@@ -176,7 +176,7 @@ public class StatisticsController {
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 获取首页最近的数据
      * 展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档；
      * @Date 21:58 2022/9/17
@@ -207,7 +207,7 @@ public class StatisticsController {
 
     /**
      * @return java.util.List<java.util.Map < java.lang.String, java.lang.Object>>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 文档列表转向为map
      * @Date 22:47 2022/9/17
      * @Param [fileDocuments]
@@ -230,7 +230,7 @@ public class StatisticsController {
 
     /**
      * @return java.util.Map<java.lang.String, java.lang.Object>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 生成返回的数据
      * @Date 23:07 2022/9/17
      * @Param [name, tagId, docList]

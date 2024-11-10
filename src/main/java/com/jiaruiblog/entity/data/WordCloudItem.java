@@ -6,7 +6,7 @@ import lombok.Data;
 /**
  * @ClassName WordCloudItem
  * @Description TODO
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/5/21 10:04
  * @Version 1.0
  **/

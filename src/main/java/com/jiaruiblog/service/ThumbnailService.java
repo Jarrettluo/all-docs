@@ -5,7 +5,7 @@ import com.jiaruiblog.entity.Thumbnail;
 /**
  * @ClassName ThumbnailService
  * @Description ThumbnailService
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/7/23 6:02 下午
  * @Version 1.0
  **/

@@ -7,7 +7,7 @@ import java.io.*;
 /**
  * @ClassName TxtExecutor
  * @Description 直接读取文本的执行器
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/26 11:22
  * @Version 1.0
  **/

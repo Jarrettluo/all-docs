@@ -173,7 +173,7 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 更新文档状态
      * @Date 15:41 2022/11/13
      * @Param [fileDocument, state]
@@ -196,7 +196,7 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 从gridFs中删除文件
      * @Date 18:01 2022/11/13
      * @Param [id]
@@ -250,7 +250,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 使用用户id 和 用户名进行保存，此接口必须使用auth进行验证
      * @Date 12:18 2023/2/19
      * @Param [file, userId, username]
@@ -360,7 +360,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 通过网络地址将文件保存下来
      * @Date 19:09 2023/4/22
      * @Param [category, tags, name, description, urlStr, userId, username]
@@ -521,7 +521,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.entity.po.FileUploadPO
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 返回需要新建或者查询的分类和标签的列表信息
      * @Date 16:09 2023/4/22
      * @Param [category, tags]
@@ -537,7 +537,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return java.lang.String
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 存入数据库及解析索引
      * @Date 12:12 2023/2/19
      * @Param [fileMd5, file]
@@ -631,7 +631,7 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 对文档的名称，标签，分类，描述进行修改
      * @Date 09:51 2023/7/2
      * @Param [updateInfoDTO]
@@ -802,7 +802,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 增加过滤条件的分页功能
      * @Date 11:12 下午 2022/6/22
      * @Param [pageIndex, pageSize, ids]
@@ -846,7 +846,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 列表；过滤；检索等
      * @Date 11:49 2022/8/6
      * @Param [documentDTO]
@@ -937,7 +937,7 @@ public class FileServiceImpl implements IFileService {
     /**
      * 过滤的时候限制分类，只能在某个分类下进行检索
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 列表；过滤；检索等
      * @Date 11:49 2022/8/6
      * @Param [documentDTO]
@@ -1061,7 +1061,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 查询文档的详细信息
      * @Date 9:27 下午 2022/6/23
      * @Param [id]
@@ -1114,7 +1114,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.util.BaseApiResult
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询不同分类条件的文档列表
      * @Date 22:44 2022/11/15
      * @Param [documentDTO]
@@ -1178,7 +1178,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return long
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 符合关键字的总数查询
      * @Date 21:55 2022/11/17
      * @Param [keyWord]
@@ -1210,7 +1210,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.vo.DocumentVO>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description convertDocuments
      * @Date 10:16 下午 2022/6/21
      * @Param fileDocuments
@@ -1230,7 +1230,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.entity.vo.DocumentVO
-     * @Author luojiarui
+     * @author luojiarui
      * @Description convertDocument
      * @Date 10:24 下午 2022/6/21
      * @Param [documentVO, fileDocument]
@@ -1268,7 +1268,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.entity.vo.DocumentVO
-     * @Author luojiarui
+     * @author luojiarui
      * @Description convertDocument
      * @Date 10:24 下午 2022/6/21
      * @Param [documentVO, fileDocument]
@@ -1349,7 +1349,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return java.lang.Integer
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 统计总数
      * @Date 4:40 下午 2022/6/26
      * @Param []
@@ -1360,7 +1360,7 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description //转换pdf文档的图片，然后保存
      * @Date 7:49 下午 2022/7/24
      * @Param [inputStream, fileDocument]
@@ -1397,7 +1397,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return java.io.InputStream
-     * @Author luojiarui
+     * @author luojiarui
      * @Description //根据缩略图id返回图片信息
      * @Date 7:59 下午 2022/7/24
      * @Param [thumbId]
@@ -1450,7 +1450,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return long
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 根据查询条件查询总数量
      * @Date 12:09 2022/8/6
      * @Param [query]
@@ -1460,7 +1460,7 @@ public class FileServiceImpl implements IFileService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description // 根据文档idid查询文档
      * @Date 22:28 2024/7/21
      * @Param [docId]
@@ -1478,7 +1478,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return com.jiaruiblog.entity.FileDocument
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询并删除文档
      * @Date 10:07 2022/12/10
      * @Param [docId]
@@ -1495,7 +1495,7 @@ public class FileServiceImpl implements IFileService {
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 修改并返回查询到的文档信息
      * @Date 10:31 2022/12/10
      * @Param [docId]

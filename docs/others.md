@@ -92,3 +92,19 @@ https://cloud.tencent.com/developer/article/2032233
 
 4、
 
+---
+
+安装中文字体：在 CentOS 上安装常用的中文字体，例如 wqy-zenhei 或 wqy-microhei。
+
+运行以下命令安装中文字体：
+```bash
+sudo yum install wqy-zenhei-fonts
+sudo yum install wqy-microhei-fonts
+```
+
+配置 Java 字体路径：有时候即使系统安装了字体，Java 程序也未必能正确找到它们。
+可以尝试在 Java 启动时通过 -D 参数指定字体目录：
+
+```bash
+java -Dawt.font.path=/usr/share/fonts -jar your-application.jar
+```

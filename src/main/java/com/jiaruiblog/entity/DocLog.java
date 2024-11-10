@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * @ClassName DocLog
  * @Description 文档日志
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/10 10:58
  * @Version 1.0
  **/

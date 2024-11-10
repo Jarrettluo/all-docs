@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @ClassName BatchIdDTO
  * @Description 批量请求基础模板
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/12/8 22:30
  * @Version 1.0
  **/

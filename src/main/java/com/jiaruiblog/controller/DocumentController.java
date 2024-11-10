@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * @ClassName DocumentController
  * @Description 文档查询删除控制器
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/19 5:18 下午
  * @Version 1.0
  **/

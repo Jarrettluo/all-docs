@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @ClassName CommentDTO
  * @Description 评论的dto
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/19 5:27 下午
  * @Version 1.0
  **/

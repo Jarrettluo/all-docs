@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * @ClassName JwtUtil
  * @Description Jwt工具类，生成JWT和认证
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/19 9:20 下午
  * @Version 1.0
  **/

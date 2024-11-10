@@ -12,7 +12,7 @@ import java.util.Date;
 /**
  * @ClassName Comment
  * @Description 用户针对某一个文档的评论
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/4 10:31 上午
  * @Version 1.0
  **/

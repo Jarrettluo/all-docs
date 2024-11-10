@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @ClassName monthStatVO
  * @Description 月数据统计
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/5/20 17:17
  * @Version 1.0
  **/

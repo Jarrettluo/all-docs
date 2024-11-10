@@ -20,7 +20,7 @@ import java.util.Set;
  * @Description 用户在搜索栏输入某字符，则将该字符记录下来 以zSet格式存储的redis中
  * 每当用户查询了已在redis存在了的字符时，则直接累加个数， 用来获取平台上最热查询的十条数据
  * 热词存储功能参考：https://zhuanlan.zhihu.com/p/551125686
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/8/14 17:03
  * @Version 1.0
  **/
@@ -201,7 +201,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description 查询某个value的分数
      * @Date 15:38 2022/9/11
      * @Param [key, value]

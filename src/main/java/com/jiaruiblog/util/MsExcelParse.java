@@ -15,7 +15,7 @@ import java.io.InputStream;
 /**
  * @ClassName MSExcelParser
  * @Description MsExcelParse
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/4 10:04 下午
  * @Version 1.0
  **/
@@ -27,7 +27,7 @@ public class MsExcelParse {
     }
 
     /**
-     * @Author luojiarui
+     * @author luojiarui
      * @Description readPdfText
      * @Date 22:59 2022/8/28
      * @Param [file, textPath]
@@ -43,7 +43,7 @@ public class MsExcelParse {
 
     /**
      * @return java.lang.String
-     * @Author luojiarui
+     * @author luojiarui
      * @Description parseExcel
      * @Date 22:59 2022/8/28
      * @Param [inputStream]

@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 /**
  * @ClassName CategoryDTO
  * @Description 分类的dto
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2022/6/19 5:32 下午
  * @Version 1.0
  **/

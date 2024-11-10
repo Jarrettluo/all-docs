@@ -7,7 +7,7 @@ import java.io.OutputStream;
 /**
  * @ClassName Converter
  * @Description 转换的抽象类
- * @Author luojiarui
+ * @author luojiarui
  * @Date 2023/2/22 22:58
  * @Version 1.0
  **/
