@@ -13,6 +13,7 @@ public enum DocType {
     PDF,
     // word文档
     DOCX,
+    PPT,
     PPTX,
     XLSX,
     // txt类的文档

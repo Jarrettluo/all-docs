@@ -1,10 +1,13 @@
-package com.jiaruiblog.task.executor;
+package com.jiaruiblog.task.executor.slider;
 
 import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.enums.FileFormatEnum;
 import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.task.exception.TaskRunException;
+import com.jiaruiblog.task.executor.DocxExecutor;
 import com.jiaruiblog.util.poi.Converter;
+import com.jiaruiblog.util.poi.PPTUtil;
 import com.jiaruiblog.util.poi.PptxToPDFConverter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +22,12 @@ import java.util.UUID;
  * @Version 1.0
  **/
 @Slf4j
-public class PptxExecutor extends DocxExecutor{
+public class PptxExecutor extends DocxExecutor {
+
+    @Override
+    protected void makeThumb(InputStream is, String picPath) {
+        PPTUtil.extractFirstPPTx(is, picPath);
+    }
 
     @Override
     protected void makePreviewFile(InputStream inStream, TaskData taskData) {
@@ -54,6 +62,20 @@ public class PptxExecutor extends DocxExecutor{
             throw new TaskRunException("create file is error!");
         }
         return new FileOutputStream(outFile);
+    }
+
+    public void uploadFileToEs(InputStream is, FileDocument fileDocument, TaskData taskData) {
+        try {
+            FileObj fileObj = new FileObj();
+            fileObj.setId(fileDocument.getMd5());
+            fileObj.setName(fileDocument.getName());
+            fileObj.setType(fileDocument.getContentType());
+            fileObj.readFile(is);
+            this.upload(fileObj);
+
+        } catch (IOException | TaskRunException e) {
+            throw new TaskRunException("存入es的过程中报错了", e);
+        }
     }
 
 }

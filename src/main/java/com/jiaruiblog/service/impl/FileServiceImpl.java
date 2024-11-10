@@ -293,6 +293,7 @@ public class FileServiceImpl implements IFileService {
                 switch (suffix) {
                     case "pdf":
                     case "docx":
+                    case "ppt":
                     case "pptx":
                     case "xlsx":
                     case "html":
@@ -506,6 +507,7 @@ public class FileServiceImpl implements IFileService {
         switch (suffix) {
             case "pdf":
             case "docx":
+            case "ppt":
             case "pptx":
             case "xlsx":
             case "html":

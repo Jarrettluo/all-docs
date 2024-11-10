@@ -147,6 +147,7 @@ public class DocReviewServiceImpl implements DocReviewService {
         switch (suffix) {
             case "pdf":
             case "docx":
+            case "ppt":
             case "pptx":
             case "xlsx":
             case "html":

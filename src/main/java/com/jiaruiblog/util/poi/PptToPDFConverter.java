@@ -63,7 +63,6 @@ public class PptToPDFConverter extends Converter {
             Graphics2D graphics = bufImg.createGraphics();
             graphics.setTransform(at);
             //clear the drawing area
-//            graphics.setPaint(getSlideBGColor(i));
             graphics.setPaint(Color.white);
             graphics.fill(new Rectangle2D.Float(0, 0, pgSize.width, pgSize.height));
             try {
@@ -103,9 +102,5 @@ public class PptToPDFConverter extends Converter {
         slides[index].draw(graphics);
     }
 
-    protected Color getSlideBGColor(int index) {
-//        return slides[index].getBackground().getFillColor();
-        return null;
-    }
 
 }
