@@ -36,6 +36,8 @@ public enum DocType {
                 return PDF;
             case ".docx":
                 return DOCX;
+            case ".ppt":
+                return PPT;
             case ".pptx":
                 return PPTX;
             case ".xlsx":

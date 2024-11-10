@@ -1,6 +1,7 @@
 package com.jiaruiblog.task.executor;
 
 import com.jiaruiblog.enums.DocType;
+import com.jiaruiblog.task.executor.slider.PptExecutor;
 import com.jiaruiblog.task.executor.slider.PptxExecutor;
 
 import java.util.EnumMap;
@@ -43,6 +44,8 @@ public class TaskExecutorFactory {
                 taskExecutor = new DocxExecutor();
                 break;
             case PPT:
+                taskExecutor = new PptExecutor();
+                break;
             case PPTX:
                 taskExecutor = new PptxExecutor();
                 break;
