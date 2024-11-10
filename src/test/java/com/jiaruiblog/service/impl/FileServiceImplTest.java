@@ -2,7 +2,7 @@ package com.jiaruiblog.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.AllDocsApplication;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.enums.FilterTypeEnum;
@@ -20,7 +20,7 @@ import java.util.List;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DocumentSharingSiteApplication.class)
+@SpringBootTest(classes = AllDocsApplication.class)
 public class FileServiceImplTest {
 
     @Before

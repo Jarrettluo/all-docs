@@ -2,7 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.AllDocsApplication;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.dto.RefuseBatchDTO;
 import com.jiaruiblog.entity.dto.RefuseDTO;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DocumentSharingSiteApplication.class)
+@SpringBootTest(classes = AllDocsApplication.class)
 public class DocReviewControllerTest {
 
     private MockMvc mockMvc;

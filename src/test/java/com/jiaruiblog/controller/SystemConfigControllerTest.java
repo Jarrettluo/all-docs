@@ -1,7 +1,7 @@
 package com.jiaruiblog.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.AllDocsApplication;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import org.junit.After;
@@ -24,7 +24,7 @@ import javax.annotation.Resource;
 import java.nio.charset.Charset;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DocumentSharingSiteApplication.class)
+@SpringBootTest(classes = AllDocsApplication.class)
 public class SystemConfigControllerTest {
 
     private MockMvc mockMvc;

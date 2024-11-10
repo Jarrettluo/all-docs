@@ -2,7 +2,7 @@ package com.jiaruiblog.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.AllDocsApplication;
 import com.jiaruiblog.service.impl.CategoryServiceImpl;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import javax.annotation.Resource;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DocumentSharingSiteApplication.class)
+@SpringBootTest(classes = AllDocsApplication.class)
 public class CategoryServiceTest {
 
     @Resource

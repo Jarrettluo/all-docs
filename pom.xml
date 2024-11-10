@@ -15,7 +15,7 @@
     <artifactId>document-sharing-site</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>all-docs</name>
-    <description>使用Mongodb作为文件上传服务器</description>
+    <description>all docs project.</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.4.3</version>
+            <version>5.8.25</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.79</version>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -198,7 +198,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.jiaruiblog.DocumentSharingSiteApplication</mainClass>
+                    <mainClass>com.jiaruiblog.AllDocsApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

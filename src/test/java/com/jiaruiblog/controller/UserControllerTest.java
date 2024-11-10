@@ -2,7 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.AllDocsApplication;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserDTO;
@@ -29,7 +29,7 @@ import java.nio.charset.Charset;
 import java.util.Date;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DocumentSharingSiteApplication.class)
+@SpringBootTest(classes = AllDocsApplication.class)
 public class UserControllerTest {
 
     private MockMvc mockMvc;

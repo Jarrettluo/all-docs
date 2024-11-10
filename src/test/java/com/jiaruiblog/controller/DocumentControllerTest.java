@@ -1,6 +1,6 @@
 package com.jiaruiblog.controller;
 
-import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.AllDocsApplication;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 //测试环境使用，用来表示测试环境使用的ApplicationContext将是WebApplicationContext类型的
 @WebAppConfiguration
 @PropertySource(value = "classpath:application.xproperties")
-@SpringBootTest(classes = {DocumentSharingSiteApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(classes = {AllDocsApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class DocumentControllerTest {
 
     private MockMvc mockMvc;

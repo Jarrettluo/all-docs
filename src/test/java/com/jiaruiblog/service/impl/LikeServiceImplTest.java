@@ -1,6 +1,6 @@
 package com.jiaruiblog.service.impl;
 
-import com.jiaruiblog.DocumentSharingSiteApplication;
+import com.jiaruiblog.AllDocsApplication;
 import com.jiaruiblog.service.LikeService;
 import com.jiaruiblog.task.like.UserLikeDetail;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -14,7 +14,7 @@ import java.util.List;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DocumentSharingSiteApplication.class)
+@SpringBootTest(classes = AllDocsApplication.class)
 public class LikeServiceImplTest {
 
     @Resource
