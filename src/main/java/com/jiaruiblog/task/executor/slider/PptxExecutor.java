@@ -64,6 +64,7 @@ public class PptxExecutor extends DocxExecutor {
         return new FileOutputStream(outFile);
     }
 
+    @Override
     public void uploadFileToEs(InputStream is, FileDocument fileDocument, TaskData taskData) {
         try {
             FileObj fileObj = new FileObj();

@@ -30,7 +30,8 @@ public abstract class TaskExecutor {
 
         // 第一步下载文件，转换为byte数组
         FileDocument fileDocument = taskData.getFileDocument();
-        InputStream docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
+        byte[] dfsBytes = downFileBytes(fileDocument.getGridfsId());
+        InputStream docInputStream = new ByteArrayInputStream(dfsBytes);
 
         // 第二步 将文本索引到es中
         try {
@@ -38,8 +39,7 @@ public abstract class TaskExecutor {
         } catch (Exception e) {
             throw new TaskRunException("建立索引的时候出错!", e);
         }
-
-        docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
+        docInputStream = new ByteArrayInputStream(dfsBytes);
         try {
             // 制作不同分辨率的缩略图
             updateFileThumb(docInputStream, taskData.getFileDocument(), taskData);
@@ -47,9 +47,11 @@ public abstract class TaskExecutor {
             throw new TaskRunException("建立缩略图的时候出错啦！", e);
         }
         // 第三步 制作预览文件
-        docInputStream = new ByteArrayInputStream(downFileBytes(fileDocument.getGridfsId()));
+        docInputStream = new ByteArrayInputStream(dfsBytes);
         makePreviewFile(docInputStream, taskData);
 
+        // 清空内存占用
+        dfsBytes = new byte[]{};
     }
 
     /**

@@ -53,6 +53,7 @@ public class PptExecutor extends TaskExecutor {
         fileDocument.setPreviewFileId(objId);
     }
 
+    @Override
     public void uploadFileToEs(InputStream is, FileDocument fileDocument, TaskData taskData) {
         try {
             FileObj fileObj = new FileObj();
