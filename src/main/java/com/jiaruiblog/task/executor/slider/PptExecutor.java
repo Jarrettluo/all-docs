@@ -8,7 +8,7 @@ import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.task.executor.TaskExecutor;
 import com.jiaruiblog.util.poi.Converter;
 import com.jiaruiblog.util.poi.PPTUtil;
-import com.jiaruiblog.util.poi.PptxToPDFConverter;
+import com.jiaruiblog.util.poi.PptToPDFConverter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +41,7 @@ public class PptExecutor extends TaskExecutor {
         taskData.setPreviewFilePath(UUID.randomUUID() + ".pdf");
         try {
             OutputStream outStream = getOutFileStream(taskData.getPreviewFilePath());
-            Converter converter = new PptxToPDFConverter(inStream, outStream, true,
+            Converter converter = new PptToPDFConverter(inStream, outStream, true,
                     true);
             converter.convert();
         } catch (Exception e) {

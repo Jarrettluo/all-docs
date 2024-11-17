@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p></p>
@@ -24,7 +23,7 @@ import java.util.List;
  */
 public class PptToPDFConverter extends Converter {
 
-    protected PptToPDFConverter(InputStream inStream, OutputStream outStream, boolean showMessages, boolean closeStreamsWhenComplete) {
+    public PptToPDFConverter(InputStream inStream, OutputStream outStream, boolean showMessages, boolean closeStreamsWhenComplete) {
         super(inStream, outStream, showMessages, closeStreamsWhenComplete);
     }
 
