@@ -652,7 +652,7 @@ public class DocReviewControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 // 设置返回值类型为utf-8，否则默认为ISO-8859-1
                 .accept(MediaType.APPLICATION_JSON)
-                .content(json.toJSONString()))
+                .content(json.toString()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
