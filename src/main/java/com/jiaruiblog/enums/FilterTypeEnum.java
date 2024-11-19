@@ -25,7 +25,12 @@ public enum FilterTypeEnum implements BaseEnum {
     /**
      * tag
      */
-    TAG(4);
+    TAG(4),
+
+    /**
+     * only search filename
+     **/
+    FILE_NAME(5);
 
     private Integer code;
 

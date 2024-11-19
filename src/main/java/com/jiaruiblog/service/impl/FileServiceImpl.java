@@ -1051,6 +1051,48 @@ public class FileServiceImpl implements IFileService {
                 Query query1 = new Query().addCriteria(Criteria.where("_id").in(fileIdList));
                 totalNum = countFileByQuery(query1);
                 break;
+            case FILE_NAME:
+                // todo 这里应该使用联合查询
+                String filenameKeyWord = Optional.of(documentDTO).map(DocumentDTO::getFilterWord).orElse("");
+
+                // 模糊查询 文件标题
+                Set<String> filenameDocIdSet = new HashSet<>(fuzzySearchDoc(filenameKeyWord));
+
+                List<DocumentVO> filenameDocVO = Lists.newArrayList();
+                // 用户进行检索的分类id
+                String currentCategoryId = documentDTO.getCategoryId();
+
+                List<String> filenameTargetFileIdList = new ArrayList<>();
+                if (org.apache.commons.lang3.StringUtils.isNoneBlank(currentCategoryId)) {
+                    Category targetCategory = new Category();
+                    targetCategory.setId(currentCategoryId);
+                    filenameTargetFileIdList = categoryService.queryDocListByCategory(targetCategory);
+                }
+
+                // 不在这个分类下的搜索出来的文档被限制
+                if (!filenameTargetFileIdList.isEmpty()) {
+                    Iterator<String> iterator = filenameDocIdSet.iterator();
+                    while (iterator.hasNext()) {
+                        if (!filenameTargetFileIdList.contains(iterator.next())) {
+                            iterator.remove();
+                        }
+                    }
+                }
+
+                // 重新把这些文件查询出来
+                fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), filenameDocIdSet);
+                fileDocuments = Optional.ofNullable(fileDocuments).orElse(new ArrayList<>());
+                for (FileDocument fileDocument : fileDocuments) {
+                    DocumentVO documentVO = new DocumentVO();
+                    documentVO.setPageVOList(new ArrayList<>());
+                    DocumentVO documentVO2 = convertDocumentNew(documentVO, fileDocument);
+                    filenameDocVO.add(documentVO2);
+                }
+                filenameDocVO.sort(Comparator.comparingInt((DocumentVO obj) ->obj.getPageVOList().size()).reversed());
+                Map<String, Object> result1 = new HashMap<>(16);
+                result1.put("totalNum", filenameDocVO.size());
+                result1.put("documents", filenameDocVO);
+                return BaseApiResult.success(result1);
             default:
                 return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
