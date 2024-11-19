@@ -1084,7 +1084,11 @@ public class FileServiceImpl implements IFileService {
                 fileDocuments = Optional.ofNullable(fileDocuments).orElse(new ArrayList<>());
                 for (FileDocument fileDocument : fileDocuments) {
                     DocumentVO documentVO = new DocumentVO();
-                    documentVO.setPageVOList(new ArrayList<>());
+                    PageVO pageVO = new PageVO();
+                    pageVO.setContent(documentVO.getDescription());
+                    List<PageVO> pageVOList = new ArrayList<>();
+                    pageVOList.add(pageVO);
+                    documentVO.setPageVOList(pageVOList);
                     DocumentVO documentVO2 = convertDocumentNew(documentVO, fileDocument);
                     filenameDocVO.add(documentVO2);
                 }
