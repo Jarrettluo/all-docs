@@ -102,24 +102,18 @@ public class FileController {
     @ApiOperation(value = "查询文档预览结果")
     @GetMapping("/view/{id}")
     public ResponseEntity<Object> serveFileOnline(@PathVariable String id,
-                                                  @RequestParam("token") String token,
                                                   HttpServletResponse response)
             throws UnsupportedEncodingException {
-        Map<String, Claim> userData = JwtUtil.verifyToken(token);
-        if (CollectionUtils.isEmpty(userData)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return null;
-        }
         Optional<FileDocument> file = fileService.getById(id);
         if (!file.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
         }
 
-        String userId = userData.get("id").asString();
-        String username = userData.get("username").asString();
+//        String userId = userData.get("id").asString();
+//        String username = userData.get("username").asString();
         User user = new User();
-        user.setId(userId);
-        user.setUsername(username);
+//        user.setId(userId);
+//        user.setUsername(username);
 
         FileDocument fileDocument1 = file.get();
         docLogService.addLog(user, fileDocument1, DocLogServiceImpl.Action.PREVIEW);
@@ -605,13 +599,12 @@ public class FileController {
     @GetMapping(value = "/image2/{thumbId}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public byte[] previewThumb2(@PathVariable String thumbId,
-                                @RequestParam("token") String token,
                                 HttpServletResponse response) {
-        Map<String, Claim> userData = JwtUtil.verifyToken(token);
-        if (CollectionUtils.isEmpty(userData)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return new byte[]{};
-        }
+//        Map<String, Claim> userData = JwtUtil.verifyToken(token);
+//        if (CollectionUtils.isEmpty(userData)) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return new byte[]{};
+//        }
         // 设置响应头，缓存 1 小时
         response.setHeader("Cache-Control", "max-age=3600, public");
         return fileService.getFileBytes(thumbId);
