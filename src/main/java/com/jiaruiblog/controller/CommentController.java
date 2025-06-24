@@ -2,6 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
+import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.dto.BasePageDTO;
@@ -9,18 +10,22 @@ import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.CommentDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.service.ICommentService;
-import com.jiaruiblog.util.BaseApiResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +36,7 @@ import java.util.Optional;
  * @Date 2022/6/4 3:11 下午
  * @Version 1.0
  **/
-@Api(tags = "评论模块")
+@Tag(name = "评论模块", description = "评论相关接口")
 @RestController
 @Slf4j
 @CrossOrigin
@@ -41,61 +46,85 @@ public class CommentController {
     @Resource
     ICommentService commentService;
 
-    @ApiOperation(value = "查询评论列表", notes = "更新评论")
+    @Operation(summary = "查询评论列表", description = "获取文档评论列表")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "请求成功", response = String.class)
+            @ApiResponse(responseCode = "200", description = "请求成功", content = @Content(schema = @Schema(implementation = String.class)))
     })
     @GetMapping("queryDocReviewList")
-    public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
-        return BaseApiResult.success();
+    public ApiResult<String> queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+        return ApiResult.success("");
     }
 
-    @ApiOperation(value = "新增单个评论", notes = "新增单个评论")
+    @Operation(summary = "新增单个评论", description = "添加新的评论")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "评论添加成功"),
+            @ApiResponse(responseCode = "400", description = "参数错误")
+    })
     @PostMapping(value = "/auth/insert")
-    public BaseApiResult insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
-        return commentService.insert(getComment(commentDTO, request));
+    public ApiResult<Object> insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
+        commentService.insert(getComment(commentDTO, request));
+        return ApiResult.success("");
     }
 
-    @ApiOperation(value = "更新评论", notes = "更新评论")
+    @Operation(summary = "更新评论", description = "修改现有评论内容")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "评论更新成功"),
+            @ApiResponse(responseCode = "400", description = "参数错误")
+    })
     @PostMapping(value = "/auth/update")
-    public BaseApiResult update(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
-        return commentService.update(getComment(commentDTO, request));
+    public ApiResult<Object> update(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
+        commentService.update(getComment(commentDTO, request));
+        return ApiResult.success("");
     }
 
-    @ApiOperation(value = "根据id移除某个评论", notes = "根据id移除某个评论")
+    @Operation(summary = "删除评论", description = "根据ID删除单个评论")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "评论删除成功"),
+            @ApiResponse(responseCode = "400", description = "参数错误")
+    })
     @DeleteMapping(value = "/auth/remove")
-    public BaseApiResult remove(@RequestBody Comment comment, HttpServletRequest request) {
+    public ApiResult<String> remove(@RequestBody Comment comment, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
         if (!StringUtils.hasText(comment.getId())) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        return commentService.remove(comment, userId);
+        commentService.remove(comment, userId);
+        return ApiResult.success("");
     }
 
     @Permission(value = PermissionEnum.ADMIN)
-    @ApiOperation(value = "根据id列表移除批量评论", notes = "管理员才能进行此项操作根据id移除批量评论")
+    @Operation(summary = "批量删除评论", description = "管理员批量删除评论")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "批量删除成功"),
+            @ApiResponse(responseCode = "400", description = "参数错误"),
+            @ApiResponse(responseCode = "403", description = "权限不足")
+    })
     @DeleteMapping(value = "/auth/removeBatch")
-    public BaseApiResult removeBatch(@RequestBody BatchIdDTO batchIdDTO) {
+    public ApiResult<String> removeBatch(@RequestBody BatchIdDTO batchIdDTO) {
         List<String> commentIdList = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(commentIdList)) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
-        return commentService.removeBatch(commentIdList);
+        commentService.removeBatch(commentIdList);
+        return ApiResult.success("");
     }
 
-    @ApiOperation(value = "根据文档id查询相关评论", notes = "根据id查询某个评论")
+    @Operation(summary = "查询文档评论", description = "根据文档ID获取相关评论")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "请求成功",
+                content = @Content(schema = @Schema(implementation = ApiResult.class))),
+            @ApiResponse(responseCode = "400", description = "参数错误")
+    })
+    @Parameters({
+            @Parameter(name = "comment", description = "评论查询参数", required = true,
+                    content = @Content(schema = @Schema(implementation = CommentListDTO.class)))
+    })
     @PostMapping(value = "/list")
-    public BaseApiResult queryById(@RequestBody CommentListDTO comment) {
-        return commentService.queryById(comment);
+    public ApiResult<String> queryById(@RequestBody CommentListDTO comment) {
+        commentService.queryById(comment);
+        return ApiResult.success("");
     }
 
-    /**
-     * @return com.jiaruiblog.entity.Comment
-     * @author luojiarui
-     * @Description // 类型转换
-     * @Date 10:18 下午 2022/6/23
-     * @Param [commentDTO, request]
-     **/
     private Comment getComment(CommentDTO commentDTO, HttpServletRequest request) {
         commentDTO = Optional.ofNullable(commentDTO).orElse(new CommentDTO());
         Comment comment = new Comment();
@@ -106,31 +135,40 @@ public class CommentController {
         return comment;
     }
 
-    /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @author luojiarui
-     * @Description 查询全部的用户评论列表
-     * @Date 14:38 2022/12/10
-     * @Param [pageDTO, request]
-     **/
-    @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")
+    @Operation(summary = "查询用户评论", description = "查询当前用户的评论列表")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "请求成功",
+                    content = @Content(schema = @Schema(implementation = ApiResult.class))),
+            @ApiResponse(responseCode = "400", description = "参数错误"),
+            @ApiResponse(responseCode = "401", description = "未授权")
+    })
+    @Parameters({
+            @Parameter(name = "pageDTO", description = "分页参数", required = true,
+                    content = @Content(schema = @Schema(implementation = BasePageDTO.class))),
+            @Parameter(name = "request", in = ParameterIn.HEADER, hidden = true)
+    })
     @PostMapping(value = "/auth/myComments")
-    public BaseApiResult queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<String> queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        return commentService.queryAllComments(pageDTO, userId, false);
+        commentService.queryAllComments(pageDTO, userId, false);
+        return ApiResult.success("");
     }
 
-    /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @author luojiarui
-     * @Description 查询全部的用户评论列表
-     * @Date 14:38 2022/12/10
-     * @Param [pageDTO, request]
-     **/
+    @Operation(summary = "查询所有评论", description = "管理员查询所有用户的评论列表")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "请求成功",
+                    content = @Content(schema = @Schema(implementation = ApiResult.class))),
+            @ApiResponse(responseCode = "400", description = "参数错误"),
+            @ApiResponse(responseCode = "403", description = "权限不足")
+    })
+    @Parameters({
+            @Parameter(name = "pageDTO", description = "分页参数", required = true,
+                    content = @Content(schema = @Schema(implementation = BasePageDTO.class)))
+    })
     @Permission(PermissionEnum.ADMIN)
-    @ApiOperation(value = "查询全部的用户评论", notes = "只有管理员有权限进行所有评论的分类查询")
     @PostMapping(value = "/auth/allComments")
-    public BaseApiResult queryAllComments(@RequestBody BasePageDTO pageDTO) {
-        return commentService.queryAllComments(pageDTO, null, true);
+    public ApiResult<String> queryAllComments(@RequestBody BasePageDTO pageDTO) {
+        commentService.queryAllComments(pageDTO, null, true);
+        return ApiResult.success("");
     }
 }
