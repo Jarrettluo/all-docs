@@ -2,10 +2,11 @@ package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
+import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.CategoryVO;
-import com.jiaruiblog.util.BaseApiResult;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jarrett Luo
@@ -17,51 +18,50 @@ public interface CategoryService {
     /**
      * 新增分类
      * @param category -> Category 实体
-     * @return -> ApiResult
      */
-    BaseApiResult insert(Category category);
+    void insert(Category category);
 
     /**
      * 更新分类信息
      * @param category -> Category 实体
-     * @return -> ApiResult
      */
-    BaseApiResult update(Category category);
+    void update(Category category);
+
+    String saveOrUpdateCate(String cateName);
+
 
     /**
      * 移除现有的分类
      * @param category -> Category 实体
-     * @return -> ApiResult
      */
-    BaseApiResult remove(Category category);
+    void remove(Category category);
 
 
     /**
      * 根据分类的各种信息进行查询
      * @param category -> Category 实体
-     * @return -> ApiResult
      */
-    BaseApiResult search(Category category);
+    void search(Category category);
 
     /**
      * 查询分类的列表信息
      * @return BaseApiResult
      */
-    BaseApiResult list();
+    List<CateOrTagVO> list();
 
     /**
      * 增加分类和文档的信息
      * @param relationship CateDocRelationship
      * @return BaseApiResult
      */
-    BaseApiResult addRelationShip(CateDocRelationship relationship);
+    void addRelationShip(CateDocRelationship relationship);
 
     /**
      * 取消分类和文档的关联
      * @param relationship CateDocRelationship
      * @return BaseApiResult
      */
-    BaseApiResult cancelCategoryRelationship(CateDocRelationship relationship);
+    void cancelCategoryRelationship(CateDocRelationship relationship);
 
     /**
      * @author luojiarui
@@ -79,8 +79,8 @@ public interface CategoryService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult getDocByTagAndCate(String cateId, String tagId, String keyword,
-                                     Long pageNum, Long pageSize);
+    Map<String, Object> getDocByTagAndCate(String cateId, String tagId, String keyword,
+                                           Long pageNum, Long pageSize);
 
     /**
      * @author luojiarui
@@ -89,7 +89,7 @@ public interface CategoryService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult getMyCollection(String cateId, String tagId, String keyword,
+    Map<String, Object> getMyCollection(String cateId, String tagId, String keyword,
                                      Long pageNum, Long pageSize, String userId);
 
     /**
@@ -99,7 +99,7 @@ public interface CategoryService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult getMyUploaded(String cateId, String tagId, String keyword,
+    Map<String, Object> getMyUploaded(String cateId, String tagId, String keyword,
                                      Long pageNum, Long pageSize, String userId);
 
     List<Category> getRandom();
@@ -114,7 +114,6 @@ public interface CategoryService {
 
     long countAllFile();
 
-    String saveOrUpdateCate(String cateName);
 
     void removeRelateByDocId(String docId);
 

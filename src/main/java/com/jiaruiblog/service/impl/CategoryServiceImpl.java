@@ -1,6 +1,5 @@
 package com.jiaruiblog.service.impl;
 
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.dto.FileDocumentDTO;
@@ -8,7 +7,7 @@ import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.enums.RedisActionEnum;
 import com.jiaruiblog.service.CategoryService;
-import com.jiaruiblog.util.BaseApiResult;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.data.domain.Sort;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -60,12 +58,12 @@ public class CategoryServiceImpl implements CategoryService {
      * @return -> BaseApiResult
      */
     @Override
-    public BaseApiResult insert(Category category) {
+    public void insert(Category category) {
         if (!isNameExist(category.getName()).isEmpty()) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(category, COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -75,9 +73,9 @@ public class CategoryServiceImpl implements CategoryService {
      * @return -> BaseApiResult
      */
     @Override
-    public BaseApiResult update(Category category) {
+    public void update(Category category) {
         if (isNameExist(category.getName()).isEmpty()) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(category.getId()));
@@ -89,7 +87,9 @@ public class CategoryServiceImpl implements CategoryService {
         // 异步更新该分类下的文本信息，避免出现已经被删除的文档还放在该分类中
         // 联合查询关系表和文档表；如果类型下的文档是存在的，则返回true，否则进行删除分类下的文档信息
 
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return BaseApiResult.success(MessageConstant.SUCCESS);
+
+
     }
 
     /**
@@ -137,24 +137,24 @@ public class CategoryServiceImpl implements CategoryService {
      * @return -> BaseApiResult
      */
     @Override
-    public BaseApiResult remove(Category category) {
+    public void remove(Category category) {
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(category.getId()));
         mongoTemplate.remove(query, Category.class, COLLECTION_NAME);
         // 删除掉相关的分类关系
         Query query1 = new Query().addCriteria(Criteria.where(CATEGORY_ID).is(category.getId()));
         mongoTemplate.remove(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
 
     @Override
-    public BaseApiResult search(Category category) {
-        return null;
+    public void search(Category category) {
+//        return null;
     }
 
     @Override
-    public BaseApiResult list() {
+    public List<CateOrTagVO> list() {
         // 需要查询全部的信息
         Aggregation aggregation = Aggregation.newAggregation(
                 // 选择某些字段
@@ -172,7 +172,7 @@ public class CategoryServiceImpl implements CategoryService {
         AggregationResults<CateOrTagVO> result = mongoTemplate.aggregate(
                 aggregation, COLLECTION_NAME, CateOrTagVO.class);
         List<CateOrTagVO> resultList = result.getMappedResults();
-        return BaseApiResult.success(resultList);
+        return resultList;
     }
 
     /**
@@ -182,16 +182,16 @@ public class CategoryServiceImpl implements CategoryService {
      * @return -> BaseApiResult
      */
     @Override
-    public BaseApiResult addRelationShip(CateDocRelationship relationship) {
+    public void addRelationShip(CateDocRelationship relationship) {
         if (relationship.getCategoryId() == null || relationship.getFileId() == null) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 先排查一个文章只能有一个分类关系，不能有多个分类信息
         Query query1 = new Query(Criteria.where(FILE_ID).is(relationship.getFileId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
         if (!CollectionUtils.isEmpty(relationships)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
         // 先排查是否具有该链接关系，否则不予进行关联
@@ -200,10 +200,10 @@ public class CategoryServiceImpl implements CategoryService {
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         if (!result.isEmpty()) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     private void addDocRelate(CateDocRelationship relationship) {
@@ -257,11 +257,11 @@ public class CategoryServiceImpl implements CategoryService {
      * @return -> CateDocRelationship
      */
     @Override
-    public BaseApiResult cancelCategoryRelationship(CateDocRelationship relationship) {
+    public void cancelCategoryRelationship(CateDocRelationship relationship) {
         Query query = new Query(Criteria.where(CATEGORY_ID).is(relationship.getCategoryId())
                 .and(FILE_ID).is(relationship.getFileId()));
         mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return BaseApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -429,7 +429,7 @@ public class CategoryServiceImpl implements CategoryService {
      * @Param [cateId, tagId, keyword, pageNum, pageSize]
      **/
     @Override
-    public BaseApiResult getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
+    public Map<String, Object> getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
         Criteria criteria = new Criteria();
         if (StringUtils.hasText(cateId) && StringUtils.hasText(tagId)) {
             criteria = Criteria.where("abc.categoryId").is(cateId).and("xyz.tagId").is(tagId);
@@ -485,13 +485,13 @@ public class CategoryServiceImpl implements CategoryService {
         result.put("pageNum", pageNum);
         result.put("pageSize", pageSize);
 
-        return BaseApiResult.success(result);
+        return result;
 
 
     }
 
     @Override
-    public BaseApiResult getMyCollection(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
+    public Map<String, Object> getMyCollection(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
         Criteria criteria = new Criteria();
         if (StringUtils.hasText(cateId) && StringUtils.hasText(tagId)) {
             criteria = Criteria.where("abc.categoryId").is(cateId).and("xyz.tagId").is(tagId);
@@ -553,11 +553,11 @@ public class CategoryServiceImpl implements CategoryService {
         result.put("pageNum", pageNum);
         result.put("pageSize", pageSize);
 
-        return BaseApiResult.success(result);
+        return result;
     }
 
     @Override
-    public BaseApiResult getMyUploaded(String cateId, String tagId, String keyword, Long pageNum, Long pageSize,
+    public Map<String, Object> getMyUploaded(String cateId, String tagId, String keyword, Long pageNum, Long pageSize,
                                        String userId) {
         Criteria criteria = new Criteria();
         if (StringUtils.hasText(cateId) && StringUtils.hasText(tagId)) {
@@ -616,6 +616,6 @@ public class CategoryServiceImpl implements CategoryService {
         result.put("pageNum", pageNum);
         result.put("pageSize", pageSize);
 
-        return BaseApiResult.success(result);
+        return result;
     }
 }
