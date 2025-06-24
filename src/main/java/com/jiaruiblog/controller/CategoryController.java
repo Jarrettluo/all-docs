@@ -34,27 +34,34 @@ import java.util.Date;
 @RestController
 @Slf4j
 @RequestMapping("/category")
-@CrossOrigin
 public class CategoryController {
 
     // 一个文章只能有一个分类项目
     // 一个文章下可能有多个列表
-
     @Resource
     CategoryService categoryService;
 
     @Resource
     TagService tagService;
 
+    /**
+     * 新增单个分类或标签
+     * @param categoryDTO 分类数据传输对象，包含名称和类型等信息
+     * @return BaseApiResult 返回操作结果
+     */
     @ApiOperation(value = "新增单个分类，可选分类或者标签", notes = "新增单个分类")
     @PostMapping(value = "/insert")
     public BaseApiResult insert(@RequestBody CategoryDTO categoryDTO) {
-        // 插入进来的参数必需经过清洗
+        // 防止前端传入ID，确保新增操作
         categoryDTO.setId(null);
+
+        // 校验名称格式是否符合中英文单词要求
         String name = categoryDTO.getName();
         if (!name.matches(RegexConstant.CH_ENG_WORD)) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
+
+        // 根据不同类型创建对应实体
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
