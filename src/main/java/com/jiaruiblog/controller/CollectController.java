@@ -7,7 +7,7 @@ import com.jiaruiblog.entity.dto.CollectDTO;
 import com.jiaruiblog.service.CollectService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
-import com.jiaruiblog.util.BaseApiResult;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.util.Date;
  * @Date 2022/6/4 3:11 下午
  * @Version 1.0
  **/
-@Api(tags = "用户收藏模块")
+@Tag(name = "用户收藏模块")
 @RestController
 @Slf4j
 @CrossOrigin

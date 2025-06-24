@@ -11,16 +11,17 @@ import com.jiaruiblog.entity.dto.RefuseDTO;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.util.BaseApiResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +32,7 @@ import java.util.List;
  * @Date 2022/11/25 15:56
  * @Version 1.0
  */
-@Api(tags = "文档评审模块")
+@Tag(name = "文档评审模块")
 @Slf4j
 @CrossOrigin
 @RestController
@@ -54,9 +55,9 @@ public class DocReviewController {
      * @return BaseApiResult
      */
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "查询需要评审的文档列表", notes = "查询需要评审的文档列表")
+    @Operation(summary = "查询需要评审的文档列表", description = "管理员可以查询所有需要评审的文档列表")
     @GetMapping("queryDocForReview")
-    public BaseApiResult queryDocReviewList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
+    public BaseApiResult queryDocReviewList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
         return fileService.queryFileDocumentResult(pageParams, true);
     }
 
@@ -69,9 +70,10 @@ public class DocReviewController {
      * @return BaseApiResult
      */
     @Permission({PermissionEnum.ADMIN, PermissionEnum.USER})
-    @ApiOperation(value = "修改已读", notes = "修改已读功能只有普通用户有此权限")
+    @Operation(summary = "修改已读", description = "修改已读状态，普通用户可以标记自己上传的文档为已读")
     @PutMapping("userRead")
-    public BaseApiResult updateDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
+    public BaseApiResult updateDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
+                                        @Parameter(hidden = true) HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
         return docReviewService.userRead(batchIdDTO.getIds(), userId);
     }
@@ -84,9 +86,9 @@ public class DocReviewController {
      * @Param [docId, reason]
      **/
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "管理员拒绝某个文档", notes = "管理员拒绝某个文档，只有管理员有操作该文档的权限")
+    @Operation(summary = "管理员拒绝某个文档", description = "管理员拒绝某个文档，只有管理员有操作该文档的权限")
     @PostMapping("refuse")
-    public BaseApiResult refuse(@RequestBody @Validated RefuseDTO refuseDTO) {
+    public BaseApiResult refuse(@Parameter(description = "拒绝参数") @RequestBody @Validated RefuseDTO refuseDTO) {
         String docId = refuseDTO.getDocId();
         String reason = refuseDTO.getReason();
         if (docReviewService.docIdExist(Collections.singletonList(docId))) {
@@ -108,9 +110,9 @@ public class DocReviewController {
      * @Param [docIds]
      **/
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "管理员拒绝一批文档", notes = "管理员拒绝一批文档，只有管理员有操作该文档的权限")
+    @Operation(summary = "管理员拒绝一批文档", description = "管理员拒绝一批文档，只有管理员有操作该文档的权限")
     @PostMapping("refuseBatch")
-    public BaseApiResult refuseBatch(@RequestBody @Valid RefuseBatchDTO refuseBatchDTO) {
+    public BaseApiResult refuseBatch(@Parameter(description = "批量拒绝参数") @RequestBody @Valid RefuseBatchDTO refuseBatchDTO) {
         List<String> docIds = refuseBatchDTO.getIds();
         String reason = refuseBatchDTO.getReason();
         if (docReviewService.docIdExist(docIds)) {
@@ -122,7 +124,6 @@ public class DocReviewController {
         }
         return docReviewService.refuseBatch(fileDocumentList, reason);
     }
-
     /**
      * @author luojiarui
      * @Description  缺少同意文档的信息
@@ -131,9 +132,9 @@ public class DocReviewController {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "同意某一批文档", notes = "管理员同意某一批文档")
+    @Operation(summary = "同意某一批文档", description = "管理员同意某一批文档")
     @PostMapping("approve")
-    public BaseApiResult approve(@RequestBody @Valid BatchIdDTO batchIdDTO) {
+    public BaseApiResult approve(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO) {
         List<String> docIds = batchIdDTO.getIds();
         if (docReviewService.docIdExist(docIds)) {
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
@@ -144,7 +145,6 @@ public class DocReviewController {
         }
         return docReviewService.approveBatch(fileDocumentList);
     }
-
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
@@ -153,9 +153,9 @@ public class DocReviewController {
      * @Param [pageParams, request]
      **/
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
+    @Operation(summary = "管理员和普通用户分别查询数据", description = "查询文档审批的列表")
     @GetMapping("queryReviewResultList")
-    public BaseApiResult queryReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
+    public BaseApiResult queryReviewResultList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
         return docReviewService.queryReviewLog(pageParams, null, true);
     }
 
@@ -167,26 +167,25 @@ public class DocReviewController {
      * @Param [pageParams, request]
      **/
     @Permission({PermissionEnum.USER, PermissionEnum.ADMIN})
-    @ApiOperation(value = "管理员和普通用户分别查询数据", notes = "查询文档审批的列表")
+    @Operation(summary = "管理员和普通用户分别查询数据", description = "查询文档审批的列表")
     @GetMapping("queryMyReviewResultList")
-    public BaseApiResult queryMyReviewResultList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
-                                               HttpServletRequest request) {
+    public BaseApiResult queryMyReviewResultList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
+                                               @Parameter(hidden = true) HttpServletRequest request) {
         return docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"), false);
     }
-
 
     /**
      * 普通用户删除，管理员删除，删除评审日志
      * @return BaseApiResult
      */
-    @ApiOperation(value = "删除评审日志", notes = "管理员和普通用户都可以删除评审结果")
+    @Operation(summary = "删除评审日志", description = "管理员和普通用户都可以删除评审结果")
     @DeleteMapping("removeDocReview")
-    public BaseApiResult removeDocReview(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
+    public BaseApiResult removeDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
+                                       @Parameter(hidden = true) HttpServletRequest request) {
         if (CollectionUtils.isEmpty(batchIdDTO.getIds())) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         return docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
     }
-
 
 }

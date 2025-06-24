@@ -1,6 +1,5 @@
 package com.jiaruiblog.controller;
 
-import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
@@ -11,8 +10,8 @@ import com.jiaruiblog.service.*;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +19,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

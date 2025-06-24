@@ -4,14 +4,14 @@ import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.service.LikeService;
 import com.jiaruiblog.util.BaseApiResult;
 import io.lettuce.core.RedisConnectionException;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import java.util.Map;
  * 点赞功能参考地址：https://blog.csdn.net/qq_45243783/article/details/128221372
  * redis的数据和数据库的数据保持同步的方案： https://blog.csdn.net/qq_22343483/article/details/103304826
  **/
-@Api(tags = "统计模块")
+@Tag(name = "统计模块")
 @RestController
 @Slf4j
 @CrossOrigin

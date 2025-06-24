@@ -8,8 +8,15 @@ import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.intercepter.SensitiveWordInit;
 import com.jiaruiblog.util.BaseApiResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -18,8 +25,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -29,14 +34,7 @@ import java.util.stream.Collectors;
 
 import static com.jiaruiblog.controller.FileController.extracted;
 
-/**
- * @ClassName SystemConfigController
- * @Description 管理员获取系统设置的配置信息，查询当前的用户配置信息
- * @author luojiarui
- * @Date 2022/12/10 11:12
- * @Version 1.0
- **/
-@Api(tags = "系统设置模块")
+@Tag(name = "SystemConfigController", description = "系统设置模块")
 @Slf4j
 @CrossOrigin
 @RestController
@@ -53,15 +51,21 @@ public class SystemConfigController {
 
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("getConfig")
-    @ApiOperation(value = "管理员获取系统设置", notes = "只有管理员有权限修改系统的设置信息")
     public BaseApiResult getSystemConfig() {
         return BaseApiResult.success(systemConfig);
     }
 
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "管理员修改系统设置", notes = "只有管理员有权限修改系统的设置信息")
+    @Operation(summary = "管理员修改系统设置", description = "只有管理员有权限修改系统的设置信息")
+    @ApiResponse(responseCode = "200", description = "操作成功",
+            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
+    @ApiResponse(responseCode = "400", description = "参数错误",
+            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
     @PutMapping("updateConfig")
-    public BaseApiResult systemConfig(@RequestBody SystemConfig userSetting) {
+    public BaseApiResult systemConfig(
+            @Parameter(description = "系统配置参数", required = true,
+                    content = @Content(schema = @Schema(implementation = SystemConfig.class)))
+            @RequestBody SystemConfig userSetting) {
         if (userSetting.getUserUpload() == null || userSetting.getUserRegistry() == null
                 || userSetting.getAdminReview() == null || userSetting.getProhibitedWord() == null) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
@@ -73,9 +77,11 @@ public class SystemConfigController {
         return BaseApiResult.success(userSetting);
     }
 
-    @ApiOperation(value = "管理员下载最新的违禁词")
+    @Operation(summary = "管理员下载最新的违禁词", description = "下载系统当前使用的违禁词列表")
+    @ApiResponse(responseCode = "200", description = "下载成功",
+            content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE))
+    @ApiResponse(responseCode = "500", description = "服务器内部错误")
     @GetMapping(value = "getProhibitedWord", produces = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseBody
     public void downloadTxt(HttpServletResponse response) {
         File file = new File(userDefinePath);
         try {
@@ -93,9 +99,18 @@ public class SystemConfigController {
         }
     }
 
-    @ApiOperation(value = "管理员更新违禁词")
+    @Operation(summary = "管理员更新违禁词", description = "上传新的违禁词列表文件")
+    @ApiResponse(responseCode = "200", description = "更新成功",
+            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
+    @ApiResponse(responseCode = "400", description = "参数错误",
+            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
+    @ApiResponse(responseCode = "500", description = "服务器内部错误",
+            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
     @PostMapping(value = "updateProhibitedWord")
-    public BaseApiResult updateProhibitedWord(@RequestParam("file") MultipartFile file) {
+    public BaseApiResult updateProhibitedWord(
+            @Parameter(description = "违禁词文件", required = true,
+                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
+            @RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty() || file.getSize() > 20000) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
@@ -118,7 +133,6 @@ public class SystemConfigController {
 
         return BaseApiResult.success();
     }
-
     private void writeToFile(Set<String> strSet) throws IOException {
         String txt = strSet.stream().limit(10000).collect(Collectors.joining("\n"));
         String replacedTxt = txt.replace(" ", "");

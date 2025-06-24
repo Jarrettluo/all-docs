@@ -16,14 +16,14 @@ import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.service.impl.DocLogServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,7 +34,7 @@ import java.util.List;
  * @Date 2022/6/19 5:18 下午
  * @Version 1.0
  **/
-@Api(tags = "文档模块")
+@Schema(description = "文档模块")
 @RestController
 @Slf4j
 @CrossOrigin
@@ -51,9 +51,9 @@ public class DocumentController {
     IDocLogService docLogService;
 
 
-    @ApiOperation(value = "2.1 查询文档的分页列表页", notes = "根据参数查询文档列表")
+    @Operation(summary = "2.1 查询文档的分页列表页", description = "根据参数查询文档列表")
     @PostMapping(value = "/list")
-    public BaseApiResult list(@RequestBody DocumentDTO documentDTO)
+    public BaseApiResult list(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
             throws IOException {
         String userId = documentDTO.getUserId();
         if (StringUtils.hasText(documentDTO.getFilterWord()) &&
@@ -77,9 +77,9 @@ public class DocumentController {
         return iFileService.list(documentDTO);
     }
 
-    @ApiOperation(value = "2.1 查询文档的分页列表页,限制了分类和标签", notes = "根据参数查询文档列表")
+    @Operation(summary = "2.1 查询文档的分页列表页", description = "根据参数查询文档列表，限制了分类和标签")
     @PostMapping(value = "/listNew")
-    public BaseApiResult listNew(@RequestBody DocumentDTO documentDTO)
+    public BaseApiResult listNew(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
             throws IOException {
         String userId = documentDTO.getUserId();
         if (StringUtils.hasText(documentDTO.getFilterWord()) &&
@@ -103,15 +103,20 @@ public class DocumentController {
         return iFileService.listNew(documentDTO);
     }
 
-    @ApiOperation(value = "2.2 查询文档的详细信息", notes = "查询文档的详细信息")
+    @Operation(summary = "2.2 查询文档的详细信息", description = "查询文档的详细信息")
     @GetMapping(value = "/detail")
-    public BaseApiResult detail(@RequestParam(value = "docId") String id) {
+    public BaseApiResult detail(
+            @RequestParam(value = "docId")
+            @Schema(description = "文档ID", required = true) String id) {
         return iFileService.detail(id);
     }
 
-    @ApiOperation(value = "3.2 删除某个文档", notes = "删除某个文档")
+    @Operation(summary = "3.2 删除某个文档", description = "删除某个文档")
     @DeleteMapping(value = "/auth/remove")
-    public BaseApiResult remove(@RequestBody RemoveObjectDTO removeObjectDTO, HttpServletRequest request) {
+    @Permission(value = PermissionEnum.ADMIN)
+    public BaseApiResult remove(
+            @RequestBody @Schema(description = "文档删除DTO", required = true) RemoveObjectDTO removeObjectDTO,
+            HttpServletRequest request) {
         FileDocument fileDocument = iFileService.queryById(removeObjectDTO.getId());
         if (fileDocument == null) {
             return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
@@ -125,17 +130,19 @@ public class DocumentController {
         return iFileService.remove(fileDocument);
     }
 
-    @ApiOperation(value = "3.2 管理员修改文档基本信息", notes = "管理员修改某个文档信息")
+    @Operation(summary = "3.2 管理员修改文档基本信息", description = "管理员修改某个文档信息")
     @PutMapping(value="/auth/updateInfo")
     @Permission(value = PermissionEnum.ADMIN)
-    public BaseApiResult updateInfo(@RequestBody UpdateInfoDTO updateInfoDTO) {
+    public BaseApiResult updateInfo(@RequestBody @Schema(description = "文档更新信息DTO") UpdateInfoDTO updateInfoDTO) {
         return iFileService.updateInfo(updateInfoDTO);
     }
 
 
-    @ApiOperation(value = "2.3 指定分类时，查询文档的分页列表页", notes = "根据参数查询文档列表")
+    @Operation(summary = "2.3 指定分类时，查询文档的分页列表页", description = "根据参数查询文档列表")
     @GetMapping(value = "/listWithCategory")
-    public BaseApiResult listWithCategory(@ModelAttribute("documentDTO") DocumentDTO documentDTO) {
+    public BaseApiResult listWithCategory(
+            @ModelAttribute("documentDTO")
+            @Schema(description = "文档查询DTO", required = true) DocumentDTO documentDTO) {
         FilterTypeEnum filterType = documentDTO.getType();
         if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG)) {
             return iFileService.listWithCategory(documentDTO);

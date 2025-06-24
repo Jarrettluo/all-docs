@@ -10,15 +10,19 @@ import com.jiaruiblog.entity.vo.DocLogVO;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.transformer.PO2VOConverter;
 import com.jiaruiblog.util.BaseApiResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +33,7 @@ import java.util.Map;
  * @Date 2022/12/10 11:10
  * @Version 1.0
  **/
-@Api(tags = "文档日志模块")
+@Tag(name = "文档日志模块", description = "文档操作日志相关接口")
 @Slf4j
 @CrossOrigin
 @RestController
@@ -47,7 +51,19 @@ public class DocLogController {
      * @Param [pageParams]
      **/
     @Permission({PermissionEnum.ADMIN})
-    @ApiOperation(value = "管理员查询系统日志信息", notes = "只有管理员有权限查询日志列表")
+    @Operation(
+        summary = "管理员查询系统日志信息",
+        description = "只有管理员有权限查询日志列表",
+        parameters = {
+            @Parameter(name = "pageParams", description = "分页参数", required = true,
+                content = @Content(schema = @Schema(implementation = BasePageDTO.class)))
+        },
+        responses = {
+            @ApiResponse(responseCode = "200", description = "成功响应",
+                content = @Content(schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "403", description = "无权限访问")
+        }
+    )
     @GetMapping("queryLogList")
     public BaseApiResult queryLogList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
         Map<String, Object> result = docLogService.queryDocLogs(pageParams);
@@ -67,7 +83,20 @@ public class DocLogController {
      * @Param [logIds]
      **/
     @Permission(PermissionEnum.ADMIN)
-    @ApiOperation(value = "管理员删除文档信息", notes = "只有管理员有权限删除文档的日志")
+    @Operation(
+        summary = "管理员删除文档信息",
+        description = "只有管理员有权限删除文档的日志",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "批量ID参数",
+            required = true,
+            content = @Content(schema = @Schema(implementation = BatchIdDTO.class))
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "删除成功"),
+            @ApiResponse(responseCode = "400", description = "参数错误"),
+            @ApiResponse(responseCode = "403", description = "无权限访问")
+        }
+    )
     @DeleteMapping("removeLog")
     public BaseApiResult removeLog(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
         List<String> logIds = batchIdDTO.getIds();

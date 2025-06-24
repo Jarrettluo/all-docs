@@ -1,6 +1,5 @@
 package com.jiaruiblog.controller;
 
-import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ConfigConstant;
@@ -13,18 +12,16 @@ import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.transformer.DTO2BO;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JwtUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.util.*;
 import java.util.regex.Pattern;
 
