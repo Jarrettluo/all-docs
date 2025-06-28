@@ -60,10 +60,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void insert(Category category) {
         if (!isNameExist(category.getName()).isEmpty()) {
-//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(category, COLLECTION_NAME);
-//        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -75,7 +75,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void update(Category category) {
         if (isNameExist(category.getName()).isEmpty()) {
-//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(category.getId()));
@@ -87,7 +87,7 @@ public class CategoryServiceImpl implements CategoryService {
         // 异步更新该分类下的文本信息，避免出现已经被删除的文档还放在该分类中
         // 联合查询关系表和文档表；如果类型下的文档是存在的，则返回true，否则进行删除分类下的文档信息
 
-//        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return ApiResult.success(MessageConstant.SUCCESS);
 
 
     }
@@ -144,7 +144,7 @@ public class CategoryServiceImpl implements CategoryService {
         // 删除掉相关的分类关系
         Query query1 = new Query().addCriteria(Criteria.where(CATEGORY_ID).is(category.getId()));
         mongoTemplate.remove(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-//        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
 
@@ -184,14 +184,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void addRelationShip(CateDocRelationship relationship) {
         if (relationship.getCategoryId() == null || relationship.getFileId() == null) {
-//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 先排查一个文章只能有一个分类关系，不能有多个分类信息
         Query query1 = new Query(Criteria.where(FILE_ID).is(relationship.getFileId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
         if (!CollectionUtils.isEmpty(relationships)) {
-//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
         // 先排查是否具有该链接关系，否则不予进行关联
@@ -200,10 +200,10 @@ public class CategoryServiceImpl implements CategoryService {
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         if (!result.isEmpty()) {
-//            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
-//        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     private void addDocRelate(CateDocRelationship relationship) {
@@ -261,7 +261,7 @@ public class CategoryServiceImpl implements CategoryService {
         Query query = new Query(Criteria.where(CATEGORY_ID).is(relationship.getCategoryId())
                 .and(FILE_ID).is(relationship.getFileId()));
         mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-//        return BaseApiResult.success(MessageConstant.SUCCESS);
+//        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

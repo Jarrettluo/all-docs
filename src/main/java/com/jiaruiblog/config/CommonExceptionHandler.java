@@ -30,14 +30,14 @@ public class CommonExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
-    public BaseApiResult handle(Exception e) {
+    public ApiResult<Object> handle(Exception e) {
         e.printStackTrace();
         if (e instanceof MaxUploadSizeExceededException) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.FILE_SIZE_ERROR);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.FILE_SIZE_ERROR);
         } else if (e instanceof HttpRequestMethodNotSupportedException) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.REQUEST_METHOD_ERROR);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.REQUEST_METHOD_ERROR);
         }else {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
     }
 
@@ -46,9 +46,9 @@ public class CommonExceptionHandler {
      * 拦截valid参数校验返回的异常，并转化成基本的返回样式
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public BaseApiResult dealMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ApiResult<Object> dealMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         e.printStackTrace();
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "参数异常");
+        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "参数异常");
     }
 
     /**
@@ -59,18 +59,18 @@ public class CommonExceptionHandler {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @ExceptionHandler(BindException.class)
-    public BaseApiResult handleValidation(BindException e) {
+    public ApiResult<Object> handleValidation(BindException e) {
         e.printStackTrace();
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "请求异常，请检查");
+        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "请求异常，请检查");
     }
 
     /**
      * 拦截valid参数校验返回的异常，并转化成基本的返回样式
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
-    public BaseApiResult dealConstraintViolationException(ConstraintViolationException e) {
+    public ApiResult<Object> dealConstraintViolationException(ConstraintViolationException e) {
         String message = e.getMessage();
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
+        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
     }
 
     /**
@@ -80,9 +80,9 @@ public class CommonExceptionHandler {
      * @return 错误信息
      */
     @ExceptionHandler(HttpMessageConversionException.class)
-    public BaseApiResult parameterTypeException(HttpMessageConversionException exception) {
+    public ApiResult<Object> parameterTypeException(HttpMessageConversionException exception) {
         exception.printStackTrace();
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "类型转换错误");
+        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "类型转换错误");
     }
 
     /**
@@ -93,9 +93,9 @@ public class CommonExceptionHandler {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public BaseApiResult dealHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+    public ApiResult<Object> dealHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         String message = e.getMessage();
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
+        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, message);
     }
 
 
@@ -117,10 +117,10 @@ public class CommonExceptionHandler {
      * @Param [e]
      **/
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public BaseApiResult dealAuthenticationException(MissingServletRequestParameterException e, HandlerMethod handlerMethod) {
+    public ApiResult<Object> dealAuthenticationException(MissingServletRequestParameterException e, HandlerMethod handlerMethod) {
         String errorMessage = String.format("MissingServletRequestParameterException（遗漏Servlet请求参数异常）：%s",
                 e.getMessage());
-        return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, errorMessage);
+        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, errorMessage);
     }
 
 }

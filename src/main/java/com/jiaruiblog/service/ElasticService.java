@@ -36,6 +36,6 @@ public interface ElasticService {
 
     void removeByDocId(String docMd5);
 
-    BaseApiResult getWordStat() throws IOException;
+    ApiResult<Object> getWordStat() throws IOException;
 
 }

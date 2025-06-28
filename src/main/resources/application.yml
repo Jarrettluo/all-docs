@@ -1,7 +1,7 @@
 server:
   port: 8082
-  servlet:
-    context-path: /api/v1.0
+#  servlet:
+#    context-path: /api/v1.0
 
 spring:
   data:
@@ -80,3 +80,11 @@ all-docs:
 hmac:
   secret:
     key: AllDocs
+
+#springdoc:
+#  api-docs:
+#    enabled: true # 开启OpenApi接口
+#    path: /v3/api-docs  # 自定义路径，默认为 "/v3/api-docs"
+#  swagger-ui:
+#    enabled: true # 开启swagger界面，依赖OpenApi，需要OpenApi同时开启
+#    path: /swagger-ui/index.html # 自定义路径，默认为"/swagger-ui/index.html"

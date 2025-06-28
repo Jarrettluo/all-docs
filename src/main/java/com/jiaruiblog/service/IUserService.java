@@ -19,9 +19,9 @@ public interface IUserService {
 
     void initFirstUser();
 
-    BaseApiResult login(RegistryUserDTO userDTO);
+    ApiResult<Object> login(RegistryUserDTO userDTO);
 
-    BaseApiResult registry(RegistryUserDTO userDTO);
+    ApiResult<Object> registry(RegistryUserDTO userDTO);
 
     /**
      * @author luojiarui
@@ -30,9 +30,9 @@ public interface IUserService {
      * @Param [pageDTO]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult getUserList(BasePageDTO pageDTO);
+    ApiResult<Object> getUserList(BasePageDTO pageDTO);
 
-    BaseApiResult changeUserRole(UserRoleDTO userRoleDTO);
+    ApiResult<Object> changeUserRole(UserRoleDTO userRoleDTO);
 
     /**
      * @author luojiarui
@@ -41,7 +41,7 @@ public interface IUserService {
      * @Param [userId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult blockUser(String userId);
+    ApiResult<Object> blockUser(String userId);
 
     User queryById(String userId);
 
@@ -56,21 +56,21 @@ public interface IUserService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult uploadUserAvatar(String userId, MultipartFile file);
+    ApiResult<Object> uploadUserAvatar(String userId, MultipartFile file);
 
     /**
      * Deleting a user profile picture
      * @param userId user index
      * @return BaseApiResult
      */
-    BaseApiResult removeUserAvatar(String userId);
+    ApiResult<Object> removeUserAvatar(String userId);
 
     /**
      * remove user entity
      * @param userId user index
      * @return BaseApiResult
      */
-    BaseApiResult removeUser(String userId);
+    ApiResult<Object> removeUser(String userId);
 
     /**
      * Remove user entities in batches
@@ -78,7 +78,7 @@ public interface IUserService {
      * @param adminUserId administrator index
      * @return BaseApiResult
      */
-    BaseApiResult deleteUserByIdBatch(List<String> userIdList, String adminUserId);
+    ApiResult<Object> deleteUserByIdBatch(List<String> userIdList, String adminUserId);
 
     Map<String, String> queryUserAvatarBatch(List<String> userIdList);
 
@@ -89,7 +89,7 @@ public interface IUserService {
      * @Param [userId, adminId] 被充值的用户id， 管理者的id
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult resetUserPwd(String userId, String adminId);
+    ApiResult<Object> resetUserPwd(String userId, String adminId);
 
 
     boolean isExist(String userId);

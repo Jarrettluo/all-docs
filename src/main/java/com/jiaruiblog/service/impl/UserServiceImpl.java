@@ -91,16 +91,16 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public BaseApiResult login(RegistryUserDTO userDTO) {
+    public ApiResult<Object> login(RegistryUserDTO userDTO) {
         Query query = new Query(Criteria.where(USERNAME)
                 .is(userDTO.getUsername()).and("password").is(userDTO.getEncodePassword()));
         User dbUser = mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
         if (dbUser == null) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         // 屏蔽用户禁止访问
         if (Boolean.TRUE.equals(dbUser.getBanning())) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.USER_HAS_BANNED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.USER_HAS_BANNED);
         }
 
         String token = JwtUtil.createToken(dbUser);
@@ -117,12 +117,12 @@ public class UserServiceImpl implements IUserService {
         update.set("lastLogin", new Date());
         mongoTemplate.updateFirst(query1, update, User.class, COLLECTION_NAME);
 
-        return BaseApiResult.success(result);
+        return ApiResult.success(result);
 
     }
 
     @Override
-    public BaseApiResult registry(RegistryUserDTO userDTO) {
+    public ApiResult<Object> registry(RegistryUserDTO userDTO) {
         User user = new User();
         user.setPermissionEnum(PermissionEnum.USER);
         Query query = new Query().addCriteria(Criteria.where(USERNAME).is(userDTO.getUsername()));
@@ -134,16 +134,16 @@ public class UserServiceImpl implements IUserService {
             user.setUpdateDate(new Date());
             user.setLastLogin(new Date());
             mongoTemplate.save(user, COLLECTION_NAME);
-            return BaseApiResult.success(MessageConstant.SUCCESS);
+            return ApiResult.success(MessageConstant.SUCCESS);
         }
-        return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_HAS_EXIST);
+        return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_HAS_EXIST);
     }
 
     @Override
-    public BaseApiResult getUserList(BasePageDTO page) {
+    public ApiResult<Object> getUserList(BasePageDTO page) {
         long count = mongoTemplate.count(new Query(), User.class, COLLECTION_NAME);
         if (count < 1) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
         }
         int pageNum = Optional.ofNullable(page.getPage()).orElse(1);
         int pageSize = Optional.ofNullable(page.getRows()).orElse(10);
@@ -161,37 +161,37 @@ public class UserServiceImpl implements IUserService {
         result.put("pageNum", pageNum);
         result.put("pageSize", pageSize);
         result.put("result", users);
-        return BaseApiResult.success(result);
+        return ApiResult.success(result);
     }
 
     @Override
-    public BaseApiResult changeUserRole(UserRoleDTO userRoleDTO) {
+    public ApiResult<Object> changeUserRole(UserRoleDTO userRoleDTO) {
         User user = mongoTemplate.findById(userRoleDTO.getUserId(), User.class, COLLECTION_NAME);
         if (user == null || userRoleDTO.getRole().equals(user.getPermissionEnum())) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query().addCriteria(Criteria.where("_id").is(user.getId()));
         Update update = new Update();
         update.set(ROLE, userRoleDTO.getRole());
         update.set(UPDATE_TIME, new Date());
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
-    public BaseApiResult blockUser(String userId) {
+    public ApiResult<Object> blockUser(String userId) {
         User user = queryById(userId);
         if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query();
         query.addCriteria(Criteria.where(OBJECT_ID).is(userId));
         Update update = new Update().set(USER_BANNING, !Optional.ofNullable(user.getBanning()).orElse(true));
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         if (updateResult.getModifiedCount() > 0) {
-            return BaseApiResult.success(MessageConstant.SUCCESS);
+            return ApiResult.success(MessageConstant.SUCCESS);
         }
-        return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
     }
 
     /**
@@ -266,18 +266,18 @@ public class UserServiceImpl implements IUserService {
      * @Param [userId, file]
      **/
     @Override
-    public BaseApiResult uploadUserAvatar(String userId, MultipartFile file) {
+    public ApiResult<Object> uploadUserAvatar(String userId, MultipartFile file) {
         User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
 
         if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         String gridfsId;
         try {
             gridfsId = fileService.uploadFileToGridFs("userAvatar", file.getInputStream(), file.getContentType());
         } catch (IOException e) {
             log.error("上传dfs出错{}", e.getLocalizedMessage());
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         List<String> avatar = user.getAvatarList();
         avatar.add(gridfsId);
@@ -290,9 +290,9 @@ public class UserServiceImpl implements IUserService {
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
         long matchedCount = updateResult.getMatchedCount();
         if (matchedCount > 0) {
-            return BaseApiResult.success(MessageConstant.SUCCESS);
+            return ApiResult.success(MessageConstant.SUCCESS);
         }
-        return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
     }
 
     /**
@@ -303,16 +303,16 @@ public class UserServiceImpl implements IUserService {
      * @Param [userId]
      **/
     @Override
-    public BaseApiResult removeUser(String userId) {
+    public ApiResult<Object> removeUser(String userId) {
         User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
         if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         log.warn("[删除警告]正在删除用户：{}", user);
         fileService.deleteGridFs(user.getAvatarList().toArray(new String[0]));
         Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
         mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -323,11 +323,11 @@ public class UserServiceImpl implements IUserService {
      * @Param [userIdList, adminUserId]
      **/
     @Override
-    public BaseApiResult deleteUserByIdBatch(List<String> userIdList, String adminUserId) {
+    public ApiResult<Object> deleteUserByIdBatch(List<String> userIdList, String adminUserId) {
         Query query = new Query().addCriteria(Criteria.where("_id").in(userIdList));
         List<User> userList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
         if (CollectionUtils.isEmpty(userList) || userIdList.contains(adminUserId)) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         List<String> allUserId = new ArrayList<>();
         for (User user : userList) {
@@ -336,14 +336,14 @@ public class UserServiceImpl implements IUserService {
         }
         fileService.deleteGridFs(allUserId.toArray(new String[0]));
         mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
-    public BaseApiResult removeUserAvatar(String userId) {
+    public ApiResult<Object> removeUserAvatar(String userId) {
         User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
         if (user == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         fileService.deleteGridFs(user.getAvatar());
         Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
@@ -351,7 +351,7 @@ public class UserServiceImpl implements IUserService {
         update.set(AVATAR, null);
         update.set(UPDATE_TIME, new Date());
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -380,7 +380,7 @@ public class UserServiceImpl implements IUserService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public BaseApiResult resetUserPwd(String userId, String adminId) {
+    public ApiResult<Object> resetUserPwd(String userId, String adminId) {
         User user = mongoTemplate.findById(adminId, User.class, COLLECTION_NAME);
         User resetUser = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
         // 如果管理者是空的，或者管理者权限不够，均不能对用户进行重置！
@@ -389,7 +389,7 @@ public class UserServiceImpl implements IUserService {
                 || !PermissionEnum.ADMIN.equals(user.getPermissionEnum())
                 || resetUser == null
         ) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
 
         RegistryUserDTO userDTO = new RegistryUserDTO();
@@ -400,7 +400,7 @@ public class UserServiceImpl implements IUserService {
         update.set("password", userDTO.getEncodePassword());
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
 
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

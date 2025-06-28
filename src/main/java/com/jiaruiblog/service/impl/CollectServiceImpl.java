@@ -38,12 +38,12 @@ public class CollectServiceImpl implements CollectService {
      * @Param [collect]
      **/
     @Override
-    public BaseApiResult insert(CollectDocRelationship collect) {
+    public ApiResult<Object> insert(CollectDocRelationship collect) {
         Boolean aBoolean = insertRelationShip(collect);
         if (Boolean.FALSE.equals(aBoolean)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
@@ -64,13 +64,13 @@ public class CollectServiceImpl implements CollectService {
      * @Param [collect]
      **/
     @Override
-    public BaseApiResult remove(CollectDocRelationship collect) {
+    public ApiResult<Object> remove(CollectDocRelationship collect) {
         collect = getExistRelationship(collect);
         while (collect != null) {
             mongoTemplate.remove(collect, COLLECTION_NAME);
             collect = getExistRelationship(collect);
         }
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

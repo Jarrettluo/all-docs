@@ -3,14 +3,13 @@ package com.jiaruiblog.controller;
 import cn.hutool.core.io.IoUtil;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
+import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.intercepter.SensitiveWordInit;
-import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,30 +50,30 @@ public class SystemConfigController {
 
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("getConfig")
-    public BaseApiResult getSystemConfig() {
-        return BaseApiResult.success(systemConfig);
+    public ApiResult<Object> getSystemConfig() {
+        return ApiResult.success(systemConfig);
     }
 
     @Permission({PermissionEnum.ADMIN})
     @Operation(summary = "管理员修改系统设置", description = "只有管理员有权限修改系统的设置信息")
     @ApiResponse(responseCode = "200", description = "操作成功",
-            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
+            content = @Content(schema = @Schema(implementation = ApiResult.class)))
     @ApiResponse(responseCode = "400", description = "参数错误",
-            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
+            content = @Content(schema = @Schema(implementation = ApiResult.class)))
     @PutMapping("updateConfig")
-    public BaseApiResult systemConfig(
+    public ApiResult<Object> systemConfig(
             @Parameter(description = "系统配置参数", required = true,
                     content = @Content(schema = @Schema(implementation = SystemConfig.class)))
             @RequestBody SystemConfig userSetting) {
         if (userSetting.getUserUpload() == null || userSetting.getUserRegistry() == null
                 || userSetting.getAdminReview() == null || userSetting.getProhibitedWord() == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         systemConfig.setUserUpload(userSetting.getUserUpload());
         systemConfig.setProhibitedWord(userSetting.getProhibitedWord());
         systemConfig.setUserRegistry(userSetting.getUserRegistry());
         systemConfig.setAdminReview(userSetting.getAdminReview());
-        return BaseApiResult.success(userSetting);
+        return ApiResult.success(userSetting);
     }
 
     @Operation(summary = "管理员下载最新的违禁词", description = "下载系统当前使用的违禁词列表")
@@ -101,24 +100,24 @@ public class SystemConfigController {
 
     @Operation(summary = "管理员更新违禁词", description = "上传新的违禁词列表文件")
     @ApiResponse(responseCode = "200", description = "更新成功",
-            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
+            content = @Content(schema = @Schema(implementation = ApiResult.class)))
     @ApiResponse(responseCode = "400", description = "参数错误",
-            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
+            content = @Content(schema = @Schema(implementation = ApiResult.class)))
     @ApiResponse(responseCode = "500", description = "服务器内部错误",
-            content = @Content(schema = @Schema(implementation = BaseApiResult.class)))
+            content = @Content(schema = @Schema(implementation = ApiResult.class)))
     @PostMapping(value = "updateProhibitedWord")
-    public BaseApiResult updateProhibitedWord(
+    public ApiResult<Object> updateProhibitedWord(
             @Parameter(description = "违禁词文件", required = true,
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty() || file.getSize() > 20000) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         String originFileName = file.getOriginalFilename();
         originFileName = Optional.ofNullable(originFileName).orElse("");
         String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1).toLowerCase(Locale.ROOT);
         if (!ObjectUtils.nullSafeEquals(suffix, "txt")) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
 
         try {
@@ -128,10 +127,10 @@ public class SystemConfigController {
             filter.refresh();
         } catch (IOException e) {
             e.printStackTrace();
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
-        return BaseApiResult.success();
+        return ApiResult.success("");
     }
     private void writeToFile(Set<String> strSet) throws IOException {
         String txt = strSet.stream().limit(10000).collect(Collectors.joining("\n"));

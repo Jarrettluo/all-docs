@@ -6,7 +6,6 @@ import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.task.exception.TaskRunException;
-import com.jiaruiblog.util.BaseApiResult;
 import org.apache.http.auth.AuthenticationException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,13 +33,13 @@ public interface IFileService {
     FileDocument saveFile(String md5, MultipartFile file);
 
 
-    BaseApiResult documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
+    Object documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
 
-    BaseApiResult uploadBatch(String category, List<String> tags, String description,
+    Object uploadBatch(String category, List<String> tags, String description,
                               Boolean skipError, MultipartFile[] files,
                               String userId, String username);
 
-    BaseApiResult uploadByUrl(String category, List<String> tags, String name,
+    Object uploadByUrl(String category, List<String> tags, String name,
                               String description, String url,
                               String userId, String username);
 
@@ -153,14 +152,14 @@ public interface IFileService {
      * @param documentDTO DocumentDTO
      * @return result
      */
-    BaseApiResult list(DocumentDTO documentDTO);
+    Object list(DocumentDTO documentDTO);
 
     /**
      * 分页检索目前的文档信息
      * @param documentDTO DocumentDTO
      * @return result
      */
-    BaseApiResult listNew(DocumentDTO documentDTO);
+    Object listNew(DocumentDTO documentDTO);
 
     /**
      *根据文档的详情，查询该文档的详细信息
@@ -168,7 +167,7 @@ public interface IFileService {
      * @param id ->Long
      * @return ApiResult
      */
-    BaseApiResult detail(String id);
+    Object detail(String id);
 
     /**
      * 删除掉已经存在的文档
@@ -176,7 +175,7 @@ public interface IFileService {
      * @param fileDocument -> 文档信息
      * @return ApiResult
      */
-    BaseApiResult remove(FileDocument fileDocument);
+    Object remove(FileDocument fileDocument);
 
     /**
      * @author luojiarui
@@ -185,10 +184,10 @@ public interface IFileService {
      * @Param [updateInfoDTO]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult updateInfo(UpdateInfoDTO updateInfoDTO);
+    Object updateInfo(UpdateInfoDTO updateInfoDTO);
 
 
-    BaseApiResult listWithCategory(DocumentDTO documentDTO);
+    Object listWithCategory(DocumentDTO documentDTO);
 
     /**
      * update file thumb
@@ -258,7 +257,7 @@ public interface IFileService {
      * @Param [page, user]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing);
+    Object queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing);
 
     long countAllFile();
 

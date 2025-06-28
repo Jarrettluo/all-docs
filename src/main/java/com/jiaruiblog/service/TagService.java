@@ -22,55 +22,55 @@ public interface TagService {
      * @param tag tag
      * @return result
      */
-    BaseApiResult insert(Tag tag);
+    ApiResult<Object> insert(Tag tag);
 
     /**
      * update
      * @param tag tag
      * @return result
      */
-    BaseApiResult update(Tag tag);
+    ApiResult<Object> update(Tag tag);
 
     /**
      * remove
      * @param tag tag
      * @return result
      */
-    BaseApiResult remove(Tag tag);
+    ApiResult<Object> remove(Tag tag);
 
     /**
      * query
      * @param tag tag
      * @return result
      */
-    BaseApiResult queryById(Tag tag);
+    ApiResult<Object> queryById(Tag tag);
 
     /**
      * search
      * @param tag tag
      * @return result
      */
-    BaseApiResult search(Tag tag);
+    ApiResult<Object> search(Tag tag);
 
     /**
      * list
      * @return result
      */
-    BaseApiResult list();
+    ApiResult<Object> list();
 
     /**
      * add relationship
      * @param relationship TagDocRelationship
      * @return BaseApiResult
      */
-    BaseApiResult addRelationShip(TagDocRelationship relationship);
+    ApiResult<Object> addRelationShip(TagDocRelationship relationship);
 
     /**
      * cancel relationship
      * @param relationship TagDocRelationShip
      * @return result
      */
-    BaseApiResult cancelTagRelationship(TagDocRelationship relationship);
+    ApiResult<Object> cancelTagRelationship(TagDocRelationship relationship);
 
     /**
      * get all relationships

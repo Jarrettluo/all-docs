@@ -57,7 +57,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @Param []
      **/
     @Override
-    public BaseApiResult trend() {
+    public ApiResult<Object> trend() {
         List<Category> categoryList = categoryService.getRandom();
         List<TrendVO> trendVos = new ArrayList<>(3);
 
@@ -86,7 +86,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             trendVO.setDocList(docVos);
             trendVos.add(trendVO);
         }
-        return BaseApiResult.success(trendVos);
+        return ApiResult.success(trendVos);
     }
 
     /**
@@ -97,13 +97,13 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @Param []
      **/
     @Override
-    public BaseApiResult all() {
+    public ApiResult<Object> all() {
         StatsVO statsVO = new StatsVO();
         statsVO.setDocNum(fileService.countAllFile());
         statsVO.setCommentNum(commentService.countAllFile());
         statsVO.setCategoryNum(categoryService.countAllFile());
         statsVO.setTagNum(tagService.countAllFile());
-        return BaseApiResult.success(statsVO);
+        return ApiResult.success(statsVO);
     }
 
     /**
@@ -114,7 +114,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public BaseApiResult getMonthStat() {
+    public ApiResult<Object> getMonthStat() {
         // 获取当前日期
         LocalDate currentDate = LocalDate.now();
 
@@ -164,6 +164,6 @@ public class StatisticsServiceImpl implements StatisticsService {
             monthStatResult.replace(monthStatVO.getDate(), monthStatVO.getCount());
         }
 
-        return BaseApiResult.success(monthStatResult);
+        return ApiResult.success(monthStatResult);
     }
 }

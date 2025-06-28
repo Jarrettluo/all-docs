@@ -3,7 +3,6 @@ package com.jiaruiblog.filter;
 import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.util.JwtUtil;
 import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +22,8 @@ import java.util.Map;
  * @version v2.0
  */
 @Slf4j
-@WebFilter(filterName = "JwtFilter", urlPatterns = {"/*"})
-public class JwtFilter implements Filter
-{
+//@WebFilter(filterName = "JwtFilter", urlPatterns = {"/*"})
+public class JwtFilter implements Filter {
 
     private static final String OPTIONS = "OPTIONS";
 
@@ -52,7 +50,12 @@ public class JwtFilter implements Filter
                 || url.contains("/files/view")
                 || url.contains("/document/listNew")
                 || url.contains("/category/all")
-                || url.contains("/files/image2")) {
+                || url.contains("/files/image2")
+                || url.startsWith("/swagger-ui")
+                || url.startsWith("/api/v1.0")
+                || url.startsWith("/v3/api-docs")
+                || url.startsWith("/webjars")
+                || url.startsWith("/swagger-resources")) {
             response.setStatus(HttpServletResponse.SC_OK);
             chain.doFilter(request, response);
             return;

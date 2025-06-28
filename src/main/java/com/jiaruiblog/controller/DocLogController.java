@@ -2,6 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
+import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.DocLog;
 import com.jiaruiblog.entity.dto.BasePageDTO;
@@ -9,7 +10,6 @@ import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.vo.DocLogVO;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.transformer.PO2VOConverter;
-import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -65,14 +65,14 @@ public class DocLogController {
         }
     )
     @GetMapping("queryLogList")
-    public BaseApiResult queryLogList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
+    public ApiResult<Object> queryLogList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
         Map<String, Object> result = docLogService.queryDocLogs(pageParams);
         if (result.get("data") instanceof List<?>) {
             List<DocLog> docLogList = (List<DocLog>) result.get("data");
             List<DocLogVO> docLogVOS = PO2VOConverter.docLogListConvert(docLogList);
             result.put("data", docLogVOS);
         }
-        return BaseApiResult.success(result);
+        return ApiResult.success(result);
     }
 
     /**
@@ -98,12 +98,12 @@ public class DocLogController {
         }
     )
     @DeleteMapping("removeLog")
-    public BaseApiResult removeLog(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
+    public ApiResult<Object> removeLog(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
         List<String> logIds = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(logIds)) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        return docLogService.deleteDocLogBatch(logIds, (String) request.getAttribute("id"));
+        return ApiResult.success(docLogService.deleteDocLogBatch(logIds, (String) request.getAttribute("id")));
     }
 
 }

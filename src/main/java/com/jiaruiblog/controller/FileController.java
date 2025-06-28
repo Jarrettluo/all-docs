@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.auth.PermissionEnum;
+import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.FileDocument;
@@ -20,7 +21,6 @@ import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.service.impl.DocLogServiceImpl;
-import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
 import com.jiaruiblog.util.HmacUtil;
 import com.jiaruiblog.util.JwtUtil;
@@ -136,14 +136,14 @@ public class FileController {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @GetMapping("/generateDownloadLink")
-    public BaseApiResult generateDownloadLink(@RequestParam String fileId,
+    public ApiResult<Object> generateDownloadLink(@RequestParam String fileId,
                                               HttpServletRequest request) throws Exception {
         if (org.apache.commons.lang3.StringUtils.isEmpty(fileId)) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
         }
         FileDocument fileDocument = fileService.queryById(fileId);
         if (Objects.isNull(fileDocument)) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
         }
 
         String username = (String) request.getAttribute("username");
@@ -159,7 +159,7 @@ public class FileController {
         // 使用hmacKey作为Redis的key，存储fileId，设置短时有效期
         redisTemplate.opsForValue().set(hmacKey, fileId, Duration.ofMinutes(10));
         // 返回下载链接
-        return BaseApiResult.success(hmacKey);
+        return ApiResult.success(hmacKey);
     }
 
     /*
@@ -352,8 +352,8 @@ public class FileController {
      * @return BaseApiResult
      */
     @PostMapping("auth/upload")
-    public BaseApiResult documentUpload(@RequestParam("file") MultipartFile file,
-                                        HttpServletRequest request)
+    public ApiResult<Object> documentUpload(@RequestParam("file") MultipartFile file,
+                                            HttpServletRequest request)
             throws AuthenticationException {
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
@@ -367,7 +367,7 @@ public class FileController {
             throw new AuthenticationException();
         }
 
-        return fileService.documentUpload(file, userId, username);
+        return ApiResult.success(fileService.documentUpload(file, userId, username);
     }
 
     /**
@@ -379,7 +379,7 @@ public class FileController {
      **/
     @Operation(summary = "用户批量上传文件", description = "需要文件分类标签信息！")
     @PostMapping("/auth/uploadBatch")
-    public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO, HttpServletRequest request) {
+    public ApiResult<Object> uploadBatch(FileUploadDTO fileUploadDTO, HttpServletRequest request) {
 
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
@@ -393,7 +393,7 @@ public class FileController {
         // 检查传递的参数是否正确
         if (checkParam(tags, category, description, null).equals(Boolean.FALSE)
                 || files == null || files.length < 1) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         // 最多只能添加10个标签
         if (!CollectionUtils.isEmpty(tags) && tags.size() > 10) {
@@ -403,7 +403,7 @@ public class FileController {
         if (files.length < 2) {
             skipError = Boolean.FALSE;
         }
-        return fileService.uploadBatch(category, tags, description, skipError, files, userId, username);
+        return ApiResult.success(fileService.uploadBatch(category, tags, description, skipError, files, userId, username);
     }
 
     /**
@@ -415,7 +415,7 @@ public class FileController {
      **/
     @Operation(summary = "根据用户的提供的url进行上传", description = "需要提供url和文件分类标签信息！")
     @PostMapping("/auth/uploadByUrl")
-    public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO, HttpServletRequest request) {
+    public ApiResult<Object> uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO, HttpServletRequest request) {
 
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
@@ -427,13 +427,13 @@ public class FileController {
         String name = urlUploadDTO.getName();
 
         if (checkParam(tags, category, description, name).equals(Boolean.FALSE)) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         // 最多只能添加10个标签
         if (!CollectionUtils.isEmpty(tags) && tags.size() > 10) {
             tags = tags.subList(0, 10);
         }
-        return fileService.uploadByUrl(category, tags, name, description, url, userId, username);
+        return ApiResult.success(fileService.uploadByUrl(category, tags, name, description, url, userId, username);
     }
 
     /**
@@ -647,21 +647,21 @@ public class FileController {
      * @Param [docId]
      **/
     @GetMapping("/rebuildIndex")
-    public BaseApiResult rebuildIndex(@RequestParam("docId") String docId) {
+    public ApiResult<Object> rebuildIndex(@RequestParam("docId") String docId) {
         if (!StringUtils.hasText(docId)) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         FileDocument fileDocument = fileService.queryById(docId);
         if (fileDocument != null && fileDocument.getDocState() != DocStateEnum.ON_PROCESS) {
             taskExecuteService.execute(fileDocument);
-            return BaseApiResult.success(MessageConstant.SUCCESS);
+            return ApiResult.success(MessageConstant.SUCCESS);
         } else {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
     }
 
     @PostMapping("/temporaryFileDownloadLink")
-    public BaseApiResult temporaryFileDownloadLink() {
+    public ApiResult<Object> temporaryFileDownloadLink() {
 
 //
 //        public class TemporaryFileDownloadLink {
@@ -708,6 +708,6 @@ public class FileController {
 //        }
 
 
-        return BaseApiResult.success();
+        return ApiResult.success("");
     }
 }

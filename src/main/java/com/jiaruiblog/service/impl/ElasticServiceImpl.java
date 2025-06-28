@@ -131,7 +131,7 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     @Override
-    public BaseApiResult getWordStat() throws IOException {
+    public ApiResult<Object> getWordStat() throws IOException {
         SearchResponse<Void> response = client.search(s -> s
             .index(INDEX_NAME)
             .query(Query.of(q -> q.matchAll(m -> m)))
@@ -150,7 +150,7 @@ public class ElasticServiceImpl implements ElasticService {
             .map(b -> new WordCloudItem(b.key().stringValue(), b.docCount()))
             .sorted(Comparator.comparingLong(WordCloudItem::getCount).reversed())
             .collect(Collectors.toList());
-        return BaseApiResult.success(wordCloudItems);
+        return ApiResult.success(wordCloudItems);
     }
 
     private String getHighlightContent(Map<String, List<String>> highlight) {

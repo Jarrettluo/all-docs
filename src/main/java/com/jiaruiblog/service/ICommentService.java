@@ -17,14 +17,14 @@ public interface ICommentService {
      * @param comment Comment
      * @return result
      */
-    BaseApiResult insert(Comment comment);
+    ApiResult<Object> insert(Comment comment);
 
     /**
      * update
      * @param comment Comment
      * @return result
      */
-    BaseApiResult update(Comment comment);
+    ApiResult<Object> update(Comment comment);
 
     /**
      * remove
@@ -32,7 +32,7 @@ public interface ICommentService {
      * @param userId userId
      * @return result
      */
-    BaseApiResult remove(Comment comment, String userId);
+    ApiResult<Object> remove(Comment comment, String userId);
 
     /**
      * @author luojiarui
@@ -41,21 +41,21 @@ public interface ICommentService {
      * @Param [commentIdList]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult removeBatch(List<String> commentIdList);
+    ApiResult<Object> removeBatch(List<String> commentIdList);
 
     /**
      * queryById
      * @param comment CommentListDTO
      * @return result
      */
-    BaseApiResult queryById(CommentListDTO comment);
+    ApiResult<Object> queryById(CommentListDTO comment);
 
     /**
      * search
      * @param comment Comment
      * @return result
      */
-    BaseApiResult search(Comment comment);
+    ApiResult<Object> search(Comment comment);
 
     /**
      * @author luojiarui
@@ -64,7 +64,7 @@ public interface ICommentService {
      * @Param [pageDTO, userId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult queryAllComments(BasePageDTO pageDTO, String userId, Boolean isAdmin);
+    ApiResult<Object> queryAllComments(BasePageDTO pageDTO, String userId, Boolean isAdmin);
 
     long countAllFile();
 

@@ -95,7 +95,7 @@ public class DocLogServiceImpl implements IDocLogService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public BaseApiResult deleteDocLogBatch(List<String> logIds, String userId) {
+    public ApiResult<Object> deleteDocLogBatch(List<String> logIds, String userId) {
 //        User user = userServiceImpl.queryById(userId);
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").in(logIds));
@@ -103,7 +103,7 @@ public class DocLogServiceImpl implements IDocLogService {
 //            query.addCriteria(Criteria.where("userId").is(user.getId()));
 //        }
         DeleteResult remove = mongoTemplate.remove(query, DocLog.class, DOC_LOG_COLLECTION);
-        return BaseApiResult.success(String.format(RESULT, remove.getDeletedCount()));
+        return ApiResult.success(String.format(RESULT, remove.getDeletedCount()));
     }
 
 }

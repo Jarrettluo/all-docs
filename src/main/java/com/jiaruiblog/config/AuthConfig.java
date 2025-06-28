@@ -1,11 +1,5 @@
 package com.jiaruiblog.config;
 
-import com.jiaruiblog.auth.AuthenticationInterceptor;
-import com.jiaruiblog.service.IUserService;
-import jakarta.annotation.Resource;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 
@@ -17,11 +11,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
  * @Date 2022/12/7 20:39
  * @Version 1.0
  **/
-@Configuration
+//@Configuration
 public class AuthConfig extends WebMvcConfigurationSupport {
-
-    @Resource
-    IUserService userService;
+//
+//    @Resource
+//    IUserService userService;
 
     /**
      * @author luojiarui
@@ -29,26 +23,14 @@ public class AuthConfig extends WebMvcConfigurationSupport {
      * @Date 21:08 2022/12/7
      * @Param [registry]
      **/
-    @Override
-    protected void addInterceptors(InterceptorRegistry registry) {
-        //注册TestInterceptor拦截器
-        registry.addInterceptor(new AuthenticationInterceptor(userService))
-                .addPathPatterns("/**");
-    }
-
-    /**
-     * 解决swagger UI页面 和 拦截器的冲突
-     * https://blog.csdn.net/m0_62943596/article/details/126186521
-     * @param registry ResourceHandlerRegistry
-     */
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("swagger-ui.html", "doc.html").addResourceLocations(
-                "classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**").addResourceLocations(
-                "classpath:/META-INF/resources/webjars/");
-        super.addResourceHandlers(registry);
-    }
+//    @Override
+//    protected void addInterceptors(InterceptorRegistry registry) {
+//        //注册TestInterceptor拦截器
+//        registry.addInterceptor(new AuthenticationInterceptor(userService))
+//                .addPathPatterns("/**")
+//                // 【看这里！！！】根据你自己的路径加上这个配置
+//                .excludePathPatterns("/swagger-ui/**", "/v3/api-docs/**");
+//    }
 
 
 }

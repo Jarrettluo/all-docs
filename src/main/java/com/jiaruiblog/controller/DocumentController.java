@@ -2,6 +2,7 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
+import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
@@ -15,7 +16,6 @@ import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.service.impl.DocLogServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
-import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Resource;
@@ -53,7 +53,7 @@ public class DocumentController {
 
     @Operation(summary = "2.1 查询文档的分页列表页", description = "根据参数查询文档列表")
     @PostMapping(value = "/list")
-    public BaseApiResult list(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
+    public ApiResult<Object> list(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
             throws IOException {
         String userId = documentDTO.getUserId();
         if (StringUtils.hasText(documentDTO.getFilterWord()) &&
@@ -74,12 +74,12 @@ public class DocumentController {
                 }
             }
         }
-        return iFileService.list(documentDTO);
+        return ApiResult.success(iFileService.list(documentDTO));
     }
 
     @Operation(summary = "2.1 查询文档的分页列表页", description = "根据参数查询文档列表，限制了分类和标签")
     @PostMapping(value = "/listNew")
-    public BaseApiResult listNew(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
+    public ApiResult<Object> listNew(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
             throws IOException {
         String userId = documentDTO.getUserId();
         if (StringUtils.hasText(documentDTO.getFilterWord()) &&
@@ -100,26 +100,26 @@ public class DocumentController {
                 }
             }
         }
-        return iFileService.listNew(documentDTO);
+        return ApiResult.success(iFileService.listNew(documentDTO));
     }
 
     @Operation(summary = "2.2 查询文档的详细信息", description = "查询文档的详细信息")
     @GetMapping(value = "/detail")
-    public BaseApiResult detail(
+    public ApiResult<Object> detail(
             @RequestParam(value = "docId")
             @Schema(description = "文档ID", required = true) String id) {
-        return iFileService.detail(id);
+        return ApiResult.success(iFileService.detail(id));
     }
 
     @Operation(summary = "3.2 删除某个文档", description = "删除某个文档")
     @DeleteMapping(value = "/auth/remove")
     @Permission(value = PermissionEnum.ADMIN)
-    public BaseApiResult remove(
+    public ApiResult<Object> remove(
             @RequestBody @Schema(description = "文档删除DTO", required = true) RemoveObjectDTO removeObjectDTO,
             HttpServletRequest request) {
         FileDocument fileDocument = iFileService.queryById(removeObjectDTO.getId());
         if (fileDocument == null) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         String username = (String) request.getAttribute("username");
         String userId = (String) request.getAttribute("id");
@@ -127,49 +127,49 @@ public class DocumentController {
         user.setUsername(username);
         user.setId(userId);
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.DELETE);
-        return iFileService.remove(fileDocument);
+        return ApiResult.success(iFileService.remove(fileDocument));
     }
 
     @Operation(summary = "3.2 管理员修改文档基本信息", description = "管理员修改某个文档信息")
     @PutMapping(value="/auth/updateInfo")
     @Permission(value = PermissionEnum.ADMIN)
-    public BaseApiResult updateInfo(@RequestBody @Schema(description = "文档更新信息DTO") UpdateInfoDTO updateInfoDTO) {
-        return iFileService.updateInfo(updateInfoDTO);
+    public ApiResult<Object> updateInfo(@RequestBody @Schema(description = "文档更新信息DTO") UpdateInfoDTO updateInfoDTO) {
+        return ApiResult.success(iFileService.updateInfo(updateInfoDTO));
     }
 
 
     @Operation(summary = "2.3 指定分类时，查询文档的分页列表页", description = "根据参数查询文档列表")
     @GetMapping(value = "/listWithCategory")
-    public BaseApiResult listWithCategory(
+    public ApiResult<Object> listWithCategory(
             @ModelAttribute("documentDTO")
             @Schema(description = "文档查询DTO", required = true) DocumentDTO documentDTO) {
         FilterTypeEnum filterType = documentDTO.getType();
         if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG)) {
-            return iFileService.listWithCategory(documentDTO);
+            return ApiResult.success(iFileService.listWithCategory(documentDTO));
         } else {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
     }
 
     @GetMapping("/addKey")
-    public BaseApiResult addKey(@RequestParam("key") String key) {
+    public ApiResult<Object> addKey(@RequestParam("key") String key) {
 
         final int ljr = redisService.addSearchHistoryByUserId("ljr", key);
         log.info(String.valueOf(ljr));
         redisService.incrementScoreByUserId(key, RedisServiceImpl.SEARCH_KEY);
-        return BaseApiResult.success(key);
+        return ApiResult.success(key);
     }
 
     @GetMapping("/keyList")
-    public BaseApiResult keyList() {
+    public ApiResult<Object> keyList() {
         List<String> keyList = redisService.getSearchHistoryByUserId("ljr");
-        return BaseApiResult.success(keyList);
+        return ApiResult.success(keyList);
     }
 
 
     @GetMapping("/hot")
-    public BaseApiResult hot() {
+    public ApiResult<Object> hot() {
         List<String> keyList = redisService.getHotList(null, RedisServiceImpl.SEARCH_KEY);
-        return BaseApiResult.success(keyList);
+        return ApiResult.success(keyList);
     }
 }

@@ -12,13 +12,13 @@ public interface StatisticsService {
      * trend
      * @return trend
      */
-    BaseApiResult trend();
+    ApiResult<Object> trend();
 
     /**
      * all
      * @return all
      */
-    BaseApiResult all();
+    ApiResult<Object> all();
 
     /**
      * @author luojiarui
@@ -27,6 +27,6 @@ public interface StatisticsService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult getMonthStat();
+    ApiResult<Object> getMonthStat();
 
 }

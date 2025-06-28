@@ -17,7 +17,7 @@ public interface DocReviewService {
      * @Param [reviewId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult userRead(List<String> ids, String userId);
+    ApiResult<Object> userRead(List<String> ids, String userId);
 
     boolean docIdExist(List<String> docIds);
 
@@ -28,7 +28,7 @@ public interface DocReviewService {
      * @Param [docId, reason] 文档的id 和 拒绝的原因
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult refuse(FileDocument fileDocument, String reason);
+    ApiResult<Object> refuse(FileDocument fileDocument, String reason);
 
     /**
      * @author luojiarui
@@ -37,7 +37,7 @@ public interface DocReviewService {
      * @Param [docId] 文档列表的id
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult refuseBatch(List<FileDocument> fileDocumentList, String reason);
+    ApiResult<Object> refuseBatch(List<FileDocument> fileDocumentList, String reason);
 
     /**
      * @author luojiarui
@@ -46,7 +46,7 @@ public interface DocReviewService {
      * @Param [fileDocumentList]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult approveBatch(List<FileDocument> fileDocumentList);
+    ApiResult<Object> approveBatch(List<FileDocument> fileDocumentList);
 
 
     /**
@@ -56,7 +56,7 @@ public interface DocReviewService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult deleteReviewsBatch(List<String> docIds, String userId);
+    ApiResult<Object> deleteReviewsBatch(List<String> docIds, String userId);
 
     /**
      * @author luojiarui
@@ -66,7 +66,7 @@ public interface DocReviewService {
      * @Param [page, user]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin);
+    ApiResult<Object> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin);
 
     void removeReviews(List<String> docIds);
 }

@@ -1,8 +1,8 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.service.LikeService;
-import com.jiaruiblog.util.BaseApiResult;
 import io.lettuce.core.RedisConnectionException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,12 +50,12 @@ public class LikeController{
     // entityType: 1:点赞
     // entityType: 2:收藏
     @PostMapping("like")
-    public BaseApiResult like(@RequestParam("entityType") int entityType,
-                              @RequestParam("entityId") String entityId,
-                              HttpServletRequest request) {
+    public ApiResult<Object> like(@RequestParam("entityType") int entityType,
+                                  @RequestParam("entityId") String entityId,
+                                  HttpServletRequest request) {
 
         if (entityType != 1 && entityType != 2) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         // 获取到当前用户
         String userId = (String) request.getAttribute("id");
@@ -69,7 +69,7 @@ public class LikeController{
             // 获取当前用户点赞的状态
             likeStatus = likeService.findEntityLikeStatus(userId, entityType, entityId);
         } catch (RedisConnectionFailureException | RedisConnectionException e) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getMessage());
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getMessage());
         }
 
 
@@ -94,11 +94,11 @@ public class LikeController{
 //            String redisKey = RedisKeyUtil.getPostScoreKey();
 //            redisTemplate.opsForSet().add(redisKey, postId);
 //        }
-        return BaseApiResult.success(map);
+        return ApiResult.success(map);
     }
 
     @GetMapping("queryLikeInfo")
-    public BaseApiResult queryLikeInfo(@RequestParam("entityId") String entityId,
+    public ApiResult<Object> queryLikeInfo(@RequestParam("entityId") String entityId,
                                        HttpServletRequest request) {
         // 获取到当前用户
         String userId = (String) request.getAttribute("id");
@@ -125,10 +125,10 @@ public class LikeController{
             map.put("collectStatus", collectStatus);
 
         } catch (RedisConnectionFailureException | RedisConnectionException e) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getMessage());
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getMessage());
         }
 
-        return BaseApiResult.success(map);
+        return ApiResult.success(map);
 
     }
 }

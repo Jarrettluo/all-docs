@@ -76,7 +76,7 @@ public class ReviewServiceImpl {
      *
      * @return -> BaseApiResult
      */
-    public BaseApiResult query() {
+    public ApiResult<Object> query() {
         List<Map<String, String>> result = Lists.newArrayList();
         for (String s : selectOption) {
             Map<String, String> reviewValue = new HashMap<>(8);
@@ -84,6 +84,6 @@ public class ReviewServiceImpl {
             reviewValue.put("value", s);
             result.add(reviewValue);
         }
-        return BaseApiResult.success(result);
+        return ApiResult.success(result);
     }
 }

@@ -4,7 +4,6 @@ import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.service.impl.DocLogServiceImpl;
-import com.jiaruiblog.util.BaseApiResult;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +46,6 @@ public interface IDocLogService {
      * @Param userId user index
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    BaseApiResult deleteDocLogBatch(List<String> logIds, String userId);
+    Object deleteDocLogBatch(List<String> logIds, String userId);
 
 }

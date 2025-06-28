@@ -15,7 +15,7 @@ public interface CollectService {
      * @param collect -> Collect Doc Relationship
      * @return -> ApiResult
      */
-    BaseApiResult insert(CollectDocRelationship collect);
+    ApiResult<Object> insert(CollectDocRelationship collect);
 
     /**
      * @author luojiarui
@@ -31,7 +31,7 @@ public interface CollectService {
      * @param collect -> CollectDocRelationship
      * @return -> ApiResult
      */
-    BaseApiResult remove(CollectDocRelationship collect);
+    ApiResult<Object> remove(CollectDocRelationship collect);
 
 
     void removeRelateByDocId(String docId);

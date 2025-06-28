@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
@@ -9,7 +10,6 @@ import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.service.*;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
-import com.jiaruiblog.util.BaseApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -59,14 +59,14 @@ public class StatisticsController {
 
     @Operation(summary = "查询热度榜", description = "查询列表")
     @GetMapping(value = "/trend")
-    public BaseApiResult trend() {
-        return statisticsService.trend();
+    public ApiResult<Object> trend() {
+        return ApiResult.success(statisticsService.trend());
     }
 
     @Operation(summary = "查询统计数据", description = "查询列表")
     @GetMapping(value = "/all")
-    public BaseApiResult all() {
-        return statisticsService.all();
+    public ApiResult<Object> all() {
+        return ApiResult.success(statisticsService.all());
     }
 
     /**
@@ -78,7 +78,7 @@ public class StatisticsController {
      **/
     @Operation(summary = "查询搜索结果", description = "查询列表")
     @GetMapping("getSearchResult")
-    public BaseApiResult getSearchResult(@RequestHeader HttpHeaders headers) {
+    public ApiResult<Object> getSearchResult(@RequestHeader HttpHeaders headers) {
         List<String> userSearchList = Lists.newArrayList();
         List<String> stringList = headers.get("id");
         if (!CollectionUtils.isEmpty(stringList)) {
@@ -92,14 +92,14 @@ public class StatisticsController {
         Map<String, List<String>> result = new HashMap<>();
         result.put("userSearch", userSearchList);
         result.put("hotSearch", hotSearchList);
-        return BaseApiResult.success(result);
+        return ApiResult.success(result);
     }
 
     @Operation(summary = "删除用户的搜索关键词", description = "删除key")
     @PutMapping(value = "removeKey")
-    public BaseApiResult removeKey(@RequestBody SearchKeyDTO searchKeyDTO) {
+    public ApiResult<Object> removeKey(@RequestBody SearchKeyDTO searchKeyDTO) {
         redisService.delSearchHistoryByUserId(searchKeyDTO.getUserId(), searchKeyDTO.getSearchWord());
-        return BaseApiResult.success();
+        return ApiResult.success("");
     }
 
     /**
@@ -120,11 +120,11 @@ public class StatisticsController {
      **/
     @Operation(summary = "查询十条热门榜单", description = "查询列表")
     @GetMapping("getHotTrend")
-    public BaseApiResult getHotTrend() {
+    public ApiResult<Object> getHotTrend() {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
 
         if (CollectionUtils.isEmpty(docIdList)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
 
@@ -140,7 +140,7 @@ public class StatisticsController {
         // 从redis中删除无效id
 
         if (CollectionUtils.isEmpty(fileDocumentList)) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         FileDocument topFileDocument = fileDocumentList.remove(0);
         DocumentVO documentVO = fileServiceImpl.convertDocument(null, topFileDocument);
@@ -168,7 +168,7 @@ public class StatisticsController {
         result.put("top1", top1);
         result.put("others", others);
 
-        return BaseApiResult.success(result);
+        return ApiResult.success(result);
     }
 
 
@@ -182,7 +182,7 @@ public class StatisticsController {
      **/
     @Operation(summary = "查询最新数据", description = "查询列表展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档")
     @GetMapping("/recentDocs")
-    public BaseApiResult getRecentDocs() {
+    public ApiResult<Object> getRecentDocs() {
         List<Map<String, Object>> result = Lists.newArrayList();
 
         List<FileDocument> recentFileDocuments = fileService.listFilesByPage(0, 12);
@@ -200,7 +200,7 @@ public class StatisticsController {
             result.add(getTagMap(tag.getName(), tag.getId(), map));
         }
 
-        return BaseApiResult.success(result);
+        return ApiResult.success(result);
     }
 
     /**
@@ -245,12 +245,12 @@ public class StatisticsController {
     }
 
     @GetMapping("monthStat")
-    private BaseApiResult getMonthStat() {
-        return statisticsService.getMonthStat();
+    private ApiResult<Object> getMonthStat() {
+        return ApiResult.success(statisticsService.getMonthStat());
     }
 
     @GetMapping("")
-    private BaseApiResult getWordStat() throws IOException {
-        return elasticService.getWordStat();
+    private ApiResult<Object> getWordStat() throws IOException {
+        return ApiResult.success(elasticService.getWordStat());
     }
 }

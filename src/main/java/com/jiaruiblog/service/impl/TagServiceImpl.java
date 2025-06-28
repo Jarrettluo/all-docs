@@ -67,13 +67,13 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public BaseApiResult insert(Tag tag) {
+    public ApiResult<Object> insert(Tag tag) {
         // 必须经过查重啊
         if(isTagExist(tag.getName())) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         mongoTemplate.save(tag, COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
     
     /**
@@ -84,17 +84,17 @@ public class TagServiceImpl implements TagService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public BaseApiResult update(Tag tag) {
+    public ApiResult<Object> update(Tag tag) {
         // 必须经过查重啊
         if(isTagExist(tag.getName())) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         Query query = new Query(Criteria.where(OBJECT_ID).is(tag.getId()));
         Update update  = new Update();
         update.set("name", tag.getName());
         update.set("updateTime",tag.getUpdateDate());
         mongoTemplate.updateFirst(query, update, Tag.class, COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
@@ -135,9 +135,9 @@ public class TagServiceImpl implements TagService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public BaseApiResult remove(Tag tag) {
+    public ApiResult<Object> remove(Tag tag) {
         if(tag == null || !StringUtils.hasText(tag.getId())) {
-            return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         Query query1 = new Query();
         query1.addCriteria(Criteria.where(OBJECT_ID).is(tag.getId()));
@@ -146,7 +146,7 @@ public class TagServiceImpl implements TagService {
         // 同时去除掉各种关系的数据
         Query query = new Query(Criteria.where(TAG_ID).is(tag.getId()));
         mongoTemplate.remove(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -155,10 +155,10 @@ public class TagServiceImpl implements TagService {
      * @return BaseApiResult
      */
     @Override
-    public BaseApiResult queryById(Tag tag) {
+    public ApiResult<Object> queryById(Tag tag) {
         Query query = new Query(Criteria.where("_").is("1"));
         mongoTemplate.count(query, Tag.class);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -174,13 +174,13 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public BaseApiResult search(Tag tag) {
+    public ApiResult<Object> search(Tag tag) {
         return null;
     }
 
 
     @Override
-    public BaseApiResult list() {
+    public ApiResult<Object> list() {
         Aggregation aggregation = Aggregation.newAggregation(
                 // 选择某些字段
                 Aggregation.project("id", "name", "createDate", "updateDate")
@@ -197,7 +197,7 @@ public class TagServiceImpl implements TagService {
         AggregationResults<CateOrTagVO> result = mongoTemplate.aggregate(
                 aggregation, COLLECTION_NAME, CateOrTagVO.class);
         List<CateOrTagVO> resultList = result.getMappedResults();
-        return BaseApiResult.success(resultList);
+        return ApiResult.success(resultList);
     }
 
     /**
@@ -221,27 +221,27 @@ public class TagServiceImpl implements TagService {
      * @return BaseApiResult
      */
     @Override
-    public BaseApiResult addRelationShip(TagDocRelationship relationship) {
+    public ApiResult<Object> addRelationShip(TagDocRelationship relationship) {
         if( relationship == null || !StringUtils.hasText(relationship.getTagId())) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         // 判断以下是否存在这个关系
         Query query = new Query(Criteria.where(TAG_ID).is(relationship.getTagId())
                 .and(FILE_ID).is(relationship.getFileId()));
         List<TagDocRelationship> result = mongoTemplate.find(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
         if( !result.isEmpty() ) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
-    public BaseApiResult cancelTagRelationship(TagDocRelationship relationship) {
+    public ApiResult<Object> cancelTagRelationship(TagDocRelationship relationship) {
         Query query = new Query(Criteria.where(TAG_ID).is(relationship.getTagId())
                 .and(FILE_ID).is(relationship.getFileId()));
         mongoTemplate.remove(query, TagDocRelationship.class, RELATE_COLLECTION_NAME);
-        return BaseApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

@@ -51,7 +51,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     private TaskExecuteService taskExecuteService;
 
     @Override
-    public BaseApiResult userRead(List<String> ids, String userId) {
+    public ApiResult<Object> userRead(List<String> ids, String userId) {
         // 只能读自己的 文档评审意见//.and(USER_ID).is(userId));
         Query query = new Query(Criteria.where("_id").in(ids));
         Update update = new Update();
@@ -60,19 +60,19 @@ public class DocReviewServiceImpl implements DocReviewService {
         // 修改更新时间
         update.set("updateDate", new Date());
         UpdateResult updateResult = mongoTemplate.updateMulti(query, update, DocReview.class, DOC_REVIEW_COLLECTION);
-        return BaseApiResult.success(String.format(RESULT, updateResult.getModifiedCount()));
+        return ApiResult.success(String.format(RESULT, updateResult.getModifiedCount()));
     }
 
     @Override
-    public BaseApiResult refuse(FileDocument fileDocument, String reason) {
+    public ApiResult<Object> refuse(FileDocument fileDocument, String reason) {
         // 删除某个文档
         DocReview docReview = docReviewInstance(fileDocument, reason, false);
         if (docReview == null) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
 
         mongoTemplate.save(docReview, DOC_REVIEW_COLLECTION);
-        return BaseApiResult.success();
+        return ApiResult.success();
     }
 
     /**
@@ -101,7 +101,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     @Override
-    public BaseApiResult refuseBatch( List<FileDocument> fileDocumentList, String reason) {
+    public ApiResult<Object> refuseBatch( List<FileDocument> fileDocumentList, String reason) {
         List<DocReview> docReviews = Lists.newArrayList();
         for (FileDocument fileDocument : fileDocumentList) {
             docReviews.add(docReviewInstance(fileDocument, reason, false));
@@ -109,14 +109,14 @@ public class DocReviewServiceImpl implements DocReviewService {
         // 可以进行批量操作，相对效率较save更高
         try {
             mongoTemplate.insert(docReviews, DOC_REVIEW_COLLECTION);
-            return BaseApiResult.success();
+            return ApiResult.success();
         } catch (DuplicateKeyException e) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
     }
 
     @Override
-    public BaseApiResult approveBatch(List<FileDocument> fileDocumentList) {
+    public ApiResult<Object> approveBatch(List<FileDocument> fileDocumentList) {
         List<DocReview> docReviews = Lists.newArrayList();
         for (FileDocument fileDocument : fileDocumentList) {
             updateDocTxt(fileDocument);
@@ -125,9 +125,9 @@ public class DocReviewServiceImpl implements DocReviewService {
         // 可以进行批量操作，相对效率较save更高
         try {
             mongoTemplate.insert(docReviews, DOC_REVIEW_COLLECTION);
-            return BaseApiResult.success();
+            return ApiResult.success();
         } catch (DuplicateKeyException e) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE,MessageConstant.OPERATE_FAILED);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE,MessageConstant.OPERATE_FAILED);
         }
     }
 
@@ -177,25 +177,25 @@ public class DocReviewServiceImpl implements DocReviewService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public BaseApiResult deleteReviewsBatch(List<String> docIds, String userId) {
+    public ApiResult<Object> deleteReviewsBatch(List<String> docIds, String userId) {
         Query query = new Query();
 //        User user = userServiceImpl.queryById(userId);
         // 区分user进行操作
 //        if (user.getPermissionEnum().equals(PermissionEnum.ADMIN)) {
 //            query.addCriteria(Criteria.where("_id").in(docIds));
 //            DeleteResult deleteResult = mongoTemplate.remove(query, DocReview.class, DOC_REVIEW_COLLECTION);
-//            return BaseApiResult.success(String.format(RESULT, deleteResult.getDeletedCount()));
+//            return ApiResult.success(String.format(RESULT, deleteResult.getDeletedCount()));
 //        }
 //        query.addCriteria(Criteria.where(USER_ID).is(user.getId()).and("_id").in(docIds));
         Update update = new Update();
         update.set("userRemove", true);
         update.set("updateDate", new Date());
         UpdateResult updateResult = mongoTemplate.updateMulti(query, update, DocReview.class, DOC_REVIEW_COLLECTION);
-        return BaseApiResult.success(String.format(RESULT, updateResult.getModifiedCount()));
+        return ApiResult.success(String.format(RESULT, updateResult.getModifiedCount()));
     }
 
     @Override
-    public BaseApiResult queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin) {
+    public ApiResult<Object> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin) {
 
         // 根据不同的user进行区分，如果不是管理员，则必须输入用户id
         Query query = new Query();
@@ -204,7 +204,7 @@ public class DocReviewServiceImpl implements DocReviewService {
         }
         long count = mongoTemplate.count(query, DocReview.class, DOC_REVIEW_COLLECTION);
         if (count < 1) {
-            return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
         }
 
         query.with(Sort.by(Sort.Direction.DESC, "createDate"));
@@ -218,7 +218,7 @@ public class DocReviewServiceImpl implements DocReviewService {
         result.put("data", docReviews);
         result.put("pageNum", page.getPage());
         result.put("pageSize", page.getRows());
-        return BaseApiResult.success(result);
+        return ApiResult.success(result);
     }
 
     @Override
