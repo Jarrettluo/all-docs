@@ -5,7 +5,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.google.common.collect.Maps;
 import com.jiaruiblog.entity.User;
 
 import java.util.Date;
@@ -71,7 +70,7 @@ public class JwtUtil {
             jwt = verifier.verify(token);
         } catch (Exception e) {
             //解码异常则抛出异常
-            return Maps.newHashMap();
+            return Map.of();
         }
         return jwt.getClaims();
     }

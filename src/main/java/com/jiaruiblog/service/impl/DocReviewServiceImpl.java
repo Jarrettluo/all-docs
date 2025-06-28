@@ -1,18 +1,15 @@
 package com.jiaruiblog.service.impl;
 
-import com.google.common.collect.Maps;
-import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.entity.FileDocument;
-import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.DuplicateKeyException;
-import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import jakarta.annotation.Resource;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -23,8 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,8 +44,8 @@ public class DocReviewServiceImpl implements DocReviewService {
     @Resource
     MongoTemplate mongoTemplate;
 
-    @Resource
-    private UserServiceImpl userServiceImpl;
+//    @Resource
+//    private UserServiceImpl userServiceImpl;
 
     @Resource
     private TaskExecuteService taskExecuteService;
@@ -173,17 +170,23 @@ public class DocReviewServiceImpl implements DocReviewService {
         return mongoTemplate.count(query, DocReview.class, DOC_REVIEW_COLLECTION) > 0;
     }
 
+    /***
+     * <p>取消用户的限制</p>
+     * @param docIds
+ * @param userId
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @Override
     public BaseApiResult deleteReviewsBatch(List<String> docIds, String userId) {
         Query query = new Query();
-        User user = userServiceImpl.queryById(userId);
+//        User user = userServiceImpl.queryById(userId);
         // 区分user进行操作
-        if (user.getPermissionEnum().equals(PermissionEnum.ADMIN)) {
-            query.addCriteria(Criteria.where("_id").in(docIds));
-            DeleteResult deleteResult = mongoTemplate.remove(query, DocReview.class, DOC_REVIEW_COLLECTION);
-            return BaseApiResult.success(String.format(RESULT, deleteResult.getDeletedCount()));
-        }
-        query.addCriteria(Criteria.where(USER_ID).is(user.getId()).and("_id").in(docIds));
+//        if (user.getPermissionEnum().equals(PermissionEnum.ADMIN)) {
+//            query.addCriteria(Criteria.where("_id").in(docIds));
+//            DeleteResult deleteResult = mongoTemplate.remove(query, DocReview.class, DOC_REVIEW_COLLECTION);
+//            return BaseApiResult.success(String.format(RESULT, deleteResult.getDeletedCount()));
+//        }
+//        query.addCriteria(Criteria.where(USER_ID).is(user.getId()).and("_id").in(docIds));
         Update update = new Update();
         update.set("userRemove", true);
         update.set("updateDate", new Date());
@@ -210,7 +213,7 @@ public class DocReviewServiceImpl implements DocReviewService {
 
         // 还需要进行分页
         List<DocReview> docReviews = mongoTemplate.find(query, DocReview.class, DOC_REVIEW_COLLECTION);
-        Map<String, Object> result = Maps.newHashMap();
+        Map<String, Object> result = new HashMap<>();
         result.put("total", count);
         result.put("data", docReviews);
         result.put("pageNum", page.getPage());

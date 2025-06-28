@@ -1,11 +1,15 @@
 package com.jiaruiblog.task.thread;
 
-import com.google.common.util.concurrent.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Jarrett Luo
@@ -15,56 +19,55 @@ import java.util.concurrent.*;
 @Slf4j
 public class TaskThreadPool {
 
-    private final ListeningExecutorService listeningExecutorService;
-
+    private final ThreadPoolTaskExecutor taskExecutor;
     private static final TaskThreadPool INSTANCE = new TaskThreadPool(2, "Task_Thread_%d");
-
-    private List<MainTask> mainTaskList;
-
+    private final List<MainTask> mainTaskList;
 
     private TaskThreadPool(Integer threadsNum, String threadNameFormat) {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                .setDaemon(true)
-                .setNameFormat(threadNameFormat)
-                .build();
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(threadsNum,
-                threadsNum,
-                60L,
-                TimeUnit.MICROSECONDS,
-                new LinkedBlockingQueue<>(512),
-                threadFactory,
-                new ThreadPoolExecutor.AbortPolicy());
-        // 让线程释放，释放资源
-        threadPoolExecutor.allowCoreThreadTimeOut(true);
-        listeningExecutorService = MoreExecutors.listeningDecorator(threadPoolExecutor);
-        mainTaskList = new LinkedList<>();
-    }
+        ThreadFactory threadFactory = new ThreadFactory() {
+            private final AtomicInteger threadNumber = new AtomicInteger(1);
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r);
+                thread.setDaemon(true);
+                thread.setName(String.format(threadNameFormat, threadNumber.getAndIncrement()));
+                return thread;
+            }
+        };
 
+        this.taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(threadsNum);
+        taskExecutor.setMaxPoolSize(threadsNum);
+        taskExecutor.setKeepAliveSeconds(60);
+        taskExecutor.setQueueCapacity(512);
+        taskExecutor.setThreadFactory(threadFactory);
+        taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        taskExecutor.setAllowCoreThreadTimeOut(true);
+        taskExecutor.initialize();
+
+        mainTaskList = new CopyOnWriteArrayList<>();
+    }
     public static TaskThreadPool getInstance() {
         return INSTANCE;
     }
 
     public <V> void submit(MainTask mainTask) {
         mainTaskList.add(mainTask);
-        // 使用线程池执行任务工作流
-        ListenableFuture<V> future = (ListenableFuture<V>) this.listeningExecutorService.submit(mainTask);
+        ListenableFuture<V> future = (ListenableFuture<V>) taskExecutor.submitListenable(mainTask);
 
-        // 工作流执行完成后，回调，将工作流从执行map中移除
-        FutureCallback<V> futureCallback = new FutureCallback<V>() {
+        future.addCallback(new ListenableFutureCallback<>() {
             @Override
-            public void onSuccess(Object o) {
+            public void onSuccess(V result) {
                 mainTask.success();
                 mainTaskList.remove(mainTask);
             }
 
             @Override
-            public void onFailure(Throwable throwable) {
-                mainTask.failed(throwable);
+            public void onFailure(Throwable ex) {
+                mainTask.failed(ex);
                 mainTask.fallback();
                 mainTaskList.remove(mainTask);
             }
-        };
-        Futures.addCallback(future, futureCallback, this.listeningExecutorService);
-
+        });
     }
 }

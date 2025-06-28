@@ -1,6 +1,5 @@
 package com.jiaruiblog.service.impl;
 
-import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
@@ -11,6 +10,7 @@ import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.TagService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.compress.utils.Lists;
@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -284,7 +283,7 @@ public class TagServiceImpl implements TagService {
      * @return java.util.Map<com.jiaruiblog.entity.Tag,java.util.List<com.jiaruiblog.entity.TagDocRelationship>>
      **/
     public Map<Tag, List<TagDocRelationship>> getRecentTagRelationship(Integer tagNum) {
-        Map<Tag, List<TagDocRelationship>> result = Maps.newHashMap();
+        Map<Tag, List<TagDocRelationship>> result = new HashMap<>();
         List<TagDocRelationship> files = getTagRelationshipByPage(0, tagNum, null);
         if( CollectionUtils.isEmpty(files)) {
             return result;

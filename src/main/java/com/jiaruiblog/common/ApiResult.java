@@ -1,5 +1,6 @@
 package com.jiaruiblog.common;
 
+import com.jiaruiblog.exception.ErrorCode;
 import org.springframework.context.MessageSource;
 
 import java.util.Locale;

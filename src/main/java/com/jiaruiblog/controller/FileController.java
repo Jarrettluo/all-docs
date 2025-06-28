@@ -3,6 +3,7 @@ package com.jiaruiblog.controller;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
@@ -23,11 +24,12 @@ import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.FileContentTypeUtils;
 import com.jiaruiblog.util.HmacUtil;
 import com.jiaruiblog.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.http.auth.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -51,7 +53,7 @@ import java.util.regex.Pattern;
 /**
  * @author jiarui.luo
  */
-@Api(tags = "查询文档详情的接口")
+@Tag(name = "查询文档详情的接口")
 @Slf4j
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -84,7 +86,7 @@ public class FileController {
      * @Date 22:41 2023/3/15
      * @Param [basePageDTO]
      **/
-    @ApiOperation(value = "查询列表", notes = "已经变更！")
+    @Operation(summary = "查询列表", description = "已经变更！")
     @GetMapping("/list")
     public List<FileDocument> list(@ModelAttribute BasePageDTO basePageDTO) {
         return fileService.listFilesByPage(basePageDTO.getPage(), basePageDTO.getRows());
@@ -96,7 +98,7 @@ public class FileController {
      * @param id 文件id
      * @return 查询结果返回
      */
-    @ApiOperation(value = "查询文档预览结果")
+    @Operation(summary = "查询文档预览结果")
     @GetMapping("/view/{id}")
     public ResponseEntity<Object> serveFileOnline(@PathVariable String id,
                                                   HttpServletResponse response)
@@ -106,17 +108,11 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
         }
 
-//        String userId = userData.get("id").asString();
-//        String username = userData.get("username").asString();
         User user = new User();
-//        user.setId(userId);
-//        user.setUsername(username);
-
         FileDocument fileDocument1 = file.get();
         docLogService.addLog(user, fileDocument1, DocLogServiceImpl.Action.PREVIEW);
 
         return ResponseEntity.ok()
-                // 这里需要进行中文编码
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8"))
                 .header(HttpHeaders.CONTENT_TYPE, file.get().getContentType())
@@ -125,7 +121,6 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
                 .body(file.get().getContent());
     }
-
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -307,7 +302,7 @@ public class FileController {
     @Deprecated
     @PostMapping("/upload")
     public ResponseModel formUpload(@RequestParam("file") MultipartFile file) throws IOException {
-        List<String> availableSuffixList = Lists.newArrayList("pdf", "png", "docx", "pptx", "xlsx");
+        List<String> availableSuffixList = List.of("pdf", "png", "docx", "pptx", "xlsx");
         ResponseModel model = ResponseModel.getInstance();
         try {
             if (file != null && !file.isEmpty()) {
@@ -382,7 +377,7 @@ public class FileController {
      * @Date 23:12 2023/4/21
      * @Param [req, files]
      **/
-    @ApiOperation(value = "用户批量上传文件", notes = "需要文件分类标签信息！")
+    @Operation(summary = "用户批量上传文件", description = "需要文件分类标签信息！")
     @PostMapping("/auth/uploadBatch")
     public BaseApiResult uploadBatch(FileUploadDTO fileUploadDTO, HttpServletRequest request) {
 
@@ -418,7 +413,7 @@ public class FileController {
      * @Date 23:12 2023/4/21
      * @Param [req, files]
      **/
-    @ApiOperation(value = "根据用户的提供的url进行上传", notes = "需要提供url和文件分类标签信息！")
+    @Operation(summary = "根据用户的提供的url进行上传", description = "需要提供url和文件分类标签信息！")
     @PostMapping("/auth/uploadByUrl")
     public BaseApiResult uploadByUrl(@RequestBody UrlUploadDTO urlUploadDTO, HttpServletRequest request) {
 

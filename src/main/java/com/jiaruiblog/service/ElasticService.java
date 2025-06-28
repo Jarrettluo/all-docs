@@ -1,6 +1,7 @@
 package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.util.BaseApiResult;
 
@@ -13,6 +14,8 @@ import java.util.Set;
  * @author jiarui.luo
  */
 public interface ElasticService {
+
+    void upload(FileObj file) throws IOException;
 
     /**
      * search
@@ -30,6 +33,8 @@ public interface ElasticService {
      * @throws IOException exception
      */
     Map<String, List<PageVO>> search(String keyword, Set<String> docIdSet) throws IOException;
+
+    void removeByDocId(String docMd5);
 
     BaseApiResult getWordStat() throws IOException;
 

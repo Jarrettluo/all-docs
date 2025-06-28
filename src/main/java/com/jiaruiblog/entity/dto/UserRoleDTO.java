@@ -2,28 +2,25 @@ package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 
 /**
- * @ClassName UserSexDTO
- * @Description 用户角色
+ * 用户角色数据传输对象
+ *
  * @author luojiarui
- * @Date 2023/2/20 21:48
- * @Version 1.0
  **/
-@ApiModel("用户角色对象")
+@Schema(description = "用户角色对象")
 @Data
 public class UserRoleDTO {
 
-    @ApiModelProperty(value = "用户主键", required = true)
+    @Schema(description = "用户主键", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private String userId;
 
-    @ApiModelProperty(value = "用户角色", notes = "可选的参数有 USER, ADMIN, NO", required = true)
+    @Schema(description = "用户角色", allowableValues = {"USER", "ADMIN", "NO"}, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private PermissionEnum role;
 }

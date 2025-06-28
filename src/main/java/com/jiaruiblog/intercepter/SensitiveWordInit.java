@@ -1,15 +1,14 @@
 package com.jiaruiblog.intercepter;
 
-import com.google.common.collect.Maps;
 import com.jiaruiblog.util.property.PropertiesUtil;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -55,7 +54,7 @@ public class SensitiveWordInit {
         // 读取敏感词库 ,存入Set中
         Set<String> wordSet = readSensitiveWordFile();
         if (CollectionUtils.isEmpty(wordSet)) {
-            return Maps.newHashMap();
+            return new HashMap();
         }
         // 将敏感词库加入到HashMap中//确定有穷自动机DFA
         return addSensitiveWordToHashMap(wordSet);

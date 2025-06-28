@@ -1,7 +1,5 @@
 package com.jiaruiblog.service.impl;
 
-import com.google.common.collect.Maps;
-import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.entity.DocLog;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
@@ -9,21 +7,22 @@ import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * @author luojiarui
  * @ClassName DocLogServiceImpl
  * @Description 文档日志的查询和删除
- * @author luojiarui
  * @Date 2022/12/10 11:05
  * @Version 1.0
  **/
@@ -34,8 +33,8 @@ public class DocLogServiceImpl implements IDocLogService {
 
     public static final String RESULT = "操作成功了 %d 项目!";
 
-    @Resource
-    private UserServiceImpl userServiceImpl;
+//    @Resource
+//    private UserServiceImpl userServiceImpl;
 
     @Resource
     private MongoTemplate mongoTemplate;
@@ -83,20 +82,26 @@ public class DocLogServiceImpl implements IDocLogService {
 
         List<DocLog> docLogList = mongoTemplate.find(query, DocLog.class);
 
-        Map<String, Object> result = Maps.newHashMap();
+        Map<String, Object> result = new HashMap<>();
         result.put("total", count);
         result.put("data", docLogList);
         return result;
     }
 
+    /***
+     * <p>TODO 使用是否权限限制</p>
+     * @param logIds log的id信息
+     * @param userId 用户id
+     * @return com.jiaruiblog.util.BaseApiResult
+     **/
     @Override
     public BaseApiResult deleteDocLogBatch(List<String> logIds, String userId) {
-        User user = userServiceImpl.queryById(userId);
+//        User user = userServiceImpl.queryById(userId);
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").in(logIds));
-        if (user.getPermissionEnum().equals(PermissionEnum.USER)) {
-            query.addCriteria(Criteria.where("userId").is(user.getId()));
-        }
+//        if (user.getPermissionEnum().equals(PermissionEnum.USER)) {
+//            query.addCriteria(Criteria.where("userId").is(user.getId()));
+//        }
         DeleteResult remove = mongoTemplate.remove(query, DocLog.class, DOC_LOG_COLLECTION);
         return BaseApiResult.success(String.format(RESULT, remove.getDeletedCount()));
     }

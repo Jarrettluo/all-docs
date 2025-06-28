@@ -1,10 +1,10 @@
 package com.jiaruiblog.initial;
 
 import com.jiaruiblog.service.IUserService;
+import jakarta.annotation.Resource;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 
 /**
  * @ClassName InitCommandLineRunner
@@ -28,6 +28,6 @@ public class InitCommandLineRunner implements CommandLineRunner {
      **/
     @Override
     public void run(String... args) throws Exception {
-        userService.initFirstUser();
+//        userService.initFirstUser();
     }
 }

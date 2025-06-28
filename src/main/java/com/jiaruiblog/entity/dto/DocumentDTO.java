@@ -2,11 +2,10 @@ package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.enums.FilterTypeEnum;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 
 /**
  * @ClassName documentDTO
@@ -15,26 +14,25 @@ import javax.validation.constraints.NotNull;
  * @Date 2022/6/19 5:15 下午
  * @Version 1.0
  **/
-@ApiModel("文档查询对象")
+@Schema(description = "文档查询对象")
 @Data
 public class DocumentDTO extends BasePageDTO{
 
-    @ApiModelProperty(value = "过滤类型")
-    @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
+    @Schema(description = "过滤类型", requiredMode = Schema.RequiredMode.REQUIRED)
     private FilterTypeEnum type;
 
-    @ApiModelProperty(value = "过滤词")
+    @Schema(description = "过滤词", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private String filterWord;
 
-    @ApiModelProperty(value = "分类id")
+    @Schema(description = "分类id", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private String categoryId;
 
-    @ApiModelProperty(value = "标签id")
+    @Schema(description = "标签id", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     private String tagId;
 
-    @ApiModelProperty(value = "用户id")
+    @Schema(description = "用户id")
     private String userId;
 }

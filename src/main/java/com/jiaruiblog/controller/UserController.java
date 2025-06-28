@@ -1,5 +1,6 @@
 package com.jiaruiblog.controller;
 
+import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ConfigConstant;
@@ -12,6 +13,8 @@ import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.transformer.DTO2BO;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,7 +35,7 @@ import java.util.regex.Pattern;
  * @Date 2022/6/4 9:38 上午
  * @Version 1.0
  **/
-@Api(tags = "用户模块")
+@Tag(name = "用户模块")
 @RestController
 @Slf4j
 @CrossOrigin
@@ -59,7 +62,7 @@ public class UserController {
     SystemConfig systemConfig;
 
 
-    @ApiOperation(value = "新增单个用户", notes = "新增单个用户")
+    @Operation(summary = "新增单个用户", description = "新增单个用户")
     @PostMapping(value = "/insert")
     public BaseApiResult insertObj(@RequestBody @Valid RegistryUserDTO userDTO) {
         if (Boolean.FALSE.equals(systemConfig.getUserRegistry())) {
@@ -68,7 +71,7 @@ public class UserController {
         return userService.registry(userDTO);
     }
 
-    @ApiOperation(value = "批量新增用户", notes = "批量新增用户; 支持使用xls进行导入用户信息")
+    @Operation(summary = "批量新增用户", description = "批量新增用户; 支持使用xls进行导入用户信息")
     @PostMapping(value = "/batchInsert")
     public BaseApiResult batchInsert(@RequestBody List<RegistryUserDTO> userDTOS) {
         for (RegistryUserDTO item : userDTOS) {
@@ -77,7 +80,7 @@ public class UserController {
         return BaseApiResult.success("批量新增成功");
     }
 
-    @ApiOperation(value = "根据id查询", notes = "批量新增用户")
+    @Operation(summary = "根据id查询", description = "批量新增用户")
     @PostMapping(value = "/getById")
     public BaseApiResult getById(@RequestBody UserDTO user) {
         User one = userService.queryById(user.getId());
@@ -88,7 +91,7 @@ public class UserController {
         return BaseApiResult.success(one);
     }
 
-    @ApiOperation(value = "根据用户名称查询", notes = "根据用户名称查询")
+    @Operation(summary = "根据用户名称查询", description = "根据用户名称查询")
     @PostMapping(value = "/getByUsername")
     public BaseApiResult getByUsername(@RequestBody RegistryUserDTO user) {
         User one = userService.queryByUsername(user.getUsername());
@@ -102,7 +105,7 @@ public class UserController {
      * @Param [userDTO]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    @ApiOperation(value = "更新用户hobby和company", notes = "更新用户hobby和company")
+    @Operation(summary = "更新用户hobby和company", description = "更新用户hobby和company")
     @PutMapping(value = "/updateUser")
     public BaseApiResult updateUser(@RequestBody UserDTO userDTO) {
         // 传入的参数数据不对，则返回参数不正确
@@ -127,7 +130,7 @@ public class UserController {
      * @Param [user, request]
      **/
     @Permission(PermissionEnum.ADMIN)
-    @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
+    @Operation(summary = "根据id删除用户", description = "根据id删除用户")
     @DeleteMapping(value = "/auth/deleteByID")
     public BaseApiResult deleteById(@RequestBody UserDTO removeUser, HttpServletRequest request) {
         String userId = (String) request.getAttribute(REQUEST_USER_ID);
@@ -146,7 +149,7 @@ public class UserController {
      * @Date 22:40 2023/1/12
      * @Param [user, request]
      **/
-    @ApiOperation(value = "根据id删除用户", notes = "根据id删除用户")
+    @Operation(summary = "根据id删除用户", description = "根据id删除用户")
     @Permission(value = PermissionEnum.ADMIN)
     @DeleteMapping(value = "/auth/deleteByIDBatch")
     public BaseApiResult deleteByIdBatch(@RequestBody BatchIdDTO batchIdDTO, HttpServletRequest request) {
@@ -163,7 +166,7 @@ public class UserController {
     /**
      * 模拟用户 登录
      */
-    @ApiOperation(value = "用户登录")
+    @Operation(summary = "用户登录")
     @PostMapping("/login")
     public BaseApiResult login(@RequestBody RegistryUserDTO user) {
         return userService.login(user);
@@ -172,7 +175,7 @@ public class UserController {
     /**
      * 模拟用户 登录
      */
-    @ApiOperation(value = "用户登录")
+    @Operation(summary = "用户登录")
     @GetMapping("/checkLoginState")
     public BaseApiResult checkLoginState(HttpServletRequest request, HttpServletResponse response) {
         // 缓存 2s; 避免前端频繁刷新
@@ -196,14 +199,14 @@ public class UserController {
      * @Date 21:21 2023/1/10
      * @Param []
      **/
-    @ApiOperation(value = "管理员查询全部用户信息", notes = "只有管理员有权限进行用户列表查询")
+    @Operation(summary = "管理员查询全部用户信息", description = "只有管理员有权限进行用户列表查询")
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("/allUsers")
     public BaseApiResult allUsers(@ModelAttribute("pageDTO") BasePageDTO pageDTO) {
         return userService.getUserList(pageDTO);
     }
 
-    @ApiOperation(value = "改变用户权限", notes = "管理员能够调整其他人的角色，不能调整自己的角色")
+    @Operation(summary = "改变用户权限", description = "管理员能够调整其他人的角色，不能调整自己的角色")
     @Permission(PermissionEnum.ADMIN)
     @PutMapping("changeUserRole")
     public BaseApiResult changeUserRole(@RequestBody UserRoleDTO userRoleDTO, HttpServletRequest request) {
@@ -222,7 +225,7 @@ public class UserController {
      * @Date 20:30 2023/2/12
      * @Param [userId]
      **/
-    @ApiOperation(value = "管理员屏蔽用户", notes = "管理员不能屏蔽自己的账号")
+    @Operation(summary = "管理员屏蔽用户", description = "管理员不能屏蔽自己的账号")
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("blockUser")
     public BaseApiResult blockUser(@RequestParam("userId") String userId, HttpServletRequest request) {
@@ -270,7 +273,7 @@ public class UserController {
         return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
     }
 
-    @ApiOperation(value = "上传用户的头像", notes = "上传当前登录用户的头像")
+    @Operation(summary = "上传用户的头像", description = "上传当前登录用户的头像")
     @PostMapping("/auth/uploadUserAvatar")
     public BaseApiResult uploadUserAvatar(@RequestParam(value = "img") MultipartFile file, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
@@ -282,20 +285,20 @@ public class UserController {
         return userService.uploadUserAvatar(userId, file);
     }
 
-    @ApiOperation(value = "删除用户头像", notes = "删除当前登录用户的头像")
+    @Operation(summary = "删除用户头像", description = "删除当前登录用户的头像")
     @DeleteMapping("/auth/removeUserAvatar")
     public BaseApiResult removeUserAvatar(HttpServletRequest request) {
         return userService.removeUserAvatar((String) request.getAttribute("id"));
     }
 
-    @ApiOperation(value = "重置用户密码", notes = "管理员对用户进行密码重置")
+    @Operation(summary = "重置用户密码", description = "管理员对用户进行密码重置")
     @PostMapping("auth/resetUserPwd")
     public BaseApiResult resetUserPwd(@RequestBody String userId, HttpServletRequest request) {
         String adminId = (String) request.getAttribute("id");
         return userService.resetUserPwd(userId, adminId);
     }
 
-    @ApiOperation(value = "用户发起找回密码的请求，发送token给邮箱")
+    @Operation(summary = "用户发起找回密码的请求，发送token给邮箱")
     @PostMapping("/generateResetToken")
     public BaseApiResult generateResetToken() {
         // 用户发送邮件信息
@@ -305,7 +308,7 @@ public class UserController {
         return BaseApiResult.success();
     }
 
-    @ApiOperation(value = "用户重置密码")
+    @Operation(summary = "用户重置密码")
     @PostMapping("/resetPassword")
     public BaseApiResult resetPassword() {
         // 用户发送邮件/token/新密码

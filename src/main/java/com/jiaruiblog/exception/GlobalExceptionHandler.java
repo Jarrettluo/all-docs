@@ -1,6 +1,6 @@
 package com.jiaruiblog.exception;
 
-import com.jiaruiblog.perfect_cv.common.ApiResult;
+import com.jiaruiblog.common.ApiResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

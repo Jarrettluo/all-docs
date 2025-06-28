@@ -1,7 +1,9 @@
 package com.jiaruiblog.config;
 
+import com.healthmarketscience.jackcess.ConstraintViolationException;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.util.BaseApiResult;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.AuthenticationException;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -15,8 +17,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolationException;
 
 /**
  * 全局统一异常处理

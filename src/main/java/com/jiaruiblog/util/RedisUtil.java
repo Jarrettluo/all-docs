@@ -1,12 +1,12 @@
 package com.jiaruiblog.util;
 
-import com.google.common.collect.Sets;
+import jakarta.annotation.Resource;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.compress.utils.Sets;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 

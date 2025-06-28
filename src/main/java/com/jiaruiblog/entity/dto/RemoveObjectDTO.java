@@ -4,8 +4,6 @@ import lombok.Data;
 
 /**
  * @author Jarrett Luo
- * @Date 2022/6/20 16:44
- * @Version 1.0
  */
 @Data
 public class RemoveObjectDTO {

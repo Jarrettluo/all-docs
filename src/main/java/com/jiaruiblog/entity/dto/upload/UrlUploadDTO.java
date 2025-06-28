@@ -1,12 +1,11 @@
 package com.jiaruiblog.entity.dto.upload;
 
 import com.jiaruiblog.common.MessageConstant;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -17,24 +16,24 @@ import java.util.List;
  * @Version 1.0
  **/
 @Data
-@ApiModel(value = "用户进行url上传的", description = "各类分页数据列表查询的实体")
+@Schema(name = "UrlUploadDTO", description = "用户进行url上传的各类分页数据列表查询的实体")
 public class UrlUploadDTO {
 
-    @ApiModelProperty(value = "文件地址", notes = "文件上传信息")
+    @Schema(description = "文件地址", minLength = 1, maxLength = 512)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     @Size(min = 1, max = 512, message = MessageConstant.PARAMS_LENGTH_REQUIRED)
     private String url;
 
-    @ApiModelProperty(value = "文档的名字",notes = "当文档的url无法提取出有效的名字时候，则需要手动给名称")
+    @Schema(description = "文档的名字（当文档的url无法提取出有效的名字时候，则需要手动给名称）")
     private String name;
 
-    @ApiModelProperty(value = "分类", notes = "文档的分类信息，如果有则分类的长度限制为64字符，不能有空格和换行符号")
+    @Schema(description = "文档的分类信息，如果有则分类的长度限制为64字符，不能有空格和换行符号")
     private String category;
 
-    @ApiModelProperty(value = "标签", notes = "文档的标签信息，如果有则标签的长度限制为64字符，不能有空格和换行符号")
+    @Schema(description = "文档的标签信息，如果有则标签的长度限制为64字符，不能有空格和换行符号")
     private List<String> tags;
 
-    @ApiModelProperty(value = "描述",notes = "文档的描述信息")
+    @Schema(description = "文档的描述信息")
     private String description;
 
 }

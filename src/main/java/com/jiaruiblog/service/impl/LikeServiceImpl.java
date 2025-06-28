@@ -5,6 +5,7 @@ import com.jiaruiblog.enums.RedisActionEnum;
 import com.jiaruiblog.service.CollectService;
 import com.jiaruiblog.service.LikeService;
 import com.jiaruiblog.task.like.UserLikeDetail;
+import jakarta.annotation.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,7 +13,6 @@ import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;

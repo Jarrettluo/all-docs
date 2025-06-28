@@ -1,10 +1,10 @@
 package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  * @ClassName RefuseBatchDTO

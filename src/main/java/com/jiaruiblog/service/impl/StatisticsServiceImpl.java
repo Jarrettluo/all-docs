@@ -9,6 +9,7 @@ import com.jiaruiblog.entity.vo.StatsVO;
 import com.jiaruiblog.entity.vo.TrendVO;
 import com.jiaruiblog.service.*;
 import com.jiaruiblog.util.BaseApiResult;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -16,7 +17,6 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;

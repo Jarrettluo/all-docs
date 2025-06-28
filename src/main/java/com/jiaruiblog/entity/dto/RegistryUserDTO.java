@@ -2,13 +2,12 @@ package com.jiaruiblog.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.common.RegexConstant;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
@@ -19,7 +18,7 @@ import java.security.MessageDigest;
  * @Date 2023/2/14 22:12
  * @Version 1.0
  **/
-@ApiModel("用户注册对象")
+@Schema(name = "用户注册对象")
 @Data
 public class RegistryUserDTO {
 
@@ -30,14 +29,14 @@ public class RegistryUserDTO {
     public static final String KEY_SHA = "SHA";
 
     // todo 用户注册的用户名为空
-    @ApiModelProperty(value = "用户名", notes = "最小3个字符， 最长32个字符", required = true)
+    @Schema(description = "用户名", minLength = 3, maxLength = 32, required = true)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     @Size(min = 3, max = 32, message = MessageConstant.PARAMS_LENGTH_REQUIRED)
     @Pattern(regexp = RegexConstant.NUM_WORD_REG, message = MessageConstant.PARAMS_FORMAT_ERROR)
     String username;
 
     // todo 用户的密码是： [Slc281335++..] 报错了
-    @ApiModelProperty(value = "用户密码", notes = "最小3个字符， 最长32个字符", required = true)
+    @Schema(description = "用户密码", minLength = 3, maxLength = 32, required = true)
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
     @Size(min = 3, max = 32, message = MessageConstant.PARAMS_LENGTH_REQUIRED)
     @Pattern(regexp = RegexConstant.NUM_WORD_REG, message = MessageConstant.PARAMS_FORMAT_ERROR)

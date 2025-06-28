@@ -1,8 +1,8 @@
 package com.jiaruiblog.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.entity.data.WordCloudItem;
@@ -10,328 +10,152 @@ import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.service.ElasticService;
 import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
-import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.text.Text;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-/**
- * @ClassName ElasticServiceImpl
- * @Description ElasticServiceImpl
- * @author luojiarui
- * @Date 2022/7/12 10:54 下午
- * @Version 1.0
- **/
 @Slf4j
 @Lazy
 @Service
 public class ElasticServiceImpl implements ElasticService {
 
     private static final String INDEX_NAME = "docwrite";
-
     private static final String PIPELINE_NAME = "attachment.content";
 
     @Autowired
-    private RestHighLevelClient client;
+    private ElasticsearchClient client;
 
     private FileServiceImpl fileServiceImpl;
 
-    // 通过属性注入的方式避免循环依赖
     @Autowired
-    private void setFileServiceImpl(FileServiceImpl fileService) {
+    public void setFileServiceImpl(FileServiceImpl fileService) {
         this.fileServiceImpl = fileService;
     }
 
-
-    /**
-     * 有三种类型
-     * 1.文件的名字
-     * 2.文件type
-     * 3.文件的data 64编码
-     * 添加文档
-     */
+    @Override
     public void upload(FileObj file) throws IOException {
-        IndexRequest indexRequest = new IndexRequest(INDEX_NAME);
-        //上传同时，使用attachment pipeline 进行提取文件
-        indexRequest.source(JSON.toJSONString(file), XContentType.JSON);
-        indexRequest.setPipeline("attachment");
-        client.index(indexRequest, RequestOptions.DEFAULT);
+        if (file == null) throw new IllegalArgumentException("文件对象不能为空");
+        client.index(i -> i
+            .index(INDEX_NAME)
+            .document(file)
+            .pipeline("attachment")
+        );
     }
 
-
-    /**
-     * 根据关键词，搜索对应的文件信息
-     * 查询文件中的文本内容
-     * 默认会search出所有的东西来
-     * SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-     * <p>
-     * // srb.query(QueryBuilders.matchQuery("attachment.content", keyword).analyzer("ik_smart"));
-     *
-     * @param keyword String
-     * @return list
-     * @throws IOException ioexception
-     */
     @Override
     public List<FileDocument> search(String keyword) throws IOException {
+        SearchResponse<FileDocument> response = client.search(s -> s
+            .index(INDEX_NAME)
+            .query(q -> q.match(m -> m.field(PIPELINE_NAME).query(keyword)))
+            .highlight(h -> h
+                .fields(PIPELINE_NAME, f -> f
+                    .preTags("<em>")
+                    .postTags("</em>")
+                )
+            )
+            .source(sc -> sc
+                .filter(f -> f
+                    .includes("name", "id")
+                    .excludes(PIPELINE_NAME)
+                )
+            )
+            .size(10)
+            .from(0),
+            FileDocument.class
+        );
 
-        List<FileDocument> fileDocumentList = new ArrayList<>();
-        SearchRequest searchRequest = new SearchRequest(INDEX_NAME);
-        // 使用lk分词器查询，会把插入的字段分词，然后进行处理
-        SearchSourceBuilder srb = new SearchSourceBuilder();
-        srb.query(QueryBuilders.matchQuery(PIPELINE_NAME, keyword));
-
-        // 每页10个数据
-        srb.size(10);
-        // 起始位置从0开始
-        srb.from(0);
-
-        //设置highlighting
-        HighlightBuilder highlightBuilder = new HighlightBuilder();
-        HighlightBuilder.Field highlightContent = new HighlightBuilder.Field(PIPELINE_NAME);
-        highlightContent.highlighterType();
-        highlightBuilder.field(highlightContent);
-        highlightBuilder.preTags("<em>");
-        highlightBuilder.postTags("</em>");
-
-        //highlighting会自动返回匹配到的文本，所以就不需要再次返回文本了
-        String[] includeFields = new String[]{"name", "id"};
-        String[] excludeFields = new String[]{PIPELINE_NAME};
-        srb.fetchSource(includeFields, excludeFields);
-
-        //把刚才设置的值导入进去
-        srb.highlighter(highlightBuilder);
-        searchRequest.source(srb);
-        SearchResponse res;
-        try {
-            res = client.search(searchRequest, RequestOptions.DEFAULT);
-        } catch (ConnectException e) {
-            log.error("连接es失败！", e.getCause());
-            res = null;
-        }
-
-        if (res == null || res.getHits() == null) {
-            return Lists.newArrayList();
-        }
-        //获取hits，这样就可以获取查询到的记录了
-        SearchHits hits = res.getHits();
-
-        //hits是一个迭代器，所以需要迭代返回每一个hits
-        Iterator<SearchHit> iterator = hits.iterator();
-        int count = 0;
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        Set<String> idSet = Sets.newHashSet();
-
-        while (iterator.hasNext()) {
-            SearchHit hit = iterator.next();
-
-            //获取返回的字段
-            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-
-            //统计找到了几条
-            count++;
-
-            //这个就会把匹配到的文本返回，而且只返回匹配到的部分文本
-            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-
-            HighlightField highlightField = highlightFields.get(PIPELINE_NAME);
-
-            StringBuilder stringBuilder1 = new StringBuilder();
-            for (Text fragment : highlightField.getFragments()) {
-                if (stringBuilder1.length()>0) {
-                    stringBuilder1.append("<br/>");
+        return response.hits().hits().stream()
+            .map(hit -> {
+                FileDocument doc = fileServiceImpl.getByMd5(hit.source().getId());
+                if (doc != null) {
+                    doc.setDescription(getHighlightContent(hit.highlight()));
                 }
-                stringBuilder1.append("📖 ");
-                stringBuilder1.append(fragment.toString());
-            }
-            String abstractString = stringBuilder1.toString();
-            if (abstractString.length() > 500) {
-                abstractString = abstractString.substring(0, 500);
-            }
-
-            if (sourceAsMap.containsKey("id")) {
-                String id = (String) sourceAsMap.get("id");
-                if (id != null && !idSet.contains(id)) {
-                    idSet.add(id);
-                    FileDocument fileDocument = fileServiceImpl.getByMd5(id);
-                    if (fileDocument == null) {
-                        //从redis中剔除该doc，并跳过循环
-                        continue;
-                    }
-                    fileDocument.setDescription(abstractString);
-                    fileDocumentList.add(fileDocument);
-                }
-            }
-
-            stringBuilder.append(highlightFields);
-        }
-
-        stringBuilder.append("查询到").append(count).append("条记录");
-        return fileDocumentList;
+                return doc;
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
-
     @Override
     public Map<String, List<PageVO>> search(String keyword, Set<String> docIdSet) throws IOException {
-        // 查询es后返回的内容
-        Map<String, List<PageVO>> result = new HashMap<>();
-        SearchRequest searchRequest = new SearchRequest(INDEX_NAME);
-        // 使用lk分词器查询，会把插入的字段分词，然后进行处理
-        SearchSourceBuilder srb = new SearchSourceBuilder();
-        srb.query(QueryBuilders.matchPhraseQuery(PIPELINE_NAME, keyword));
+        SearchResponse<Map> response = client.search(s -> s
+            .index(INDEX_NAME)
+            .query(q -> q.matchPhrase(m -> m.field(PIPELINE_NAME).query(keyword)))
+            .highlight(h -> h
+                .fields(PIPELINE_NAME, f -> f
+                    .preTags("<em>")
+                    .postTags("</em>")
+                    .fragmentSize(100)
+                    .numberOfFragments(100)
+                )
+            )
+            .source(sc -> sc
+                .filter(f -> f
+                    .includes("name", "id")
+                    .excludes(PIPELINE_NAME)
+                )
+            )
+            .size(10)
+            .from(0),
+            Map.class
+        );
 
-        // 每页10个数据
-        srb.size(10);
-        // 起始位置从0开始
-        srb.from(0);
-
-        //设置highlighting
-        HighlightBuilder highlightBuilder = new HighlightBuilder();
-        HighlightBuilder.Field highlightContent = new HighlightBuilder.Field(PIPELINE_NAME);
-        highlightContent.fragmentSize(100); // 设置片段大小为最大值，即返回全部片段
-        highlightContent.highlighterType("unified");
-        highlightBuilder.field(highlightContent);
-        highlightBuilder.preTags("<em>");
-        highlightBuilder.postTags("</em>");
-        highlightBuilder.numOfFragments(100);
-
-        //highlighting会自动返回匹配到的文本，所以就不需要再次返回文本了
-        String[] includeFields = new String[]{"name", "id"};
-        String[] excludeFields = new String[]{PIPELINE_NAME};
-        srb.fetchSource(includeFields, excludeFields);
-
-        //把刚才设置的值导入进去
-        srb.highlighter(highlightBuilder);
-        searchRequest.source(srb);
-        SearchResponse res;
-        try {
-            res = client.search(searchRequest, RequestOptions.DEFAULT);
-        } catch (ConnectException e) {
-            log.error("连接es失败！", e.getCause());
-            res = null;
-        }
-
-        if (res == null || res.getHits() == null) {
-            return Maps.newHashMap();
-        }
-        //获取hits，这样就可以获取查询到的记录了
-        SearchHits hits = res.getHits();
-
-        //hits是一个迭代器，所以需要迭代返回每一个hits
-        for (SearchHit hit : hits) {
-            //获取返回的字段
-            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-            //这个就会把匹配到的文本返回，而且只返回匹配到的部分文本
-            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-            HighlightField highlightField = highlightFields.get(PIPELINE_NAME);
-
-            List<PageVO> pageVOList = new ArrayList<>();
-            for (Text fragment : highlightField.getFragments()) {
-                PageVO pageVO = new PageVO();
-                pageVO.setContent(fragment.string());
-                pageVOList.add(pageVO);
-            }
-
-            if (sourceAsMap.containsKey("id")) {
-                String id = (String) sourceAsMap.get("id");
-                if (Objects.nonNull(id)) {
-                    result.put(id, pageVOList);
-                }
-            }
-        }
-        return result;
+    AtomicInteger counter = new AtomicInteger(0);
+        return response.hits().hits().stream()
+            .collect(Collectors.toMap(
+                hit -> (String) hit.source().get("id"),
+                hit -> hit.highlight().get(PIPELINE_NAME).stream()
+                .map(text -> {
+                    PageVO pageVO = new PageVO();
+                    pageVO.setOrder(counter.getAndIncrement());
+                    pageVO.setContent(text);
+                    return pageVO;
+                })
+                .collect(Collectors.toList())
+            ));
     }
 
-    /**
-     * @author luojiarui
-     * @Description 根据文档的id删除文档
-     * @Date 22:52 2023/5/3
-     * @Param [docMd5]
-     **/
-    void removeByDocId(String docMd5) {
-        if (!StringUtils.hasText(docMd5)) {
-            return;
-        }
+    @Override
+    public void removeByDocId(String docMd5) {
+        if (!StringUtils.hasText(docMd5)) return;
         try {
-            DeleteRequest deleteRequest = new DeleteRequest(INDEX_NAME, docMd5);
-            client.delete(deleteRequest, RequestOptions.DEFAULT);
+            client.delete(d -> d.index(INDEX_NAME).id(docMd5));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("删除文档失败", e);
         }
     }
 
-    /**
-     * @author luojiarui
-     * @Description 词云的聚合只能是Keyword 类型
-     * 使用了attachment.content字段来进行词云聚合，这是因为Attachment Processor插件会将提取的文本内容存储在名为attachment.content的字段中。
-     * ES 的Text 字段不能进行聚合
-     * @Date 10:15 2023/5/21
-     * @Param []
-     * @return com.jiaruiblog.util.BaseApiResult
-     **/
     @Override
     public BaseApiResult getWordStat() throws IOException {
-        SearchRequest searchRequest = new SearchRequest(INDEX_NAME);
+        SearchResponse<Void> response = client.search(s -> s
+            .index(INDEX_NAME)
+            .query(Query.of(q -> q.matchAll(m -> m)))
+            .aggregations("word_cloud", a -> a
+                .terms(t -> t.field(PIPELINE_NAME).size(100))
+            ),
+            Void.class
+        );
 
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-
-        // 创建词云聚合
-        TermsAggregationBuilder aggregation = AggregationBuilders.terms("word_cloud")
-                .field("attachment.content")
-                .size(100); // 限制返回的词云数量
-
-        searchSourceBuilder.aggregation(aggregation);
-        searchRequest.source(searchSourceBuilder);
-
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-//        SearchResponse searchResponse = client.search(searchSourceBuilder, RequestOptions.DEFAULT);
-
-        Terms wordCloudAggregation = searchResponse.getAggregations().get("word_cloud");
-
-        List<? extends Terms.Bucket> buckets = wordCloudAggregation.getBuckets();
-
-        // 自定义处理词云数据
-        List<WordCloudItem> wordCloudItems = new ArrayList<>();
-
-        for (Terms.Bucket bucket : buckets) {
-            String keyword = bucket.getKeyAsString();
-            long count = bucket.getDocCount();
-            WordCloudItem wordCloudItem = new WordCloudItem(keyword, count);
-            wordCloudItems.add(wordCloudItem);
-        }
-
-        // 根据词云数量排序
-        wordCloudItems.sort(Comparator.comparingLong(WordCloudItem::getCount).reversed());
-
-        // 打印词云结果
-        for (WordCloudItem item : wordCloudItems) {
-            System.out.println("Keyword: " + item.getWord() + ", Count: " + item.getCount());
-        }
-
+        List<WordCloudItem> wordCloudItems = response.aggregations()
+            .get("word_cloud")
+            .sterms()
+            .buckets()
+            .array()
+            .stream()
+            .map(b -> new WordCloudItem(b.key().stringValue(), b.docCount()))
+            .sorted(Comparator.comparingLong(WordCloudItem::getCount).reversed())
+            .collect(Collectors.toList());
         return BaseApiResult.success(wordCloudItems);
+    }
+
+    private String getHighlightContent(Map<String, List<String>> highlight) {
+        return highlight.getOrDefault(PIPELINE_NAME, Collections.emptyList()).stream()
+            .map(fragment -> "📖 " + fragment)
+            .collect(Collectors.joining("<br/>"));
     }
 }

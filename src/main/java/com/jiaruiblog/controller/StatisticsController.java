@@ -10,7 +10,7 @@ import com.jiaruiblog.service.*;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import com.jiaruiblog.util.BaseApiResult;
-
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,7 +33,6 @@ import java.util.stream.Collectors;
  * @Date 2022/6/26 2:24 下午
  * @Version 1.0
  **/
-@Api(tags = "统计模块")
 @RestController
 @Slf4j
 @CrossOrigin
@@ -57,13 +57,13 @@ public class StatisticsController {
     @Resource
     ElasticService elasticService;
 
-    @ApiOperation(value = "查询热度榜", notes = "查询列表")
+    @Operation(summary = "查询热度榜", description = "查询列表")
     @GetMapping(value = "/trend")
     public BaseApiResult trend() {
         return statisticsService.trend();
     }
 
-    @ApiOperation(value = "查询统计数据", notes = "查询列表")
+    @Operation(summary = "查询统计数据", description = "查询列表")
     @GetMapping(value = "/all")
     public BaseApiResult all() {
         return statisticsService.all();
@@ -76,7 +76,7 @@ public class StatisticsController {
      * @Date 15:46 2022/9/11
      * @Param []
      **/
-    @ApiOperation(value = "查询搜索结果", notes = "查询列表")
+    @Operation(summary = "查询搜索结果", description = "查询列表")
     @GetMapping("getSearchResult")
     public BaseApiResult getSearchResult(@RequestHeader HttpHeaders headers) {
         List<String> userSearchList = Lists.newArrayList();
@@ -89,13 +89,13 @@ public class StatisticsController {
         }
 
         List<String> hotSearchList = redisService.getHotList(null, RedisServiceImpl.SEARCH_KEY);
-        Map<String, List<String>> result = Maps.newHashMap();
+        Map<String, List<String>> result = new HashMap<>();
         result.put("userSearch", userSearchList);
         result.put("hotSearch", hotSearchList);
         return BaseApiResult.success(result);
     }
 
-    @ApiOperation(value = "删除用户的搜索关键词", notes = "删除key")
+    @Operation(summary = "删除用户的搜索关键词", description = "删除key")
     @PutMapping(value = "removeKey")
     public BaseApiResult removeKey(@RequestBody SearchKeyDTO searchKeyDTO) {
         redisService.delSearchHistoryByUserId(searchKeyDTO.getUserId(), searchKeyDTO.getSearchWord());
@@ -118,7 +118,7 @@ public class StatisticsController {
      * @Date 15:51 2022/9/11
      * @Param []
      **/
-    @ApiOperation(value = "查询十条热门榜单", notes = "查询列表")
+    @Operation(summary = "查询十条热门榜单", description = "查询列表")
     @GetMapping("getHotTrend")
     public BaseApiResult getHotTrend() {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
@@ -144,7 +144,7 @@ public class StatisticsController {
         }
         FileDocument topFileDocument = fileDocumentList.remove(0);
         DocumentVO documentVO = fileServiceImpl.convertDocument(null, topFileDocument);
-        Map<String, Object> top1 = Maps.newHashMap();
+        Map<String, Object> top1 = new HashMap<>();
         top1.put("name", topFileDocument.getName());
         top1.put("id", topFileDocument.getId());
         top1.put("commentNum", documentVO.getCommentNum());
@@ -156,7 +156,7 @@ public class StatisticsController {
         List<Object> others = new ArrayList<>();
         int count = 10;
         for (FileDocument fileDocument : fileDocumentList) {
-            Map<String, Object> otherInfo = Maps.newHashMap();
+            Map<String, Object> otherInfo =new HashMap<>();
             otherInfo.put("hit", count);
             otherInfo.put("name", fileDocument.getName());
             otherInfo.put("id", fileDocument.getId());
@@ -164,7 +164,7 @@ public class StatisticsController {
             others.add(otherInfo);
         }
 
-        Map<String, Object> result = Maps.newHashMap();
+        Map<String, Object> result = new HashMap<>();
         result.put("top1", top1);
         result.put("others", others);
 
@@ -180,7 +180,7 @@ public class StatisticsController {
      * @Date 21:58 2022/9/17
      * @Param []
      **/
-    @ApiOperation(value = "查询最新数据", notes = "查询列表展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档")
+    @Operation(summary = "查询最新数据", description = "查询列表展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档")
     @GetMapping("/recentDocs")
     public BaseApiResult getRecentDocs() {
         List<Map<String, Object>> result = Lists.newArrayList();
@@ -217,7 +217,7 @@ public class StatisticsController {
         }
 
         for (FileDocument fileDocument : fileDocuments) {
-            Map<String, Object> map = Maps.newHashMap();
+            Map<String, Object> map = new HashMap<>();
             map.put("name", fileDocument.getName());
             map.put("id", fileDocument.getId());
             map.put("thumbId", fileDocument.getThumbId());
@@ -234,7 +234,7 @@ public class StatisticsController {
      * @Param [name, tagId, docList]
      **/
     private Map<String, Object> getTagMap(String name, String tagId, Object docList) {
-        Map<String, Object> tagMap = Maps.newHashMap();
+        Map<String, Object> tagMap = new HashMap<>();
         if (name == null || tagId == null || docList == null) {
             return tagMap;
         }

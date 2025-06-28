@@ -5,11 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * @ClassName UserDTO
- * @Description 注册用户信息
  * @author luojiarui
- * @Date 2022/12/18 12:56
- * @Version 1.0
  **/
 @Data
 public class UserDTO {

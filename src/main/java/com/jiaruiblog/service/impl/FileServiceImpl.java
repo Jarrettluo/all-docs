@@ -3,7 +3,6 @@ package com.jiaruiblog.service.impl;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.Category;
@@ -26,6 +25,7 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.http.auth.AuthenticationException;
@@ -42,15 +42,12 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -132,10 +129,7 @@ public class FileServiceImpl implements IFileService {
     @Resource
     private DocReviewService docReviewService;
 
-    List<String> availableSuffixList = com.google.common.collect.Lists
-            .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
-
-
+    List<String> availableSuffixList = Arrays.asList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
     /**
      * js文件流上传附件
      *
@@ -365,6 +359,7 @@ public class FileServiceImpl implements IFileService {
      * @Description 通过网络地址将文件保存下来
      * @Date 19:09 2023/4/22
      * @Param [category, tags, name, description, urlStr, userId, username]
+     * TODO 这里上传没写好
      **/
     @Override
     public BaseApiResult uploadByUrl(String category, List<String> tags, String name, String description,
@@ -390,20 +385,39 @@ public class FileServiceImpl implements IFileService {
                 conn = (HttpURLConnection) url.openConnection();
             }
 
-//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            //设置超时间为5秒
             conn.setConnectTimeout(5 * 1000);
-            //防止屏蔽程序抓取而返回403错误
             conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-            //得到输入流
             InputStream inputStream = conn.getInputStream();
             if (!StringUtils.hasText(name)) {
                 return BaseApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
             }
-            MultipartFile file = new MockMultipartFile(name, name, MediaType.MULTIPART_FORM_DATA_VALUE, inputStream);
-            if (!file.isEmpty()) {
-                fileDocument = saveFileNew(file, userId, username, description);
+
+            String fileMd5 = SecureUtil.md5(inputStream);
+            FileDocument fileDocumentInDb = getByMd5(fileMd5);
+            if (fileDocumentInDb != null) {
+                throw new RuntimeException(MessageConstant.DATA_DUPLICATE);
             }
+
+            fileDocument = new FileDocument();
+            fileDocument.setName(name);
+            fileDocument.setSize((long) inputStream.available());
+            fileDocument.setContentType(conn.getContentType());
+            fileDocument.setUploadDate(new Date());
+            fileDocument.setMd5(fileMd5);
+            fileDocument.setUserId(userId);
+            fileDocument.setUserName(username);
+            fileDocument.setDescription(description);
+            fileDocument.setReviewing(Boolean.TRUE.equals(systemConfig.getAdminReview()));
+
+            String suffix = name.substring(name.lastIndexOf(".") + 1);
+            fileDocument.setSuffix("." + suffix);
+
+            String gridfsId = uploadFileToGridFs(inputStream, conn.getContentType());
+            fileDocument.setGridfsId(gridfsId);
+            fileDocument = mongoTemplate.save(fileDocument, COLLECTION_NAME);
+
+            tagService.saveTagWhenSaveDoc(fileDocument);
+
         } catch (IOException e) {
             e.printStackTrace();
             return BaseApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
@@ -655,7 +669,7 @@ public class FileServiceImpl implements IFileService {
         tagService.removeRelateByDocId(docId);
 
         // 保存文档和分类/标签的关系
-        List<String> fileIds = com.google.common.collect.Lists.newArrayList(docId);
+        List<String> fileIds = List.of(docId);
         String categoryId = updateInfoDTO.getCategoryId();
         List<String> tags = updateInfoDTO.getTags();
         FileUploadPO fileUploadPO = saveOrUpdateCategory(null, tags);
@@ -1581,7 +1595,7 @@ public class FileServiceImpl implements IFileService {
     public BaseApiResult queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing) {
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         query.addCriteria(Criteria.where("reviewing").is(reviewing));
-        Map<String, Object> result = Maps.newHashMap();
+        Map<String, Object> result = new HashMap<>();
         result.put("data", queryFileDocument(pageDTO, reviewing));
         result.put("total", mongoTemplate.count(query, FileDocument.class, COLLECTION_NAME));
         return BaseApiResult.success(result);

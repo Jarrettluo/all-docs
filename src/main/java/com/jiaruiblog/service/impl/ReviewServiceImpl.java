@@ -1,6 +1,5 @@
 package com.jiaruiblog.service.impl;
 
-import com.google.common.collect.Sets;
 import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JavaSerializable;
 import org.apache.commons.compress.utils.Lists;
@@ -18,7 +17,7 @@ public class ReviewServiceImpl {
     /**
      * 默认的系统自带的备选项
      */
-    static Set<String> selectOption = Sets.newHashSet("低质量的", "重复的", "abc");
+    static Set<String> selectOption = Set.of("低质量的", "重复的", "abc");
 
     /**
      * 可容纳的备选项的个数

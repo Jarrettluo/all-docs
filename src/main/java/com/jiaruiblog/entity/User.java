@@ -2,13 +2,13 @@ package com.jiaruiblog.entity;
 
 import com.alibaba.fastjson.JSON;
 import com.jiaruiblog.auth.PermissionEnum;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

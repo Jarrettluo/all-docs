@@ -2,10 +2,10 @@ package com.jiaruiblog.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jiaruiblog.auth.PermissionEnum;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
-import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 /**

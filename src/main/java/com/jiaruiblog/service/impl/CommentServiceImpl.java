@@ -1,6 +1,5 @@
 package com.jiaruiblog.service.impl;
 
-import com.google.common.collect.Maps;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
@@ -10,9 +9,9 @@ import com.jiaruiblog.entity.dto.CommentWithUserDTO;
 import com.jiaruiblog.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.ICommentService;
-import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.BeanUtils;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -54,9 +52,6 @@ public class CommentServiceImpl implements ICommentService {
 
     @Resource
     MongoTemplate template;
-
-    @Resource
-    IUserService userService;
 
     @Override
     public BaseApiResult insert(Comment comment) {
@@ -160,16 +155,18 @@ public class CommentServiceImpl implements ICommentService {
         List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
         // 通过comment的id查询用户的头像信息
         List<String> userId = comments.stream().map(Comment::getUserId).collect(Collectors.toList());
-        Map<String, String> userAvatarMap = userService.queryUserAvatarBatch(userId);
+//        Map<String, String> userAvatarMap = userService.queryUserAvatarBatch(userId);
+
+        // TODO 无头像
         List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
         for (Comment item : comments) {
             CommentWithUserVO commentWithUserVO = new CommentWithUserVO();
             BeanUtils.copyProperties(item, commentWithUserVO);
-            commentWithUserVO.setUserAvatarId(userAvatarMap.get(item.getUserId()));
+//            commentWithUserVO.setUserAvatarId(userAvatarMap.get(item.getUserId()));
             commentWithUserVOList.add(commentWithUserVO);
         }
 
-        Map<String, Object> result = Maps.newHashMap();
+        Map<String, Object> result = new HashMap<>();
         result.put("totalNum", totalNum);
         result.put("comments", commentWithUserVOList);
 
@@ -296,7 +293,7 @@ public class CommentServiceImpl implements ICommentService {
 
         int count = template.aggregate(countAggregation, COLLECTION_NAME, CommentWithUserDTO.class).getMappedResults().size();
 
-        Map<String, Object> result = Maps.newHashMap();
+        Map<String, Object> result = new HashMap<>();
         result.put("data", commentWithUserVOList);
         result.put("total", count);
         result.put("pageNum", page.getPage());

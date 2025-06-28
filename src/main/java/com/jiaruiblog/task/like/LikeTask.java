@@ -1,12 +1,12 @@
 package com.jiaruiblog.task.like;
 
 import com.jiaruiblog.service.LikeService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-import javax.annotation.Resource;
 
 /**
  * @ClassName LikeTask

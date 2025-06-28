@@ -1,7 +1,6 @@
 package com.jiaruiblog.util.converter;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.google.common.collect.Maps;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.Map;
@@ -14,7 +13,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 public class StringToEnumConverter<T extends BaseEnum> implements Converter<String, T> {
-    private Map<String, T> enumMap = Maps.newHashMap();
+    private Map<String, T> enumMap = Map.of();
 
     public StringToEnumConverter(Class<T> enumType) {
         T[] enums = enumType.getEnumConstants();

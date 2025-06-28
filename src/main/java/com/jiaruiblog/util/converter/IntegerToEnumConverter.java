@@ -1,9 +1,9 @@
 package com.jiaruiblog.util.converter;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.google.common.collect.Maps;
 import org.springframework.core.convert.converter.Converter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,7 +14,7 @@ import java.util.Map;
  * @Version 1.0
  **/
 public class IntegerToEnumConverter<T extends BaseEnum> implements Converter<Integer, T> {
-    private Map<Integer, T> enumMap = Maps.newHashMap();
+    private Map<Integer, T> enumMap = new HashMap<>();
 
     public IntegerToEnumConverter(Class<T> enumType) {
         T[] enums = enumType.getEnumConstants();

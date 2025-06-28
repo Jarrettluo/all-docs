@@ -2,13 +2,13 @@ package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.entity.Thumbnail;
 import com.jiaruiblog.service.ThumbnailService;
+import jakarta.annotation.Resource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 
 /**
  * @ClassName ThumbnailServiceImpl
