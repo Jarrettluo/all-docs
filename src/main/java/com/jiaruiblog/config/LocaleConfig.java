@@ -1,0 +1,40 @@
+package com.jiaruiblog.config;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+
+import java.util.Locale;
+
+@Configuration
+public class LocaleConfig {
+
+    @Bean
+    public LocaleResolver localeResolver() {
+        // 创建组合解析器
+        AcceptHeaderLocaleResolver headerResolver = new AcceptHeaderLocaleResolver();
+        headerResolver.setDefaultLocale(Locale.ENGLISH);
+
+        // 优先使用URL参数，没有参数时回退到请求头
+        return new LocaleResolver() {
+            @Override
+            public Locale resolveLocale(HttpServletRequest request) {
+                String lang = request.getParameter("lang");
+                if (lang != null && !lang.isEmpty()) {
+                    return Locale.forLanguageTag(lang);
+                }
+                return headerResolver.resolveLocale(request);
+            }
+
+            @Override
+            public void setLocale(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  Locale locale) {
+                headerResolver.setLocale(request, response, locale);
+            }
+        };
+    }
+}

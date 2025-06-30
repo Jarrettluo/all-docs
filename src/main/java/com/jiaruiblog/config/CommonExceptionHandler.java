@@ -4,7 +4,6 @@ import com.healthmarketscience.jackcess.ConstraintViolationException;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.AuthenticationException;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.validation.BindException;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
@@ -24,8 +22,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
  *
  * @author jiarui.luo
  */
-@Slf4j
-@RestControllerAdvice
+//@Slf4j
+//@RestControllerAdvice
 public class CommonExceptionHandler {
 
     @ResponseBody
