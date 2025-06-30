@@ -9,6 +9,8 @@ import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.RemoveObjectDTO;
 import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
+import com.jiaruiblog.entity.vo.DocWithCateVO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IDocLogService;
@@ -127,20 +129,22 @@ public class DocumentController {
         user.setUsername(username);
         user.setId(userId);
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.DELETE);
-        return ApiResult.success(iFileService.remove(fileDocument));
+        iFileService.remove(fileDocument);
+        return ApiResult.success();
     }
 
     @Operation(summary = "3.2 管理员修改文档基本信息", description = "管理员修改某个文档信息")
     @PutMapping(value="/auth/updateInfo")
     @Permission(value = PermissionEnum.ADMIN)
     public ApiResult<Object> updateInfo(@RequestBody @Schema(description = "文档更新信息DTO") UpdateInfoDTO updateInfoDTO) {
-        return ApiResult.success(iFileService.updateInfo(updateInfoDTO));
+        iFileService.updateInfo(updateInfoDTO);
+        return ApiResult.success();
     }
 
 
     @Operation(summary = "2.3 指定分类时，查询文档的分页列表页", description = "根据参数查询文档列表")
     @GetMapping(value = "/listWithCategory")
-    public ApiResult<Object> listWithCategory(
+    public ApiResult<PageVO<DocWithCateVO>> listWithCategory(
             @ModelAttribute("documentDTO")
             @Schema(description = "文档查询DTO", required = true) DocumentDTO documentDTO) {
         FilterTypeEnum filterType = documentDTO.getType();

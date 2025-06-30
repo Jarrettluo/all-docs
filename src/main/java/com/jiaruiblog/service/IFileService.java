@@ -4,6 +4,9 @@ import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
+import com.jiaruiblog.entity.vo.DocWithCateVO;
+import com.jiaruiblog.entity.vo.DocumentVO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.task.exception.TaskRunException;
 import org.apache.http.auth.AuthenticationException;
@@ -30,13 +33,13 @@ public interface IFileService {
     FileDocument saveFile(String md5, MultipartFile file);
 
 
-    Object documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
+    void documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
 
     Object uploadBatch(String category, List<String> tags, String description,
                               Boolean skipError, MultipartFile[] files,
                               String userId, String username);
 
-    Object uploadByUrl(String category, List<String> tags, String name,
+    void uploadByUrl(String category, List<String> tags, String name,
                               String description, String url,
                               String userId, String username);
 
@@ -164,7 +167,7 @@ public interface IFileService {
      * @param id ->Long
      * @return ApiResult
      */
-    Object detail(String id);
+    DocumentVO detail(String id);
 
     /**
      * 删除掉已经存在的文档
@@ -172,7 +175,7 @@ public interface IFileService {
      * @param fileDocument -> 文档信息
      * @return ApiResult
      */
-    Object remove(FileDocument fileDocument);
+    void remove(FileDocument fileDocument);
 
     /**
      * @author luojiarui
@@ -181,10 +184,10 @@ public interface IFileService {
      * @Param [updateInfoDTO]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Object updateInfo(UpdateInfoDTO updateInfoDTO);
+    void updateInfo(UpdateInfoDTO updateInfoDTO);
 
 
-    Object listWithCategory(DocumentDTO documentDTO);
+    PageVO<DocWithCateVO> listWithCategory(DocumentDTO documentDTO);
 
     /**
      * update file thumb

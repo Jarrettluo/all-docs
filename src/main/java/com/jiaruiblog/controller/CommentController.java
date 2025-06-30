@@ -9,6 +9,8 @@ import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.CommentDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
+import com.jiaruiblog.entity.vo.CommentWithUserVO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.service.ICommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -149,9 +151,9 @@ public class CommentController {
             @Parameter(name = "request", in = ParameterIn.HEADER, hidden = true)
     })
     @PostMapping(value = "/auth/myComments")
-    public ApiResult<Map<String, Object>> queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<PageVO<CommentWithUserVO>> queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        Map<String, Object> result = commentService.queryAllComments(pageDTO, userId, false);
+        PageVO<CommentWithUserVO> result = commentService.queryAllComments(pageDTO, userId, false);
         return ApiResult.success(result);
     }
 
@@ -168,8 +170,8 @@ public class CommentController {
     })
     @Permission(PermissionEnum.ADMIN)
     @PostMapping(value = "/auth/allComments")
-    public ApiResult<Map<String, Object>> queryAllComments(@RequestBody BasePageDTO pageDTO) {
-        Map<String, Object> result = commentService.queryAllComments(pageDTO, null, true);
+    public ApiResult<PageVO<CommentWithUserVO>> queryAllComments(@RequestBody BasePageDTO pageDTO) {
+        PageVO<CommentWithUserVO> result = commentService.queryAllComments(pageDTO, null, true);
         return ApiResult.success(result);
     }
 }

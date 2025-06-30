@@ -3,7 +3,7 @@ package com.jiaruiblog.service.impl;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.jiaruiblog.common.ApiResult;
+
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.Category;
@@ -18,6 +18,8 @@ import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.enums.DocStateEnum;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.*;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.PdfUtil;
@@ -250,26 +252,25 @@ public class FileServiceImpl implements IFileService {
      * @Param [file, userId, username]
      **/
     @Override
-    public Object documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException {
-//        List<String> availableSuffixList = com.google.common.collect.Lists
-//                .newArrayList("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
+    public void documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException {
+        List<String> availableSuffixList = List.of("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
         try {
             if (file != null && !file.isEmpty()) {
                 String originFileName = file.getOriginalFilename();
                 if (!StringUtils.hasText(originFileName)) {
-//                    return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.FORMAT_ERROR);
+                    throw new BusinessException(ErrorCode.PARAMS_ERROR);
                 }
                 //获取文件后缀名
                 String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
-//                if (!availableSuffixList.contains(suffix)) {
-//                    return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.FORMAT_ERROR);
-//                }
+                if (!availableSuffixList.contains(suffix)) {
+                    throw new BusinessException(ErrorCode.PARAMS_ERROR);
+                }
                 String fileMd5 = SecureUtil.md5(file.getInputStream());
 
                 //已存在该文件，则拒绝保存
                 FileDocument fileDocumentInDb = getByMd5(fileMd5);
                 if (fileDocumentInDb != null) {
-                    return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_DUPLICATE);
+                    throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
                 }
                 FileDocument fileDocument = saveToDb(fileMd5, file, userId, username, null);
 
@@ -281,7 +282,7 @@ public class FileServiceImpl implements IFileService {
                 // 目前支持这一类数据进行预览
                 // 进行全文的制作，索引，文本入库等
                 if (Boolean.TRUE.equals(systemConfig.getAdminReview())) {
-                    return ApiResult.success(fileDocument.getId());
+                    return ;
                 }
 
                 switch (suffix) {
@@ -304,18 +305,16 @@ public class FileServiceImpl implements IFileService {
                     default:
                         break;
                 }
-                return ApiResult.success(fileDocument.getId());
             } else {
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+                throw new BusinessException(ErrorCode.PARAMS_ERROR);
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
         }
     }
 
     @Override
-    public ApiResult<Object> uploadBatch(String category, List<String> tags, String description,
+    public Object uploadBatch(String category, List<String> tags, String description,
                                      Boolean skipError, MultipartFile[] files,
                                      String userId, String username) {
 
@@ -331,18 +330,14 @@ public class FileServiceImpl implements IFileService {
                     }
                 } catch (IOException | RuntimeException e) {
                     if (Boolean.FALSE.equals(skipError)) {
-                        if (e instanceof RuntimeException) {
-                            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, e.getMessage());
-                        } else {
-                            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-                        }
+                        throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
                     }
                 }
             }
         }
         categoryService.addRelationShipDefault(fileUploadPO.getCategoryId(), fileIds);
         tagService.addTagRelationShip(fileUploadPO.getTagIds(), fileIds);
-        return ApiResult.success("共计保存了" + fileIds.size() + "文档");
+        return "共计保存了" + fileIds.size() + "文档";
     }
 
     //证书信任
@@ -362,7 +357,7 @@ public class FileServiceImpl implements IFileService {
      * TODO 这里上传没写好
      **/
     @Override
-    public ApiResult<Object> uploadByUrl(String category, List<String> tags, String name, String description,
+    public void uploadByUrl(String category, List<String> tags, String name, String description,
                                      String urlStr, String userId, String username) {
 
         FileDocument fileDocument = null;
@@ -389,13 +384,13 @@ public class FileServiceImpl implements IFileService {
             conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
             InputStream inputStream = conn.getInputStream();
             if (!StringUtils.hasText(name)) {
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+                throw  new BusinessException(ErrorCode.PARAMS_ERROR);
             }
 
             String fileMd5 = SecureUtil.md5(inputStream);
             FileDocument fileDocumentInDb = getByMd5(fileMd5);
             if (fileDocumentInDb != null) {
-                throw new RuntimeException(MessageConstant.DATA_DUPLICATE);
+                throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
             }
 
             fileDocument = new FileDocument();
@@ -418,24 +413,18 @@ public class FileServiceImpl implements IFileService {
 
             tagService.saveTagWhenSaveDoc(fileDocument);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, e.getMessage());
-        } catch (Exception e) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        } catch (IOException | RuntimeException  e) {
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
         }
         if (fileDocument == null) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
         FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
         categoryService.addRelationShipDefault(fileUploadPO.getCategoryId(), fileDocument.getId());
         List<String> fileId = new ArrayList<>();
         fileId.add(fileDocument.getId());
         tagService.addTagRelationShip(fileUploadPO.getTagIds(), fileId);
-        return ApiResult.success(MessageConstant.SUCCESS);
+
     }
 
 
@@ -655,12 +644,12 @@ public class FileServiceImpl implements IFileService {
      **/
     @Override
 //    @Transactional  应该是不生效
-    public ApiResult<Object> updateInfo(UpdateInfoDTO updateInfoDTO) {
+    public void updateInfo(UpdateInfoDTO updateInfoDTO) {
         String docId = updateInfoDTO.getId();
         Query query = new Query().addCriteria(Criteria.where("_id").is(docId));
         FileDocument document = mongoTemplate.findById(docId, FileDocument.class, COLLECTION_NAME);
         if (Objects.isNull(document)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 清除全部的标签和分类信息
         // 删除分类关系
@@ -694,7 +683,6 @@ public class FileServiceImpl implements IFileService {
         update.set("description", desc);
         mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
 
-        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -868,7 +856,7 @@ public class FileServiceImpl implements IFileService {
      * @Param [documentDTO]
      **/
     @Override
-    public ApiResult<Object> list(DocumentDTO documentDTO) {
+    public PageVO<DocumentVO> list(DocumentDTO documentDTO) {
         List<DocumentVO> documentVos;
         List<FileDocument> fileDocuments = Lists.newArrayList();
 
@@ -941,13 +929,15 @@ public class FileServiceImpl implements IFileService {
                 totalNum = countFileByQuery(query1);
                 break;
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+                break;
         }
         documentVos = convertDocuments(fileDocuments);
-        Map<String, Object> result = new HashMap<>(8);
-        result.put("totalNum", totalNum);
-        result.put("documents", documentVos);
-        return ApiResult.success(result);
+        return PageVO.<DocumentVO>builder()
+                .total(totalNum)
+                .pageNum(documentDTO.getPage())
+                .pageSize(documentDTO.getRows())
+                .list(documentVos)
+                .build();
     }
 
     /**
@@ -959,8 +949,8 @@ public class FileServiceImpl implements IFileService {
      * @Param [documentDTO]
      **/
     @Override
-    public ApiResult<Object> listNew(DocumentDTO documentDTO) {
-        List<DocumentVO> documentVos;
+    public PageVO<DocumentVO> listNew(DocumentDTO documentDTO) {
+        List<DocumentVO> documentVos = new ArrayList<>();
         List<FileDocument> fileDocuments = Lists.newArrayList();
 
         long totalNum = 0L;
@@ -1048,10 +1038,8 @@ public class FileServiceImpl implements IFileService {
                     esDocVO.add(documentVO2);
                 }
                 esDocVO.sort(Comparator.comparingInt((DocumentVO obj) ->obj.getPageVOList().size()).reversed());
-                Map<String, Object> result = new HashMap<>(16);
-                result.put("totalNum", esDocVO.size());
-                result.put("documents", esDocVO);
-                return ApiResult.success(result);
+                documentVos = esDocVO;
+                break;
             case CATEGORY:
                 Category category = categoryService.queryById(documentDTO.getCategoryId());
                 if (category == null) {
@@ -1108,18 +1096,22 @@ public class FileServiceImpl implements IFileService {
                     filenameDocVO.add(documentVO2);
                 }
                 filenameDocVO.sort(Comparator.comparingInt((DocumentVO obj) ->obj.getPageVOList().size()).reversed());
-                Map<String, Object> result1 = new HashMap<>(16);
-                result1.put("totalNum", filenameDocVO.size());
-                result1.put("documents", filenameDocVO);
-                return ApiResult.success(result1);
+
+                documentVos = filenameDocVO;
+                break;
             default:
-                return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+                break;
         }
-        documentVos = convertDocuments(fileDocuments);
-        Map<String, Object> result = new HashMap<>(8);
-        result.put("totalNum", totalNum);
-        result.put("documents", documentVos);
-        return ApiResult.success(result);
+        if (!CollectionUtils.isEmpty(documentVos)){
+            documentVos = convertDocuments(fileDocuments);
+        }
+
+        return PageVO.<DocumentVO>builder()
+                .total(totalNum)
+                .pageNum(documentDTO.getPage())
+                .pageSize(documentDTO.getRows())
+                .list(documentVos)
+                .build();
     }
 
     /**
@@ -1130,10 +1122,10 @@ public class FileServiceImpl implements IFileService {
      * @Param [id]
      **/
     @Override
-    public ApiResult<Object> detail(String id) {
+    public DocumentVO detail(String id) {
         FileDocument fileDocument = queryById(id);
         if (fileDocument == null) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_LENGTH_REQUIRED);
+            throw  new BusinessException(ErrorCode.PARAMS_ERROR);
         } else {
             try {
                 redisService.incrementScoreByUserId(id, RedisServiceImpl.DOC_KEY);
@@ -1142,14 +1134,14 @@ public class FileServiceImpl implements IFileService {
             }
         }
         // 查询评论信息，查询分类信息，查询分类关系，查询标签信息，查询标签关系信息
-        return ApiResult.success(convertDocument(null, fileDocument));
+        return convertDocument(null, fileDocument);
     }
 
     @Override
-    public ApiResult<Object> remove(FileDocument fileDocument) {
+    public void remove(FileDocument fileDocument) {
         String id = fileDocument.getId();
         if (!isExist(id)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 删除评论信息，删除分类关系，删除标签关系
         // 删除dfs的文件；删除es的索引；删除审核的消息
@@ -1172,7 +1164,6 @@ public class FileServiceImpl implements IFileService {
         // 删除redis中对于文档的统计信息
         redisService.removeByDocId(id);
 
-        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -1183,7 +1174,7 @@ public class FileServiceImpl implements IFileService {
      * @Param [documentDTO]
      **/
     @Override
-    public ApiResult<Object> listWithCategory(DocumentDTO documentDTO) {
+    public PageVO<DocWithCateVO> listWithCategory(DocumentDTO documentDTO) {
         String restrictId;
         String filterWord = documentDTO.getFilterWord();
         int page = documentDTO.getPage();
@@ -1210,10 +1201,12 @@ public class FileServiceImpl implements IFileService {
             default:
                 break;
         }
-        Map<String, Object> result = new HashMap<>(8);
-        result.put("totalNum", totalNum);
-        result.put("documents", documentVos);
-        return ApiResult.success(result);
+        return PageVO.<DocWithCateVO>builder()
+                .total(totalNum)
+                .pageSize(row)
+                .pageNum(page)
+                .list(documentVos)
+                .build();
     }
 
     /**

@@ -4,11 +4,13 @@ import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.RefuseBatchDTO;
 import com.jiaruiblog.entity.dto.RefuseDTO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.DocReviewService;
@@ -164,7 +166,7 @@ public class DocReviewController {
     @Permission({PermissionEnum.ADMIN})
     @Operation(summary = "管理员和普通用户分别查询数据", description = "查询文档审批的列表")
     @GetMapping("queryReviewResultList")
-    public ApiResult<Object> queryReviewResultList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
+    public ApiResult<PageVO<DocReview>> queryReviewResultList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
         return ApiResult.success(docReviewService.queryReviewLog(pageParams, null, true));
     }
 
@@ -178,7 +180,7 @@ public class DocReviewController {
     @Permission({PermissionEnum.USER, PermissionEnum.ADMIN})
     @Operation(summary = "管理员和普通用户分别查询数据", description = "查询文档审批的列表")
     @GetMapping("queryMyReviewResultList")
-    public ApiResult<Object> queryMyReviewResultList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
+    public ApiResult<PageVO<DocReview>> queryMyReviewResultList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
                                                @Parameter(hidden = true) HttpServletRequest request) {
         return ApiResult.success(docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"), false));
     }

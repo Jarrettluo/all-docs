@@ -177,14 +177,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void addRelationShip(CateDocRelationship relationship) {
         if (relationship.getCategoryId() == null || relationship.getFileId() == null) {
-//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
         // 先排查一个文章只能有一个分类关系，不能有多个分类信息
         Query query1 = new Query(Criteria.where(FILE_ID).is(relationship.getFileId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
         if (!CollectionUtils.isEmpty(relationships)) {
-//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
 
         // 先排查是否具有该链接关系，否则不予进行关联
@@ -193,22 +193,21 @@ public class CategoryServiceImpl implements CategoryService {
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         if (!result.isEmpty()) {
-//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
-//        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     private void addDocRelate(CateDocRelationship relationship) {
         if (relationship.getCategoryId() == null || relationship.getFileId() == null) {
-            throw new RuntimeException();
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
         // 先排查一个文章只能有一个分类关系，不能有多个分类信息
         Query query1 = new Query(Criteria.where(FILE_ID).is(relationship.getFileId()));
         List<CateDocRelationship> relationships = mongoTemplate.find(query1, CateDocRelationship.class,
                 RELATE_COLLECTION_NAME);
         if (!CollectionUtils.isEmpty(relationships)) {
-            throw new RuntimeException();
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
 
         // 先排查是否具有该链接关系，否则不予进行关联
@@ -217,7 +216,7 @@ public class CategoryServiceImpl implements CategoryService {
         List<CateDocRelationship> result = mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         if (!result.isEmpty()) {
-            throw new RuntimeException();
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
         mongoTemplate.save(relationship, RELATE_COLLECTION_NAME);
     }
@@ -297,7 +296,7 @@ public class CategoryServiceImpl implements CategoryService {
         CateDocRelationship relationship = mongoTemplate.findOne(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
 
         if (relationship == null || relationship.getCategoryId() == null) {
-            return null;
+            throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
         }
         Category category = mongoTemplate.findById(relationship.getCategoryId(), Category.class, COLLECTION_NAME);
         category = Optional.ofNullable(category).orElse(new Category());
@@ -353,7 +352,7 @@ public class CategoryServiceImpl implements CategoryService {
         int pageIndex = 1;
         int pageSize = 3;
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, UPDATE_DATE));
-        long skip = (long) (pageIndex - 1) * pageSize;
+        long skip = 0;
         query.skip(skip);
         query.limit(pageSize);
         return mongoTemplate.find(query, Category.class, COLLECTION_NAME);
@@ -406,7 +405,7 @@ public class CategoryServiceImpl implements CategoryService {
      * 根据分类id， 标签id，搜索内容联合查询文档
      **/
     @Override
-    public Map<String, Object> getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
+    public PageVO<FileDocumentDTO> getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
         Criteria criteria = new Criteria();
         if (StringUtils.hasText(cateId) && StringUtils.hasText(tagId)) {
             criteria = Criteria.where("abc.categoryId").is(cateId).and("xyz.tagId").is(tagId);
@@ -455,20 +454,11 @@ public class CategoryServiceImpl implements CategoryService {
                 FileServiceImpl.COLLECTION_NAME, FileDocumentDTO.class);
         List<FileDocumentDTO> mappedResults = aggregate.getMappedResults();
 
-
-        Map<String, Object> result = new HashMap<>(20);
-        result.put("data", mappedResults);
-        result.put("total", count);
-        result.put("pageNum", pageNum);
-        result.put("pageSize", pageSize);
-
-        return result;
-
-
+        return PageVO.<FileDocumentDTO>builder().pageSize(pageSize.intValue()).pageNum(pageNum.intValue()).total(count).list(mappedResults).build();
     }
 
     @Override
-    public Map<String, Object> getMyCollection(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
+    public PageVO<FileDocumentDTO>  getMyCollection(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
         Criteria criteria = new Criteria();
         if (StringUtils.hasText(cateId) && StringUtils.hasText(tagId)) {
             criteria = Criteria.where("abc.categoryId").is(cateId).and("xyz.tagId").is(tagId);
@@ -523,14 +513,7 @@ public class CategoryServiceImpl implements CategoryService {
                 FileServiceImpl.COLLECTION_NAME, FileDocumentDTO.class);
         List<FileDocumentDTO> mappedResults = aggregate.getMappedResults();
 
-
-        Map<String, Object> result = new HashMap<>(20);
-        result.put("data", mappedResults);
-        result.put("total", count);
-        result.put("pageNum", pageNum);
-        result.put("pageSize", pageSize);
-
-        return result;
+        return PageVO.<FileDocumentDTO>builder().pageSize(pageSize.intValue()).pageNum(pageNum.intValue()).total(count).list(mappedResults).build();
     }
 
     @Override

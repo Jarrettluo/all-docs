@@ -17,7 +17,6 @@ import com.jiaruiblog.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.TagService;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
@@ -118,8 +116,10 @@ public class CategoryController {
         switch (type) {
             case CATEGORY:
                 cateOrTagVOList = categoryService.list();
+                break;
             case TAG:
                 cateOrTagVOList = tagService.list();
+                break;
             default:
                 break;
         }
@@ -134,6 +134,7 @@ public class CategoryController {
                 category.setCategoryId(relationDTO.getId());
                 category.setFileId(relationDTO.getDocId());
                 categoryService.addRelationShip(category);
+                break;
             case TAG:
                 TagDocRelationship tag = new TagDocRelationship();
                 tag.setTagId(relationDTO.getId());
@@ -141,6 +142,7 @@ public class CategoryController {
                 tag.setCreateDate(new Date());
                 tag.setUpdateDate(new Date());
                 tagService.addRelationShip(tag);
+                break;
             default:
                 break;
         }
@@ -167,8 +169,8 @@ public class CategoryController {
     }
 
     @GetMapping(value = "getDocByTagCateKeyWord")
-    public ApiResult<Map<String, Object>> getDocByTagCateKeyWord(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO) {
-        Map<String, Object> result = categoryService.getDocByTagAndCate(pageDTO.getCateId(),
+    public ApiResult<PageVO<FileDocumentDTO>> getDocByTagCateKeyWord(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO) {
+        PageVO<FileDocumentDTO> result = categoryService.getDocByTagAndCate(pageDTO.getCateId(),
                 pageDTO.getTagId(),
                 pageDTO.getKeyword(),
                 Integer.toUnsignedLong(pageDTO.getPage() - 1),
@@ -177,9 +179,9 @@ public class CategoryController {
     }
 
     @GetMapping(value = "/auth/getMyCollection")
-    public ApiResult<Map<String, Object>> getMyCollection(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<PageVO<FileDocumentDTO> > getMyCollection(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        Map<String, Object> result = categoryService.getMyCollection(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
+        PageVO<FileDocumentDTO>  result = categoryService.getMyCollection(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
                 Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()),
                 userId);
         return ApiResult.success(result);

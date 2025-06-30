@@ -8,7 +8,6 @@ import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.entity.vo.PageVO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Jarrett Luo
@@ -79,7 +78,7 @@ public interface CategoryService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Map<String, Object> getDocByTagAndCate(String cateId, String tagId, String keyword,
+    PageVO<FileDocumentDTO> getDocByTagAndCate(String cateId, String tagId, String keyword,
                                            Long pageNum, Long pageSize);
 
     /**
@@ -89,7 +88,7 @@ public interface CategoryService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Map<String, Object> getMyCollection(String cateId, String tagId, String keyword,
+    PageVO<FileDocumentDTO>  getMyCollection(String cateId, String tagId, String keyword,
                                      Long pageNum, Long pageSize, String userId);
 
     /**

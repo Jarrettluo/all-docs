@@ -8,6 +8,8 @@ import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserRoleDTO;
 import com.jiaruiblog.entity.vo.UserVO;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.JwtUtil;
@@ -29,9 +31,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * 用户服务实现类
  * @author Jarrett Luo
- * @Date 2022/6/24 13:48
- * @Version 1.0
  */
 @Slf4j
 @Service
@@ -54,13 +55,9 @@ public class UserServiceImpl implements IUserService {
     @Resource
     private SystemConfig systemConfig;
 
-    /*
-     * @author luojiarui
-     * @Description 初始化第一个用户，默认从配置中取到第一个管理员账号密码
-     * @Date 17:30 2024/7/23
-     * @Param []
-     * @return void
-     **/
+    /**
+     * 初始化第一个用户，默认从配置中取到第一个管理员账号密码
+     */
     @Override
     public void initFirstUser() {
         RegistryUserDTO userDTO = new RegistryUserDTO();
@@ -85,9 +82,13 @@ public class UserServiceImpl implements IUserService {
             update.set(UPDATE_TIME, new Date());
             mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         }
-
     }
 
+    /**
+     * 用户登录
+     * @param userDTO 登录用户信息DTO
+     * @return Map<String, String> 包含token、用户ID、头像、用户名、用户类型等信息的map
+     */
     @Override
     public Map<String, String> login(RegistryUserDTO userDTO) {
         Query query = new Query(Criteria.where(USERNAME)
@@ -116,9 +117,12 @@ public class UserServiceImpl implements IUserService {
         mongoTemplate.updateFirst(query1, update, User.class, COLLECTION_NAME);
 
         return result;
-
     }
 
+    /**
+     * 用户注册
+     * @param userDTO 注册用户信息DTO
+     */
     @Override
     public void registry(RegistryUserDTO userDTO) {
         User user = new User();
@@ -132,11 +136,14 @@ public class UserServiceImpl implements IUserService {
             user.setUpdateDate(new Date());
             user.setLastLogin(new Date());
             mongoTemplate.save(user, COLLECTION_NAME);
-            return ;
         }
-        return;
     }
 
+    /**
+     * 获取用户列表
+     * @param page 分页参数DTO
+     * @return Map<String, Object> 包含总数、当前页码、每页大小、用户列表的map
+     */
     @Override
     public Map<String, Object> getUserList(BasePageDTO page) {
         long count = mongoTemplate.count(new Query(), User.class, COLLECTION_NAME);
@@ -162,6 +169,10 @@ public class UserServiceImpl implements IUserService {
         return result;
     }
 
+    /**
+     * 修改用户角色
+     * @param userRoleDTO 用户角色修改DTO
+     */
     @Override
     public void changeUserRole(UserRoleDTO userRoleDTO) {
         User user = mongoTemplate.findById(userRoleDTO.getUserId(), User.class, COLLECTION_NAME);
@@ -175,6 +186,10 @@ public class UserServiceImpl implements IUserService {
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
     }
 
+    /**
+     * 封禁或解封用户
+     * @param userId 用户ID
+     */
     @Override
     public void blockUser(String userId) {
         User user = queryById(userId);
@@ -184,28 +199,28 @@ public class UserServiceImpl implements IUserService {
         Query query = new Query();
         query.addCriteria(Criteria.where(OBJECT_ID).is(userId));
         Update update = new Update().set(USER_BANNING, !Optional.ofNullable(user.getBanning()).orElse(true));
-        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
-        if (updateResult.getModifiedCount() > 0) {
-            return ;
-        }
-        return ;
+        mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
     }
 
     /**
-     * 根据用户的主键id查询用户信息
-     *
-     * @param userId 用户信息
-     * @return 返回布尔
+     * 检查用户是否存在
+     * @param userId 用户ID
+     * @return boolean 用户是否存在
      */
     @Override
     public boolean isExist(String userId) {
-        if (userId == null || "".equals(userId)) {
+        if (userId == null || userId.isEmpty()) {
             return false;
         }
         User user = queryById(userId);
         return user != null;
     }
 
+    /**
+     * 用户自行更新信息
+     * @param user 用户业务对象
+     * @return boolean 是否更新成功
+     */
     @Override
     public boolean updateUserBySelf(UserBO user) {
         Query query = new Query(Criteria.where("_id").is(user.getId()));
@@ -214,7 +229,11 @@ public class UserServiceImpl implements IUserService {
         UpdateResult updateResult1 = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         return updateResult1.getModifiedCount() > 0;
     }
-
+    /**
+     * 管理员更新用户信息
+     * @param userBO 用户业务对象
+     * @return boolean 是否更新成功
+     */
     @Override
     public boolean updateUserByAdmin(UserBO userBO) {
         Query query = new Query().addCriteria(Criteria.where("_id").is(userBO.getId()));
@@ -225,30 +244,32 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * 检索已经存在的user
-     *
-     * @param userId String userId
-     * @return User
+     * 根据用户ID查询用户信息
+     * @param userId 用户ID
+     * @return User 用户实体
      */
     @Override
     public User queryById(String userId) {
         return mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
     }
 
+    /**
+     * 根据用户名查询用户信息
+     * @param username 用户名
+     * @return User 用户实体
+     */
     @Override
     public User queryByUsername(String username) {
         Query query = new Query(Criteria.where("username").is(username));
-        User one = mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
-        return one;
+        return mongoTemplate.findOne(query, User.class, COLLECTION_NAME);
     }
 
     /**
-     * @return boolean
-     * @author luojiarui
-     * @Description 检查某个用户是否具有某种权限
-     * @Date 21:28 2022/12/7
-     * @Param [user, permissionEnum]
-     **/
+     * 检查用户是否具有指定权限
+     * @param user 用户实体
+     * @param permissionEnums 权限枚举数组
+     * @return boolean 是否具有权限
+     */
     @Override
     public boolean checkPermissionForUser(User user, PermissionEnum[] permissionEnums) {
         Set<PermissionEnum> collect = Arrays.stream(permissionEnums).collect(Collectors.toSet());
@@ -256,12 +277,10 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @author luojiarui
-     * @Description 上传头像到文件的avatar中，保存了多个用户的信息
-     * @Date 22:40 2023/1/12
-     * @Param [userId, file]
-     **/
+     * 上传用户头像
+     * @param userId 用户ID
+     * @param file 头像文件
+     */
     @Override
     public void uploadUserAvatar(String userId, MultipartFile file) {
         User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
@@ -286,18 +305,16 @@ public class UserServiceImpl implements IUserService {
         update.set(AVATAR, gridfsId);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
         long matchedCount = updateResult.getMatchedCount();
-        if (matchedCount > 0) {
-            return ;
+        if (matchedCount < 1) {
+            throw new BusinessException(ErrorCode.USER_DISABLED);
         }
     }
 
     /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @author luojiarui
-     * @Description 删除某个用户的信息
-     * @Date 23:00 2023/1/12
-     * @Param [userId]
-     **/
+     * 删除某个用户的信息
+     * @param userId 要删除的用户ID
+     * @throws BusinessException 当删除操作失败时抛出异常
+     */
     @Override
     public void removeUser(String userId) {
         User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
@@ -311,12 +328,10 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @author luojiarui
-     * @Description 管理员根据用户的id批量删除用户
-     * @Date 20:28 2023/2/12
-     * @Param [userIdList, adminUserId]
-     **/
+     * 管理员根据用户的id批量删除用户
+     * @param userIdList 要删除的用户ID列表
+     * @param adminUserId 管理员用户ID
+     */
     @Override
     public void deleteUserByIdBatch(List<String> userIdList, String adminUserId) {
         Query query = new Query().addCriteria(Criteria.where("_id").in(userIdList));
@@ -333,6 +348,10 @@ public class UserServiceImpl implements IUserService {
         mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
     }
 
+    /**
+     * 删除用户的头像
+     * @param userId 用户ID
+     */
     @Override
     public void removeUserAvatar(String userId) {
         User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
@@ -346,18 +365,15 @@ public class UserServiceImpl implements IUserService {
         update.set(UPDATE_TIME, new Date());
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
     }
-
     /**
-     * @return java.util.List<java.lang.String>
-     * @author luojiarui
-     * @Description 根据用户id批量查询用户的头像信息
-     * @Date 22:41 2023/3/30
-     * @Param [userIdList]
-     **/
+     * 根据用户id批量查询用户的头像信息
+     * @param userIdList 用户ID列表
+     * @return Map<String, String> 用户ID和头像URL的映射
+     */
     @Override
     public Map<String, String> queryUserAvatarBatch(List<String> userIdList) {
         if (CollectionUtils.isEmpty(userIdList) || userIdList.size() > 100) {
-            return new HashMap();
+            return new HashMap<>();
         }
         Query query = new Query(Criteria.where("_id").in(userIdList));
         List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
@@ -365,13 +381,11 @@ public class UserServiceImpl implements IUserService {
                 .collect(Collectors.toMap(User::getId, User::getAvatar, (v1, v2) -> v2));
     }
 
-    /*
-     * @author luojiarui
-     * @Description 管理员对用户进行密码重置，重置的密码是初始密码
-     * @Date 11:43 2024/8/17
-     * @Param [userId, adminId]
-     * @return com.jiaruiblog.util.BaseApiResult
-     **/
+    /**
+     * 管理员对用户进行密码重置，重置的密码是初始密码
+     * @param userId 需要重置密码的用户ID
+     * @param adminId 管理员用户ID
+     */
     @Override
     public void resetUserPwd(String userId, String adminId) {
         User user = mongoTemplate.findById(adminId, User.class, COLLECTION_NAME);
@@ -395,12 +409,10 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * @author luojiarui
-     * @Description 用户自行更新或者管理员更新用户信息的时候操作
-     * @Date 23:47 2024/7/26
-     * @Param [user]
-     * @return org.springframework.data.mongodb.core.query.Update
-     **/
+     * 构建用户信息更新的Update对象
+     * @param user 用户业务对象，包含需要更新的字段信息
+     * @return Update 构建好的MongoDB更新对象
+     */
     private Update getUserUpdate(UserBO user) {
         Update update = new Update();
         if (StringUtils.hasText(user.getPassword())) {
@@ -414,5 +426,4 @@ public class UserServiceImpl implements IUserService {
         update.set("birthtime", user.getBirthtime());
         return update;
     }
-
 }

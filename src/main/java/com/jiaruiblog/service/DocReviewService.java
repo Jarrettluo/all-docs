@@ -1,12 +1,13 @@
 package com.jiaruiblog.service;
 
 
+import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.mongodb.client.result.UpdateResult;
 
 import java.util.List;
-import java.util.Map;
 
 public interface DocReviewService {
 
@@ -67,7 +68,7 @@ public interface DocReviewService {
      * @Param [page, user]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Map<String, Object> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin);
+    PageVO<DocReview> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin);
 
     void removeReviews(List<String> docIds);
 }

@@ -3,6 +3,7 @@ package com.jiaruiblog.service.impl;
 import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.mongodb.DuplicateKeyException;
@@ -19,10 +20,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 /**
  * @ClassName DocReviewServiceImpl
  * @Description 文档评审
@@ -192,7 +190,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     @Override
-    public Map<String, Object> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin) {
+    public PageVO<DocReview> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin) {
 
         // 根据不同的user进行区分，如果不是管理员，则必须输入用户id
         Query query = new Query();
@@ -200,9 +198,6 @@ public class DocReviewServiceImpl implements DocReviewService {
             query.addCriteria(Criteria.where(USER_ID).is(userId));
         }
         long count = mongoTemplate.count(query, DocReview.class, DOC_REVIEW_COLLECTION);
-        if (count < 1) {
-            return new HashMap<>();
-        }
 
         query.with(Sort.by(Sort.Direction.DESC, "createDate"));
         query.skip((long) (page.getPage()-1) * page.getRows());
@@ -210,12 +205,14 @@ public class DocReviewServiceImpl implements DocReviewService {
 
         // 还需要进行分页
         List<DocReview> docReviews = mongoTemplate.find(query, DocReview.class, DOC_REVIEW_COLLECTION);
-        Map<String, Object> result = new HashMap<>();
-        result.put("total", count);
-        result.put("data", docReviews);
-        result.put("pageNum", page.getPage());
-        result.put("pageSize", page.getRows());
-        return result;
+
+        return PageVO.<DocReview>builder()
+                .total(count)
+                .list(docReviews)
+                .pageNum( page.getPage())
+                .pageSize(page.getRows())
+                .build();
+
     }
 
     @Override

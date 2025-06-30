@@ -367,7 +367,7 @@ public class FileController {
             throw new AuthenticationException();
         }
 
-        Object o = fileService.documentUpload(file, userId, username);
+        fileService.documentUpload(file, userId, username);
 
         return ApiResult.success();
     }
@@ -435,7 +435,8 @@ public class FileController {
         if (!CollectionUtils.isEmpty(tags) && tags.size() > 10) {
             tags = tags.subList(0, 10);
         }
-        return ApiResult.success(fileService.uploadByUrl(category, tags, name, description, url, userId, username));
+        fileService.uploadByUrl(category, tags, name, description, url, userId, username);
+        return ApiResult.success();
     }
 
     /**

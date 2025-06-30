@@ -11,12 +11,11 @@ import org.springframework.util.StringUtils;
 
 
 /**
- * @ClassName ThumbnailServiceImpl
- * @Description ThumbnailServiceImpl
+ * 缩略图服务实现类
+ *
  * @author luojiarui
- * @Date 2022/7/23 6:06 下午
- * @Version 1.0
- **/
+ * @version 1.0
+ */
 @Service
 public class ThumbnailServiceImpl implements ThumbnailService {
 
@@ -26,26 +25,42 @@ public class ThumbnailServiceImpl implements ThumbnailService {
     MongoTemplate mongoTemplate;
 
 
+    /**
+     * 保存缩略图信息
+     *
+     * @param thumbnail 缩略图对象
+     */
     @Override
     public void save(Thumbnail thumbnail) {
         String objectId = thumbnail.getObjectId();
-        if( !StringUtils.hasText(objectId) || !StringUtils.hasText(thumbnail.getGridfsId())) {
+        if (!StringUtils.hasText(objectId) || !StringUtils.hasText(thumbnail.getGridfsId())) {
             return;
         }
-        if( searchByObjectId(objectId) != null) {
+        if (searchByObjectId(objectId) != null) {
             this.removeByObjectId(objectId);
         }
         mongoTemplate.save(thumbnail, THUMB_COLLECTION_NAME);
     }
 
+    /**
+     * 根据对象ID查询缩略图
+     *
+     * @param objectId 对象ID
+     * @return 缩略图对象
+     */
     @Override
     public Thumbnail searchByObjectId(String objectId) {
-        if( !StringUtils.hasText(objectId)) {
+        if (!StringUtils.hasText(objectId)) {
             return null;
         }
         return mongoTemplate.findById(objectId, Thumbnail.class, THUMB_COLLECTION_NAME);
     }
 
+    /**
+     * 根据对象ID删除缩略图
+     *
+     * @param objectId 对象ID
+     */
     @Override
     public void removeByObjectId(String objectId) {
         // 删除掉相关的分类关系

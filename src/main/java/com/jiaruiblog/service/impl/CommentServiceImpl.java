@@ -6,6 +6,9 @@ import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.entity.dto.CommentWithUserDTO;
 import com.jiaruiblog.entity.vo.CommentWithUserVO;
+import com.jiaruiblog.entity.vo.PageVO;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.ICommentService;
 import com.mongodb.client.result.DeleteResult;
@@ -31,9 +34,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * @author luojiarui
  * @ClassName CommentServiceImpl
  * @Description comment service impl
- * @author luojiarui
  * @Date 2022/6/4 5:23 下午
  * @Version 1.0
  **/
@@ -53,17 +56,17 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public void insert(Comment comment) {
-        if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
+        if (!StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return;
         }
         try {
             // 敏感词过滤
             SensitiveFilter filter = SensitiveFilter.getInstance();
             String content = comment.getContent();
-            content = filter.replaceSensitiveWord(content, 1,"*");
+            content = filter.replaceSensitiveWord(content, 1, "*");
             comment.setContent(content);
         } catch (IOException e) {
-            return ;
+            return;
         }
 
 
@@ -75,24 +78,23 @@ public class CommentServiceImpl implements ICommentService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void update(Comment comment) {
-        if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
-            return ;
+        if (!StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
+            return;
         }
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
         Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
                 .orElse(new Comment());
-        if( !commentDb.getUserId().equals(comment.getUserId())) {
-            return ;
+        if (!commentDb.getUserId().equals(comment.getUserId())) {
+            return;
         }
 
-        Update update  = new Update();
+        Update update = new Update();
         update.set("content", comment.getContent());
         update.set("updateDate", new Date());
         try {
             template.updateFirst(query, update, User.class);
         } catch (Exception e) {
             log.error("更新评论信息{}==>出错==>{}", comment, e);
-            return ;
         }
     }
 
@@ -101,34 +103,34 @@ public class CommentServiceImpl implements ICommentService {
         Query query = new Query(Criteria.where(OBJECT_ID).is(comment.getId()));
         Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
                 .orElse(new Comment());
-        if( !commentDb.getUserId().equals(comment.getUserId())) {
-            return ;
+        if (!commentDb.getUserId().equals(comment.getUserId())) {
+            return;
         }
         template.remove(query, Comment.class, COLLECTION_NAME);
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
      * @Description 删除批量的评论列表
      * @Date 20:51 2023/2/12
      * @Param [commentIdList]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
     public void removeBatch(List<String> commentIdList) {
         Query query = new Query(Criteria.where(OBJECT_ID).in(commentIdList));
         DeleteResult remove = template.remove(query, Comment.class, COLLECTION_NAME);
         if (remove.getDeletedCount() < commentIdList.size()) {
-            return;
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
     }
 
     /**
+     * @return com.jiaruiblog.utils.ApiResult
      * @author luojiarui
      * @Description 根据文档的id查询相关的评论列表
      * @Date 11:57 2022/9/4
      * @Param [comment]
-     * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
     public Map<String, Object> queryById(CommentListDTO comment) {
@@ -171,11 +173,11 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
+     * @return java.lang.Long
      * @author luojiarui
      * @Description //根据文档的id 查询评论的数量
      * @Date 10:47 下午 2022/6/22
      * @Param [docId]
-     * @return java.lang.Long
      **/
     @Override
     public Long commentNum(String docId) {
@@ -185,15 +187,16 @@ public class CommentServiceImpl implements ICommentService {
 
     /**
      * 根据关键字模糊搜索相关的文档id
+     *
      * @param keyWord 关键字
      * @return 文档的id信息
      */
     @Override
     public List<String> fuzzySearchDoc(String keyWord) {
-        if(keyWord == null || "".equalsIgnoreCase(keyWord)) {
+        if (keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return Lists.newArrayList();
         }
-        Pattern pattern = Pattern.compile("^.*"+keyWord+".*$", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
         query.addCriteria(Criteria.where("content").regex(pattern));
 
@@ -215,11 +218,11 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
+     * @return java.lang.Integer
      * @author luojiarui
      * @Description // 统计总数
      * @Date 4:40 下午 2022/6/26
      * @Param []
-     * @return java.lang.Integer
      **/
     @Override
     public long countAllFile() {
@@ -227,14 +230,14 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
      * @Description 分页查询评论信息
      * @Date 14:47 2022/12/10
      * @Param [page, userId]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public Map<String, Object> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
+    public PageVO<CommentWithUserVO> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
 
         log.info("查询的参数是：{}, {}", page, userId);
         Criteria criteria = new Criteria();
@@ -264,7 +267,7 @@ public class CommentServiceImpl implements ICommentService {
                 Aggregation.lookup(FileServiceImpl.COLLECTION_NAME, "docId", "_id", "abc"),
                 Aggregation.sort(Sort.Direction.DESC, "createDate"),
                 Aggregation.match(criteria),
-                Aggregation.skip((long) (page.getPage()-1) * page.getRows()),
+                Aggregation.skip((long) (page.getPage() - 1) * page.getRows()),
                 Aggregation.limit(page.getRows())
 
         );
@@ -285,11 +288,11 @@ public class CommentServiceImpl implements ICommentService {
 
         int count = template.aggregate(countAggregation, COLLECTION_NAME, CommentWithUserDTO.class).getMappedResults().size();
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("data", commentWithUserVOList);
-        result.put("total", count);
-        result.put("pageNum", page.getPage());
-        result.put("pageSize", page.getRows());
-        return result;
+        return PageVO.<CommentWithUserVO>builder()
+                .total(count)
+                .list(commentWithUserVOList)
+                .pageNum( page.getPage())
+                .pageSize(page.getRows())
+                .build();
     }
 }

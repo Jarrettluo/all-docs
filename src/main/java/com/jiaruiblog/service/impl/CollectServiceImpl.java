@@ -41,7 +41,7 @@ public class CollectServiceImpl implements CollectService {
     public void insert(CollectDocRelationship collect) {
         Boolean aBoolean = insertRelationShip(collect);
         if (Boolean.FALSE.equals(aBoolean)) {
-            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
     }
 

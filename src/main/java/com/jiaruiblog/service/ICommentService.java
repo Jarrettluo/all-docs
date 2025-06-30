@@ -3,6 +3,8 @@ package com.jiaruiblog.service;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
+import com.jiaruiblog.entity.vo.CommentWithUserVO;
+import com.jiaruiblog.entity.vo.PageVO;
 
 import java.util.List;
 import java.util.Map;
@@ -64,7 +66,7 @@ public interface ICommentService {
      * @Param [pageDTO, userId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Map<String, Object> queryAllComments(BasePageDTO pageDTO, String userId, Boolean isAdmin);
+    PageVO<CommentWithUserVO> queryAllComments(BasePageDTO pageDTO, String userId, Boolean isAdmin);
 
     long countAllFile();
 
