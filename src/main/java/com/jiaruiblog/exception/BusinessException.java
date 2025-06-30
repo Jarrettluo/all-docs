@@ -1,81 +1,75 @@
 package com.jiaruiblog.exception;
 
-import org.springframework.context.MessageSource;
-
-import java.util.Locale;
-
 /**
  * <p>业务异常类，用于处理业务逻辑中的异常情况</p>
  *
  **/
+/**
+ * 业务异常基类
+ */
+import lombok.Getter;
+
+import java.util.Arrays;
+
+/**
+ * 业务异常类，支持国际化、错误码和消息占位符
+ */
 public class BusinessException extends RuntimeException {
-
-    private Integer code;
-
-    private final transient Object[] args;  // For parameterized messages
+    // Getters
+    @Getter
+    private final ErrorCode errorCode;
+    private final Object[] messageArgs;
+    @Getter
+    private final String detailMessage;
 
     /**
-     * 构造方法，传入错误码枚举
-     *
-     * @param errorCode 错误码枚举
+     * 构造方法 - 基础版
      */
     public BusinessException(ErrorCode errorCode) {
-        super(errorCode.getMessageKey());
-        this.code = errorCode.getCode();
-        this.args = null;
+        this(errorCode, (Object[]) null, null, null);
     }
 
     /**
-     * 构造方法，传入错误码枚举
-     *
-     * @param errorCode 错误码枚举
+     * 构造方法 - 带消息参数
      */
-    public BusinessException(ErrorCode errorCode, MessageSource messageSource, Locale locale) {
-        super(errorCode.getLocalizedMessage(messageSource, locale));
-        this.code = errorCode.getCode();
-        this.args = null;
-    }
-
-    public BusinessException(ErrorCode errorCode, Object[] args, MessageSource messageSource, Locale locale) {
-        super(messageSource.getMessage(errorCode.getMessageKey(), args, locale));
-        this.code = errorCode.getCode();
-        this.args = args;
+    public BusinessException(ErrorCode errorCode, Object... messageArgs) {
+        this(errorCode, messageArgs, null, null);
     }
 
     /**
-     * 构造方法，传入错误码枚举
-     *
-     * @param errorCode 错误码枚举
+     * 构造方法 - 带详细消息
      */
-    public BusinessException(int errorCode, String msg) {
-        super(msg);
-        this.code = errorCode;
-        this.args = null;
-    }
-
-
-    /**
-     * 构造方法，传入错误码枚举和异常原因
-     *
-     * @param errorCode 错误码枚举
-     * @param cause     异常原因
-     */
-    public BusinessException(ErrorCode errorCode,  MessageSource messageSource, Locale locale, Throwable cause) {
-        super(errorCode.getLocalizedMessage(messageSource, locale), cause);
-        this.code = errorCode.getCode();
-        this.args = null;
+    public BusinessException(ErrorCode errorCode, String detailMessage) {
+        this(errorCode, null, detailMessage, null);
     }
 
     /**
-     * 获取错误信息
-     *
-     * @return 错误信息
+     * 构造方法 - 带消息参数和详细消息
      */
-    public String getErrorMessage() {
-        return super.getLocalizedMessage();
+    public BusinessException(ErrorCode errorCode, Object[] messageArgs, String detailMessage) {
+        this(errorCode, messageArgs, detailMessage, null);
     }
 
-    public Integer getCode() {
-        return this.code;
+    /**
+     * 构造方法 - 完整版
+     */
+    public BusinessException(ErrorCode errorCode, Object[] messageArgs, String detailMessage, Throwable cause) {
+        super(cause);
+        this.errorCode = errorCode;
+        this.messageArgs = messageArgs != null ? messageArgs.clone() : null;
+        this.detailMessage = detailMessage;
+    }
+
+    public Object[] getMessageArgs() {
+        return messageArgs != null ? messageArgs.clone() : null;
+    }
+
+    @Override
+    public String getMessage() {
+        return String.format("BusinessException: code=%s, messageKey=%s, args=%s, detail=%s",
+                errorCode.getCode(),
+                errorCode.getMessageKey(),
+                Arrays.toString(messageArgs),
+                detailMessage);
     }
 }
