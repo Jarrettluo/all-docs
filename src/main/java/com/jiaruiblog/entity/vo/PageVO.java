@@ -2,20 +2,17 @@ package com.jiaruiblog.entity.vo;
 
 import lombok.Data;
 
-/**
- * @ClassName PageVO
- * @Description TODO
- * @author luojiarui
- * @Date 2024/4/23 22:33
- * @Version 1.0
- **/
+import java.util.List;
+
 @Data
-public class PageVO {
+public class PageVO<T> {
 
-    private Integer order;
+    private long total;        // 总记录数
 
-    private String content;
+    private int pageNum;       // 当前页码
 
-    private Integer page;
+    private int pageSize;      // 每页大小
+
+    private List<T> list;      // 当前页数据列表
 
 }

@@ -47,21 +47,20 @@ public class CollectController {
      **/
     @Deprecated
     @PostMapping(value = "/auth/insert")
-    public ApiResult<Object> insert(@RequestBody CollectDTO collect, HttpServletRequest request) {
+    public ApiResult<Void> insert(@RequestBody CollectDTO collect, HttpServletRequest request) {
         CollectDocRelationship relationship = setRelationshipValue(collect, request);
         // 必须经过userId和docId的校验，否则不予关注
         if (!userService.isExist(relationship.getUserId()) || !fileService.isExist(relationship.getDocId())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
         collectService.insert(relationship);
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 
     @DeleteMapping(value = "/auth/remove")
-    public ApiResult remove(@RequestBody CollectDTO collect, HttpServletRequest request) {
+    public ApiResult<Void> remove(@RequestBody CollectDTO collect, HttpServletRequest request) {
         collectService.remove(setRelationshipValue(collect, request));
-
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 
     /**

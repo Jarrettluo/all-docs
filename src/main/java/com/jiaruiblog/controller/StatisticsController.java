@@ -7,6 +7,8 @@ import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.dto.SearchKeyDTO;
 import com.jiaruiblog.entity.vo.DocumentVO;
+import com.jiaruiblog.entity.vo.StatsVO;
+import com.jiaruiblog.entity.vo.TrendVO;
 import com.jiaruiblog.service.*;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
@@ -59,13 +61,13 @@ public class StatisticsController {
 
     @Operation(summary = "查询热度榜", description = "查询列表")
     @GetMapping(value = "/trend")
-    public ApiResult<Object> trend() {
+    public ApiResult<List<TrendVO>> trend() {
         return ApiResult.success(statisticsService.trend());
     }
 
     @Operation(summary = "查询统计数据", description = "查询列表")
     @GetMapping(value = "/all")
-    public ApiResult<Object> all() {
+    public ApiResult<StatsVO> all() {
         return ApiResult.success(statisticsService.all());
     }
 
@@ -78,7 +80,7 @@ public class StatisticsController {
      **/
     @Operation(summary = "查询搜索结果", description = "查询列表")
     @GetMapping("getSearchResult")
-    public ApiResult<Object> getSearchResult(@RequestHeader HttpHeaders headers) {
+    public ApiResult<Map<String, List<String>>> getSearchResult(@RequestHeader HttpHeaders headers) {
         List<String> userSearchList = Lists.newArrayList();
         List<String> stringList = headers.get("id");
         if (!CollectionUtils.isEmpty(stringList)) {
@@ -97,9 +99,9 @@ public class StatisticsController {
 
     @Operation(summary = "删除用户的搜索关键词", description = "删除key")
     @PutMapping(value = "removeKey")
-    public ApiResult<Object> removeKey(@RequestBody SearchKeyDTO searchKeyDTO) {
-        redisService.delSearchHistoryByUserId(searchKeyDTO.getUserId(), searchKeyDTO.getSearchWord());
-        return ApiResult.success("");
+    public ApiResult<Long> removeKey(@RequestBody SearchKeyDTO searchKeyDTO) {
+        Long result = redisService.delSearchHistoryByUserId(searchKeyDTO.getUserId(), searchKeyDTO.getSearchWord());
+        return ApiResult.success(result);
     }
 
     /**
@@ -120,7 +122,7 @@ public class StatisticsController {
      **/
     @Operation(summary = "查询十条热门榜单", description = "查询列表")
     @GetMapping("getHotTrend")
-    public ApiResult<Object> getHotTrend() {
+    public ApiResult<Map<String, Object>> getHotTrend() {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
 
         if (CollectionUtils.isEmpty(docIdList)) {
@@ -182,7 +184,7 @@ public class StatisticsController {
      **/
     @Operation(summary = "查询最新数据", description = "查询列表展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档")
     @GetMapping("/recentDocs")
-    public ApiResult<Object> getRecentDocs() {
+    public ApiResult<List<Map<String, Object>>> getRecentDocs() {
         List<Map<String, Object>> result = Lists.newArrayList();
 
         List<FileDocument> recentFileDocuments = fileService.listFilesByPage(0, 12);

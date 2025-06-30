@@ -6,6 +6,8 @@ import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
+import com.jiaruiblog.exception.BusinessExceptionBuilder;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.intercepter.SensitiveWordInit;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,7 +52,7 @@ public class SystemConfigController {
 
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("getConfig")
-    public ApiResult<Object> getSystemConfig() {
+    public ApiResult<SystemConfig> getSystemConfig() {
         return ApiResult.success(systemConfig);
     }
 
@@ -61,7 +63,7 @@ public class SystemConfigController {
     @ApiResponse(responseCode = "400", description = "参数错误",
             content = @Content(schema = @Schema(implementation = ApiResult.class)))
     @PutMapping("updateConfig")
-    public ApiResult<Object> systemConfig(
+    public ApiResult<SystemConfig> systemConfig(
             @Parameter(description = "系统配置参数", required = true,
                     content = @Content(schema = @Schema(implementation = SystemConfig.class)))
             @RequestBody SystemConfig userSetting) {
@@ -94,7 +96,7 @@ public class SystemConfigController {
                 extracted(response, buffer);
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            log.error("下载最新的违禁词错误");
         }
     }
 
@@ -111,13 +113,13 @@ public class SystemConfigController {
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty() || file.getSize() > 20000) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
         String originFileName = file.getOriginalFilename();
         originFileName = Optional.ofNullable(originFileName).orElse("");
         String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1).toLowerCase(Locale.ROOT);
         if (!ObjectUtils.nullSafeEquals(suffix, "txt")) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
 
         try {
@@ -126,11 +128,11 @@ public class SystemConfigController {
             SensitiveFilter filter = SensitiveFilter.getInstance();
             filter.refresh();
         } catch (IOException e) {
-            e.printStackTrace();
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            log.error("管理员更新违禁词错误", e.getCause());
+            throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
         }
 
-        return ApiResult.success("");
+        return ApiResult.success();
     }
     private void writeToFile(Set<String> strSet) throws IOException {
         String txt = strSet.stream().limit(10000).collect(Collectors.joining("\n"));

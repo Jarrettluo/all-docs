@@ -65,7 +65,7 @@ public class DocLogController {
         }
     )
     @GetMapping("queryLogList")
-    public ApiResult<Object> queryLogList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
+    public ApiResult< Map<String, Object>> queryLogList(@ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
         Map<String, Object> result = docLogService.queryDocLogs(pageParams);
         if (result.get("data") instanceof List<?>) {
             List<DocLog> docLogList = (List<DocLog>) result.get("data");
@@ -98,13 +98,13 @@ public class DocLogController {
         }
     )
     @DeleteMapping("removeLog")
-    public ApiResult<Object> removeLog(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
+    public ApiResult<Void> removeLog(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
         List<String> logIds = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(logIds)) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         docLogService.deleteDocLogBatch(logIds, (String) request.getAttribute("id"));
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
 }

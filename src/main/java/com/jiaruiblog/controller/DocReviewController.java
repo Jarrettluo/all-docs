@@ -9,8 +9,11 @@ import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.RefuseBatchDTO;
 import com.jiaruiblog.entity.dto.RefuseDTO;
+import com.jiaruiblog.exception.BusinessExceptionBuilder;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.IFileService;
+import com.mongodb.client.result.UpdateResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文档评审，日志查询
@@ -58,7 +62,8 @@ public class DocReviewController {
     @Operation(summary = "查询需要评审的文档列表", description = "管理员可以查询所有需要评审的文档列表")
     @GetMapping("queryDocForReview")
     public ApiResult<Object> queryDocReviewList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
-        return ApiResult.success(fileService.queryFileDocumentResult(pageParams, true));
+        Map<String, Object> result = fileService.queryFileDocumentResult(pageParams, true);
+        return ApiResult.success(result);
     }
 
 
@@ -75,7 +80,8 @@ public class DocReviewController {
     public ApiResult<Object> updateDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
                                         @Parameter(hidden = true) HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        return ApiResult.success(docReviewService.userRead(batchIdDTO.getIds(), userId));
+        UpdateResult result = docReviewService.userRead(batchIdDTO.getIds(), userId);
+        return ApiResult.success(result);
     }
 
     /**
@@ -88,19 +94,19 @@ public class DocReviewController {
     @Permission({PermissionEnum.ADMIN})
     @Operation(summary = "管理员拒绝某个文档", description = "管理员拒绝某个文档，只有管理员有操作该文档的权限")
     @PostMapping("refuse")
-    public ApiResult<Object> refuse(@Parameter(description = "拒绝参数") @RequestBody @Validated RefuseDTO refuseDTO) {
+    public ApiResult<Void> refuse(@Parameter(description = "拒绝参数") @RequestBody @Validated RefuseDTO refuseDTO) {
         String docId = refuseDTO.getDocId();
         String reason = refuseDTO.getReason();
         if (docReviewService.docIdExist(Collections.singletonList(docId))) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw BusinessExceptionBuilder.of(ErrorCode.DOCUMENT_NOT_FOUND).build();
         }
         // 校验某个文档是否存在, 查询并删除某个文档
         List<FileDocument> fileDocumentList = fileService.queryAndRemove(docId);
         if (CollectionUtils.isEmpty(fileDocumentList)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw BusinessExceptionBuilder.of(ErrorCode.DOCUMENT_NOT_FOUND).build();
         }
         docReviewService.refuse(fileDocumentList.get(0), reason);
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
     /**
@@ -183,12 +189,13 @@ public class DocReviewController {
      */
     @Operation(summary = "删除评审日志", description = "管理员和普通用户都可以删除评审结果")
     @DeleteMapping("removeDocReview")
-    public ApiResult<Object> removeDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
+    public ApiResult<UpdateResult> removeDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
                                        @Parameter(hidden = true) HttpServletRequest request) {
         if (CollectionUtils.isEmpty(batchIdDTO.getIds())) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        return ApiResult.success(docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id")));
+        UpdateResult updateResult = docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
+        return ApiResult.success(updateResult);
     }
 
 }

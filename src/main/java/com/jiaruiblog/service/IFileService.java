@@ -11,10 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -257,7 +254,7 @@ public interface IFileService {
      * @Param [page, user]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Object queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing);
+    Map<String, Object> queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing);
 
     long countAllFile();
 

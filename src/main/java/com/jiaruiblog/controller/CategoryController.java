@@ -1,7 +1,6 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.common.RegexConstant;
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
@@ -10,16 +9,23 @@ import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.dto.CategoryDTO;
 import com.jiaruiblog.entity.dto.QueryDocByTagCateDTO;
 import com.jiaruiblog.entity.dto.RelationDTO;
+import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.enums.FilterTypeEnum;
+import com.jiaruiblog.exception.BusinessExceptionBuilder;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.CategoryService;
 import com.jiaruiblog.service.TagService;
+
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -35,11 +41,11 @@ public class CategoryController {
 
 
     @PostMapping(value = "/insert")
-    public ApiResult<Object> insert(@RequestBody CategoryDTO categoryDTO) {
+    public ApiResult<Void> insert(@RequestBody CategoryDTO categoryDTO) {
         categoryDTO.setId(null);
         String name = categoryDTO.getName();
         if (!name.matches(RegexConstant.CH_ENG_WORD)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
         switch (categoryDTO.getType()) {
             case CATEGORY:
@@ -57,14 +63,14 @@ public class CategoryController {
             default:
                 break;
         }
-        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        return ApiResult.success();
     }
 
     @PutMapping(value = "/update")
-    public ApiResult<Object> update(@RequestBody CategoryDTO categoryDTO) {
+    public ApiResult<Void> update(@RequestBody CategoryDTO categoryDTO) {
         String name = categoryDTO.getName();
         if (!name.matches(RegexConstant.CH_ENG_WORD)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
         switch (categoryDTO.getType()) {
             case CATEGORY:
@@ -82,11 +88,11 @@ public class CategoryController {
             default:
                 break;
         }
-        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        return ApiResult.success();
     }
 
     @DeleteMapping(value = "/remove")
-    public ApiResult<Object> remove(@RequestBody CategoryDTO categoryDTO) {
+    public ApiResult<Void> remove(@RequestBody CategoryDTO categoryDTO) {
         switch (categoryDTO.getType()) {
             case CATEGORY:
                 Category category = new Category();
@@ -99,25 +105,26 @@ public class CategoryController {
             default:
                 break;
         }
-        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        return ApiResult.success();
     }
 
     @GetMapping(value = "/all")
-    public ApiResult<Object> list(@RequestParam FilterTypeEnum type, HttpServletResponse response) {
+    public ApiResult<List<CateOrTagVO>> list(@RequestParam FilterTypeEnum type, HttpServletResponse response) {
         response.setHeader("Cache-Control", "max-age=10, public");
+        List<CateOrTagVO> cateOrTagVOList = new ArrayList<>();
         switch (type) {
             case CATEGORY:
-                categoryService.list();
+                cateOrTagVOList = categoryService.list();
             case TAG:
-                tagService.list();
+                cateOrTagVOList = tagService.list();
             default:
                 break;
         }
-        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        return ApiResult.success(cateOrTagVOList);
     }
 
     @PostMapping(value = "/addRelationship")
-    public synchronized ApiResult<Object> addRelationship(@RequestBody RelationDTO relationDTO) {
+    public ApiResult<Void> addRelationship(@RequestBody RelationDTO relationDTO) {
         switch (relationDTO.getType()) {
             case CATEGORY:
                 CateDocRelationship category = new CateDocRelationship();
@@ -134,11 +141,11 @@ public class CategoryController {
             default:
                 break;
         }
-        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        return ApiResult.success();
     }
 
     @DeleteMapping(value = "/removeRelationship")
-    public ApiResult<Object> removeRelationship(@RequestBody RelationDTO relationDTO) {
+    public ApiResult<Void> removeRelationship(@RequestBody RelationDTO relationDTO) {
         switch (relationDTO.getType()) {
             case CATEGORY:
                 CateDocRelationship category = new CateDocRelationship();
@@ -153,31 +160,34 @@ public class CategoryController {
             default:
                 break;
         }
-        return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+        return ApiResult.success();
     }
 
     @GetMapping(value = "getDocByTagCateKeyWord")
-    public ApiResult<Object> getDocByTagCateKeyWord(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO) {
-        categoryService.getDocByTagAndCate(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
-                Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()));
-        return ApiResult.success("");
+    public ApiResult<Map<String, Object>> getDocByTagCateKeyWord(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO) {
+        Map<String, Object> result = categoryService.getDocByTagAndCate(pageDTO.getCateId(),
+                pageDTO.getTagId(),
+                pageDTO.getKeyword(),
+                Integer.toUnsignedLong(pageDTO.getPage() - 1),
+                Integer.toUnsignedLong(pageDTO.getRows()));
+        return ApiResult.success(result);
     }
 
     @GetMapping(value = "/auth/getMyCollection")
-    public ApiResult<Object> getMyCollection(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<Map<String, Object>> getMyCollection(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        categoryService.getMyCollection(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
+        Map<String, Object> result = categoryService.getMyCollection(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
                 Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()),
                 userId);
-        return ApiResult.success("");
+        return ApiResult.success(result);
     }
 
     @GetMapping(value = "/auth/getMyUploaded")
-    public ApiResult<Object> getMyUploaded(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<Map<String, Object>> getMyUploaded(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        categoryService.getMyUploaded(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
+        Map<String, Object> result = categoryService.getMyUploaded(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
                 Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()),
                 userId);
-        return ApiResult.success("");
+        return ApiResult.success(result);
     }
 }

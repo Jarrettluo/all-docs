@@ -1097,12 +1097,13 @@ public class FileServiceImpl implements IFileService {
                 fileDocuments = listAndFilterByPage(documentDTO.getPage(), documentDTO.getRows(), filenameDocIdSet);
                 fileDocuments = Optional.ofNullable(fileDocuments).orElse(new ArrayList<>());
                 for (FileDocument fileDocument : fileDocuments) {
+                    // TODO 这里需要修改。
                     DocumentVO documentVO = new DocumentVO();
-                    PageVO pageVO = new PageVO();
-                    pageVO.setContent(documentVO.getDescription());
-                    List<PageVO> pageVOList = new ArrayList<>();
-                    pageVOList.add(pageVO);
-                    documentVO.setPageVOList(pageVOList);
+//                    PageVO pageVO = new PageVO();
+//                    pageVO.setList(documentVO.getDescription());
+//                    List<PageVO> pageVOList = new ArrayList<>();
+//                    pageVOList.add(pageVO);
+//                    documentVO.setPageVOList(pageVOList);
                     DocumentVO documentVO2 = convertDocumentNew(documentVO, fileDocument);
                     filenameDocVO.add(documentVO2);
                 }
@@ -1592,12 +1593,12 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public ApiResult<Object> queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing) {
+    public Map<String, Object> queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing) {
         Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
         query.addCriteria(Criteria.where("reviewing").is(reviewing));
         Map<String, Object> result = new HashMap<>();
         result.put("data", queryFileDocument(pageDTO, reviewing));
         result.put("total", mongoTemplate.count(query, FileDocument.class, COLLECTION_NAME));
-        return ApiResult.success(result);
+        return result;
     }
 }

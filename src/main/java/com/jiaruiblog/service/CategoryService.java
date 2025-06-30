@@ -52,14 +52,12 @@ public interface CategoryService {
     /**
      * 增加分类和文档的信息
      * @param relationship CateDocRelationship
-     * @return BaseApiResult
      */
     void addRelationShip(CateDocRelationship relationship);
 
     /**
      * 取消分类和文档的关联
      * @param relationship CateDocRelationship
-     * @return BaseApiResult
      */
     void cancelCategoryRelationship(CateDocRelationship relationship);
 

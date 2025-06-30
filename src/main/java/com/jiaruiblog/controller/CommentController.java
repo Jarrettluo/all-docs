@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -51,8 +52,8 @@ public class CommentController {
             @ApiResponse(responseCode = "200", description = "请求成功", content = @Content(schema = @Schema(implementation = String.class)))
     })
     @GetMapping("queryDocReviewList")
-    public ApiResult<String> queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
-        return ApiResult.success("");
+    public ApiResult<Void> queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
+        return ApiResult.success();
     }
 
     @Operation(summary = "新增单个评论", description = "添加新的评论")
@@ -61,9 +62,9 @@ public class CommentController {
             @ApiResponse(responseCode = "400", description = "参数错误")
     })
     @PostMapping(value = "/auth/insert")
-    public ApiResult<Object> insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
+    public ApiResult<Void> insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
         commentService.insert(getComment(commentDTO, request));
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 
     @Operation(summary = "更新评论", description = "修改现有评论内容")
@@ -72,9 +73,9 @@ public class CommentController {
             @ApiResponse(responseCode = "400", description = "参数错误")
     })
     @PostMapping(value = "/auth/update")
-    public ApiResult<Object> update(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
+    public ApiResult<Void> update(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
         commentService.update(getComment(commentDTO, request));
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 
     @Operation(summary = "删除评论", description = "根据ID删除单个评论")
@@ -83,13 +84,13 @@ public class CommentController {
             @ApiResponse(responseCode = "400", description = "参数错误")
     })
     @DeleteMapping(value = "/auth/remove")
-    public ApiResult<String> remove(@RequestBody Comment comment, HttpServletRequest request) {
+    public ApiResult<Void> remove(@RequestBody Comment comment, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
         if (!StringUtils.hasText(comment.getId())) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
         commentService.remove(comment, userId);
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 
     @Permission(value = PermissionEnum.ADMIN)
@@ -100,13 +101,13 @@ public class CommentController {
             @ApiResponse(responseCode = "403", description = "权限不足")
     })
     @DeleteMapping(value = "/auth/removeBatch")
-    public ApiResult<String> removeBatch(@RequestBody BatchIdDTO batchIdDTO) {
+    public ApiResult<Void> removeBatch(@RequestBody BatchIdDTO batchIdDTO) {
         List<String> commentIdList = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(commentIdList)) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
         commentService.removeBatch(commentIdList);
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 
     @Operation(summary = "查询文档评论", description = "根据文档ID获取相关评论")
@@ -120,9 +121,9 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = CommentListDTO.class)))
     })
     @PostMapping(value = "/list")
-    public ApiResult<String> queryById(@RequestBody CommentListDTO comment) {
-        commentService.queryById(comment);
-        return ApiResult.success("");
+    public ApiResult<Map<String, Object>> queryById(@RequestBody CommentListDTO comment) {
+        Map<String, Object> result = commentService.queryById(comment);
+        return ApiResult.success(result);
     }
 
     private Comment getComment(CommentDTO commentDTO, HttpServletRequest request) {
@@ -148,10 +149,10 @@ public class CommentController {
             @Parameter(name = "request", in = ParameterIn.HEADER, hidden = true)
     })
     @PostMapping(value = "/auth/myComments")
-    public ApiResult<String> queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<Map<String, Object>> queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        commentService.queryAllComments(pageDTO, userId, false);
-        return ApiResult.success("");
+        Map<String, Object> result = commentService.queryAllComments(pageDTO, userId, false);
+        return ApiResult.success(result);
     }
 
     @Operation(summary = "查询所有评论", description = "管理员查询所有用户的评论列表")
@@ -167,8 +168,8 @@ public class CommentController {
     })
     @Permission(PermissionEnum.ADMIN)
     @PostMapping(value = "/auth/allComments")
-    public ApiResult<String> queryAllComments(@RequestBody BasePageDTO pageDTO) {
-        commentService.queryAllComments(pageDTO, null, true);
-        return ApiResult.success("");
+    public ApiResult<Map<String, Object>> queryAllComments(@RequestBody BasePageDTO pageDTO) {
+        Map<String, Object> result = commentService.queryAllComments(pageDTO, null, true);
+        return ApiResult.success(result);
     }
 }

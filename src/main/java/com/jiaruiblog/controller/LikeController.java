@@ -2,6 +2,8 @@ package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.exception.BusinessExceptionBuilder;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.LikeService;
 import io.lettuce.core.RedisConnectionException;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,7 +52,7 @@ public class LikeController{
     // entityType: 1:点赞
     // entityType: 2:收藏
     @PostMapping("like")
-    public ApiResult<Object> like(@RequestParam("entityType") int entityType,
+    public ApiResult<Map<String, Object>> like(@RequestParam("entityType") int entityType,
                                   @RequestParam("entityId") String entityId,
                                   HttpServletRequest request) {
 
@@ -69,7 +71,7 @@ public class LikeController{
             // 获取当前用户点赞的状态
             likeStatus = likeService.findEntityLikeStatus(userId, entityType, entityId);
         } catch (RedisConnectionFailureException | RedisConnectionException e) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getMessage());
+            throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
         }
 
 

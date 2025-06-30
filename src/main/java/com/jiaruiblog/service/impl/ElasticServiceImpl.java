@@ -110,9 +110,10 @@ public class ElasticServiceImpl implements ElasticService {
                 hit -> (String) hit.source().get("id"),
                 hit -> hit.highlight().get(PIPELINE_NAME).stream()
                 .map(text -> {
+                    // ToDO 待修改
                     PageVO pageVO = new PageVO();
-                    pageVO.setOrder(counter.getAndIncrement());
-                    pageVO.setContent(text);
+//                    pageVO.setOrder(counter.getAndIncrement());
+//                    pageVO.setContent(text);
                     return pageVO;
                 })
                 .collect(Collectors.toList())

@@ -121,6 +121,7 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
                 .body(file.get().getContent());
     }
+
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -136,8 +137,8 @@ public class FileController {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @GetMapping("/generateDownloadLink")
-    public ApiResult<Object> generateDownloadLink(@RequestParam String fileId,
-                                              HttpServletRequest request) throws Exception {
+    public ApiResult<String> generateDownloadLink(@RequestParam String fileId,
+                                                  HttpServletRequest request) throws Exception {
         if (org.apache.commons.lang3.StringUtils.isEmpty(fileId)) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
         }
@@ -159,7 +160,7 @@ public class FileController {
         // 使用hmacKey作为Redis的key，存储fileId，设置短时有效期
         redisTemplate.opsForValue().set(hmacKey, fileId, Duration.ofMinutes(10));
         // 返回下载链接
-        return ApiResult.success(hmacKey);
+        return ApiResult.success("success", hmacKey);
     }
 
     /*
@@ -338,7 +339,6 @@ public class FileController {
                 model.setMessage("请传入文件");
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
             model.setMessage(ex.getMessage());
         }
         return model;
@@ -367,7 +367,9 @@ public class FileController {
             throw new AuthenticationException();
         }
 
-        return ApiResult.success(fileService.documentUpload(file, userId, username));
+        Object o = fileService.documentUpload(file, userId, username);
+
+        return ApiResult.success();
     }
 
     /**
