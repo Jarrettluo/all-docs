@@ -46,6 +46,6 @@ public interface IDocLogService {
      * @Param userId user index
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Object deleteDocLogBatch(List<String> logIds, String userId);
+    void deleteDocLogBatch(List<String> logIds, String userId);
 
 }

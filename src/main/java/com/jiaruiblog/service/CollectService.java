@@ -1,7 +1,6 @@
 package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.CollectDocRelationship;
-import com.jiaruiblog.util.BaseApiResult;
 
 /**
  * @author Jarrett Luo
@@ -15,7 +14,7 @@ public interface CollectService {
      * @param collect -> Collect Doc Relationship
      * @return -> ApiResult
      */
-    ApiResult<Object> insert(CollectDocRelationship collect);
+    void insert(CollectDocRelationship collect);
 
     /**
      * @author luojiarui
@@ -31,7 +30,7 @@ public interface CollectService {
      * @param collect -> CollectDocRelationship
      * @return -> ApiResult
      */
-    ApiResult<Object> remove(CollectDocRelationship collect);
+    void remove(CollectDocRelationship collect);
 
 
     void removeRelateByDocId(String docId);

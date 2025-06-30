@@ -3,9 +3,10 @@ package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
-import com.jiaruiblog.util.BaseApiResult;
+import com.mongodb.client.result.UpdateResult;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DocReviewService {
 
@@ -17,7 +18,7 @@ public interface DocReviewService {
      * @Param [reviewId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> userRead(List<String> ids, String userId);
+    UpdateResult userRead(List<String> ids, String userId);
 
     boolean docIdExist(List<String> docIds);
 
@@ -28,7 +29,7 @@ public interface DocReviewService {
      * @Param [docId, reason] 文档的id 和 拒绝的原因
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> refuse(FileDocument fileDocument, String reason);
+    void refuse(FileDocument fileDocument, String reason);
 
     /**
      * @author luojiarui
@@ -37,7 +38,7 @@ public interface DocReviewService {
      * @Param [docId] 文档列表的id
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> refuseBatch(List<FileDocument> fileDocumentList, String reason);
+    void refuseBatch(List<FileDocument> fileDocumentList, String reason);
 
     /**
      * @author luojiarui
@@ -46,7 +47,7 @@ public interface DocReviewService {
      * @Param [fileDocumentList]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> approveBatch(List<FileDocument> fileDocumentList);
+    void approveBatch(List<FileDocument> fileDocumentList);
 
 
     /**
@@ -56,7 +57,7 @@ public interface DocReviewService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> deleteReviewsBatch(List<String> docIds, String userId);
+    UpdateResult deleteReviewsBatch(List<String> docIds, String userId);
 
     /**
      * @author luojiarui
@@ -66,7 +67,7 @@ public interface DocReviewService {
      * @Param [page, user]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin);
+    Map<String, Object> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin);
 
     void removeReviews(List<String> docIds);
 }

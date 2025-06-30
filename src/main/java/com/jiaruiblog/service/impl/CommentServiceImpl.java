@@ -1,6 +1,5 @@
 package com.jiaruiblog.service.impl;
 
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
@@ -9,7 +8,6 @@ import com.jiaruiblog.entity.dto.CommentWithUserDTO;
 import com.jiaruiblog.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.ICommentService;
-import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +52,9 @@ public class CommentServiceImpl implements ICommentService {
     MongoTemplate template;
 
     @Override
-    public ApiResult<Object> insert(Comment comment) {
+    public void insert(Comment comment) {
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return;
         }
         try {
             // 敏感词过滤
@@ -65,29 +63,26 @@ public class CommentServiceImpl implements ICommentService {
             content = filter.replaceSensitiveWord(content, 1,"*");
             comment.setContent(content);
         } catch (IOException e) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getLocalizedMessage());
+            return ;
         }
 
 
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
         template.save(comment, COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ApiResult<Object> update(Comment comment) {
-
+    public void update(Comment comment) {
         if( !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            return ;
         }
-
         Query query = new Query(Criteria.where("_id").is(comment.getId()));
         Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
                 .orElse(new Comment());
         if( !commentDb.getUserId().equals(comment.getUserId())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ;
         }
 
         Update update  = new Update();
@@ -97,21 +92,19 @@ public class CommentServiceImpl implements ICommentService {
             template.updateFirst(query, update, User.class);
         } catch (Exception e) {
             log.error("更新评论信息{}==>出错==>{}", comment, e);
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ;
         }
-        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
-    public ApiResult<Object> remove(Comment comment, String userId) {
+    public void remove(Comment comment, String userId) {
         Query query = new Query(Criteria.where(OBJECT_ID).is(comment.getId()));
         Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
                 .orElse(new Comment());
         if( !commentDb.getUserId().equals(comment.getUserId())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return ;
         }
         template.remove(query, Comment.class, COLLECTION_NAME);
-        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -122,13 +115,12 @@ public class CommentServiceImpl implements ICommentService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public ApiResult<Object> removeBatch(List<String> commentIdList) {
+    public void removeBatch(List<String> commentIdList) {
         Query query = new Query(Criteria.where(OBJECT_ID).in(commentIdList));
         DeleteResult remove = template.remove(query, Comment.class, COLLECTION_NAME);
         if (remove.getDeletedCount() < commentIdList.size()) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            return;
         }
-        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -139,9 +131,9 @@ public class CommentServiceImpl implements ICommentService {
      * @return com.jiaruiblog.utils.ApiResult
      **/
     @Override
-    public ApiResult<Object> queryById(CommentListDTO comment) {
+    public Map<String, Object> queryById(CommentListDTO comment) {
         if (comment == null || comment.getDocId() == null) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            return new HashMap<>();
         }
         Query query = new Query(Criteria.where(DOC_ID).is(comment.getDocId()))
                 .with(Sort.by(Sort.Direction.DESC, "createDate"));
@@ -170,12 +162,12 @@ public class CommentServiceImpl implements ICommentService {
         result.put("totalNum", totalNum);
         result.put("comments", commentWithUserVOList);
 
-        return ApiResult.success(result);
+        return result;
     }
 
     @Override
-    public ApiResult<Object> search(Comment comment) {
-        return ApiResult.success(MessageConstant.SUCCESS);
+    public Object search(Comment comment) {
+        return null;
     }
 
     /**
@@ -242,7 +234,7 @@ public class CommentServiceImpl implements ICommentService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public ApiResult<Object> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
+    public Map<String, Object> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
 
         log.info("查询的参数是：{}, {}", page, userId);
         Criteria criteria = new Criteria();
@@ -298,6 +290,6 @@ public class CommentServiceImpl implements ICommentService {
         result.put("total", count);
         result.put("pageNum", page.getPage());
         result.put("pageSize", page.getRows());
-        return ApiResult.success(result);
+        return result;
     }
 }

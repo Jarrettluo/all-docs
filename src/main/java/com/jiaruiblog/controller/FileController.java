@@ -367,7 +367,7 @@ public class FileController {
             throw new AuthenticationException();
         }
 
-        return ApiResult.success(fileService.documentUpload(file, userId, username);
+        return ApiResult.success(fileService.documentUpload(file, userId, username));
     }
 
     /**
@@ -403,7 +403,7 @@ public class FileController {
         if (files.length < 2) {
             skipError = Boolean.FALSE;
         }
-        return ApiResult.success(fileService.uploadBatch(category, tags, description, skipError, files, userId, username);
+        return ApiResult.success(fileService.uploadBatch(category, tags, description, skipError, files, userId, username));
     }
 
     /**
@@ -433,7 +433,7 @@ public class FileController {
         if (!CollectionUtils.isEmpty(tags) && tags.size() > 10) {
             tags = tags.subList(0, 10);
         }
-        return ApiResult.success(fileService.uploadByUrl(category, tags, name, description, url, userId, username);
+        return ApiResult.success(fileService.uploadByUrl(category, tags, name, description, url, userId, username));
     }
 
     /**

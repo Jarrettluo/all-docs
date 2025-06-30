@@ -19,6 +19,17 @@ public class BusinessException extends RuntimeException {
      *
      * @param errorCode 错误码枚举
      */
+    public BusinessException(ErrorCode errorCode) {
+        super(errorCode.getMessageKey());
+        this.code = errorCode.getCode();
+        this.args = null;
+    }
+
+    /**
+     * 构造方法，传入错误码枚举
+     *
+     * @param errorCode 错误码枚举
+     */
     public BusinessException(ErrorCode errorCode, MessageSource messageSource, Locale locale) {
         super(errorCode.getLocalizedMessage(messageSource, locale));
         this.code = errorCode.getCode();

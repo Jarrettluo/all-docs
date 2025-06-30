@@ -2,8 +2,8 @@ package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
+import com.jiaruiblog.entity.data.WordCloudItem;
 import com.jiaruiblog.entity.vo.PageVO;
-import com.jiaruiblog.util.BaseApiResult;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,6 +36,6 @@ public interface ElasticService {
 
     void removeByDocId(String docMd5);
 
-    ApiResult<Object> getWordStat() throws IOException;
+    List<WordCloudItem> getWordStat() throws IOException;
 
 }

@@ -1,9 +1,9 @@
 package com.jiaruiblog.service.impl;
 
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.CollectDocRelationship;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.CollectService;
-import com.jiaruiblog.util.BaseApiResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -38,12 +38,11 @@ public class CollectServiceImpl implements CollectService {
      * @Param [collect]
      **/
     @Override
-    public ApiResult<Object> insert(CollectDocRelationship collect) {
+    public void insert(CollectDocRelationship collect) {
         Boolean aBoolean = insertRelationShip(collect);
         if (Boolean.FALSE.equals(aBoolean)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
         }
-        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     @Override
@@ -64,13 +63,12 @@ public class CollectServiceImpl implements CollectService {
      * @Param [collect]
      **/
     @Override
-    public ApiResult<Object> remove(CollectDocRelationship collect) {
+    public void remove(CollectDocRelationship collect) {
         collect = getExistRelationship(collect);
         while (collect != null) {
             mongoTemplate.remove(collect, COLLECTION_NAME);
             collect = getExistRelationship(collect);
         }
-        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**

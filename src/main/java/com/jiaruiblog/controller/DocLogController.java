@@ -103,7 +103,8 @@ public class DocLogController {
         if (CollectionUtils.isEmpty(logIds)) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
         }
-        return ApiResult.success(docLogService.deleteDocLogBatch(logIds, (String) request.getAttribute("id")));
+        docLogService.deleteDocLogBatch(logIds, (String) request.getAttribute("id"));
+        return ApiResult.success("success");
     }
 
 }

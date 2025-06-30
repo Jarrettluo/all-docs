@@ -6,7 +6,6 @@ import com.jiaruiblog.entity.bo.UserBO;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserRoleDTO;
-import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -19,9 +18,9 @@ public interface IUserService {
 
     void initFirstUser();
 
-    ApiResult<Object> login(RegistryUserDTO userDTO);
+    Map<String, String> login(RegistryUserDTO userDTO);
 
-    ApiResult<Object> registry(RegistryUserDTO userDTO);
+    void registry(RegistryUserDTO userDTO);
 
     /**
      * @author luojiarui
@@ -30,9 +29,9 @@ public interface IUserService {
      * @Param [pageDTO]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> getUserList(BasePageDTO pageDTO);
+    Map<String, Object> getUserList(BasePageDTO pageDTO);
 
-    ApiResult<Object> changeUserRole(UserRoleDTO userRoleDTO);
+    void changeUserRole(UserRoleDTO userRoleDTO);
 
     /**
      * @author luojiarui
@@ -41,7 +40,7 @@ public interface IUserService {
      * @Param [userId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> blockUser(String userId);
+    void blockUser(String userId);
 
     User queryById(String userId);
 
@@ -56,21 +55,21 @@ public interface IUserService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> uploadUserAvatar(String userId, MultipartFile file);
+    void uploadUserAvatar(String userId, MultipartFile file);
 
     /**
      * Deleting a user profile picture
      * @param userId user index
      * @return BaseApiResult
      */
-    ApiResult<Object> removeUserAvatar(String userId);
+    void removeUserAvatar(String userId);
 
     /**
      * remove user entity
      * @param userId user index
      * @return BaseApiResult
      */
-    ApiResult<Object> removeUser(String userId);
+     void removeUser(String userId);
 
     /**
      * Remove user entities in batches
@@ -78,7 +77,7 @@ public interface IUserService {
      * @param adminUserId administrator index
      * @return BaseApiResult
      */
-    ApiResult<Object> deleteUserByIdBatch(List<String> userIdList, String adminUserId);
+    void deleteUserByIdBatch(List<String> userIdList, String adminUserId);
 
     Map<String, String> queryUserAvatarBatch(List<String> userIdList);
 
@@ -89,7 +88,7 @@ public interface IUserService {
      * @Param [userId, adminId] 被充值的用户id， 管理者的id
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> resetUserPwd(String userId, String adminId);
+    void resetUserPwd(String userId, String adminId);
 
 
     boolean isExist(String userId);

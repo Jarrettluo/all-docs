@@ -3,8 +3,8 @@ package com.jiaruiblog.service;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
+import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.TagVO;
-import com.jiaruiblog.util.BaseApiResult;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
@@ -22,55 +22,55 @@ public interface TagService {
      * @param tag tag
      * @return result
      */
-    ApiResult<Object> insert(Tag tag);
+    void insert(Tag tag);
 
     /**
      * update
      * @param tag tag
      * @return result
      */
-    ApiResult<Object> update(Tag tag);
+    void update(Tag tag);
 
     /**
      * remove
      * @param tag tag
      * @return result
      */
-    ApiResult<Object> remove(Tag tag);
+    void remove(Tag tag);
 
     /**
      * query
      * @param tag tag
      * @return result
      */
-    ApiResult<Object> queryById(Tag tag);
+    TagVO queryById(Tag tag);
 
     /**
      * search
      * @param tag tag
      * @return result
      */
-    ApiResult<Object> search(Tag tag);
+    List<TagVO> search(Tag tag);
 
     /**
      * list
      * @return result
      */
-    ApiResult<Object> list();
+    List<CateOrTagVO> list();
 
     /**
      * add relationship
      * @param relationship TagDocRelationship
      * @return BaseApiResult
      */
-    ApiResult<Object> addRelationShip(TagDocRelationship relationship);
+    void addRelationShip(TagDocRelationship relationship);
 
     /**
      * cancel relationship
      * @param relationship TagDocRelationShip
      * @return result
      */
-    ApiResult<Object> cancelTagRelationship(TagDocRelationship relationship);
+    void cancelTagRelationship(TagDocRelationship relationship);
 
     /**
      * get all relationships

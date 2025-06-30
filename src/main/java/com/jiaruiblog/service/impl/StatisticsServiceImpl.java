@@ -8,7 +8,6 @@ import com.jiaruiblog.entity.vo.MonthStatVO;
 import com.jiaruiblog.entity.vo.StatsVO;
 import com.jiaruiblog.entity.vo.TrendVO;
 import com.jiaruiblog.service.*;
-import com.jiaruiblog.util.BaseApiResult;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -57,7 +56,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @Param []
      **/
     @Override
-    public ApiResult<Object> trend() {
+    public List<TrendVO> trend() {
         List<Category> categoryList = categoryService.getRandom();
         List<TrendVO> trendVos = new ArrayList<>(3);
 
@@ -86,7 +85,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             trendVO.setDocList(docVos);
             trendVos.add(trendVO);
         }
-        return ApiResult.success(trendVos);
+        return trendVos;
     }
 
     /**
@@ -97,13 +96,13 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @Param []
      **/
     @Override
-    public ApiResult<Object> all() {
+    public StatsVO all() {
         StatsVO statsVO = new StatsVO();
         statsVO.setDocNum(fileService.countAllFile());
         statsVO.setCommentNum(commentService.countAllFile());
         statsVO.setCategoryNum(categoryService.countAllFile());
         statsVO.setTagNum(tagService.countAllFile());
-        return ApiResult.success(statsVO);
+        return statsVO;
     }
 
     /**
@@ -114,7 +113,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public ApiResult<Object> getMonthStat() {
+    public Map<String, Integer> getMonthStat() {
         // 获取当前日期
         LocalDate currentDate = LocalDate.now();
 
@@ -164,6 +163,6 @@ public class StatisticsServiceImpl implements StatisticsService {
             monthStatResult.replace(monthStatVO.getDate(), monthStatVO.getCount());
         }
 
-        return ApiResult.success(monthStatResult);
+        return monthStatResult;
     }
 }

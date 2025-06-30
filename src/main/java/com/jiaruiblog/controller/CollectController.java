@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 
 /**
+ * @author luojiarui
  * @ClassName CollectController
  * @Description user collection module
- * @author luojiarui
  * @Date 2022/6/4 3:11 下午
  * @Version 1.0
  **/
@@ -39,11 +39,11 @@ public class CollectController {
     private IFileService fileService;
 
     /**
+     * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
      * @Description 废弃该文档
      * @Date 13:30 2023/4/5
      * @Param [collect, request]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Deprecated
     @PostMapping(value = "/auth/insert")
@@ -53,7 +53,7 @@ public class CollectController {
         if (!userService.isExist(relationship.getUserId()) || !fileService.isExist(relationship.getDocId())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-         collectService.insert(relationship);
+        collectService.insert(relationship);
         return ApiResult.success("");
     }
 

@@ -3,9 +3,9 @@ package com.jiaruiblog.service;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
-import com.jiaruiblog.util.BaseApiResult;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author jiarui.luo
@@ -17,14 +17,14 @@ public interface ICommentService {
      * @param comment Comment
      * @return result
      */
-    ApiResult<Object> insert(Comment comment);
+    void insert(Comment comment);
 
     /**
      * update
      * @param comment Comment
      * @return result
      */
-    ApiResult<Object> update(Comment comment);
+    void update(Comment comment);
 
     /**
      * remove
@@ -32,7 +32,7 @@ public interface ICommentService {
      * @param userId userId
      * @return result
      */
-    ApiResult<Object> remove(Comment comment, String userId);
+    void remove(Comment comment, String userId);
 
     /**
      * @author luojiarui
@@ -41,21 +41,21 @@ public interface ICommentService {
      * @Param [commentIdList]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> removeBatch(List<String> commentIdList);
+    void removeBatch(List<String> commentIdList);
 
     /**
      * queryById
      * @param comment CommentListDTO
      * @return result
      */
-    ApiResult<Object> queryById(CommentListDTO comment);
+    Map<String, Object> queryById(CommentListDTO comment);
 
     /**
      * search
      * @param comment Comment
      * @return result
      */
-    ApiResult<Object> search(Comment comment);
+    Object search(Comment comment);
 
     /**
      * @author luojiarui
@@ -64,7 +64,7 @@ public interface ICommentService {
      * @Param [pageDTO, userId]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> queryAllComments(BasePageDTO pageDTO, String userId, Boolean isAdmin);
+    Map<String, Object> queryAllComments(BasePageDTO pageDTO, String userId, Boolean isAdmin);
 
     long countAllFile();
 

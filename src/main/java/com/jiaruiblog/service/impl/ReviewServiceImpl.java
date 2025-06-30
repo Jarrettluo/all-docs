@@ -1,6 +1,5 @@
 package com.jiaruiblog.service.impl;
 
-import com.jiaruiblog.util.BaseApiResult;
 import com.jiaruiblog.util.JavaSerializable;
 import org.apache.commons.compress.utils.Lists;
 
@@ -76,7 +75,7 @@ public class ReviewServiceImpl {
      *
      * @return -> BaseApiResult
      */
-    public ApiResult<Object> query() {
+    public List<Map<String, String>> query() {
         List<Map<String, String>> result = Lists.newArrayList();
         for (String s : selectOption) {
             Map<String, String> reviewValue = new HashMap<>(8);
@@ -84,6 +83,6 @@ public class ReviewServiceImpl {
             reviewValue.put("value", s);
             result.add(reviewValue);
         }
-        return ApiResult.success(result);
+        return result;
     }
 }

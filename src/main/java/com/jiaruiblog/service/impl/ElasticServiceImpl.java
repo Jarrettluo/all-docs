@@ -8,7 +8,6 @@ import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.entity.data.WordCloudItem;
 import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.service.ElasticService;
-import com.jiaruiblog.util.BaseApiResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -131,7 +130,7 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     @Override
-    public ApiResult<Object> getWordStat() throws IOException {
+    public List<WordCloudItem> getWordStat() throws IOException {
         SearchResponse<Void> response = client.search(s -> s
             .index(INDEX_NAME)
             .query(Query.of(q -> q.matchAll(m -> m)))
@@ -150,7 +149,7 @@ public class ElasticServiceImpl implements ElasticService {
             .map(b -> new WordCloudItem(b.key().stringValue(), b.docCount()))
             .sorted(Comparator.comparingLong(WordCloudItem::getCount).reversed())
             .collect(Collectors.toList());
-        return ApiResult.success(wordCloudItems);
+        return wordCloudItems;
     }
 
     private String getHighlightContent(Map<String, List<String>> highlight) {

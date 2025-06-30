@@ -1,8 +1,8 @@
 package com.jiaruiblog.config;
 
 import com.healthmarketscience.jackcess.ConstraintViolationException;
+import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.util.BaseApiResult;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.auth.AuthenticationException;
@@ -31,7 +31,6 @@ public class CommonExceptionHandler {
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public ApiResult<Object> handle(Exception e) {
-        e.printStackTrace();
         if (e instanceof MaxUploadSizeExceededException) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.FILE_SIZE_ERROR);
         } else if (e instanceof HttpRequestMethodNotSupportedException) {
@@ -47,7 +46,6 @@ public class CommonExceptionHandler {
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ApiResult<Object> dealMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        e.printStackTrace();
         return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "参数异常");
     }
 
@@ -60,7 +58,6 @@ public class CommonExceptionHandler {
      **/
     @ExceptionHandler(BindException.class)
     public ApiResult<Object> handleValidation(BindException e) {
-        e.printStackTrace();
         return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "请求异常，请检查");
     }
 
@@ -81,7 +78,6 @@ public class CommonExceptionHandler {
      */
     @ExceptionHandler(HttpMessageConversionException.class)
     public ApiResult<Object> parameterTypeException(HttpMessageConversionException exception) {
-        exception.printStackTrace();
         return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, "类型转换错误");
     }
 

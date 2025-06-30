@@ -5,7 +5,6 @@ import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.service.IDocLogService;
-import com.jiaruiblog.util.BaseApiResult;
 import com.mongodb.client.result.DeleteResult;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Sort;
@@ -95,7 +94,7 @@ public class DocLogServiceImpl implements IDocLogService {
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
-    public ApiResult<Object> deleteDocLogBatch(List<String> logIds, String userId) {
+    public void deleteDocLogBatch(List<String> logIds, String userId) {
 //        User user = userServiceImpl.queryById(userId);
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").in(logIds));
@@ -103,7 +102,6 @@ public class DocLogServiceImpl implements IDocLogService {
 //            query.addCriteria(Criteria.where("userId").is(user.getId()));
 //        }
         DeleteResult remove = mongoTemplate.remove(query, DocLog.class, DOC_LOG_COLLECTION);
-        return ApiResult.success(String.format(RESULT, remove.getDeletedCount()));
     }
 
 }

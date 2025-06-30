@@ -1,6 +1,10 @@
 package com.jiaruiblog.service;
 
-import com.jiaruiblog.util.BaseApiResult;
+import com.jiaruiblog.entity.vo.StatsVO;
+import com.jiaruiblog.entity.vo.TrendVO;
+
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -12,13 +16,13 @@ public interface StatisticsService {
      * trend
      * @return trend
      */
-    ApiResult<Object> trend();
+    List<TrendVO> trend();
 
     /**
      * all
      * @return all
      */
-    ApiResult<Object> all();
+    StatsVO all();
 
     /**
      * @author luojiarui
@@ -27,6 +31,6 @@ public interface StatisticsService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    ApiResult<Object> getMonthStat();
+    Map<String, Integer> getMonthStat();
 
 }

@@ -58,7 +58,7 @@ public class DocReviewController {
     @Operation(summary = "查询需要评审的文档列表", description = "管理员可以查询所有需要评审的文档列表")
     @GetMapping("queryDocForReview")
     public ApiResult<Object> queryDocReviewList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams) {
-        return ApiResult.success(fileService.queryFileDocumentResult(pageParams, true);
+        return ApiResult.success(fileService.queryFileDocumentResult(pageParams, true));
     }
 
 
@@ -75,7 +75,7 @@ public class DocReviewController {
     public ApiResult<Object> updateDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
                                         @Parameter(hidden = true) HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        return ApiResult.success(docReviewService.userRead(batchIdDTO.getIds(), userId);
+        return ApiResult.success(docReviewService.userRead(batchIdDTO.getIds(), userId));
     }
 
     /**
@@ -99,7 +99,8 @@ public class DocReviewController {
         if (CollectionUtils.isEmpty(fileDocumentList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return ApiResult.success(docReviewService.refuse(fileDocumentList.get(0), reason);
+        docReviewService.refuse(fileDocumentList.get(0), reason);
+        return ApiResult.success("success");
     }
 
     /**
@@ -122,7 +123,8 @@ public class DocReviewController {
         if (CollectionUtils.isEmpty(fileDocumentList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return ApiResult.success(docReviewService.refuseBatch(fileDocumentList, reason));
+        docReviewService.refuseBatch(fileDocumentList, reason);
+        return ApiResult.success("success");
     }
     /**
      * @author luojiarui
@@ -143,7 +145,8 @@ public class DocReviewController {
         if (CollectionUtils.isEmpty(fileDocumentList)) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return ApiResult.success(docReviewService.approveBatch(fileDocumentList));
+        docReviewService.approveBatch(fileDocumentList);
+        return ApiResult.success("success");
     }
     /**
      * @return com.jiaruiblog.util.BaseApiResult

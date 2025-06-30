@@ -68,7 +68,8 @@ public class UserController {
         if (Boolean.FALSE.equals(systemConfig.getUserRegistry())) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return ApiResult.success(userService.registry(userDTO));
+        userService.registry(userDTO);
+        return ApiResult.success("success");
     }
 
     @Operation(summary = "批量新增用户", description = "批量新增用户; 支持使用xls进行导入用户信息")
@@ -139,7 +140,8 @@ public class UserController {
         if (userId == null || userId.equals(removeUserId)) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return ApiResult.success(userService.removeUser(removeUserId));
+        userService.removeUser(removeUserId);
+        return ApiResult.success("success");
     }
 
     /**
@@ -159,7 +161,8 @@ public class UserController {
         if (userIdList.size() > ConfigConstant.MAX_DELETE_NUM) {
             return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return ApiResult.success(userService.deleteUserByIdBatch(userIdList, adminUserId));
+        userService.deleteUserByIdBatch(userIdList, adminUserId);
+        return ApiResult.success("success");
     }
 
 
@@ -215,7 +218,8 @@ public class UserController {
         if (userRoleDTO.getUserId().equals(adminUserId)) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return ApiResult.success(userService.changeUserRole(userRoleDTO));
+        userService.changeUserRole(userRoleDTO);
+        return ApiResult.success("success");
     }
 
     /**
@@ -237,7 +241,8 @@ public class UserController {
         if (userId.equals(adminUserId)) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
         }
-        return ApiResult.success(userService.blockUser(userId));
+        userService.blockUser(userId);
+        return ApiResult.success("success");
     }
 
     /**
@@ -282,20 +287,23 @@ public class UserController {
         if (!Arrays.asList(availableTypes).contains(type)) {
             return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
         }
-        return ApiResult.success(userService.uploadUserAvatar(userId, file));
+        userService.uploadUserAvatar(userId, file);
+        return ApiResult.success("success");
     }
 
     @Operation(summary = "删除用户头像", description = "删除当前登录用户的头像")
     @DeleteMapping("/auth/removeUserAvatar")
     public ApiResult<Object> removeUserAvatar(HttpServletRequest request) {
-        return ApiResult.success(userService.removeUserAvatar((String) request.getAttribute("id")));
+        userService.removeUserAvatar((String) request.getAttribute("id"));
+        return ApiResult.success("success");
     }
 
     @Operation(summary = "重置用户密码", description = "管理员对用户进行密码重置")
     @PostMapping("auth/resetUserPwd")
     public ApiResult<Object> resetUserPwd(@RequestBody String userId, HttpServletRequest request) {
         String adminId = (String) request.getAttribute("id");
-        return ApiResult.success(userService.resetUserPwd(userId, adminId));
+        userService.resetUserPwd(userId, adminId);
+        return ApiResult.success("success");
     }
 
     @Operation(summary = "用户发起找回密码的请求，发送token给邮箱")
