@@ -23,6 +23,11 @@ public record ApiResult<T>(int code, String message, T data) {
     }
 
     // 快速构建成功响应（仅消息，无数据）
+    public static <T> ApiResult<T> success() {
+        return new ApiResult<>(200, "success", null);
+    }
+
+    // 快速构建成功响应（仅消息，无数据）
     public static <T> ApiResult<T> error(int code, String message) {
         return new ApiResult<>(code, message, null);
     }

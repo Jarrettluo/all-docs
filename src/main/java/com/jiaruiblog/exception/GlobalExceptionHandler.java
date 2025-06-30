@@ -1,7 +1,6 @@
 package com.jiaruiblog.exception;
 
 import com.jiaruiblog.common.ApiResult;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.auth.AuthenticationException;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.Locale;
 
@@ -29,15 +29,18 @@ public class GlobalExceptionHandler {
     @Autowired
     MessageSource messageSource;
 
+    @Autowired
+    LocaleResolver localeResolver;
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResult<Void>> handleBusinessException(
             BusinessException ex,
             HttpServletRequest request) {
-        Locale locale = request.getLocale();
-
+        Locale locale = localeResolver.resolveLocale(request);
         // 直接使用 ErrorCode 的缓存能力
         String mainMessage = ex.getErrorCode().getMessage(messageSource, locale,
                 ex.getMessageArgs());
+
         // 拼接主消息和详情消息
         String fullMessage = ex.getDetailMessage() != null
                 ? mainMessage + " (" + ex.getDetailMessage() + ")"

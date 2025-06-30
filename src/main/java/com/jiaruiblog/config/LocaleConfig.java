@@ -24,16 +24,18 @@ public class LocaleConfig {
             public Locale resolveLocale(HttpServletRequest request) {
                 String lang = request.getParameter("lang");
                 if (lang != null && !lang.isEmpty()) {
-                    return Locale.forLanguageTag(lang);
+                    try {
+                        return Locale.forLanguageTag(lang.replace("_", "-"));  // 处理下划线格式
+                    } catch (Exception e) {
+                        // 参数无效时回退
+                    }
                 }
                 return headerResolver.resolveLocale(request);
             }
 
             @Override
-            public void setLocale(HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  Locale locale) {
-                headerResolver.setLocale(request, response, locale);
+            public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+                throw new UnsupportedOperationException("禁止动态修改Locale");
             }
         };
     }
