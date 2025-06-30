@@ -2,8 +2,10 @@ package com.jiaruiblog.service;
 
 import com.jiaruiblog.entity.CateDocRelationship;
 import com.jiaruiblog.entity.Category;
+import com.jiaruiblog.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.CategoryVO;
+import com.jiaruiblog.entity.vo.PageVO;
 
 import java.util.List;
 import java.util.Map;
@@ -97,8 +99,8 @@ public interface CategoryService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Map<String, Object> getMyUploaded(String cateId, String tagId, String keyword,
-                                     Long pageNum, Long pageSize, String userId);
+    PageVO<FileDocumentDTO> getMyUploaded(String cateId, String tagId, String keyword,
+                                          Long pageNum, Long pageSize, String userId);
 
     List<Category> getRandom();
 

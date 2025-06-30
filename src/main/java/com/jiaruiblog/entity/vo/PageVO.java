@@ -1,10 +1,12 @@
 package com.jiaruiblog.entity.vo;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@Builder
 public class PageVO<T> {
 
     private long total;        // 总记录数

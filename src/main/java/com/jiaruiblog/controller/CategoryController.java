@@ -7,9 +7,11 @@ import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
 import com.jiaruiblog.entity.dto.CategoryDTO;
+import com.jiaruiblog.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.entity.dto.QueryDocByTagCateDTO;
 import com.jiaruiblog.entity.dto.RelationDTO;
 import com.jiaruiblog.entity.vo.CateOrTagVO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.enums.FilterTypeEnum;
 import com.jiaruiblog.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.exception.ErrorCode;
@@ -44,6 +46,7 @@ public class CategoryController {
     public ApiResult<Void> insert(@RequestBody CategoryDTO categoryDTO) {
         categoryDTO.setId(null);
         String name = categoryDTO.getName();
+        // 中英文下划线横向，1-64位
         if (!name.matches(RegexConstant.CH_ENG_WORD)) {
             throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
         }
@@ -183,9 +186,9 @@ public class CategoryController {
     }
 
     @GetMapping(value = "/auth/getMyUploaded")
-    public ApiResult<Map<String, Object>> getMyUploaded(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<PageVO<FileDocumentDTO>> getMyUploaded(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        Map<String, Object> result = categoryService.getMyUploaded(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
+        PageVO<FileDocumentDTO> result = categoryService.getMyUploaded(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
                 Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()),
                 userId);
         return ApiResult.success(result);

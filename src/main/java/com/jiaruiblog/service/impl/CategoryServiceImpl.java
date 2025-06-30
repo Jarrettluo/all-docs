@@ -5,7 +5,10 @@ import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.CategoryVO;
+import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.enums.RedisActionEnum;
+import com.jiaruiblog.exception.BusinessExceptionBuilder;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.CategoryService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -52,30 +55,27 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * 新增一条分类记录
-     * todo 这里需要考虑并发插入的事务问题
+     * 这里需要考虑并发插入的事务问题
      *
      * @param category -> Category 实体
-     * @return -> BaseApiResult
      */
     @Override
     public void insert(Category category) {
         if (!isNameExist(category.getName()).isEmpty()) {
-//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
         }
         mongoTemplate.save(category, COLLECTION_NAME);
-//        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
      * 更新一条已经存在的记录
      *
      * @param category -> Category 实体
-     * @return -> BaseApiResult
      */
     @Override
     public void update(Category category) {
         if (isNameExist(category.getName()).isEmpty()) {
-//            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw BusinessExceptionBuilder.of(ErrorCode.CATEGORY_NOT_FOUND).build();
         }
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(category.getId()));
@@ -87,17 +87,14 @@ public class CategoryServiceImpl implements CategoryService {
         // 异步更新该分类下的文本信息，避免出现已经被删除的文档还放在该分类中
         // 联合查询关系表和文档表；如果类型下的文档是存在的，则返回true，否则进行删除分类下的文档信息
 
-//        return ApiResult.success(MessageConstant.SUCCESS);
-
 
     }
 
     /**
-     * @author luojiarui
-     * @Description 有就返回分类的id；没有的话就新增后返回id
-     * @Date 10:32 2023/4/22
-     * @Param [cateName]
+     * 有就返回分类的id；没有的话就新增后返回id
+     *
      * @return java.lang.String
+     * @author luojiarui
      **/
     @Override
     public String saveOrUpdateCate(String cateName) {
@@ -120,21 +117,19 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
+     * 判断该名字是否存在，如果是存在的则返回true，否则返回false
+     *
      * @return boolean
      * @author luojiarui
-     * @Description // 判断该名字是否存在，如果是存在的则返回true，否则返回false
-     * @Date 11:47 上午 2022/6/25
-     * @Param [name]
      **/
     private List<Category> isNameExist(String name) {
         Query query = new Query(Criteria.where("name").is(name));
         List<Category> categories = mongoTemplate.find(query, Category.class, COLLECTION_NAME);
-        return Optional.ofNullable(categories).orElse(new ArrayList<>());
+        return Optional.of(categories).orElse(new ArrayList<>());
     }
 
     /**
      * @param category -> Category 实体
-     * @return -> BaseApiResult
      */
     @Override
     public void remove(Category category) {
@@ -144,12 +139,12 @@ public class CategoryServiceImpl implements CategoryService {
         // 删除掉相关的分类关系
         Query query1 = new Query().addCriteria(Criteria.where(CATEGORY_ID).is(category.getId()));
         mongoTemplate.remove(query1, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-//        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
 
     @Override
     public void search(Category category) {
+        // TODO 待开发
 //        return null;
     }
 
@@ -171,15 +166,13 @@ public class CategoryServiceImpl implements CategoryService {
 
         AggregationResults<CateOrTagVO> result = mongoTemplate.aggregate(
                 aggregation, COLLECTION_NAME, CateOrTagVO.class);
-        List<CateOrTagVO> resultList = result.getMappedResults();
-        return resultList;
+        return result.getMappedResults();
     }
 
     /**
      * 增加某个文件的分类关系
      *
      * @param relationship -> CateDocRelationship
-     * @return -> BaseApiResult
      */
     @Override
     public void addRelationShip(CateDocRelationship relationship) {
@@ -254,14 +247,12 @@ public class CategoryServiceImpl implements CategoryService {
      * 取消某个文件在分类下的关联关系
      *
      * @param relationship -> CateDocRelationship
-     * @return -> CateDocRelationship
      */
     @Override
     public void cancelCategoryRelationship(CateDocRelationship relationship) {
         Query query = new Query(Criteria.where(CATEGORY_ID).is(relationship.getCategoryId())
                 .and(FILE_ID).is(relationship.getFileId()));
         mongoTemplate.remove(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
-//        return ApiResult.success(MessageConstant.SUCCESS);
     }
 
     /**
@@ -288,7 +279,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public Category queryById(String id) {
-        if (id == null || "".equals(id)) {
+        if (id == null || id.isEmpty()) {
             return null;
         }
         return mongoTemplate.findById(id, Category.class, COLLECTION_NAME);
@@ -297,9 +288,7 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * @return com.jiaruiblog.entity.Category
      * @author luojiarui
-     * @Description //根据文档的信息返回分类信息
-     * @Date 10:52 下午 2022/6/22
-     * @Param [docId]
+     * 根据文档的信息返回分类信息
      **/
     @Override
     public CategoryVO queryByDocId(String docId) {
@@ -345,9 +334,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     /**
      * @author luojiarui
-     * @Description // 根据文档的id进行分类和文档的关系删除，这里文档的id是fileId
-     * @Date 11:20 上午 2022/6/25
-     * @Param [docId]
+     * 根据文档的id进行分类和文档的关系删除，这里文档的id是fileId
      **/
     @Override
     public void removeRelateByDocId(String docId) {
@@ -359,9 +346,7 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * @return java.util.List<com.jiaruiblog.entity.Category>
      * @author luojiarui
-     * @Description //热度随机产生
-     * @Date 4:58 下午 2022/6/26
-     * @Param []
+     * 热度随机产生22/6/26
      **/
     @Override
     public List<Category> getRandom() {
@@ -377,9 +362,7 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * @return java.util.List<com.jiaruiblog.entity.CateDocRelationship>
      * @author luojiarui
-     * @Description // 根据总类查询关系
-     * @Date 5:00 下午 2022/6/26
-     * @Param [cateId]
+     * 根据总类查询关系
      **/
     @Override
     public List<CateDocRelationship> getRelateByCateId(String cateId) {
@@ -396,9 +379,7 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * @return java.lang.Integer
      * @author luojiarui
-     * @Description // 统计总数
-     * @Date 4:40 下午 2022/6/26
-     * @Param []
+     * 统计总数
      **/
     @Override
     public long countAllFile() {
@@ -408,9 +389,7 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * @return boolean
      * @author luojiarui
-     * @Description 某个分类和文档是否存在关系
-     * @Date 22:19 2022/11/16
-     * @Param [categoryId, fileId]
+     * 某个分类和文档是否存在关系
      **/
     @Override
     public boolean relateExist(String categoryId, String fileId) {
@@ -424,9 +403,7 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 根据分类id， 标签id，搜索内容联合查询文档
-     * @Date 21:50 2023/1/6
-     * @Param [cateId, tagId, keyword, pageNum, pageSize]
+     * 根据分类id， 标签id，搜索内容联合查询文档
      **/
     @Override
     public Map<String, Object> getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
@@ -557,8 +534,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Map<String, Object> getMyUploaded(String cateId, String tagId, String keyword, Long pageNum, Long pageSize,
-                                       String userId) {
+    public PageVO<FileDocumentDTO> getMyUploaded(String cateId, String tagId, String keyword, Long pageNum, Long pageSize,
+                                             String userId) {
         Criteria criteria = new Criteria();
         if (StringUtils.hasText(cateId) && StringUtils.hasText(tagId)) {
             criteria = Criteria.where("abc.categoryId").is(cateId)
@@ -609,13 +586,12 @@ public class CategoryServiceImpl implements CategoryService {
                 FileServiceImpl.COLLECTION_NAME, FileDocumentDTO.class);
         List<FileDocumentDTO> mappedResults = aggregate.getMappedResults();
 
+        return PageVO.<FileDocumentDTO>builder()
+                .total(count)
+                .list(mappedResults)
+                .pageNum(pageNum.intValue())
+                .pageSize(pageSize.intValue())
+                .build();
 
-        Map<String, Object> result = new HashMap<>(20);
-        result.put("data", mappedResults);
-        result.put("total", count);
-        result.put("pageNum", pageNum);
-        result.put("pageSize", pageSize);
-
-        return result;
     }
 }

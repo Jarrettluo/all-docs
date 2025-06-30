@@ -4,12 +4,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 
 
 /**
- * @ClassName AuthConfig
- * @Description 登录拦截器配置，参考地址
- * https://cloud.tencent.com/developer/article/1860615
  * @author luojiarui
- * @Date 2022/12/7 20:39
- * @Version 1.0
  **/
 //@Configuration
 public class AuthConfig extends WebMvcConfigurationSupport {
