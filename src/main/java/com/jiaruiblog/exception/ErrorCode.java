@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 public enum ErrorCode {
 
+    SUCCESS(2000, "error-code.success"),
+
     // HTTP Status Codes
     NOT_FOUND(404, "error-code.not-found"),
     INVALID_PARAM(400, "error-code.bad-request"),
@@ -27,6 +29,11 @@ public enum ErrorCode {
     ACCOUNT_LOCKED(1006, "error-code.account-locked"),
     PASSWORD_EXPIRED(1007, "error-code.password-expired"),
     INVALID_PASSWORD(1008, "error-code.invalid-password"),
+
+    // Common Error Codes (merged from MessageConstant)
+    PARAMS_ERROR(1201, "error-code.params-error"),
+    PROCESS_ERROR(1202, "error-code.process-error"),
+    OPERATE_FAILED(1203, "error-code.operate-failed"),
 
     // File Related
     FILE_NOT_FOUND(2001, "error-code.file-not-found"),
