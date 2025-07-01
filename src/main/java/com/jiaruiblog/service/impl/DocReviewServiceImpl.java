@@ -4,6 +4,7 @@ import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.vo.PageVO;
+import com.jiaruiblog.repository.DocReviewRepository;
 import com.jiaruiblog.service.DocReviewService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.mongodb.DuplicateKeyException;
@@ -11,7 +12,6 @@ import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.Resource;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -21,6 +21,9 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 /**
  * @ClassName DocReviewServiceImpl
  * @Description 文档评审
@@ -31,14 +34,14 @@ import java.util.List;
 @Service
 public class DocReviewServiceImpl implements DocReviewService {
 
-    public static final String DOC_REVIEW_COLLECTION = "docReview";
+//    public static final String DOC_REVIEW_COLLECTION = "docReview";
 
     public static final String RESULT = "操作成功了 %d 项目";
     public static final String USER_ID = "userId";
     public static final String DOC_ID = "docId";
-
-    @Resource
-    MongoTemplate mongoTemplate;
+//
+//    @Resource
+//    MongoTemplate mongoTemplate;
 
 //    @Resource
 //    private UserServiceImpl userServiceImpl;
@@ -46,28 +49,25 @@ public class DocReviewServiceImpl implements DocReviewService {
     @Resource
     private TaskExecuteService taskExecuteService;
 
+
+    @Resource
+    private DocReviewRepository docReviewRepository;
+
     @Override
     public UpdateResult userRead(List<String> ids, String userId) {
-        // 只能读自己的 文档评审意见//.and(USER_ID).is(userId));
         Query query = new Query(Criteria.where("_id").in(ids));
         Update update = new Update();
-        // 修改为已读状态
         update.set("readState", true);
-        // 修改更新时间
         update.set("updateDate", new Date());
-        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, DocReview.class, DOC_REVIEW_COLLECTION);
-        return updateResult;
+        return docReviewRepository.updateMulti(query, update);
     }
 
     @Override
     public void refuse(FileDocument fileDocument, String reason) {
-        // 删除某个文档
         DocReview docReview = docReviewInstance(fileDocument, reason, false);
-        if (docReview == null) {
-            return;
+        if (docReview != null) {
+            docReviewRepository.save(docReview);
         }
-
-        mongoTemplate.save(docReview, DOC_REVIEW_COLLECTION);
     }
 
     /**
@@ -95,19 +95,14 @@ public class DocReviewServiceImpl implements DocReviewService {
         return docReview;
     }
 
+
     @Override
-    public void refuseBatch( List<FileDocument> fileDocumentList, String reason) {
-        List<DocReview> docReviews = Lists.newArrayList();
-        for (FileDocument fileDocument : fileDocumentList) {
-            docReviews.add(docReviewInstance(fileDocument, reason, false));
-        }
-        // 可以进行批量操作，相对效率较save更高
-        try {
-            mongoTemplate.insert(docReviews, DOC_REVIEW_COLLECTION);
-            return;
-        } catch (DuplicateKeyException e) {
-            return;
-        }
+    public void refuseBatch(List<FileDocument> fileDocumentList, String reason) {
+        List<DocReview> docReviews = fileDocumentList.stream()
+                .map(file -> docReviewInstance(file, reason, false))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        docReviewRepository.saveAll(docReviews);
     }
 
     @Override
@@ -119,8 +114,7 @@ public class DocReviewServiceImpl implements DocReviewService {
         }
         // 可以进行批量操作，相对效率较save更高
         try {
-            mongoTemplate.insert(docReviews, DOC_REVIEW_COLLECTION);
-            return ;
+            docReviewRepository.saveAll(docReviews);
         } catch (DuplicateKeyException e) {
             return;
         }
@@ -161,8 +155,7 @@ public class DocReviewServiceImpl implements DocReviewService {
      **/
     @Override
     public boolean docIdExist(List<String> docIds) {
-        Query query = new Query(Criteria.where("docId").in(docIds));
-        return mongoTemplate.count(query, DocReview.class, DOC_REVIEW_COLLECTION) > 0;
+        return docReviewRepository.existsByDocIdIn(docIds);
     }
 
     /***
@@ -185,42 +178,37 @@ public class DocReviewServiceImpl implements DocReviewService {
         Update update = new Update();
         update.set("userRemove", true);
         update.set("updateDate", new Date());
-        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, DocReview.class, DOC_REVIEW_COLLECTION);
+        UpdateResult updateResult = docReviewRepository.updateMulti(query, update);
         return updateResult;
     }
 
     @Override
     public PageVO<DocReview> queryReviewLog(BasePageDTO page, String userId, Boolean isAdmin) {
-
-        // 根据不同的user进行区分，如果不是管理员，则必须输入用户id
         Query query = new Query();
         if (!isAdmin && userId != null) {
             query.addCriteria(Criteria.where(USER_ID).is(userId));
         }
-        long count = mongoTemplate.count(query, DocReview.class, DOC_REVIEW_COLLECTION);
+        long count = docReviewRepository.countByQuery(query);
 
         query.with(Sort.by(Sort.Direction.DESC, "createDate"));
         query.skip((long) (page.getPage()-1) * page.getRows());
         query.limit(page.getRows());
 
-        // 还需要进行分页
-        List<DocReview> docReviews = mongoTemplate.find(query, DocReview.class, DOC_REVIEW_COLLECTION);
-
+        List<DocReview> docReviews = docReviewRepository.findByQuery(query);
         return PageVO.<DocReview>builder()
                 .total(count)
                 .list(docReviews)
-                .pageNum( page.getPage())
+                .pageNum(page.getPage())
                 .pageSize(page.getRows())
                 .build();
-
     }
 
+
     @Override
-    public void removeReviews(List<String> docIds){
-        if (CollectionUtils.isEmpty(docIds)) {
-            return;
+    public void removeReviews(List<String> docIds) {
+        if (!CollectionUtils.isEmpty(docIds)) {
+            Query query = new Query(Criteria.where(DOC_ID).in(docIds));
+            docReviewRepository.deleteByQuery(query);
         }
-        Query query = new Query(Criteria.where(DOC_ID).in(docIds));
-        mongoTemplate.remove(query, DocReview.class, DOC_REVIEW_COLLECTION);
     }
 }
