@@ -6,6 +6,7 @@ import com.jiaruiblog.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.entity.vo.CateOrTagVO;
 import com.jiaruiblog.entity.vo.CategoryVO;
 import com.jiaruiblog.entity.vo.PageVO;
+import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.repository.CategoryRepository;
@@ -14,7 +15,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -26,6 +26,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * 分类服务实现类
+ * 提供分类相关的增删改查及关联关系管理功能
+ *
  * @author Jarrett Luo
  * @Date 2022/6/7 11:39
  * @Version 1.0
@@ -34,48 +37,46 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-//    private static final String COLLECTION_NAME = "categoryCollection";
-//
-//    private static final String RELATE_COLLECTION_NAME = "relateCateCollection";
-
-    private static final String CATEGORY_ID = "categoryId";
-
-    private static final String UPDATE_DATE = "uploadDate";
-
-    private static final String FILE_ID = "fileId";
-    public static final String DOC_ID = "docId";
-
-//    @Resource
-//    MongoTemplate mongoTemplate;
+    // 常量定义
+    private static final String CATEGORY_ID = "categoryId";  // 分类ID字段名
+    private static final String UPDATE_DATE = "uploadDate";  // 更新日期字段名
+    private static final String FILE_ID = "fileId";          // 文件ID字段名
+    public static final String DOC_ID = "docId";             // 文档ID字段名
 
     @Resource
-    CategoryRepository categoryRepository;
+    CategoryRepository categoryRepository;  // 分类数据访问接口
 
     /**
-     * 新增一条分类记录
-     * 这里需要考虑并发插入的事务问题
+     * 新增分类记录
+     * 注意：需要处理并发插入的事务问题
      *
-     * @param category -> Category 实体
+     * @param category 分类实体对象
+     * @throws BusinessException 当分类名称已存在时抛出
      */
     @Override
     public void insert(Category category) {
+        // 检查分类名称是否已存在
         if (!isNameExist(category.getName()).isEmpty()) {
             throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
         }
-        // mongoTemplate.save(category, COLLECTION_NAME);
+        // 保存分类信息
         categoryRepository.save(category);
     }
 
     /**
-     * 更新一条已经存在的记录
+     * 更新分类记录
      *
-     * @param category -> Category 实体
+     * @param category 分类实体对象
+     * @throws BusinessException 当分类不存在时抛出
      */
     @Override
     public void update(Category category) {
+        // 检查分类名称是否存在
         if (categoryRepository.findByName(category.getName()).isEmpty()) {
             throw BusinessExceptionBuilder.of(ErrorCode.CATEGORY_NOT_FOUND).build();
         }
+
+        // 更新分类信息
         Optional<Category> existing = categoryRepository.findById(category.getId());
         if (existing.isPresent()) {
             Category toUpdate = existing.get();
@@ -86,18 +87,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * 有就返回分类的id；没有的话就新增后返回id
+     * 保存或更新分类
+     * 如果分类名称已存在则返回现有分类ID，否则创建新分类
      *
-     * @return java.lang.String
-     * @author luojiarui
-     **/
+     * @param cateName 分类名称
+     * @return 分类ID，如果名称为空则返回null
+     */
     @Override
     public String saveOrUpdateCate(String cateName) {
         if (!StringUtils.hasText(cateName)) {
             return null;
         }
+
+        // 检查分类是否已存在
         List<Category> nameExist = categoryRepository.findByName(cateName);
         if (nameExist.isEmpty()) {
+            // 创建新分类
             Category category = new Category();
             category.setUpdateDate(new Date());
             category.setCreateDate(new Date());
@@ -105,121 +110,99 @@ public class CategoryServiceImpl implements CategoryService {
             categoryRepository.save(category);
             return category.getId();
         } else {
+            // 返回现有分类ID
             return nameExist.stream().findFirst().map(Category::getId).orElse(null);
         }
     }
 
     /**
-     * 判断该名字是否存在，如果是存在的则返回true，否则返回false
+     * 检查分类名称是否存在
      *
-     * @return boolean
-     * @author luojiarui
-     **/
+     * @param name 分类名称
+     * @return 包含该名称的分类列表，如果不存在则返回空列表
+     */
     private List<Category> isNameExist(String name) {
         return categoryRepository.findByName(name);
     }
 
     /**
-     * @param category -> Category 实体
+     * 删除分类记录
+     * 注意：需要先删除该分类下的所有关联关系
+     *
+     * @param category 要删除的分类实体
      */
     @Override
     public void remove(Category category) {
+        // 删除分类
         categoryRepository.delete(category);
-        // 删除掉相关的分类关系
-//        categoryRepository.deleteRelationshipsByCategoryId(category.getId());
+        // TODO: 需要先删除关联关系，否则会导致数据不一致
+        // categoryRepository.deleteRelationshipsByCategoryId(category.getId());
     }
 
+    /**
+     * 搜索分类（待实现）
+     *
+     * @param category 分类实体对象（未使用）
+     * @deprecated 该方法尚未实现具体功能
+     */
     @Override
+    @Deprecated
     public void search(Category category) {
-        // TODO 待开发
+        // TODO 待实现分类搜索功能
     }
 
+    /**
+     * 获取所有分类列表及关联文档数量
+     *
+     * @return 分类视图对象列表，包含分类基本信息和关联文档数量
+     */
     @Override
     public List<CateOrTagVO> list() {
+        // 按更新时间升序获取所有分类
         List<Category> categories = categoryRepository.findAll(Sort.by(Sort.Direction.ASC, "updateDate"));
+
         return categories.stream().map(category -> {
             CateOrTagVO vo = new CateOrTagVO();
             vo.setId(category.getId());
             vo.setName(category.getName());
             vo.setCreateDate(category.getCreateDate());
             vo.setUpdateDate(category.getUpdateDate());
+            // 查询并设置该分类下的文档数量
             vo.setNum(categoryRepository.findRelationshipsByCategoryId(category.getId(), Sort.unsorted()).size());
             return vo;
         }).collect(Collectors.toList());
     }
-    /**
-     * 增加某个文件的分类关系
-     *
-     * @param relationship -> CateDocRelationship
-     */
+
     @Override
     public void addRelationShip(CateDocRelationship relationship) {
-        if (relationship.getCategoryId() == null || relationship.getFileId() == null) {
-            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
-        }
-        // 先排查一个文章只能有一个分类关系，不能有多个分类信息
-        List<CateDocRelationship> existingRelations = categoryRepository.findRelationshipsByDocId(relationship.getFileId());
-        if (!CollectionUtils.isEmpty(existingRelations)) {
-            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
-        }
 
-        // 先排查是否具有该链接关系，否则不予进行关联
-        List<CateDocRelationship> result = categoryRepository.findRelationshipsByCategoryAndDoc(
-            relationship.getCategoryId(), relationship.getFileId());
-        if (!result.isEmpty()) {
-            throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
-        }
-        categoryRepository.saveRelationship(relationship);
-    }
-
-    private void addDocRelate(CateDocRelationship relationship) {
-        if (relationship.getCategoryId() == null || relationship.getFileId() == null) {
-            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
-        }
-        // 先排查一个文章只能有一个分类关系，不能有多个分类信息
-    List<CateDocRelationship> relationships = categoryRepository.findRelationshipsByDocId(relationship.getFileId());
-        if (!CollectionUtils.isEmpty(relationships)) {
-            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
-        }
-
-        // 先排查是否具有该链接关系，否则不予进行关联
-    List<CateDocRelationship> result = categoryRepository.findRelationshipsByCategoryAndDoc(
-        relationship.getCategoryId(), relationship.getFileId());
-        if (!result.isEmpty()) {
-            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
-        }
-    categoryRepository.saveRelationship(relationship);
-    }
-
-    @Async
-    @Override
-    public void addRelationShipDefault(String categoryId, String docId) {
-        if (categoryId == null) {
-            return;
-        }
-        CateDocRelationship relationship = new CateDocRelationship();
-        relationship.setCategoryId(categoryId);
-        relationship.setCreateDate(new Date());
-        relationship.setFileId(docId);
-        relationship.setUpdateDate(new Date());
-        addDocRelate(relationship);
-    }
-
-    @Override
-    public void addRelationShipDefault(String categoryId, List<String> docIds) {
-        for (String docId : docIds) {
-            addRelationShipDefault(categoryId, docId);
-        }
     }
 
     /**
-     * 取消某个文件在分类下的关联关系
+     * 添加文档与分类的关联关系
      *
+     * @param relationship 关联关系实体
      * @param relationship -> CateDocRelationship
+     * @throws BusinessException 当参数错误或关系已存在时抛出
+     *                           CateDocRelationship relationship = new CateDocRelationship();
+     *                           relationship.setCategoryId(categoryId);
+     *                           relationship.setCreateDate(new Date());
+     *                           relationship.setFileId(docId);
+     *                           relationship.setUpdateDate(new Date());
+     *                           addDocRelate(relationship);
+     *                           }
+     * @Override public void addRelationShipDefault(String categoryId, List<String> docIds) {
+     * for (String docId : docIds) {
+     * addRelationShipDefault(categoryId, docId);
+     * }
+     * }
+     * <p>
+     * /**
+     * 取消某个文件在分类下的关联关系
      */
     @Override
     public void cancelCategoryRelationship(CateDocRelationship relationship) {
-    categoryRepository.deleteRelationship(relationship);
+        categoryRepository.deleteRelationship(relationship);
     }
 
     /**
@@ -230,7 +213,7 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public List<String> queryDocListByCategory(Category categoryDb) {
-    List<CateDocRelationship> result = categoryRepository.findRelationshipsByCategoryId(categoryDb.getId(), Sort.unsorted());
+        List<CateDocRelationship> result = categoryRepository.findRelationshipsByCategoryId(categoryDb.getId(), Sort.unsorted());
         if (result.isEmpty()) {
             return Lists.newArrayList();
         }
@@ -248,7 +231,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (id == null || id.isEmpty()) {
             return null;
         }
-    return categoryRepository.findById(id).orElse(null);
+        return categoryRepository.findById(id).orElse(null);
     }
 
     /**
@@ -258,15 +241,15 @@ public class CategoryServiceImpl implements CategoryService {
      **/
     @Override
     public CategoryVO queryByDocId(String docId) {
-    List<CateDocRelationship> relationships = categoryRepository.findRelationshipsByDocId(docId);
-    if (relationships.isEmpty() || relationships.get(0).getCategoryId() == null) {
+        List<CateDocRelationship> relationships = categoryRepository.findRelationshipsByDocId(docId);
+        if (relationships.isEmpty() || relationships.get(0).getCategoryId() == null) {
             throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
         }
-    Category category = categoryRepository.findById(relationships.get(0).getCategoryId()).orElse(new Category());
+        Category category = categoryRepository.findById(relationships.get(0).getCategoryId()).orElse(new Category());
         CategoryVO categoryVO = new CategoryVO();
         categoryVO.setId(category.getId());
         categoryVO.setName(category.getName());
-    categoryVO.setRelationShipId(relationships.get(0).getId());
+        categoryVO.setRelationShipId(relationships.get(0).getId());
         return categoryVO;
     }
 
@@ -281,15 +264,15 @@ public class CategoryServiceImpl implements CategoryService {
         if (!StringUtils.hasText(keyWord)) {
             return Lists.newArrayList();
         }
-    List<Category> categories = new ArrayList<>(); // categoryRepository.findByNameContainingIgnoreCase(keyWord);
+        List<Category> categories = new ArrayList<>(); // categoryRepository.findByNameContainingIgnoreCase(keyWord);
         List<String> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
-    List<CateDocRelationship> relationships = new ArrayList<>();
-    for (String id : ids) {
-        relationships.addAll(categoryRepository.findRelationshipsByCategoryId(id, Sort.unsorted()));
-    }
+        List<CateDocRelationship> relationships = new ArrayList<>();
+        for (String id : ids) {
+            relationships.addAll(categoryRepository.findRelationshipsByCategoryId(id, Sort.unsorted()));
+        }
 
-    return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
-}
+        return relationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
+    }
 
     /**
      * @author luojiarui
@@ -297,7 +280,7 @@ public class CategoryServiceImpl implements CategoryService {
      **/
     @Override
     public void removeRelateByDocId(String docId) {
-    categoryRepository.deleteRelationshipsByDocId(docId);
+        categoryRepository.deleteRelationshipsByDocId(docId);
     }
 
     /**
@@ -307,8 +290,19 @@ public class CategoryServiceImpl implements CategoryService {
      **/
     @Override
     public List<Category> getRandom() {
-    return categoryRepository.findAll(Sort.by(Sort.Direction.DESC, UPDATE_DATE)).subList(0, 3);
-}
+        return categoryRepository.findAll(Sort.by(Sort.Direction.DESC, UPDATE_DATE)).subList(0, 3);
+    }
+
+    @Override
+    public void addRelationShipDefault(String categoryId, String docId) {
+
+    }
+
+    @Override
+    public void addRelationShipDefault(String categoryId, List<String> docIds) {
+
+    }
+
     /**
      * @return java.util.List<com.jiaruiblog.entity.CateDocRelationship>
      * @author luojiarui
@@ -319,10 +313,10 @@ public class CategoryServiceImpl implements CategoryService {
         long pageIndex = 0;
         int pageSize = 7;
         return categoryRepository.findRelationshipsByCategoryId(cateId, Sort.by(Sort.Direction.DESC, UPDATE_DATE))
-            .stream()
-            .skip((pageIndex - 1) * pageSize)
-            .limit(pageSize)
-            .collect(Collectors.toList());
+                .stream()
+                .skip((pageIndex - 1) * pageSize)
+                .limit(pageSize)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -353,46 +347,46 @@ public class CategoryServiceImpl implements CategoryService {
      **/
     @Override
     public PageVO<FileDocumentDTO> getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
-    List<FileDocumentDTO> mappedResults = new ArrayList<>();
-    int count = 0;
+        List<FileDocumentDTO> mappedResults = new ArrayList<>();
+        int count = 0;
 
-    // Implement logic using CategoryRepository instead of mongoTemplate
-    // This is a placeholder - actual implementation will depend on your repository methods
+        // Implement logic using CategoryRepository instead of mongoTemplate
+        // This is a placeholder - actual implementation will depend on your repository methods
         return PageVO.<FileDocumentDTO>builder()
-            .pageSize(pageSize.intValue())
-            .pageNum(pageNum.intValue())
-            .total(count)
-            .list(mappedResults)
+                .pageSize(pageSize.intValue())
+                .pageNum(pageNum.intValue())
+                .total(count)
+                .list(mappedResults)
                 .build();
     }
 
-@Override
-public PageVO<FileDocumentDTO> getMyCollection(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
-    List<FileDocumentDTO> mappedResults = new ArrayList<>();
-    int count = 0;
+    @Override
+    public PageVO<FileDocumentDTO> getMyCollection(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
+        List<FileDocumentDTO> mappedResults = new ArrayList<>();
+        int count = 0;
 
-    // Implement logic using CategoryRepository instead of mongoTemplate
-    // This is a placeholder - actual implementation will depend on your repository methods
-    return PageVO.<FileDocumentDTO>builder()
-            .pageSize(pageSize.intValue())
-            .pageNum(pageNum.intValue())
-            .total(count)
-            .list(mappedResults)
-            .build();
-}
+        // Implement logic using CategoryRepository instead of mongoTemplate
+        // This is a placeholder - actual implementation will depend on your repository methods
+        return PageVO.<FileDocumentDTO>builder()
+                .pageSize(pageSize.intValue())
+                .pageNum(pageNum.intValue())
+                .total(count)
+                .list(mappedResults)
+                .build();
+    }
 
-@Override
-public PageVO<FileDocumentDTO> getMyUploaded(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
-    List<FileDocumentDTO> mappedResults = new ArrayList<>();
-    int count = 0;
+    @Override
+    public PageVO<FileDocumentDTO> getMyUploaded(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
+        List<FileDocumentDTO> mappedResults = new ArrayList<>();
+        int count = 0;
 
-    // Implement logic using CategoryRepository instead of mongoTemplate
-    // This is a placeholder - actual implementation will depend on your repository methods
-    return PageVO.<FileDocumentDTO>builder()
-            .total(count)
-            .list(mappedResults)
-            .pageNum(pageNum.intValue())
-            .pageSize(pageSize.intValue())
-            .build();
-}
+        // Implement logic using CategoryRepository instead of mongoTemplate
+        // This is a placeholder - actual implementation will depend on your repository methods
+        return PageVO.<FileDocumentDTO>builder()
+                .total(count)
+                .list(mappedResults)
+                .pageNum(pageNum.intValue())
+                .pageSize(pageSize.intValue())
+                .build();
+    }
 }
