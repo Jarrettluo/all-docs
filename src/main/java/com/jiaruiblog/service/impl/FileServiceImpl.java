@@ -4,7 +4,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.FileDocument;
@@ -314,7 +313,7 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public Object uploadBatch(String category, List<String> tags, String description,
+    public String uploadBatch(String category, List<String> tags, String description,
                                      Boolean skipError, MultipartFile[] files,
                                      String userId, String username) {
 
@@ -482,19 +481,19 @@ public class FileServiceImpl implements IFileService {
                                      String desc) throws IOException {
         String originFileName = file.getOriginalFilename();
         if (!StringUtils.hasText(originFileName)) {
-            throw new RuntimeException(MessageConstant.FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.INVALID_FILE_NAME);
         }
         //获取文件后缀名
         String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
         if (!availableSuffixList.contains(suffix)) {
-            throw new RuntimeException(MessageConstant.FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.INVALID_FILE_NAME);
         }
         String fileMd5 = SecureUtil.md5(file.getInputStream());
 
         //已存在该文件，则拒绝保存
         FileDocument fileDocumentInDb = getByMd5(fileMd5);
         if (fileDocumentInDb != null) {
-            throw new RuntimeException(MessageConstant.DATA_DUPLICATE);
+            throw new BusinessException(ErrorCode.DOCUMENT_ALREADY_EXISTS);
         }
         FileDocument fileDocument = saveToDb(fileMd5, file, userId, username, desc);
 

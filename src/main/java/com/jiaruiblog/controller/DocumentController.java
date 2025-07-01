@@ -3,7 +3,6 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.DocumentDTO;
@@ -12,6 +11,8 @@ import com.jiaruiblog.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.entity.vo.DocWithCateVO;
 import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.enums.FilterTypeEnum;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.service.IFileService;
@@ -121,7 +122,7 @@ public class DocumentController {
             HttpServletRequest request) {
         FileDocument fileDocument = iFileService.queryById(removeObjectDTO.getId());
         if (fileDocument == null) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND);
         }
         String username = (String) request.getAttribute("username");
         String userId = (String) request.getAttribute("id");
@@ -151,7 +152,7 @@ public class DocumentController {
         if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG)) {
             return ApiResult.success(iFileService.listWithCategory(documentDTO));
         } else {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
     }
 

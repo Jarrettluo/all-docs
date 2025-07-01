@@ -3,6 +3,7 @@ package com.jiaruiblog.exception;
 import com.jiaruiblog.common.ApiResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolationException;
 import org.apache.http.auth.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 
 @ControllerAdvice
@@ -67,6 +69,38 @@ public class GlobalExceptionHandler {
                 ? ((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors().get(0).getDefaultMessage()
                 : ErrorCode.INVALID_PARAM.getLocalizedMessage(messageSource, null);
         return new ApiResult<>(ErrorCode.INVALID_PARAM.getCode(), errorMsg, null);
+    }
+
+    // 增强版校验异常处理
+    @ResponseBody
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResult<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String errorMsg = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+
+        return new ApiResult<>(
+                ErrorCode.INVALID_PARAM.getCode(),
+                "参数校验失败: " + errorMsg,
+                null
+        );
+    }
+
+    // 新增路径参数校验处理
+    @ResponseBody
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResult<Object> handleConstraintViolation(ConstraintViolationException ex) {
+        String errorMsg = ex.getConstraintViolations().stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .collect(Collectors.joining("; "));
+
+        return new ApiResult<>(
+                ErrorCode.INVALID_PARAM.getCode(),
+                "路径参数校验失败: " + errorMsg,
+                null
+        );
     }
 
     // Other common exceptions (from CommonExceptionHandler)

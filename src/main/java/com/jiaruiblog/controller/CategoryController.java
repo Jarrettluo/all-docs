@@ -55,12 +55,14 @@ public class CategoryController {
                 category.setCreateDate(new Date());
                 category.setUpdateDate(new Date());
                 categoryService.insert(category);
+                break;
             case TAG:
                 Tag tag = new Tag();
                 tag.setName(categoryDTO.getName());
                 tag.setCreateDate(new Date());
                 tag.setUpdateDate(new Date());
                 tagService.insert(tag);
+                break;
             default:
                 break;
         }
@@ -80,12 +82,14 @@ public class CategoryController {
                 category.setId(categoryDTO.getId());
                 category.setUpdateDate(new Date());
                 categoryService.update(category);
+                break;
             case TAG:
                 Tag tag = new Tag();
                 tag.setName(categoryDTO.getName());
                 tag.setId(categoryDTO.getId());
                 tag.setUpdateDate(new Date());
                 tagService.update(tag);
+                break;
             default:
                 break;
         }
@@ -99,10 +103,12 @@ public class CategoryController {
                 Category category = new Category();
                 category.setId(categoryDTO.getId());
                 categoryService.remove(category);
+                break;
             case TAG:
                 Tag tag = new Tag();
                 tag.setId(categoryDTO.getId());
                 tagService.remove(tag);
+                break;
             default:
                 break;
         }
@@ -157,11 +163,13 @@ public class CategoryController {
                 category.setCategoryId(relationDTO.getId());
                 category.setFileId(relationDTO.getDocId());
                 categoryService.cancelCategoryRelationship(category);
+                break;
             case TAG:
                 TagDocRelationship tag = new TagDocRelationship();
                 tag.setTagId(relationDTO.getId());
                 tag.setFileId(relationDTO.getDocId());
                 tagService.cancelTagRelationship(tag);
+                break;
             default:
                 break;
         }
@@ -169,7 +177,11 @@ public class CategoryController {
     }
 
     @GetMapping(value = "getDocByTagCateKeyWord")
-    public ApiResult<PageVO<FileDocumentDTO>> getDocByTagCateKeyWord(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO) {
+    public ApiResult<PageVO<FileDocumentDTO>> getDocByTagCateKeyWord(@ModelAttribute("pageDTO")
+                                                                         QueryDocByTagCateDTO pageDTO) {
+        if (pageDTO.getPage() < 1 || pageDTO.getRows() < 1) {
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
+        }
         PageVO<FileDocumentDTO> result = categoryService.getDocByTagAndCate(pageDTO.getCateId(),
                 pageDTO.getTagId(),
                 pageDTO.getKeyword(),
@@ -179,7 +191,11 @@ public class CategoryController {
     }
 
     @GetMapping(value = "/auth/getMyCollection")
-    public ApiResult<PageVO<FileDocumentDTO> > getMyCollection(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<PageVO<FileDocumentDTO>> getMyCollection(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO,
+                                                               HttpServletRequest request) {
+        if (pageDTO.getPage() < 1 || pageDTO.getRows() < 1) {
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
+        }
         String userId = (String) request.getAttribute("id");
         PageVO<FileDocumentDTO>  result = categoryService.getMyCollection(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
                 Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()),
@@ -188,7 +204,11 @@ public class CategoryController {
     }
 
     @GetMapping(value = "/auth/getMyUploaded")
-    public ApiResult<PageVO<FileDocumentDTO>> getMyUploaded(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO, HttpServletRequest request) {
+    public ApiResult<PageVO<FileDocumentDTO>> getMyUploaded(@ModelAttribute("pageDTO") QueryDocByTagCateDTO pageDTO,
+                                                            HttpServletRequest request) {
+        if (pageDTO.getPage() < 1 || pageDTO.getRows() < 1) {
+            throw BusinessExceptionBuilder.of(ErrorCode.PARAMS_ERROR).build();
+        }
         String userId = (String) request.getAttribute("id");
         PageVO<FileDocumentDTO> result = categoryService.getMyUploaded(pageDTO.getCateId(), pageDTO.getTagId(), pageDTO.getKeyword(),
                 Integer.toUnsignedLong(pageDTO.getPage() - 1), Integer.toUnsignedLong(pageDTO.getRows()),

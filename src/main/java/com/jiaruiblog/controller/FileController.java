@@ -6,7 +6,6 @@ import cn.hutool.crypto.SecureUtil;
 import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.ResponseModel;
@@ -15,6 +14,8 @@ import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.upload.FileUploadDTO;
 import com.jiaruiblog.entity.dto.upload.UrlUploadDTO;
 import com.jiaruiblog.enums.DocStateEnum;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.service.IFileService;
@@ -104,8 +105,8 @@ public class FileController {
                                                   HttpServletResponse response)
             throws UnsupportedEncodingException {
         Optional<FileDocument> file = fileService.getById(id);
-        if (!file.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
+        if (file.isEmpty()) {
+            throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
 
         User user = new User();
@@ -139,12 +140,12 @@ public class FileController {
     @GetMapping("/generateDownloadLink")
     public ApiResult<String> generateDownloadLink(@RequestParam String fileId,
                                                   HttpServletRequest request) throws Exception {
-        if (org.apache.commons.lang3.StringUtils.isEmpty(fileId)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+        if (StringUtils.isEmpty(fileId)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         FileDocument fileDocument = fileService.queryById(fileId);
         if (Objects.isNull(fileDocument)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+            throw new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND);
         }
 
         String username = (String) request.getAttribute("username");
@@ -214,7 +215,7 @@ public class FileController {
                     .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
                     .body(file.get().getContent());
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
+            throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
     }
 
@@ -236,7 +237,7 @@ public class FileController {
                     .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
                     .body(file.get().getContent());
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
+            throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
     }
 
@@ -284,7 +285,6 @@ public class FileController {
             }
             in.close();
         } catch (Exception ex) {
-            ex.printStackTrace();
             model.setMessage("上传失败");
         }
         return model;
@@ -395,7 +395,7 @@ public class FileController {
         // 检查传递的参数是否正确
         if (checkParam(tags, category, description, null).equals(Boolean.FALSE)
                 || files == null || files.length < 1) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 最多只能添加10个标签
         if (!CollectionUtils.isEmpty(tags) && tags.size() > 10) {
@@ -405,15 +405,13 @@ public class FileController {
         if (files.length < 2) {
             skipError = Boolean.FALSE;
         }
-        return ApiResult.success(fileService.uploadBatch(category, tags, description, skipError, files, userId, username));
+        String o = fileService.uploadBatch(category, tags, description, skipError, files, userId, username);
+        return ApiResult.success("success", o);
     }
 
     /**
      * @return java.util.List<java.lang.String>
      * @author luojiarui
-     * @Description 通过url上传
-     * @Date 23:12 2023/4/21
-     * @Param [req, files]
      **/
     @Operation(summary = "根据用户的提供的url进行上传", description = "需要提供url和文件分类标签信息！")
     @PostMapping("/auth/uploadByUrl")
@@ -429,7 +427,7 @@ public class FileController {
         String name = urlUploadDTO.getName();
 
         if (checkParam(tags, category, description, name).equals(Boolean.FALSE)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 最多只能添加10个标签
         if (!CollectionUtils.isEmpty(tags) && tags.size() > 10) {
@@ -442,9 +440,6 @@ public class FileController {
     /**
      * @return java.lang.Boolean
      * @author luojiarui
-     * @Description 文件上传时的参数检查：长度要求；格式要求；敏感词要求
-     * @Date 16:14 2023/4/22
-     * @Param [tags, category, description, name]
      **/
     private static Boolean checkParam(List<String> tags, String category, String description, String name) {
 
@@ -497,8 +492,8 @@ public class FileController {
     /**
      * 删除附件
      *
-     * @param id
-     * @return
+     * @param id entity id
+     * @return ResponseModel
      */
     @DeleteMapping("/{id}")
     public ResponseModel deleteFile(@PathVariable String id) {
@@ -587,7 +582,7 @@ public class FileController {
                     .header(HttpHeaders.CONTENT_LENGTH, "123")
                     .body(IoUtil.readBytes(inputStream));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageConstant.FILE_NOT_FOUND);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
     }
 
@@ -652,14 +647,14 @@ public class FileController {
     @GetMapping("/rebuildIndex")
     public ApiResult<Object> rebuildIndex(@RequestParam("docId") String docId) {
         if (!StringUtils.hasText(docId)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         FileDocument fileDocument = fileService.queryById(docId);
         if (fileDocument != null && fileDocument.getDocState() != DocStateEnum.ON_PROCESS) {
             taskExecuteService.execute(fileDocument);
-            return ApiResult.success(MessageConstant.SUCCESS);
+            return ApiResult.success();
         } else {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
     }
 
@@ -711,6 +706,6 @@ public class FileController {
 //        }
 
 
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 }

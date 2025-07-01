@@ -3,11 +3,12 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.DocLog;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.vo.DocLogVO;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.IDocLogService;
 import com.jiaruiblog.transformer.PO2VOConverter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,11 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @ClassName DocLogController
- * @Description 文档日志的查询等
+ * 文档日志的查询等
  * @author luojiarui
- * @Date 2022/12/10 11:10
- * @Version 1.0
  **/
 @Tag(name = "文档日志模块", description = "文档操作日志相关接口")
 @Slf4j
@@ -46,9 +44,6 @@ public class DocLogController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 系统用户日志查询
-     * @Date 21:16 2022/11/30
-     * @Param [pageParams]
      **/
     @Permission({PermissionEnum.ADMIN})
     @Operation(
@@ -78,9 +73,6 @@ public class DocLogController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 删除用户日志
-     * @Date 21:16 2022/11/30
-     * @Param [logIds]
      **/
     @Permission(PermissionEnum.ADMIN)
     @Operation(
@@ -101,7 +93,7 @@ public class DocLogController {
     public ApiResult<Void> removeLog(@RequestBody @Valid BatchIdDTO batchIdDTO, HttpServletRequest request) {
         List<String> logIds = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(logIds)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         docLogService.deleteDocLogBatch(logIds, (String) request.getAttribute("id"));
         return ApiResult.success();

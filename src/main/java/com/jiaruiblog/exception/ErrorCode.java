@@ -42,13 +42,15 @@ public enum ErrorCode {
     FILE_DELETE_FAILED(2004, "error-code.file-delete-failed"),
     FILE_SIZE_EXCEEDED(2005, "error-code.file-size-exceeded"),
     INVALID_FILE_TYPE(2006, "error-code.invalid-file-type"),
-    STORAGE_QUOTA_EXCEEDED(2007, "error-code.storage-quota-exceeded"),
+    INVALID_FILE_NAME(2007, "error-code.invalid-file-name"),
+    STORAGE_QUOTA_EXCEEDED(2008, "error-code.storage-quota-exceeded"),
 
     // Document Related
     DOCUMENT_NOT_FOUND(3001, "error-code.document-not-found"),
     DOCUMENT_UPDATE_FAILED(3002, "error-code.document-update-failed"),
     DOCUMENT_DELETE_FAILED(3003, "error-code.document-delete-failed"),
     DOCUMENT_VERSION_CONFLICT(3004, "error-code.document-version-conflict"),
+    DOCUMENT_ALREADY_EXISTS(3005, "error-code.document-already-exists"),
 
     // Team Related
     TEAM_NOT_FOUND(4001, "error-code.team-not-found"),

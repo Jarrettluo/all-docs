@@ -35,7 +35,7 @@ public interface IFileService {
 
     void documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
 
-    Object uploadBatch(String category, List<String> tags, String description,
+    String uploadBatch(String category, List<String> tags, String description,
                               Boolean skipError, MultipartFile[] files,
                               String userId, String username);
 

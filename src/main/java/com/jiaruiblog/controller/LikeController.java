@@ -1,7 +1,7 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
+import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.LikeService;
@@ -57,7 +57,7 @@ public class LikeController{
                                   HttpServletRequest request) {
 
         if (entityType != 1 && entityType != 2) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 获取到当前用户
         String userId = (String) request.getAttribute("id");
@@ -127,10 +127,9 @@ public class LikeController{
             map.put("collectStatus", collectStatus);
 
         } catch (RedisConnectionFailureException | RedisConnectionException e) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, e.getMessage());
+            throw new BusinessException(ErrorCode.OPERATE_FAILED, e.getCause());
         }
 
         return ApiResult.success(map);
-
     }
 }

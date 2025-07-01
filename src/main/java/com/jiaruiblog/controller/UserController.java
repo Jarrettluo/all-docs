@@ -5,11 +5,12 @@ import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.ConfigConstant;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.bo.UserBO;
 import com.jiaruiblog.entity.dto.*;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.transformer.DTO2BO;
 import com.jiaruiblog.util.JwtUtil;
@@ -66,7 +67,7 @@ public class UserController {
     @PostMapping(value = "/insert")
     public ApiResult<Object> insertObj(@RequestBody @Valid RegistryUserDTO userDTO) {
         if (Boolean.FALSE.equals(systemConfig.getUserRegistry())) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         userService.registry(userDTO);
         return ApiResult.success("success");
@@ -87,7 +88,7 @@ public class UserController {
         User one = userService.queryById(user.getId());
         // 增加对无效用户的判断
         if (Objects.isNull(one)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.DATA_IS_NULL);
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
         return ApiResult.success(one);
     }
@@ -108,19 +109,19 @@ public class UserController {
      **/
     @Operation(summary = "更新用户hobby和company", description = "更新用户hobby和company")
     @PutMapping(value = "/updateUser")
-    public ApiResult<Object> updateUser(@RequestBody UserDTO userDTO) {
+    public ApiResult<Void> updateUser(@RequestBody UserDTO userDTO) {
         // 传入的参数数据不对，则返回参数不正确
         if (checkUserDTOParams(userDTO)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 检查修改参数信息
         UserBO userBO = DTO2BO.userDTO2BO(userDTO);
         // 个人用户对自己的信息进行更改
         boolean result = userService.updateUserBySelf(userBO);
         if (result) {
-            return ApiResult.success("更新成功!");
+            return ApiResult.success();
         }
-        return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        throw new BusinessException(ErrorCode.OPERATE_FAILED);
     }
 
     /**
@@ -138,7 +139,7 @@ public class UserController {
         // 不能删除自己的账号
         String removeUserId = removeUser.getId();
         if (userId == null || userId.equals(removeUserId)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
         userService.removeUser(removeUserId);
         return ApiResult.success("success");
@@ -159,7 +160,7 @@ public class UserController {
         String adminUserId = (String) request.getAttribute(REQUEST_USER_ID);
         List<String> userIdList = Optional.ofNullable(batchIdDTO.getIds()).orElse(new ArrayList<>());
         if (userIdList.size() > ConfigConstant.MAX_DELETE_NUM) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         userService.deleteUserByIdBatch(userIdList, adminUserId);
         return ApiResult.success("success");
@@ -186,13 +187,13 @@ public class UserController {
         //获取 header里的token
         final String token = request.getHeader("authorization");
         if (!StringUtils.hasText(token)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Map<String, Claim> userData = JwtUtil.verifyToken(token);
         if (CollectionUtils.isEmpty(userData)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
-        return ApiResult.success(MessageConstant.SUCCESS);
+        return ApiResult.success();
     }
 
     /**
@@ -216,10 +217,10 @@ public class UserController {
         String adminUserId = (String) request.getAttribute(REQUEST_USER_ID);
         // 不能屏蔽自己的账号
         if (userRoleDTO.getUserId().equals(adminUserId)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
         userService.changeUserRole(userRoleDTO);
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
     /**
@@ -234,12 +235,12 @@ public class UserController {
     @GetMapping("blockUser")
     public ApiResult<Object> blockUser(@RequestParam("userId") String userId, HttpServletRequest request) {
         if (!StringUtils.hasText(userId)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String adminUserId = (String) request.getAttribute(REQUEST_USER_ID);
         // 不能屏蔽自己的账号
         if (userId.equals(adminUserId)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
         userService.blockUser(userId);
         return ApiResult.success("success");
@@ -268,14 +269,14 @@ public class UserController {
     public ApiResult<String> updateUserInfo(@RequestBody UserDTO userDTO) {
         // 传入的参数数据不对，则返回参数不正确
         if (checkUserDTOParams(userDTO)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         UserBO userBO = DTO2BO.userDTO2BO(userDTO);
         boolean b = userService.updateUserByAdmin(userBO);
         if (b) {
-            return ApiResult.success(MessageConstant.SUCCESS);
+            return ApiResult.success();
         }
-        return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+        throw new BusinessException(ErrorCode.OPERATE_FAILED);
     }
 
     @Operation(summary = "上传用户的头像", description = "上传当前登录用户的头像")
@@ -285,17 +286,17 @@ public class UserController {
         String type = file.getContentType();
         String[] availableTypes = new String[]{"image/png", "image/jpeg", "image/gif"};
         if (!Arrays.asList(availableTypes).contains(type)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         userService.uploadUserAvatar(userId, file);
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
     @Operation(summary = "删除用户头像", description = "删除当前登录用户的头像")
     @DeleteMapping("/auth/removeUserAvatar")
     public ApiResult<Object> removeUserAvatar(HttpServletRequest request) {
         userService.removeUserAvatar((String) request.getAttribute("id"));
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
     @Operation(summary = "重置用户密码", description = "管理员对用户进行密码重置")
@@ -303,7 +304,7 @@ public class UserController {
     public ApiResult<Object> resetUserPwd(@RequestBody String userId, HttpServletRequest request) {
         String adminId = (String) request.getAttribute("id");
         userService.resetUserPwd(userId, adminId);
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
     @Operation(summary = "用户发起找回密码的请求，发送token给邮箱")
@@ -313,7 +314,7 @@ public class UserController {
         // 查找相应的用户名；如果用户名不存在则报错
         // 用户名找到以后发送对应的重置邮箱给用户
         // 使用88 邮箱给邮件发消息
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 
     @Operation(summary = "用户重置密码")
@@ -324,7 +325,7 @@ public class UserController {
         // 如果令牌有效，允许用户重置密码，并在成功后从 Redis 中删除令牌。
         // 其次根据邮箱找到对应的用户信息，修改用户密码
         // 用户自动登录
-        return ApiResult.success("");
+        return ApiResult.success();
     }
 
     private static boolean patternMatch(String s, String regex) {

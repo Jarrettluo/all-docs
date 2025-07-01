@@ -3,7 +3,6 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.BasePageDTO;
@@ -11,6 +10,7 @@ import com.jiaruiblog.entity.dto.BatchIdDTO;
 import com.jiaruiblog.entity.dto.RefuseBatchDTO;
 import com.jiaruiblog.entity.dto.RefuseDTO;
 import com.jiaruiblog.entity.vo.PageVO;
+import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.DocReviewService;
@@ -35,8 +35,6 @@ import java.util.Map;
  * 文档评审，日志查询
  *
  * @author Jarrett Luo
- * @Date 2022/11/25 15:56
- * @Version 1.0
  */
 @Tag(name = "文档评审模块")
 @Slf4j
@@ -89,9 +87,6 @@ public class DocReviewController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 单个进行拒绝
-     * @Date 21:12 2022/11/30
-     * @Param [docId, reason]
      **/
     @Permission({PermissionEnum.ADMIN})
     @Operation(summary = "管理员拒绝某个文档", description = "管理员拒绝某个文档，只有管理员有操作该文档的权限")
@@ -114,9 +109,6 @@ public class DocReviewController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 批量进行拒绝，并删除文档
-     * @Date 21:12 2022/11/30
-     * @Param [docIds]
      **/
     @Permission({PermissionEnum.ADMIN})
     @Operation(summary = "管理员拒绝一批文档", description = "管理员拒绝一批文档，只有管理员有操作该文档的权限")
@@ -125,21 +117,17 @@ public class DocReviewController {
         List<String> docIds = refuseBatchDTO.getIds();
         String reason = refuseBatchDTO.getReason();
         if (docReviewService.docIdExist(docIds)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
         List<FileDocument> fileDocumentList = fileService.queryAndRemove(docIds.toArray(new String[0]));
         if (CollectionUtils.isEmpty(fileDocumentList)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
         docReviewService.refuseBatch(fileDocumentList, reason);
         return ApiResult.success("success");
     }
     /**
      * @author luojiarui
-     * @Description  缺少同意文档的信息
-     * @Date 22:04 2022/12/9
-     * @Param [batchIdDTO]
-     * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Permission({PermissionEnum.ADMIN})
     @Operation(summary = "同意某一批文档", description = "管理员同意某一批文档")
@@ -147,11 +135,11 @@ public class DocReviewController {
     public ApiResult<Object> approve(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO) {
         List<String> docIds = batchIdDTO.getIds();
         if (docReviewService.docIdExist(docIds)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
         List<FileDocument> fileDocumentList = fileService.queryAndUpdate(docIds.toArray(new String[0]));
         if (CollectionUtils.isEmpty(fileDocumentList)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
         docReviewService.approveBatch(fileDocumentList);
         return ApiResult.success("success");
@@ -159,9 +147,6 @@ public class DocReviewController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 管理员和普通用户分别查询
-     * @Date 21:15 2022/11/30
-     * @Param [pageParams, request]
      **/
     @Permission({PermissionEnum.ADMIN})
     @Operation(summary = "管理员和普通用户分别查询数据", description = "查询文档审批的列表")
@@ -173,14 +158,13 @@ public class DocReviewController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 管理员和普通用户分别查询
-     * @Date 21:15 2022/11/30
-     * @Param [pageParams, request]
      **/
     @Permission({PermissionEnum.USER, PermissionEnum.ADMIN})
     @Operation(summary = "管理员和普通用户分别查询数据", description = "查询文档审批的列表")
     @GetMapping("queryMyReviewResultList")
-    public ApiResult<PageVO<DocReview>> queryMyReviewResultList(@Parameter(description = "分页参数") @ModelAttribute("pageParams") @Valid BasePageDTO pageParams,
+    public ApiResult<PageVO<DocReview>> queryMyReviewResultList(@Parameter(description = "分页参数")
+                                                                    @ModelAttribute("pageParams")
+                                                                    @Valid BasePageDTO pageParams,
                                                @Parameter(hidden = true) HttpServletRequest request) {
         return ApiResult.success(docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"), false));
     }
@@ -191,10 +175,11 @@ public class DocReviewController {
      */
     @Operation(summary = "删除评审日志", description = "管理员和普通用户都可以删除评审结果")
     @DeleteMapping("removeDocReview")
-    public ApiResult<UpdateResult> removeDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
+    public ApiResult<UpdateResult> removeDocReview(@Parameter(description = "批量ID参数") @RequestBody
+                                                       @Valid BatchIdDTO batchIdDTO,
                                        @Parameter(hidden = true) HttpServletRequest request) {
         if (CollectionUtils.isEmpty(batchIdDTO.getIds())) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         UpdateResult updateResult = docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
         return ApiResult.success(updateResult);

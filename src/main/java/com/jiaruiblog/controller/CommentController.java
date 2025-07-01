@@ -3,7 +3,6 @@ package com.jiaruiblog.controller;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.Comment;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.BatchIdDTO;
@@ -11,6 +10,8 @@ import com.jiaruiblog.entity.dto.CommentDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
 import com.jiaruiblog.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.entity.vo.PageVO;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.ICommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,11 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * @ClassName CommentController
- * @Description 评论系统的控制器
+ * 评论系统的控制器
  * @author luojiarui
- * @Date 2022/6/4 3:11 下午
- * @Version 1.0
  **/
 @Tag(name = "评论模块", description = "评论相关接口")
 @RestController
@@ -89,7 +87,7 @@ public class CommentController {
     public ApiResult<Void> remove(@RequestBody Comment comment, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
         if (!StringUtils.hasText(comment.getId())) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_IS_NOT_NULL);
+            throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
         }
         commentService.remove(comment, userId);
         return ApiResult.success();
@@ -106,7 +104,7 @@ public class CommentController {
     public ApiResult<Void> removeBatch(@RequestBody BatchIdDTO batchIdDTO) {
         List<String> commentIdList = batchIdDTO.getIds();
         if (CollectionUtils.isEmpty(commentIdList)) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         commentService.removeBatch(commentIdList);
         return ApiResult.success();

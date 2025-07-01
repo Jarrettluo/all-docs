@@ -1,7 +1,6 @@
 package com.jiaruiblog.controller;
 
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
@@ -9,6 +8,8 @@ import com.jiaruiblog.entity.dto.SearchKeyDTO;
 import com.jiaruiblog.entity.vo.DocumentVO;
 import com.jiaruiblog.entity.vo.StatsVO;
 import com.jiaruiblog.entity.vo.TrendVO;
+import com.jiaruiblog.exception.BusinessException;
+import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.*;
 import com.jiaruiblog.service.impl.FileServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
@@ -126,7 +127,7 @@ public class StatisticsController {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
 
         if (CollectionUtils.isEmpty(docIdList)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
 
@@ -140,9 +141,8 @@ public class StatisticsController {
             }
         }
         // 从redis中删除无效id
-
         if (CollectionUtils.isEmpty(fileDocumentList)) {
-            return ApiResult.error(MessageConstant.PROCESS_ERROR_CODE, MessageConstant.OPERATE_FAILED);
+            throw new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND);
         }
         FileDocument topFileDocument = fileDocumentList.remove(0);
         DocumentVO documentVO = fileServiceImpl.convertDocument(null, topFileDocument);

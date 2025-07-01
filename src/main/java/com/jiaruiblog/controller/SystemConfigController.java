@@ -4,8 +4,8 @@ import cn.hutool.core.io.IoUtil;
 import com.jiaruiblog.auth.Permission;
 import com.jiaruiblog.auth.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.config.SystemConfig;
+import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.intercepter.SensitiveFilter;
@@ -69,7 +69,7 @@ public class SystemConfigController {
             @RequestBody SystemConfig userSetting) {
         if (userSetting.getUserUpload() == null || userSetting.getUserRegistry() == null
                 || userSetting.getAdminReview() == null || userSetting.getProhibitedWord() == null) {
-            return ApiResult.error(MessageConstant.PARAMS_ERROR_CODE, MessageConstant.PARAMS_FORMAT_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         systemConfig.setUserUpload(userSetting.getUserUpload());
         systemConfig.setProhibitedWord(userSetting.getProhibitedWord());
