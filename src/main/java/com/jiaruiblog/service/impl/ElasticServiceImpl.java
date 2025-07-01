@@ -105,19 +105,21 @@ public class ElasticServiceImpl implements ElasticService {
         );
 
     AtomicInteger counter = new AtomicInteger(0);
-        return response.hits().hits().stream()
-            .collect(Collectors.toMap(
-                hit -> (String) hit.source().get("id"),
-                hit -> hit.highlight().get(PIPELINE_NAME).stream()
-                .map(text -> {
-                    // ToDO 待修改
-                    PageVO pageVO = new PageVO();
-//                    pageVO.setOrder(counter.getAndIncrement());
-//                    pageVO.setContent(text);
-                    return pageVO;
-                })
-                .collect(Collectors.toList())
-            ));
+//        return response.hits().hits().stream()
+//            .collect(Collectors.toMap(
+//                hit -> (String) hit.source().get("id"),
+//                hit -> hit.highlight().get(PIPELINE_NAME).stream()
+////                .map(text -> {
+//                    // ToDO 待修改
+////                    PageVO pageVO = new PageVO();
+////                    pageVO.setOrder(counter.getAndIncrement());
+////                    pageVO.setContent(text);
+////                    return pageVO;
+////                })
+//                .collect(Collectors.toList())
+//            ));
+
+        return new HashMap<>();
     }
 
     @Override

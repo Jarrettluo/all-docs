@@ -22,7 +22,6 @@ import java.util.Date;
 @Tag(name = "用户收藏模块")
 @RestController
 @Slf4j
-@CrossOrigin
 @RequestMapping("/collect")
 public class CollectController {
 
@@ -41,7 +40,6 @@ public class CollectController {
      * @return ApiResult<Void> 操作结果
      * @author luojiarui
      **/
-    @Deprecated
     @PostMapping(value = "/auth/insert")
     public ApiResult<Void> insert(@RequestBody CollectDTO collect, HttpServletRequest request) {
         log.info("开始执行文档收藏操作，文档ID: {}, 用户ID: {}", collect.getDocId(), request.getAttribute("id"));

@@ -3,6 +3,10 @@ server:
 #  servlet:
 #    context-path: /api/v1.0
 
+app:
+  datasource:
+    type: mongodb  # 可配置为mysql或mongodb
+
 spring:
   data:
     mongodb:
@@ -14,6 +18,12 @@ spring:
       socket-timeout: 10000
       max-wait-time: 5000
       connections-per-host: 20
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/demo?useSSL=false&serverTimezone=UTC
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   redis:
     database: 0

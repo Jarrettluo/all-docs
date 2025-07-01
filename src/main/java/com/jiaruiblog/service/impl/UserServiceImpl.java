@@ -10,12 +10,14 @@ import com.jiaruiblog.entity.dto.UserRoleDTO;
 import com.jiaruiblog.entity.vo.UserVO;
 import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.ErrorCode;
+import com.jiaruiblog.repository.UserRepository;
 import com.jiaruiblog.service.IFileService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.util.JwtUtil;
 import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -54,6 +56,9 @@ public class UserServiceImpl implements IUserService {
 
     @Resource
     private SystemConfig systemConfig;
+
+    @Autowired
+    private UserRepository userRepository;  // 统一接口，根据配置自动注入对应实现
 
     /**
      * 初始化第一个用户，默认从配置中取到第一个管理员账号密码

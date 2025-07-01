@@ -127,7 +127,11 @@ public class CommentController {
     }
 
     private Comment getComment(CommentDTO commentDTO, HttpServletRequest request) {
-        commentDTO = Optional.ofNullable(commentDTO).orElse(new CommentDTO());
+        commentDTO = Optional.ofNullable(commentDTO).orElseThrow(() ->
+                new BusinessException(ErrorCode.PARAMS_ERROR));
+        if (!StringUtils.hasText(commentDTO.getContent()) || !StringUtils.hasText(commentDTO.getDocId())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
         Comment comment = new Comment();
         comment.setContent(commentDTO.getContent());
         comment.setDocId(commentDTO.getDocId());

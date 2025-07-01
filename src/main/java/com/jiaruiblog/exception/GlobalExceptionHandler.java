@@ -61,15 +61,15 @@ public class GlobalExceptionHandler {
 
 
     // Validation Exception Handling (combined from both)
-    @ResponseBody
-    @ExceptionHandler({MethodArgumentNotValidException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResult<Object> handleValidationExceptions(Exception ex) {
-        String errorMsg = ex instanceof MethodArgumentNotValidException
-                ? ((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors().get(0).getDefaultMessage()
-                : ErrorCode.INVALID_PARAM.getLocalizedMessage(messageSource, null);
-        return new ApiResult<>(ErrorCode.INVALID_PARAM.getCode(), errorMsg, null);
-    }
+//    @ResponseBody
+//    @ExceptionHandler({MethodArgumentNotValidException.class})
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public ApiResult<Object> handleValidationExceptions(Exception ex) {
+//        String errorMsg = ex instanceof MethodArgumentNotValidException
+//                ? ((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors().get(0).getDefaultMessage()
+//                : ErrorCode.INVALID_PARAM.getLocalizedMessage(messageSource, null);
+//        return new ApiResult<>(ErrorCode.INVALID_PARAM.getCode(), errorMsg, null);
+//    }
 
     // 增强版校验异常处理
     @ResponseBody

@@ -1,0 +1,49 @@
+package com.jiaruiblog.repository.mongodb;
+
+import com.jiaruiblog.config.datasource.DataSourceCondition;
+import com.jiaruiblog.entity.User;
+import com.jiaruiblog.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Repository;
+
+/**
+ * <p></p>
+ * edit at 2025/7/1 11:05
+ *
+ * @author Jarrett Luo
+ * @version 1.0
+ */
+@Repository
+@Conditional(DataSourceCondition.MongoDBCondition.class)
+public class UserMongoRepository implements UserRepository {
+
+    @Autowired
+    MongoTemplate mongoTemplate;
+
+    @Override
+    public User findById(Long id) {
+        return mongoTemplate.findById(id, User.class);
+    }
+
+    @Override
+    public int insert(User user) {
+        return 0;
+    }
+
+    @Override
+    public int update(User user) {
+        return 0;
+    }
+
+    @Override
+    public int deleteById(Long id) {
+        return 0;
+    }
+
+    @Override
+    public User save(User user) {
+        return mongoTemplate.save(user);
+    }
+}

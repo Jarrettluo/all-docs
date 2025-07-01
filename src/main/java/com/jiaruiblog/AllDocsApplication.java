@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 
 /**
- * <p>DocumentSharingSiteApplication</p>
+ * <p>AllDocsApplication</p>
  * @author luojiarui
  **/
 @EnableAsync(proxyTargetClass=true)
