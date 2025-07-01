@@ -49,9 +49,6 @@ public class UserServiceImpl implements IUserService {
     public static final String UPDATE_TIME = "updateDate";
 
     @Resource
-    MongoTemplate mongoTemplate;
-
-    @Resource
     IFileService fileService;
 
     @Resource

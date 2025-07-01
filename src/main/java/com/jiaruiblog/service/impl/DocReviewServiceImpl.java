@@ -34,17 +34,8 @@ import java.util.stream.Collectors;
 @Service
 public class DocReviewServiceImpl implements DocReviewService {
 
-//    public static final String DOC_REVIEW_COLLECTION = "docReview";
-
-    public static final String RESULT = "操作成功了 %d 项目";
     public static final String USER_ID = "userId";
     public static final String DOC_ID = "docId";
-//
-//    @Resource
-//    MongoTemplate mongoTemplate;
-
-//    @Resource
-//    private UserServiceImpl userServiceImpl;
 
     @Resource
     private TaskExecuteService taskExecuteService;
