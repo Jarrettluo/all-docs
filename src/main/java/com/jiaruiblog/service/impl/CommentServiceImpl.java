@@ -1,66 +1,48 @@
 package com.jiaruiblog.service.impl;
 
 import com.jiaruiblog.entity.Comment;
-import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.CommentListDTO;
-import com.jiaruiblog.entity.dto.CommentWithUserDTO;
 import com.jiaruiblog.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.entity.vo.PageVO;
-import com.jiaruiblog.exception.BusinessException;
-import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.intercepter.SensitiveFilter;
+import com.jiaruiblog.repository.CommentRepository;
 import com.jiaruiblog.service.ICommentService;
-import com.mongodb.client.result.DeleteResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.ConvertOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
  * @author luojiarui
- * @ClassName CommentServiceImpl
- * @Description comment service impl
- * @Date 2022/6/4 5:23 下午
- * @Version 1.0
  **/
 @Slf4j
 @Service
 public class CommentServiceImpl implements ICommentService {
 
-
-    private static final String COLLECTION_NAME = "commentCollection";
-
-    private static final String DOC_ID = "docId";
-
-    private static final String OBJECT_ID = "_id";
-
     @Resource
-    MongoTemplate template;
+    CommentRepository commentRepository;
 
+    /**
+     * 插入新的评论
+     *
+     * @param comment 评论对象
+     */
     @Override
     public void insert(Comment comment) {
         if (!StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return;
         }
         try {
-            // 敏感词过滤
             SensitiveFilter filter = SensitiveFilter.getInstance();
             String content = comment.getContent();
             content = filter.replaceSensitiveWord(content, 1, "*");
@@ -69,94 +51,84 @@ public class CommentServiceImpl implements ICommentService {
             return;
         }
 
-
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
-        template.save(comment, COLLECTION_NAME);
+        commentRepository.save(comment);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    /**
+     * 更新评论内容
+     *
+     * @param comment 评论对象
+     */
     @Override
     public void update(Comment comment) {
         if (!StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return;
         }
-        Query query = new Query(Criteria.where("_id").is(comment.getId()));
-        Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
-                .orElse(new Comment());
-        if (!commentDb.getUserId().equals(comment.getUserId())) {
+        Optional<Comment> commentDb = commentRepository.findById(comment.getId());
+        if (commentDb.isEmpty() || !commentDb.get().getUserId().equals(comment.getUserId())) {
             return;
         }
 
-        Update update = new Update();
-        update.set("content", comment.getContent());
-        update.set("updateDate", new Date());
+        comment.setContent(comment.getContent());
+        comment.setUpdateDate(new Date());
         try {
-            template.updateFirst(query, update, User.class);
+            commentRepository.save(comment);
         } catch (Exception e) {
             log.error("更新评论信息{}==>出错==>{}", comment, e);
         }
     }
 
+    /**
+     * 删除指定评论
+     *
+     * @param comment 评论对象
+     * @param userId  用户ID
+     */
     @Override
     public void remove(Comment comment, String userId) {
-        Query query = new Query(Criteria.where(OBJECT_ID).is(comment.getId()));
-        Comment commentDb = Optional.ofNullable(template.findById(comment.getId(), Comment.class, COLLECTION_NAME))
-                .orElse(new Comment());
-        if (!commentDb.getUserId().equals(comment.getUserId())) {
+        Optional<Comment> commentDb = commentRepository.findById(comment.getId());
+        if (commentDb.isEmpty() || !commentDb.get().getUserId().equals(comment.getUserId())) {
             return;
         }
-        template.remove(query, Comment.class, COLLECTION_NAME);
+        commentRepository.deleteById(comment.getId());
     }
 
     /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @author luojiarui
-     * @Description 删除批量的评论列表
-     * @Date 20:51 2023/2/12
-     * @Param [commentIdList]
-     **/
+     * 批量删除评论
+     *
+     * @param commentIdList 评论ID列表
+     */
     @Override
     public void removeBatch(List<String> commentIdList) {
-        Query query = new Query(Criteria.where(OBJECT_ID).in(commentIdList));
-        DeleteResult remove = template.remove(query, Comment.class, COLLECTION_NAME);
-        if (remove.getDeletedCount() < commentIdList.size()) {
-            throw new BusinessException(ErrorCode.OPERATE_FAILED);
-        }
+        commentRepository.deleteAllByIdIn(commentIdList);
     }
 
     /**
-     * @return com.jiaruiblog.utils.ApiResult
-     * @author luojiarui
-     * @Description 根据文档的id查询相关的评论列表
-     * @Date 11:57 2022/9/4
-     * @Param [comment]
-     **/
+     * 根据文档ID查询相关评论列表（分页）
+     *
+     * @param comment 评论查询DTO，包含文档ID和分页信息
+     * @return Map包含评论总数和评论列表
+     */
     @Override
     public Map<String, Object> queryById(CommentListDTO comment) {
         if (comment == null || comment.getDocId() == null) {
             return new HashMap<>();
         }
-        Query query = new Query(Criteria.where(DOC_ID).is(comment.getDocId()))
-                .with(Sort.by(Sort.Direction.DESC, "createDate"));
 
-        Long totalNum = template.count(query, Comment.class, COLLECTION_NAME);
-        // 分页查询
-        long skip = (long) comment.getPage() * comment.getRows();
-        query.skip(skip);
-        query.limit(comment.getRows());
-        // 这里应该联合查询，根据评论的id查询到评论的用户，再根据用户查询头像信息
-        List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
-        // 通过comment的id查询用户的头像信息
-        List<String> userId = comments.stream().map(Comment::getUserId).collect(Collectors.toList());
-//        Map<String, String> userAvatarMap = userService.queryUserAvatarBatch(userId);
+        List<Comment> comments = commentRepository.findByDocId(comment.getDocId());
+        Sort.by(Sort.Direction.DESC, "createDate")
+                .stream()
+                .skip((long) comment.getPage() * comment.getRows())
+                .limit(comment.getRows())
+                .collect(Collectors.toList());
 
-        // TODO 无头像
+        Long totalNum = commentRepository.countByDocId(comment.getDocId());
         List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
         for (Comment item : comments) {
             CommentWithUserVO commentWithUserVO = new CommentWithUserVO();
             BeanUtils.copyProperties(item, commentWithUserVO);
-//            commentWithUserVO.setUserAvatarId(userAvatarMap.get(item.getUserId()));
             commentWithUserVOList.add(commentWithUserVO);
         }
 
@@ -167,131 +139,100 @@ public class CommentServiceImpl implements ICommentService {
         return result;
     }
 
+    /**
+     * 搜索评论（暂未实现）
+     *
+     * @param comment 评论对象
+     * @return null
+     */
     @Override
     public Object search(Comment comment) {
         return null;
     }
 
     /**
-     * @return java.lang.Long
-     * @author luojiarui
-     * @Description //根据文档的id 查询评论的数量
-     * @Date 10:47 下午 2022/6/22
-     * @Param [docId]
-     **/
+     * 根据文档ID查询评论数量
+     *
+     * @param docId 文档ID
+     * @return 评论数量
+     */
     @Override
     public Long commentNum(String docId) {
-        Query query = new Query().addCriteria(Criteria.where(DOC_ID).is(docId));
-        return template.count(query, Comment.class, COLLECTION_NAME);
+        return commentRepository.countByDocId(docId);
     }
 
     /**
-     * 根据关键字模糊搜索相关的文档id
+     * 根据关键字模糊搜索相关文档ID
      *
-     * @param keyWord 关键字
-     * @return 文档的id信息
+     * @param keyWord 搜索关键字
+     * @return 匹配的文档ID列表
      */
     @Override
     public List<String> fuzzySearchDoc(String keyWord) {
         if (keyWord == null || "".equalsIgnoreCase(keyWord)) {
             return Lists.newArrayList();
         }
-        Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
-        Query query = new Query();
-        query.addCriteria(Criteria.where("content").regex(pattern));
-
-        List<Comment> comments = template.find(query, Comment.class, COLLECTION_NAME);
+        List<Comment> comments = commentRepository.findByContentContaining(keyWord);
         return comments.stream().map(Comment::getDocId).collect(Collectors.toList());
-
     }
 
     /**
-     * @author luojiarui
-     * @Description 根据文档进行删除评论信息
-     * @Date 11:14 上午 2022/6/25
-     * @Param [docId]
-     **/
+     * 根据文档ID删除所有相关评论
+     *
+     * @param docId 文档ID
+     */
     @Override
     public void removeByDocId(String docId) {
-        Query query = new Query(Criteria.where(DOC_ID).is(docId));
-        template.remove(query, Comment.class, COLLECTION_NAME);
+        commentRepository.deleteByDocId(docId);
     }
 
     /**
-     * @return java.lang.Integer
-     * @author luojiarui
-     * @Description // 统计总数
-     * @Date 4:40 下午 2022/6/26
-     * @Param []
-     **/
+     * 统计所有评论数量
+     *
+     * @return 评论总数
+     */
     @Override
     public long countAllFile() {
-        return template.getCollection(COLLECTION_NAME).estimatedDocumentCount();
+        return commentRepository.count();
     }
 
     /**
-     * @return com.jiaruiblog.util.BaseApiResult
-     * @author luojiarui
-     * @Description 分页查询评论信息
-     * @Date 14:47 2022/12/10
-     * @Param [page, userId]
-     **/
+     * 分页查询评论信息（支持管理员和普通用户不同权限）
+     *
+     * @param page    分页参数
+     * @param userId  用户ID
+     * @param isAdmin 是否管理员
+     * @return 分页结果VO对象
+     */
     @Override
     public PageVO<CommentWithUserVO> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
-
         log.info("查询的参数是：{}, {}", page, userId);
         Criteria criteria = new Criteria();
         if (Boolean.FALSE.equals(isAdmin)) {
             criteria = Criteria.where("userId").is(userId);
         }
 
-        // 通过query进行查找
-        Aggregation countAggregation = Aggregation.newAggregation(
-                // 选择某些字段
-                Aggregation.project("id", "userName", "createDate", "content", "userId", "docId")
-                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
-                        .as("id")
-                        .and(ConvertOperators.Convert.convertValue("$docId").to("objectId")).as("docId")
-                ,//新字段名称,
-                Aggregation.match(criteria)
-        );
+        // Query for comments
+        Query query = new Query(criteria)
+                .with(Sort.by(Sort.Direction.DESC, "createDate"))
+                .skip((long) (page.getPage() - 1) * page.getRows())
+                .limit(page.getRows());
 
-        Aggregation aggregation = Aggregation.newAggregation(
-                // 选择某些字段
-                Aggregation.project("id", "userName", "createDate", "content", "userId", "docId")
-                        .and(ConvertOperators.Convert.convertValue("$_id").to("string"))//将主键Id转换为objectId
-                        .as("id")
-                        .and(ConvertOperators.Convert.convertValue("$docId").to("objectId")).as("docId")
-                ,//新字段名称,
-
-                Aggregation.lookup(FileServiceImpl.COLLECTION_NAME, "docId", "_id", "abc"),
-                Aggregation.sort(Sort.Direction.DESC, "createDate"),
-                Aggregation.match(criteria),
-                Aggregation.skip((long) (page.getPage() - 1) * page.getRows()),
-                Aggregation.limit(page.getRows())
-
-        );
-
-        AggregationResults<CommentWithUserDTO> aggregate = template.aggregate(aggregation,
-                COLLECTION_NAME, CommentWithUserDTO.class);
-        List<CommentWithUserDTO> mappedResults = aggregate.getMappedResults();
+        List<Comment> comments = commentRepository.findByQuery(query);
         List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
-        mappedResults.forEach(item -> {
-            if (!item.getAbc().isEmpty()) {
-                CommentWithUserVO commentWithUserVO = new CommentWithUserVO();
-                BeanUtils.copyProperties(item, commentWithUserVO);
-                commentWithUserVO.setDocId(item.getAbc().get(0).getId());
-                commentWithUserVO.setDocName(item.getAbc().get(0).getName());
-                commentWithUserVOList.add(commentWithUserVO);
-            }
-        });
 
-        int count = template.aggregate(countAggregation, COLLECTION_NAME, CommentWithUserDTO.class).getMappedResults().size();
+        for (Comment comment : comments) {
+            CommentWithUserVO vo = new CommentWithUserVO();
+            BeanUtils.copyProperties(comment, vo);
+            // Additional processing if needed
+            commentWithUserVOList.add(vo);
+        }
 
+        long count = commentRepository.countByQuery(new Query(criteria));
         return PageVO.<CommentWithUserVO>builder()
-                .total(count)
+                .total((int) count)
                 .list(commentWithUserVOList)
-                .pageNum( page.getPage())
+                .pageNum(page.getPage())
                 .pageSize(page.getRows())
                 .build();
     }
