@@ -35,7 +35,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
@@ -68,7 +67,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Lazy
 @Service
-public class FileServiceImpl implements IFileService {
+public class DocumentServiceImpl implements DocumentService {
 
     public static final String COLLECTION_NAME = "fileDatas";
 
@@ -85,9 +84,6 @@ public class FileServiceImpl implements IFileService {
 
     @Resource
     SystemConfig systemConfig;
-
-    @Resource
-    private MongoTemplate mongoTemplate;
 
     @Resource
     private GridFsTemplate gridFsTemplate;

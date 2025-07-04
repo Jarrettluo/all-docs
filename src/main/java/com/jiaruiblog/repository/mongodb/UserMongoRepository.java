@@ -84,7 +84,7 @@ public class UserMongoRepository implements UserRepository {
     }
 
     @Override
-    public int deleteById(Long id) {
+    public int deleteById(String id) {
         return 0;
     }
 

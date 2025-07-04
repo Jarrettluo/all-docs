@@ -30,11 +30,11 @@ public class ElasticServiceImpl implements ElasticService {
     @Autowired
     private ElasticsearchClient client;
 
-    private FileServiceImpl fileServiceImpl;
+    private DocumentServiceImpl documentServiceImpl;
 
     @Autowired
-    public void setFileServiceImpl(FileServiceImpl fileService) {
-        this.fileServiceImpl = fileService;
+    public void setFileServiceImpl(DocumentServiceImpl fileService) {
+        this.documentServiceImpl = fileService;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ElasticServiceImpl implements ElasticService {
 
         return response.hits().hits().stream()
             .map(hit -> {
-                FileDocument doc = fileServiceImpl.getByMd5(hit.source().getId());
+                FileDocument doc = documentServiceImpl.getByMd5(hit.source().getId());
                 if (doc != null) {
                     doc.setDescription(getHighlightContent(hit.highlight()));
                 }

@@ -76,7 +76,7 @@ public class CommentServiceImpl implements ICommentService {
         try {
             commentRepository.save(comment);
         } catch (Exception e) {
-            log.error("更新评论信息{}==>出错==>{}", comment, e);
+            log.error("更新评论信息{}==>出错==>{}", comment, e.getMessage(), e.getCause());
         }
     }
 
@@ -118,11 +118,11 @@ public class CommentServiceImpl implements ICommentService {
         }
 
         List<Comment> comments = commentRepository.findByDocId(comment.getDocId());
-        Sort.by(Sort.Direction.DESC, "createDate")
-                .stream()
+
+        comments = comments.stream()
                 .skip((long) comment.getPage() * comment.getRows())
                 .limit(comment.getRows())
-                .collect(Collectors.toList());
+                .toList();
 
         Long totalNum = commentRepository.countByDocId(comment.getDocId());
         List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();

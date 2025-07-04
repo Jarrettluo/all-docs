@@ -4,7 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.FileObj;
 import com.jiaruiblog.enums.FileFormatEnum;
-import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.DocumentService;
 import com.jiaruiblog.service.impl.ElasticServiceImpl;
 import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.task.exception.TaskRunException;
@@ -62,7 +62,7 @@ public abstract class TaskExecutor {
      * @Param [gridFsId]
      **/
     protected byte[] downFileBytes(String gridFsId) {
-        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
         return fileService.getFileBytes(gridFsId);
     }
 
@@ -92,7 +92,7 @@ public abstract class TaskExecutor {
         // 被文本文件上传到gridFS系统中
         try (FileInputStream inputStream = new FileInputStream(textFilePath)) {
 
-            IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+            DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
             String txtObjId = fileService.uploadFileToGridFs(
                     FileFormatEnum.TEXT.getFilePrefix(),
                     inputStream,
@@ -189,7 +189,7 @@ public abstract class TaskExecutor {
 
         try (FileInputStream thumbIns = new FileInputStream(picPath)){
             // 存储到GridFS系统中
-            IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+            DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
             String txtObjId = fileService.uploadFileToGridFs(
                     FileFormatEnum.PNG.getFilePrefix(),
                     thumbIns,
@@ -220,7 +220,7 @@ public abstract class TaskExecutor {
         String objId;
         try (FileInputStream thumbIns = new FileInputStream(filePath)){
             // 存储到GridFS系统中
-            IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+            DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
             objId = fileService.uploadFileToGridFs(
                     prefix,
                     thumbIns,

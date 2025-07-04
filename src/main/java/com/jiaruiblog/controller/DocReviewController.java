@@ -14,7 +14,7 @@ import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.DocReviewService;
-import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.DocumentService;
 import com.mongodb.client.result.UpdateResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,7 +47,7 @@ public class DocReviewController {
     private DocReviewService docReviewService;
 
     @Resource
-    private IFileService fileService;
+    private DocumentService fileService;
 
     /**
      * 普通用户、管理员用户，列表查询
@@ -175,14 +175,14 @@ public class DocReviewController {
      */
     @Operation(summary = "删除评审日志", description = "管理员和普通用户都可以删除评审结果")
     @DeleteMapping("removeDocReview")
-    public ApiResult<UpdateResult> removeDocReview(@Parameter(description = "批量ID参数") @RequestBody
+    public ApiResult<Void> removeDocReview(@Parameter(description = "批量ID参数") @RequestBody
                                                        @Valid BatchIdDTO batchIdDTO,
                                        @Parameter(hidden = true) HttpServletRequest request) {
         if (CollectionUtils.isEmpty(batchIdDTO.getIds())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        UpdateResult updateResult = docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
-        return ApiResult.success(updateResult);
+         docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
+        return ApiResult.success();
     }
 
 }

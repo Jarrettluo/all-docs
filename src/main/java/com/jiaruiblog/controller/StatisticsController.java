@@ -11,7 +11,7 @@ import com.jiaruiblog.entity.vo.TrendVO;
 import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.*;
-import com.jiaruiblog.service.impl.FileServiceImpl;
+import com.jiaruiblog.service.impl.DocumentServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
@@ -49,10 +49,10 @@ public class StatisticsController {
     RedisService redisService;
 
     @Resource
-    IFileService fileService;
+    DocumentService fileService;
 
     @Resource
-    FileServiceImpl fileServiceImpl;
+    DocumentServiceImpl documentServiceImpl;
 
     @Resource
     TagService tagService;
@@ -145,7 +145,7 @@ public class StatisticsController {
             throw new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND);
         }
         FileDocument topFileDocument = fileDocumentList.remove(0);
-        DocumentVO documentVO = fileServiceImpl.convertDocument(null, topFileDocument);
+        DocumentVO documentVO = documentServiceImpl.convertDocument(null, topFileDocument);
         Map<String, Object> top1 = new HashMap<>();
         top1.put("name", topFileDocument.getName());
         top1.put("id", topFileDocument.getId());

@@ -2,8 +2,6 @@ package com.jiaruiblog.repository;
 
 import com.jiaruiblog.entity.Tag;
 import com.jiaruiblog.entity.TagDocRelationship;
-import com.mongodb.client.result.UpdateResult;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,15 +17,14 @@ public interface TagRepository {
     List<Tag> findByNames(List<String> names);
     long count();
     void delete(Tag tag);
-    UpdateResult update(Query query, Update update);
+    void update(Tag tag);
 
     // Relationship operations
     TagDocRelationship saveRelationship(TagDocRelationship relationship);
-    List<TagDocRelationship> findRelationships(Query query);
-    long countRelationships(Query query);
-    void deleteRelationships(Query query);
-    boolean relationshipExists(Query query);
+    List<TagDocRelationship> findRelationships();
+    List<TagDocRelationship> findRelationshipsByDocId(String docId);
+    long countRelationships();
+    void deleteRelationships(TagDocRelationship tagDocRelationship);
+    boolean relationshipExists();
 
-    // Aggregation operations
-    <T> AggregationResults<T> aggregate(Aggregation aggregation, String collectionName, Class<T> outputType);
 }

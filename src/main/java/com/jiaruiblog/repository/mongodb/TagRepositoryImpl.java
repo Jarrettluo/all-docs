@@ -7,7 +7,9 @@ import com.mongodb.client.result.UpdateResult;
 import jakarta.annotation.Resource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -18,6 +20,8 @@ public class TagRepositoryImpl implements TagRepository {
 
     @Resource
     private MongoTemplate mongoTemplate;
+
+    private static final String TAG_ID = "tagId";
 
     private static final String TAG_COLLECTION = "tagCollection";
     private static final String RELATION_COLLECTION = "relateTagCollection";
@@ -67,6 +71,15 @@ public class TagRepositoryImpl implements TagRepository {
     }
 
     @Override
+    public void update(Tag tag) {
+        Query query = new Query(Criteria.where("_id").is(tag.getId()));
+        Update update = new Update();
+        update.set("name", tag.getName());
+        update.set("updateTime", tag.getUpdateDate());
+        mongoTemplate.updateFirst(query, update, TAG_COLLECTION);
+    }
+
+    @Override
     public UpdateResult update(Query query, Update update) {
         return mongoTemplate.updateFirst(query, update, Tag.class, TAG_COLLECTION);
     }
@@ -74,6 +87,33 @@ public class TagRepositoryImpl implements TagRepository {
     @Override
     public TagDocRelationship saveRelationship(TagDocRelationship relationship) {
         return mongoTemplate.save(relationship, RELATION_COLLECTION);
+    }
+
+    @Override
+    public List<TagDocRelationship> findRelationships() {
+        return List.of();
+    }
+
+    @Override
+    public List<TagDocRelationship> findRelationshipsByDocId(String docId) {
+        Query query = new Query().addCriteria(Criteria.where(FILE_ID).is(id));
+        return tagRepository.findRelationships(query);
+    }
+
+    @Override
+    public long countRelationships() {
+        return 0;
+    }
+
+    @Override
+    public void deleteRelationships(TagDocRelationship tagDocRelationship) {
+        Query query = new Query(Criteria.where(TAG_ID).is(relationship.getTagId())
+                .and(FILE_ID).is(relationship.getFileId()));
+    }
+
+    @Override
+    public boolean relationshipExists() {
+        return false;
     }
 
     @Override

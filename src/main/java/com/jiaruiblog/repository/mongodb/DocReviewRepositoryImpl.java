@@ -18,6 +18,10 @@ public class DocReviewRepositoryImpl implements DocReviewRepository {
 
     private final MongoTemplate mongoTemplate;
 
+    public static final String USER_ID = "userId";
+    public static final String DOC_ID = "docId";
+
+
     public DocReviewRepositoryImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
@@ -30,6 +34,15 @@ public class DocReviewRepositoryImpl implements DocReviewRepository {
     @Override
     public void saveAll(List<DocReview> docReviews) {
         mongoTemplate.insert(docReviews, COLLECTION_NAME);
+    }
+
+    @Override
+    public long countByUserId(String userId, boolean isAdmin) {
+        Query query = new Query();
+        if (!isAdmin && userId != null) {
+            query.addCriteria(Criteria.where(USER_ID).is(userId));
+        }
+        return mongoTemplate.count(query, DocReview.class, COLLECTION_NAME);
     }
 
     @Override
@@ -50,6 +63,11 @@ public class DocReviewRepositoryImpl implements DocReviewRepository {
     @Override
     public long deleteByQuery(Query query) {
         return mongoTemplate.remove(query, DocReview.class, COLLECTION_NAME).getDeletedCount();
+    }
+
+    @Override
+    public void deleteByIdList(List<String> docIds) {
+        Query query = new Query(Criteria.where(DOC_ID).in(docIds));
     }
 
     @Override

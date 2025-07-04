@@ -18,7 +18,7 @@ import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IDocLogService;
-import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.DocumentService;
 import com.jiaruiblog.service.IUserService;
 import com.jiaruiblog.service.TaskExecuteService;
 import com.jiaruiblog.service.impl.DocLogServiceImpl;
@@ -66,7 +66,7 @@ public class FileController {
     private static final String USERNAME = "username";
 
     @Resource
-    private IFileService fileService;
+    private DocumentService fileService;
 
     @Resource
     private TaskExecuteService taskExecuteService;

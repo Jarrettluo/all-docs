@@ -58,7 +58,7 @@ public interface DocReviewService {
      * @Param []
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    UpdateResult deleteReviewsBatch(List<String> docIds, String userId);
+    void deleteReviewsBatch(List<String> docIds, String userId);
 
     /**
      * @author luojiarui

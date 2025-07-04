@@ -12,11 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @ClassName FileOperation
- * @Description FileOperationServiceImpl
  * @author luojiarui
- * @Date 2022/7/13 7:57 下午
- * @Version 1.0
  **/
 @Slf4j
 @Service

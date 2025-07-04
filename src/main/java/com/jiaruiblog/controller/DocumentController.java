@@ -15,7 +15,7 @@ import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.intercepter.SensitiveFilter;
 import com.jiaruiblog.service.IDocLogService;
-import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.DocumentService;
 import com.jiaruiblog.service.RedisService;
 import com.jiaruiblog.service.impl.DocLogServiceImpl;
 import com.jiaruiblog.service.impl.RedisServiceImpl;
@@ -45,7 +45,7 @@ import java.util.List;
 public class DocumentController {
 
     @Resource
-    IFileService iFileService;
+    DocumentService documentService;
 
     @Resource
     RedisService redisService;
@@ -77,7 +77,7 @@ public class DocumentController {
                 }
             }
         }
-        return ApiResult.success(iFileService.list(documentDTO));
+        return ApiResult.success(documentService.list(documentDTO));
     }
 
     @Operation(summary = "2.1 查询文档的分页列表页", description = "根据参数查询文档列表，限制了分类和标签")
@@ -103,7 +103,7 @@ public class DocumentController {
                 }
             }
         }
-        return ApiResult.success(iFileService.listNew(documentDTO));
+        return ApiResult.success(documentService.listNew(documentDTO));
     }
 
     @Operation(summary = "2.2 查询文档的详细信息", description = "查询文档的详细信息")
@@ -111,7 +111,7 @@ public class DocumentController {
     public ApiResult<Object> detail(
             @RequestParam(value = "docId")
             @Schema(description = "文档ID", required = true) String id) {
-        return ApiResult.success(iFileService.detail(id));
+        return ApiResult.success(documentService.detail(id));
     }
 
     @Operation(summary = "3.2 删除某个文档", description = "删除某个文档")
@@ -120,7 +120,7 @@ public class DocumentController {
     public ApiResult<Object> remove(
             @RequestBody @Schema(description = "文档删除DTO", required = true) RemoveObjectDTO removeObjectDTO,
             HttpServletRequest request) {
-        FileDocument fileDocument = iFileService.queryById(removeObjectDTO.getId());
+        FileDocument fileDocument = documentService.queryById(removeObjectDTO.getId());
         if (fileDocument == null) {
             throw new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND);
         }
@@ -130,7 +130,7 @@ public class DocumentController {
         user.setUsername(username);
         user.setId(userId);
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.DELETE);
-        iFileService.remove(fileDocument);
+        documentService.remove(fileDocument);
         return ApiResult.success();
     }
 
@@ -138,7 +138,7 @@ public class DocumentController {
     @PutMapping(value="/auth/updateInfo")
     @Permission(value = PermissionEnum.ADMIN)
     public ApiResult<Object> updateInfo(@RequestBody @Schema(description = "文档更新信息DTO") UpdateInfoDTO updateInfoDTO) {
-        iFileService.updateInfo(updateInfoDTO);
+        documentService.updateInfo(updateInfoDTO);
         return ApiResult.success();
     }
 
@@ -150,7 +150,7 @@ public class DocumentController {
             @Schema(description = "文档查询DTO", required = true) DocumentDTO documentDTO) {
         FilterTypeEnum filterType = documentDTO.getType();
         if (filterType.equals(FilterTypeEnum.CATEGORY) || filterType.equals(FilterTypeEnum.TAG)) {
-            return ApiResult.success(iFileService.listWithCategory(documentDTO));
+            return ApiResult.success(documentService.listWithCategory(documentDTO));
         } else {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

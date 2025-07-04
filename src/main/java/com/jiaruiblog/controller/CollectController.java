@@ -6,7 +6,7 @@ import com.jiaruiblog.entity.dto.CollectDTO;
 import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.CollectService;
-import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.DocumentService;
 import com.jiaruiblog.service.IUserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -32,7 +32,7 @@ public class CollectController {
     private IUserService userService;
 
     @Resource
-    private IFileService fileService;
+    private DocumentService fileService;
 
     /**
      * @param collect 收藏数据传输对象

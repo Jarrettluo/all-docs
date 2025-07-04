@@ -23,7 +23,6 @@ public class CollectServiceImpl implements CollectService {
     @Resource
     CollectRepository collectRepository;
 
-
     /**
      * 添加文档收藏关系
      * @param collect 收藏关系实体

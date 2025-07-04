@@ -6,7 +6,7 @@ import com.jiaruiblog.AllDocsApplication;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.dto.DocumentDTO;
 import com.jiaruiblog.enums.FilterTypeEnum;
-import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.DocumentService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class FileServiceImplTest {
     }
 
     @Autowired
-    IFileService iFileService;
+    DocumentService documentService;
 
     @Test
     public void listWithCategory() {
@@ -42,7 +42,7 @@ public class FileServiceImplTest {
         documentDTO.setPage(0);
         documentDTO.setRows(20);
         documentDTO.setCategoryId("");
-        String s = JSON.toJSONString(iFileService.listWithCategory(documentDTO));
+        String s = JSON.toJSONString(documentService.listWithCategory(documentDTO));
         System.out.println(s);
     }
 
@@ -54,14 +54,14 @@ public class FileServiceImplTest {
         documentDTO.setPage(0);
         documentDTO.setRows(10);
         documentDTO.setCategoryId("62b6814b77914c7fa8fa959c");
-        String s = JSON.toJSONString(iFileService.listWithCategory(documentDTO));
+        String s = JSON.toJSONString(documentService.listWithCategory(documentDTO));
         System.out.println(s);
     }
 
     @Test
     public void queryByIdTest() {
         String docId = "62b843695f74b25a63f5427b";
-        FileDocument fileDocument = iFileService.queryById(docId);
+        FileDocument fileDocument = documentService.queryById(docId);
         System.out.println(fileDocument);
     }
 
@@ -74,7 +74,7 @@ public class FileServiceImplTest {
         String urlStr = "https://docs.spring.io/spring-framework/docs/1.0.0/license.txt";
         String userId = "636f05ef852f7c3263f71d63";
         String username = "admin123";
-        JSONObject jsonObject = (JSONObject) JSON.toJSON(iFileService.uploadByUrl(category, tags, name, description,
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(documentService.uploadByUrl(category, tags, name, description,
                 urlStr, userId, username));
 
         System.out.println(jsonObject);
@@ -89,7 +89,7 @@ public class FileServiceImplTest {
         String urlStr = "https://docs.spring.io/spring-framework/docs/4.2.0.RC1/spring-framework-reference/pdf//spring-framework-reference.pdf";
         String userId = "636f05ef852f7c3263f71d63";
         String username = "admin123";
-        iFileService.uploadByUrl(category, tags, name, description, urlStr, userId, username);
+        documentService.uploadByUrl(category, tags, name, description, urlStr, userId, username);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class FileServiceImplTest {
         String urlStr = "https://oss.dreamfly.top/navigation/files/%E6%88%90%E9%83%BD%E6%97%85%E6%B8%B8%E6%94%BB%E7%95%A52018%E6%9A%91%E5%81%87.pdf";
         String userId = "636f05ef852f7c3263f71d63";
         String username = "admin123";
-        iFileService.uploadByUrl(category, tags, name, description, urlStr, userId, username);
+        documentService.uploadByUrl(category, tags, name, description, urlStr, userId, username);
     }
 
 

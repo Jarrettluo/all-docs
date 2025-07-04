@@ -20,7 +20,7 @@ import java.util.*;
 /**
  * @author jiarui.luo
  */
-public interface IFileService {
+public interface DocumentService {
 
 
     /**

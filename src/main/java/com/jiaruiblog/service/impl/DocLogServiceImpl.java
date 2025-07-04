@@ -19,10 +19,6 @@ import java.util.Map;
 
 /**
  * @author luojiarui
- * @ClassName DocLogServiceImpl
- * @Description 文档日志的查询和删除
- * @Date 2022/12/10 11:05
- * @Version 1.0
  **/
 @Service
 public class DocLogServiceImpl implements IDocLogService {

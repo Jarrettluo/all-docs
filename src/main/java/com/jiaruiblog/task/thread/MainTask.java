@@ -3,7 +3,7 @@ package com.jiaruiblog.task.thread;
 import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.enums.DocType;
-import com.jiaruiblog.service.IFileService;
+import com.jiaruiblog.service.DocumentService;
 import com.jiaruiblog.task.data.TaskData;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.task.executor.TaskExecutor;
@@ -57,7 +57,7 @@ public class MainTask implements RunnableTask {
         updateTaskStatus();
 
         // 更新文档的数据
-        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
         fileService.updateFile(taskData.getFileDocument());
     }
 
@@ -121,7 +121,7 @@ public class MainTask implements RunnableTask {
 
 
     private void updateTaskStatus() {
-        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
         FileDocument fileDocument = taskData.getFileDocument();
         try {
             fileService.updateState(fileDocument, fileDocument.getDocState(), fileDocument.getErrorMsg());
@@ -142,7 +142,7 @@ public class MainTask implements RunnableTask {
         String thumbFileId = fileDocument.getThumbId();
         String previewFileId = fileDocument.getPreviewFileId();
 
-        IFileService fileService = SpringApplicationContext.getBean(IFileService.class);
+        DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
         fileService.deleteGridFs(textFileId, thumbFileId, previewFileId);
     }
 

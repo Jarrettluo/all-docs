@@ -7,13 +7,9 @@ import com.jiaruiblog.entity.vo.DocVO;
 import com.jiaruiblog.entity.vo.MonthStatVO;
 import com.jiaruiblog.entity.vo.StatsVO;
 import com.jiaruiblog.entity.vo.TrendVO;
+import com.jiaruiblog.repository.DocumentRepository;
 import com.jiaruiblog.service.*;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,11 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @ClassName StatisticsServiceImpl
- * @Description StatisticsServiceImpl
  * @author luojiarui
- * @Date 2022/6/26 2:28 下午
- * @Version 1.0
  **/
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
@@ -36,7 +28,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     CategoryService categoryService;
 
     @Resource
-    IFileService fileService;
+    DocumentService fileService;
 
     @Resource
     TagService tagService;
@@ -45,15 +37,13 @@ public class StatisticsServiceImpl implements StatisticsService {
     ICommentService commentService;
 
     @Resource
-    private MongoTemplate mongoTemplate;
+    DocumentRepository documentRepository;
 
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
      * @author luojiarui
-     * @Description // 统计随机的三个分类
-     * @Date 2:29 下午 2022/6/26
-     * @Param []
+     * 统计随机的三个分类
      **/
     @Override
     public List<TrendVO> trend() {
@@ -91,9 +81,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     /**
      * @return com.jiaruiblog.utils.ApiResult
      * @author luojiarui
-     * @Description // 统计数量
-     * @Date 2:29 下午 2022/6/26
-     * @Param []
+     * 统计数量
      **/
     @Override
     public StatsVO all() {
@@ -107,9 +95,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     /**
      * @author luojiarui
-     * @Description 统计过去一个月每天的数据
-     * @Date 17:13 2023/5/20
-     * @Param []
+     * 统计过去一个月每天的数据
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Override
@@ -137,27 +123,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         LocalDate lastDateOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth());
         Date endDate = Date.from(lastDateOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        Aggregation aggregation = Aggregation.newAggregation(
-                // 使用$match操作符筛选出在过去一个月内的文档
-                Aggregation.match(Criteria.where("uploadDate").gte(startDate).lte(endDate)),
-                // 使用$project操作符提取日期字段的年、月、日部分，并合并为日期字符串字段
-                Aggregation.project()
-                        .andExpression("dateToString('%Y-%m-%d', uploadDate)").as("date"),
-                // 使用$group操作符按日期分组，并计算每天的统计数据
-                Aggregation.group("date").count().as("count"),
-                // 使用$project操作符进行投影和重命名字段
-                // 使用$group操作符进行分组时，默认会将分组字段的结果存储在_id字段中，无法直接将其命名为其他字段名称
-                Aggregation.project("count")
-                        .and("$_id").as("date"),
-                // 使用$sort操作符按日期排序
-                Aggregation.sort(Sort.Direction.ASC, "date")
-        );
-
-        // 执行聚合操作并获取结果
-        AggregationResults<MonthStatVO> results = mongoTemplate.aggregate(aggregation,
-                FileServiceImpl.COLLECTION_NAME,
-                MonthStatVO.class);
-        List<MonthStatVO> resultList = results.getMappedResults();
+        List<MonthStatVO> resultList = documentRepository.xx(startDate, endDate);
 
         for (MonthStatVO monthStatVO : resultList) {
             monthStatResult.replace(monthStatVO.getDate(), monthStatVO.getCount());

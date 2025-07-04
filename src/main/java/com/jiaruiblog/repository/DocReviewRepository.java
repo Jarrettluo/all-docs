@@ -13,6 +13,12 @@ public interface DocReviewRepository {
 
     void saveAll(List<DocReview> docReviews);
 
+    long countByUserId(String userId);
+
+    long countByUserId(String userId, boolean isAdmin);
+
+    List<DocReview> findByPage(Integer pageNum, Integer pageRows, String userId, boolean isAdmin);
+
     long countByQuery(Query query);
 
     List<DocReview> findByQuery(Query query);
@@ -20,6 +26,8 @@ public interface DocReviewRepository {
     UpdateResult updateMulti(Query query, Update update);
 
     long deleteByQuery(Query query);
+
+    void deleteByIdList(List<String> docIdList);
 
     boolean existsByDocIdIn(List<String> docIds);
 }
