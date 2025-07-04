@@ -9,6 +9,8 @@ import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.User;
 import com.jiaruiblog.entity.bo.UserBO;
 import com.jiaruiblog.entity.dto.*;
+import com.jiaruiblog.entity.vo.PageVO;
+import com.jiaruiblog.entity.vo.UserVO;
 import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.service.IUserService;
@@ -206,7 +208,7 @@ public class UserController {
     @Operation(summary = "管理员查询全部用户信息", description = "只有管理员有权限进行用户列表查询")
     @Permission(PermissionEnum.ADMIN)
     @GetMapping("/allUsers")
-    public ApiResult<Object> allUsers(@ModelAttribute("pageDTO") BasePageDTO pageDTO) {
+    public ApiResult<PageVO<UserVO>> allUsers(@ModelAttribute("pageDTO") BasePageDTO pageDTO) {
         return ApiResult.success(userService.getUserList(pageDTO));
     }
 

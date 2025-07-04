@@ -5,8 +5,16 @@ import com.jiaruiblog.entity.User;
 import com.jiaruiblog.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * <p></p>
@@ -19,22 +27,60 @@ import org.springframework.stereotype.Repository;
 @Conditional(DataSourceCondition.MongoDBCondition.class)
 public class UserMongoRepository implements UserRepository {
 
+    private static final String COLLECTION_NAME = "user";
+    private static final String OBJECT_ID = "_id";
+    private static final String USER_BANNING = "banning";
+    public static final String AVATAR = "avatar";
+    public static final String USERNAME = "username";
+    public static final String ROLE = "permissionEnum";
+    public static final String UPDATE_TIME = "updateDate";
+
+
     @Autowired
     MongoTemplate mongoTemplate;
 
     @Override
-    public User findById(Long id) {
+    public User findById(String id) {
         return mongoTemplate.findById(id, User.class);
     }
 
     @Override
+    public List<User> findByUsername(String username) {
+        Query query = new Query().addCriteria(Criteria.where(USERNAME).is(username));
+        return mongoTemplate.find(query, User.class, COLLECTION_NAME);
+    }
+
+    @Override
     public int insert(User user) {
+        mongoTemplate.save(user, COLLECTION_NAME);
         return 0;
     }
 
     @Override
     public int update(User user) {
+        Query query = new Query().addCriteria(Criteria.where(USERNAME).is(user.getUsername()));
+        Update update = new Update();
+        update.set(ROLE, user.getPermissionEnum());
+        update.set("password", user.getPassword());
+        update.set(UPDATE_TIME, new Date());
+        mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
         return 0;
+    }
+
+    @Override
+    public void updateLoginTime(User user) {
+        Query query1 = new Query(Criteria.where("_id").is(user.getId()));
+        Update update = new Update();
+        update.set("lastLogin", new Date());
+        mongoTemplate.updateFirst(query1, update, User.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public void blockUser(User user) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where(OBJECT_ID).is(user.getId()));
+        Update update = new Update().set(USER_BANNING, !Optional.ofNullable(user.getBanning()).orElse(true));
+        mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
     }
 
     @Override
@@ -45,5 +91,20 @@ public class UserMongoRepository implements UserRepository {
     @Override
     public User save(User user) {
         return mongoTemplate.save(user);
+    }
+
+    @Override
+    public long count() {
+        return mongoTemplate.count(new Query(), User.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public List<User> findByPage(int pageNum, int pageSize, Sort sort) {
+        Query query = new Query();
+        query.skip((long) (pageNum - 1) * pageSize);
+        query.limit(pageSize);
+        query.with(sort);
+        return mongoTemplate.find(query, User.class, COLLECTION_NAME);
+
     }
 }

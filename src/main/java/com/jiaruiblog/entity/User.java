@@ -21,7 +21,7 @@ import java.util.List;
  * @Date 2022/6/4 9:37 上午
  * @Version 1.0
  **/
-@Document
+@Document(collection = "users") // Mongo
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

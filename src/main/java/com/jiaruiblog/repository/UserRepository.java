@@ -1,6 +1,9 @@
 package com.jiaruiblog.repository;
 
 import com.jiaruiblog.entity.User;
+import org.springframework.data.domain.Sort;
+
+import java.util.List;
 
 /**
  * <p></p>
@@ -11,13 +14,23 @@ import com.jiaruiblog.entity.User;
  */
 public interface UserRepository {
 
-    User findById(Long id);
+    User findById(String id);
+
+    List<User> findByUsername(String username);
 
     int insert(User user);
 
     int update(User user);
 
-    int deleteById(Long id);
+    void updateLoginTime(User user);
+
+    void blockUser(User user);
+
+    int deleteById(String id);
 
     User save(User user);
+
+    long count();
+
+    List<User> findByPage(int pageNum, int pageSize, Sort sort);
 }

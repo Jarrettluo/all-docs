@@ -34,6 +34,7 @@ public enum ErrorCode {
     PARAMS_ERROR(1201, "error-code.params-error"),
     PROCESS_ERROR(1202, "error-code.process-error"),
     OPERATE_FAILED(1203, "error-code.operate-failed"),
+    DATA_IS_EMPTY(1204, "error-code.data-is-empty"),
 
     // File Related
     FILE_NOT_FOUND(2001, "error-code.file-not-found"),

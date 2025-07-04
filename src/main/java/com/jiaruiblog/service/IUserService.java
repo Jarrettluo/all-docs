@@ -6,6 +6,8 @@ import com.jiaruiblog.entity.bo.UserBO;
 import com.jiaruiblog.entity.dto.BasePageDTO;
 import com.jiaruiblog.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.entity.dto.UserRoleDTO;
+import com.jiaruiblog.entity.vo.PageVO;
+import com.jiaruiblog.entity.vo.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -29,7 +31,7 @@ public interface IUserService {
      * @Param [pageDTO]
      * @return com.jiaruiblog.util.BaseApiResult
      **/
-    Map<String, Object> getUserList(BasePageDTO pageDTO);
+    PageVO<UserVO> getUserList(BasePageDTO pageDTO);
 
     void changeUserRole(UserRoleDTO userRoleDTO);
 
