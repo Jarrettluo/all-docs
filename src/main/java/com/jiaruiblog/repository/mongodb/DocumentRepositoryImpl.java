@@ -1,17 +1,22 @@
 package com.jiaruiblog.repository.mongodb;
 
+import com.jiaruiblog.entity.FileDocument;
+import com.jiaruiblog.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.entity.vo.MonthStatVO;
 import com.jiaruiblog.repository.DocumentRepository;
-import com.jiaruiblog.service.impl.DocumentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Field;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * <p></p>
@@ -22,10 +27,87 @@ import java.util.List;
  */
 public class DocumentRepositoryImpl implements DocumentRepository {
 
+    public static final String COLLECTION_NAME = "fileDatas";
+
     @Autowired
     MongoTemplate mongoTemplate;
 
-    public List<MonthStatVO> xx(Date startDate, Date endDate) {
+    @Override
+    public void save(FileDocument fileDocument) {
+
+    }
+
+    @Override
+    public void update(FileDocument fileDocument) {
+        Query query = new Query(Criteria.where("_id").is(fileDocument.getId()));
+        Update update = new Update();
+        update.set("textFileId", fileDocument.getTextFileId());
+        update.set("thumbId", fileDocument.getThumbId());
+        update.set("previewFileId", fileDocument.getPreviewFileId());
+        update.set("description", fileDocument.getDescription());
+        mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
+
+    }
+
+    @Override
+    public long count() {
+        return 0;
+    }
+
+    @Override
+    public FileDocument findById(String fileDocumentId) {
+
+        return new FileDocument();
+    }
+
+    @Override
+    public List<FileDocument> findByIdList(List<String> docIdList) {
+        return List.of();
+    }
+
+    @Override
+    public FileDocument findByMd5(String md5) {
+        Query query = new Query().addCriteria(Criteria.where("md5").is(md5));
+        return mongoTemplate.findOne(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public List<FileDocument> findByPage(Integer pageNum, Integer pageSize, Sort sort) {
+        Query query = new Query().addCriteria(Criteria.where("reviewing").is(false));
+        long skip = (long) (pageNum) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        Field field = query.fields();
+        field.exclude("content");
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public List<FileDocumentDTO> findByPageWithFussySearch(Integer pageNum, Integer pageSize, Sort sort, String keyWord) {
+
+        Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
+        Query query = new Query();
+        query.addCriteria(Criteria.where("name").regex(pattern));
+
+        List<FileDocument> documents = mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        
+        return List.of();
+    }
+
+    @Override
+    public boolean delete(String fileDocumentId) {
+
+        Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocumentId));
+        mongoTemplate.remove(query, COLLECTION_NAME);
+        return true;
+    }
+
+    @Override
+    public boolean deleteByIdList(List<String> idList) {
+        return false;
+    }
+
+    public List<MonthStatVO> stats(Date startDate, Date endDate) {
         Aggregation aggregation = Aggregation.newAggregation(
                 // 使用$match操作符筛选出在过去一个月内的文档
                 Aggregation.match(Criteria.where("uploadDate").gte(startDate).lte(endDate)),
@@ -44,7 +126,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
         // 执行聚合操作并获取结果
         AggregationResults<MonthStatVO> results = mongoTemplate.aggregate(aggregation,
-                DocumentServiceImpl.COLLECTION_NAME,
+                COLLECTION_NAME,
                 MonthStatVO.class);
         return results.getMappedResults();
     }

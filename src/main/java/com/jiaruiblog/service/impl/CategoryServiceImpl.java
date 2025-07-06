@@ -30,18 +30,13 @@ import java.util.stream.Collectors;
  * 提供分类相关的增删改查及关联关系管理功能
  *
  * @author Jarrett Luo
- * @Date 2022/6/7 11:39
- * @Version 1.0
  */
 @Slf4j
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
     // 常量定义
-    private static final String CATEGORY_ID = "categoryId";  // 分类ID字段名
     private static final String UPDATE_DATE = "uploadDate";  // 更新日期字段名
-    private static final String FILE_ID = "fileId";          // 文件ID字段名
-    public static final String DOC_ID = "docId";             // 文档ID字段名
 
     @Resource
     CategoryRepository categoryRepository;  // 分类数据访问接口
@@ -179,25 +174,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * 添加文档与分类的关联关系
-     *
-     * @param relationship 关联关系实体
-     * @param relationship -> CateDocRelationship
-     * @throws BusinessException 当参数错误或关系已存在时抛出
-     *                           CateDocRelationship relationship = new CateDocRelationship();
-     *                           relationship.setCategoryId(categoryId);
-     *                           relationship.setCreateDate(new Date());
-     *                           relationship.setFileId(docId);
-     *                           relationship.setUpdateDate(new Date());
-     *                           addDocRelate(relationship);
-     *                           }
-     * @Override public void addRelationShipDefault(String categoryId, List<String> docIds) {
-     * for (String docId : docIds) {
-     * addRelationShipDefault(categoryId, docId);
-     * }
-     * }
-     * <p>
-     * /**
      * 取消某个文件在分类下的关联关系
      */
     @Override
@@ -217,7 +193,9 @@ public class CategoryServiceImpl implements CategoryService {
         if (result.isEmpty()) {
             return Lists.newArrayList();
         }
-        return result.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
+        return result.stream()
+                .map(CateDocRelationship::getFileId)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -265,7 +243,7 @@ public class CategoryServiceImpl implements CategoryService {
             return Lists.newArrayList();
         }
         List<Category> categories = new ArrayList<>(); // categoryRepository.findByNameContainingIgnoreCase(keyWord);
-        List<String> ids = categories.stream().map(Category::getId).collect(Collectors.toList());
+        List<String> ids = categories.stream().map(Category::getId).toList();
         List<CateDocRelationship> relationships = new ArrayList<>();
         for (String id : ids) {
             relationships.addAll(categoryRepository.findRelationshipsByCategoryId(id, Sort.unsorted()));
@@ -361,7 +339,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public PageVO<FileDocumentDTO> getMyCollection(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
+    public PageVO<FileDocumentDTO> getMyCollection(String cateId, String tagId,
+                                                   String keyword, Long pageNum,
+                                                   Long pageSize, String userId) {
         List<FileDocumentDTO> mappedResults = new ArrayList<>();
         int count = 0;
 

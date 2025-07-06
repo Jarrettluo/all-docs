@@ -1,6 +1,8 @@
 package com.jiaruiblog.repository;
 
+import com.jiaruiblog.entity.FileDocument;
 import com.jiaruiblog.entity.vo.MonthStatVO;
+import org.springframework.data.domain.Sort;
 
 import java.util.Date;
 import java.util.List;
@@ -14,5 +16,25 @@ import java.util.List;
  */
 public interface DocumentRepository {
 
-    List<MonthStatVO> xx(Date startDate, Date endDate);
+    void save(FileDocument fileDocument);
+
+    void update(FileDocument fileDocument);
+
+    long count();
+
+    FileDocument findById(String fileDocumentId);
+
+    List<FileDocument> findByIdList(List<String> docIdList);
+
+    FileDocument findByMd5(String md5);
+
+    List<FileDocument> findByPage(Integer pageNum, Integer pageSize, Sort sort);
+
+    List<FileDocument> findByPageWithFussySearch(Integer pageNum, Integer pageSize, Sort sort, String keyWord);
+
+    boolean delete(String fileDocumentId);
+
+    boolean deleteByIdList(List<String> idList);
+
+    List<MonthStatVO> stats(Date startDate, Date endDate);
 }

@@ -3,7 +3,6 @@ package com.jiaruiblog.service.impl;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
-
 import com.jiaruiblog.config.SystemConfig;
 import com.jiaruiblog.entity.Category;
 import com.jiaruiblog.entity.FileDocument;
@@ -19,6 +18,7 @@ import com.jiaruiblog.entity.vo.PageVO;
 import com.jiaruiblog.enums.DocStateEnum;
 import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.ErrorCode;
+import com.jiaruiblog.repository.DocumentRepository;
 import com.jiaruiblog.service.*;
 import com.jiaruiblog.task.exception.TaskRunException;
 import com.jiaruiblog.util.PdfUtil;
@@ -29,16 +29,11 @@ import com.mongodb.client.gridfs.model.GridFSFile;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
-import org.apache.http.auth.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -53,6 +48,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -69,16 +65,11 @@ import java.util.stream.Collectors;
 @Service
 public class DocumentServiceImpl implements DocumentService {
 
-    public static final String COLLECTION_NAME = "fileDatas";
-
     private static final String PDF_SUFFIX = ".pdf";
 
     private static final String FILE_NAME = "filename";
 
-    private static final String CONTENT = "content";
 
-    private static final String[] EXCLUDE_FIELD = new String[]{"md5", CONTENT, "contentType", "suffix", "description",
-            "gridfsId", "thumbId", "textFileId", "errorMsg"};
     // 以点分割必须经过转译
     public static final String DOT = "\\.";
 
@@ -109,6 +100,9 @@ public class DocumentServiceImpl implements DocumentService {
     private void setTagService(@Lazy TagService tagService) {
         this.tagService = tagService;
     }
+
+    @Resource
+    DocumentRepository documentRepository;
 
     private ElasticServiceImpl elasticServiceImpl;
 
@@ -146,51 +140,26 @@ public class DocumentServiceImpl implements DocumentService {
         String gridfsId = uploadFileToGridFs(inputStream, fileDocument.getContentType());
         fileDocument.setGridfsId(gridfsId);
 
-        fileDocument = mongoTemplate.save(fileDocument, COLLECTION_NAME);
-
+        documentRepository.save(fileDocument);
         return fileDocument;
     }
 
     @Override
     public void updateFile(FileDocument fileDocument) {
-        Query query = new Query(Criteria.where("_id").is(fileDocument.getId()));
-        Update update = new Update();
-        update.set("textFileId", fileDocument.getTextFileId());
-        update.set("thumbId", fileDocument.getThumbId());
-        update.set("previewFileId", fileDocument.getPreviewFileId());
-        update.set("description", fileDocument.getDescription());
-        mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
-
+        documentRepository.update(fileDocument);
     }
 
     /**
      * @author luojiarui
-     * @Description // 更新文档状态
-     * @Date 15:41 2022/11/13
-     * @Param [fileDocument, state]
      **/
     @Override
     public void updateState(FileDocument fileDocument, DocStateEnum state, String errorMsg) throws TaskRunException {
-        Query query = new Query(Criteria.where("_id").is(fileDocument.getId()));
-        if (state != DocStateEnum.FAIL) {
-            errorMsg = "无";
-        }
-        Update update = new Update();
-        update.set("docState", state);
-        update.set("errorMsg", errorMsg);
-        try {
-            mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
-        } catch (Exception e) {
-            log.error("更新文档状态信息{}==>出错==>{}", fileDocument, e);
-            throw new TaskRunException("更新文档状态信息==>出错==>{}", e);
-        }
+        documentRepository.update(fileDocument);
     }
 
     /**
      * @author luojiarui
-     * @Description // 从gridFs中删除文件
-     * @Date 18:01 2022/11/13
-     * @Param [id]
+     * // 从gridFs中删除文件
      **/
     @Override
     public void deleteGridFs(String... id) {
@@ -229,9 +198,9 @@ public class DocumentServiceImpl implements DocumentService {
         try {
             String gridfsId = uploadFileToGridFs(file.getInputStream(), file.getContentType());
             fileDocument.setGridfsId(gridfsId);
-            fileDocument = mongoTemplate.save(fileDocument, COLLECTION_NAME);
+            documentRepository.save(fileDocument);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            log.error("保存文件出错{}", ex.getMessage(), ex.getCause());
         }
         // 异步保存数据标签
         tagService.saveTagWhenSaveDoc(fileDocument);
@@ -240,14 +209,11 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     /**
-     * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 使用用户id 和 用户名进行保存，此接口必须使用auth进行验证
-     * @Date 12:18 2023/2/19
-     * @Param [file, userId, username]
+     *  使用用户id 和 用户名进行保存，此接口必须使用auth进行验证
      **/
     @Override
-    public void documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException {
+    public void documentUpload(MultipartFile file, String userId, String username) {
         List<String> availableSuffixList = List.of("pdf", "png", "docx", "pptx", "xlsx", "html", "md", "txt");
         try {
             if (file != null && !file.isEmpty()) {
@@ -320,9 +286,7 @@ public class DocumentServiceImpl implements DocumentService {
             if (!file.isEmpty()) {
                 try {
                     FileDocument fileDocument = saveFileNew(file, userId, username, description);
-                    if (fileDocument != null) {
-                        fileIds.add(fileDocument.getId());
-                    }
+                    fileIds.add(fileDocument.getId());
                 } catch (IOException | RuntimeException e) {
                     if (Boolean.FALSE.equals(skipError)) {
                         throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
@@ -336,26 +300,18 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     //证书信任
-    public final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
-        @Override
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    };
+    public final static HostnameVerifier DO_NOT_VERIFY = (hostname, session) -> true;
 
     /**
-     * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 通过网络地址将文件保存下来
-     * @Date 19:09 2023/4/22
-     * @Param [category, tags, name, description, urlStr, userId, username]
+     *  通过网络地址将文件保存下来
      * TODO 这里上传没写好
      **/
     @Override
     public void uploadByUrl(String category, List<String> tags, String name, String description,
                                      String urlStr, String userId, String username) {
 
-        FileDocument fileDocument = null;
+        FileDocument fileDocument;
         try {
             if (!StringUtils.hasText(name)) {
                 name = getFileName(urlStr);
@@ -365,7 +321,7 @@ public class DocumentServiceImpl implements DocumentService {
             HttpURLConnection conn;
             //证书信任
             //关键代码
-            if ("HTTPS".equals(url.getProtocol().toUpperCase())) {
+            if ("HTTPS".equalsIgnoreCase(url.getProtocol())) {
                 trustAllHosts();
                 HttpsURLConnection https = (HttpsURLConnection) url
                         .openConnection();
@@ -390,29 +346,21 @@ public class DocumentServiceImpl implements DocumentService {
 
             fileDocument = new FileDocument();
             fileDocument.setName(name);
-            fileDocument.setSize((long) inputStream.available());
-            fileDocument.setContentType(conn.getContentType());
-            fileDocument.setUploadDate(new Date());
-            fileDocument.setMd5(fileMd5);
-            fileDocument.setUserId(userId);
-            fileDocument.setUserName(username);
-            fileDocument.setDescription(description);
-            fileDocument.setReviewing(Boolean.TRUE.equals(systemConfig.getAdminReview()));
+            fileDocument.setSize( inputStream.available());
+            getFileDocumentInstance(description, userId, username, fileDocument, fileMd5, conn.getContentType());
 
             String suffix = name.substring(name.lastIndexOf(".") + 1);
             fileDocument.setSuffix("." + suffix);
 
             String gridfsId = uploadFileToGridFs(inputStream, conn.getContentType());
             fileDocument.setGridfsId(gridfsId);
-            fileDocument = mongoTemplate.save(fileDocument, COLLECTION_NAME);
+
+            documentRepository.save(fileDocument);
 
             tagService.saveTagWhenSaveDoc(fileDocument);
 
         } catch (IOException | RuntimeException  e) {
             throw new BusinessException(ErrorCode.INTERNAL_ERROR);
-        }
-        if (fileDocument == null) {
-            throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
         FileUploadPO fileUploadPO = saveOrUpdateCategory(category, tags);
         categoryService.addRelationShipDefault(fileUploadPO.getCategoryId(), fileDocument.getId());
@@ -422,16 +370,26 @@ public class DocumentServiceImpl implements DocumentService {
 
     }
 
+    private void getFileDocumentInstance(String description, String userId, String username, FileDocument fileDocument, String fileMd5, String contentType) {
+        fileDocument.setContentType(contentType);
+        fileDocument.setUploadDate(new Date());
+        fileDocument.setMd5(fileMd5);
+        fileDocument.setUserId(userId);
+        fileDocument.setUserName(username);
+        fileDocument.setDescription(description);
+        fileDocument.setReviewing(Boolean.TRUE.equals(systemConfig.getAdminReview()));
+    }
+
 
     public static void trustAllHosts() {
         TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
             @Override
-            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
 
             }
 
             @Override
-            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
 
             }
 
@@ -447,7 +405,7 @@ public class DocumentServiceImpl implements DocumentService {
             HttpsURLConnection
                     .setDefaultSSLSocketFactory(sc.getSocketFactory());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("处理出错啦！{}", e.getMessage(), e.getCause());
         }
     }
 
@@ -459,12 +417,8 @@ public class DocumentServiceImpl implements DocumentService {
      */
     private static String getFileName(String srcRealPath) {
         // 如果是包含中文的src需要将其转换为标准名称
-        String decoderUrl = null;
-        try {
-            decoderUrl = URLDecoder.decode(srcRealPath, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        String decoderUrl;
+        decoderUrl = URLDecoder.decode(srcRealPath, StandardCharsets.UTF_8);
         if (org.apache.commons.lang3.StringUtils.isNoneBlank(decoderUrl)) {
             srcRealPath = decoderUrl;
         }
@@ -522,9 +476,7 @@ public class DocumentServiceImpl implements DocumentService {
     /**
      * @return com.jiaruiblog.entity.po.FileUploadPO
      * @author luojiarui
-     * @Description 返回需要新建或者查询的分类和标签的列表信息
-     * @Date 16:09 2023/4/22
-     * @Param [category, tags]
+     * 返回需要新建或者查询的分类和标签的列表信息
      **/
     private FileUploadPO saveOrUpdateCategory(String category, List<String> tags) {
         FileUploadPO fileUploadPO = new FileUploadPO();
@@ -538,13 +490,12 @@ public class DocumentServiceImpl implements DocumentService {
     /**
      * @return java.lang.String
      * @author luojiarui
-     * @Description 存入数据库及解析索引
-     * @Date 12:12 2023/2/19
-     * @Param [fileMd5, file]
+     * 存入数据库及解析索引
      **/
     private FileDocument saveToDb(String md5, MultipartFile file, String userId, String username, String desc) {
         FileDocument fileDocument;
         String originFilename = file.getOriginalFilename();
+        assert originFilename != null;
         if (originFilename.contains("/")) {
             String[] split = originFilename.split("/");
             originFilename = split[split.length-1];
@@ -552,14 +503,7 @@ public class DocumentServiceImpl implements DocumentService {
         fileDocument = new FileDocument();
         fileDocument.setName(originFilename);
         fileDocument.setSize(file.getSize());
-        fileDocument.setContentType(file.getContentType());
-        fileDocument.setUploadDate(new Date());
-        fileDocument.setMd5(md5);
-        fileDocument.setUserId(userId);
-        fileDocument.setUserName(username);
-        fileDocument.setDescription(desc);
-        // 如果已经关闭了管理员审核功能，则设置审核状态为关闭
-        fileDocument.setReviewing(Boolean.TRUE.equals(systemConfig.getAdminReview()));
+        getFileDocumentInstance(desc, userId, username, fileDocument, md5, file.getContentType());
 
         if (StringUtils.hasText(originFilename)) {
             String suffix = originFilename.substring(originFilename.lastIndexOf("."));
@@ -569,9 +513,9 @@ public class DocumentServiceImpl implements DocumentService {
         try {
             String gridfsId = uploadFileToGridFs(file.getInputStream(), file.getContentType());
             fileDocument.setGridfsId(gridfsId);
-            fileDocument = mongoTemplate.save(fileDocument, COLLECTION_NAME);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            documentRepository.save(fileDocument);
+        } catch (IOException e) {
+            log.error("处理出错啦！{}", e.getMessage(), e.getCause());
         }
         // 异步保存数据标签
         tagService.saveTagWhenSaveDoc(fileDocument);
@@ -619,10 +563,9 @@ public class DocumentServiceImpl implements DocumentService {
      */
     @Override
     public void removeFile(String id, boolean isDeleteFile) {
-        FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, COLLECTION_NAME);
+        FileDocument fileDocument = documentRepository.findById(id);
         if (fileDocument != null) {
-            Query query = new Query().addCriteria(Criteria.where("_id").is(id));
-            mongoTemplate.remove(query, COLLECTION_NAME);
+            boolean result = documentRepository.delete(fileDocument.getId());
             if (isDeleteFile) {
                 Query deleteQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(fileDocument.getGridfsId()));
                 gridFsTemplate.delete(deleteQuery);
@@ -632,17 +575,13 @@ public class DocumentServiceImpl implements DocumentService {
 
     /**
      * @author luojiarui
-     * @Description 对文档的名称，标签，分类，描述进行修改
-     * @Date 09:51 2023/7/2
-     * @Param [updateInfoDTO]
-     * @return com.jiaruiblog.util.BaseApiResult
+     * 对文档的名称，标签，分类，描述进行修改
      **/
     @Override
 //    @Transactional  应该是不生效
     public void updateInfo(UpdateInfoDTO updateInfoDTO) {
         String docId = updateInfoDTO.getId();
-        Query query = new Query().addCriteria(Criteria.where("_id").is(docId));
-        FileDocument document = mongoTemplate.findById(docId, FileDocument.class, COLLECTION_NAME);
+        FileDocument document = documentRepository.findById(docId);
         if (Objects.isNull(document)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -673,10 +612,10 @@ public class DocumentServiceImpl implements DocumentService {
             String suffix = split[split.length - 1];
             name = name + "." + suffix;
         }
-        Update update = new Update();
-        update.set("name", name);
-        update.set("description", desc);
-        mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
+        // 修改描述和名字以后更新文档基本信息
+        document.setDescription(desc);
+        document.setName(name);
+        documentRepository.update(document);
 
     }
 
@@ -688,13 +627,15 @@ public class DocumentServiceImpl implements DocumentService {
      */
     @Override
     public Optional<FileDocument> getById(String id) {
-        FileDocument fileDocument = mongoTemplate.findById(id, FileDocument.class, COLLECTION_NAME);
+        FileDocument fileDocument = documentRepository.findById(id);
         if (fileDocument != null) {
             Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(fileDocument.getGridfsId()));
             GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
 
-            if (fsFile == null || fsFile.getObjectId() == null) {
+            if (fsFile == null) {
                 return Optional.empty();
+            } else {
+                fsFile.getObjectId();
             }
 
             // 开启文件下载
@@ -724,35 +665,33 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Optional<FileDocument> getPreviewById(String id) {
         FileDocument fileDocument = new FileDocument();
-        if (fileDocument != null) {
-            Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(id));
-            GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
+        Query gridQuery = new Query().addCriteria(Criteria.where(FILE_NAME).is(id));
+        GridFSFile fsFile = gridFsTemplate.findOne(gridQuery);
 
-            if (fsFile == null) {
+        if (fsFile == null) {
+            return Optional.empty();
+        }
+
+        fileDocument.setSize(fsFile.getLength());
+        fileDocument.setName(fsFile.getFilename());
+
+        if (fsFile != null) {
+            fsFile.getObjectId();
+        }
+
+        // 开启文件下载
+        GridFSDownloadOptions gridFSDownloadOptions = new GridFSDownloadOptions();
+
+        try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId())) {
+            if (in.getGridFSFile().getLength() > 0) {
+                GridFsResource resource = new GridFsResource(fsFile, in);
+                fileDocument.setContent(IoUtil.readBytes(resource.getInputStream()));
+                return Optional.of(fileDocument);
+            } else {
                 return Optional.empty();
             }
-
-            fileDocument.setSize(fsFile.getLength());
-            fileDocument.setName(fsFile.getFilename());
-
-            if (fsFile != null) {
-                fsFile.getObjectId();
-            }
-
-            // 开启文件下载
-            GridFSDownloadOptions gridFSDownloadOptions = new GridFSDownloadOptions();
-
-            try (GridFSDownloadStream in = gridFsBucket.openDownloadStream(fsFile.getObjectId())) {
-                if (in.getGridFSFile().getLength() > 0) {
-                    GridFsResource resource = new GridFsResource(fsFile, in);
-                    fileDocument.setContent(IoUtil.readBytes(resource.getInputStream()));
-                    return Optional.of(fileDocument);
-                } else {
-                    return Optional.empty();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+        } catch (IOException e) {
+            log.error("处理出错啦！{}", e.getMessage(), e.getCause());
         }
         return Optional.empty();
     }
@@ -768,8 +707,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (md5 == null) {
             return null;
         }
-        Query query = new Query().addCriteria(Criteria.where("md5").is(md5));
-        return mongoTemplate.findOne(query, FileDocument.class, COLLECTION_NAME);
+        return documentRepository.findByMd5(md5);
     }
 
     /**
@@ -783,45 +721,44 @@ public class DocumentServiceImpl implements DocumentService {
         if (Objects.isNull(md5Set)) {
             return null;
         }
-        Query query = new Query().addCriteria(Criteria.where("md5").in(md5Set));
-        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        List<FileDocument> fileDocumentList = new ArrayList<>();
+        for (String s : md5Set) {
+            fileDocumentList.add(documentRepository.findByMd5(s));
+        }
+        return fileDocumentList;
     }
 
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"))
-                .addCriteria(Criteria.where("reviewing").is(false));
-        long skip = (long) (pageIndex) * pageSize;
-        query.skip(skip);
-        query.limit(pageSize);
-        Field field = query.fields();
-        field.exclude(CONTENT);
-        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        // todo 需要转换为page
+        return documentRepository.findByPage(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
+
     }
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      * @author luojiarui
-     * @Description // 增加过滤条件的分页功能
-     * @Date 11:12 下午 2022/6/22
-     * @Param [pageIndex, pageSize, ids]
+     * 增加过滤条件的分页功能
+     *
      **/
     @Override
     public List<FileDocument> listAndFilterByPage(int pageIndex, int pageSize, Collection<String> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return Lists.newArrayList();
         }
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        // 增加过滤条件
-        query.addCriteria(Criteria.where("_id").in(ids)).addCriteria(Criteria.where("reviewing").is(false));
-        // 设置起始页和每页查询条数
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
-        query.with(pageable);
+//        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+//        // 增加过滤条件
+//        query.addCriteria(Criteria.where("_id").in(ids)).addCriteria(Criteria.where("reviewing").is(false));
+//        // 设置起始页和每页查询条数
+//        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+//        query.with(pageable);
+//
+//
+//        Field field = query.fields();
+//        field.exclude(CONTENT);
+//        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
 
-
-        Field field = query.fields();
-        field.exclude(CONTENT);
-        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        return documentRepository.findByPage(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
@@ -829,26 +766,25 @@ public class DocumentServiceImpl implements DocumentService {
         if (CollectionUtils.isEmpty(ids)) {
             return Lists.newArrayList();
         }
-        Query query = new Query();
-        query.with(Sort.unsorted());
-        // 增加过滤条件
-        query.addCriteria(Criteria.where("_id").in(ids));
-        // 设置起始页和每页查询条数
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
-        query.with(pageable);
-
-
-        Field field = query.fields();
-        field.exclude(CONTENT);
-        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+//        Query query = new Query();
+//        query.with(Sort.unsorted());
+//        // 增加过滤条件
+//        query.addCriteria(Criteria.where("_id").in(ids));
+//        // 设置起始页和每页查询条数
+//        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+//        query.with(pageable);
+//
+//
+//        Field field = query.fields();
+//        field.exclude(CONTENT);
+//        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        return documentRepository.findByPage(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     /**
      * @return com.jiaruiblog.utils.ApiResult
      * @author luojiarui
-     * @Description 列表；过滤；检索等
-     * @Date 11:49 2022/8/6
-     * @Param [documentDTO]
+     * 列表；过滤；检索等
      **/
     @Override
     public PageVO<DocumentVO> list(DocumentDTO documentDTO) {
@@ -1217,14 +1153,15 @@ public class DocumentServiceImpl implements DocumentService {
             Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
             query.addCriteria(Criteria.where("name").regex(pattern));
         }
-        // 不包含该字段
-        query.fields().exclude(EXCLUDE_FIELD);
-
-        // 设置起始页和每页查询条数
-        Pageable pageable = PageRequest.of(page, row);
-        query.with(pageable);
-        query.with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+//        // 不包含该字段
+//        query.fields().exclude(EXCLUDE_FIELD);
+//
+//        // 设置起始页和每页查询条数
+//        Pageable pageable = PageRequest.of(page, row);
+//        query.with(pageable);
+//        query.with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+//        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        return documentRepository.findByPage(page, row, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     /**
@@ -1235,14 +1172,15 @@ public class DocumentServiceImpl implements DocumentService {
      * @Param [keyWord]
      **/
     private long countNumByKeyWord(String keyWord) {
-        if (StringUtils.hasText(keyWord)) {
-            Query query = new Query();
-            Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
-            query.addCriteria(Criteria.where("name").regex(pattern));
-            return mongoTemplate.count(query, COLLECTION_NAME);
-        } else {
-            return countAllFile();
-        }
+//        if (StringUtils.hasText(keyWord)) {
+//            Query query = new Query();
+//            Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
+//            query.addCriteria(Criteria.where("name").regex(pattern));
+//            return mongoTemplate.count(query, COLLECTION_NAME);
+//        } else {
+//            return countAllFile();
+//        }
+        return documentRepository.count();
     }
 
     private DocWithCateVO entityTransfer(boolean checkState, FileDocument fileDocument) {
@@ -1361,11 +1299,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (!StringUtils.hasText(keyWord)) {
             return Lists.newArrayList();
         }
-        Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
-        Query query = new Query();
-        query.addCriteria(Criteria.where("name").regex(pattern));
-
-        List<FileDocument> documents = mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        List<FileDocument> documents = documentRepository.findByPageWithFussySearch(1,1,null, keyWord);
         return documents.stream().map(FileDocument::getId).collect(Collectors.toList());
     }
 
@@ -1395,7 +1329,7 @@ public class DocumentServiceImpl implements DocumentService {
      */
     @Override
     public FileDocument queryById(String docId) {
-        return mongoTemplate.findById(docId, FileDocument.class, COLLECTION_NAME);
+        return documentRepository.findById(docId);
     }
 
     /**
@@ -1407,7 +1341,7 @@ public class DocumentServiceImpl implements DocumentService {
      **/
     @Override
     public long countAllFile() {
-        return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
+        return documentRepository.count();
     }
 
     /**
@@ -1440,9 +1374,11 @@ public class DocumentServiceImpl implements DocumentService {
             }
         }
 
-        Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocument.getId()));
-        Update update = new Update().set("thumbId", gridfsId);
-        mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
+//        Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocument.getId()));
+//        Update update = new Update().set("thumbId", gridfsId);
+//        mongoTemplate.updateFirst(query, update, FileDocument.class, COLLECTION_NAME);
+
+        documentRepository.update(fileDocument);
 
     }
 
@@ -1507,7 +1443,7 @@ public class DocumentServiceImpl implements DocumentService {
      * @Param [query]
      **/
     public long countFileByQuery(Query query) {
-        return mongoTemplate.count(query, FileDocument.class, COLLECTION_NAME);
+        return documentRepository.count();
     }
 
     /**
@@ -1523,8 +1459,8 @@ public class DocumentServiceImpl implements DocumentService {
         if (CollectionUtils.isEmpty(docIds)) {
             return Collections.emptyList();
         }
-        Query query = new Query(Criteria.where("_id").in(docIds));
-        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+
+        return documentRepository.findByIdList(new ArrayList<>(docIds));
     }
 
     /**
@@ -1535,21 +1471,19 @@ public class DocumentServiceImpl implements DocumentService {
      * @Param [docId]
      **/
     @Override
-    public List<FileDocument> queryAndRemove(String... docId) {
+    public void queryAndRemove(String... docId) {
         List<String> docIds = Arrays.asList(docId);
         if (CollectionUtils.isEmpty(docIds)) {
-            return Collections.emptyList();
+            return;
         }
-        Query query = new Query(Criteria.where("_id").in(docIds));
-        return mongoTemplate.findAllAndRemove(query, FileDocument.class, COLLECTION_NAME);
+        documentRepository.deleteByIdList(docIds);
+
     }
 
     /**
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      * @author luojiarui
-     * @Description 修改并返回查询到的文档信息
-     * @Date 10:31 2022/12/10
-     * @Param [docId]
+     * 修改并返回查询到的文档信息
      **/
     @Override
     public List<FileDocument> queryAndUpdate(String... docId) {
@@ -1557,27 +1491,30 @@ public class DocumentServiceImpl implements DocumentService {
         if (CollectionUtils.isEmpty(docIds)) {
             return Collections.emptyList();
         }
-        Query query = new Query(Criteria.where("_id").in(docIds));
-        Update update = new Update();
-        update.set("reviewing", false);
-        mongoTemplate.updateMulti(query, update, COLLECTION_NAME);
-        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+//        Query query = new Query(Criteria.where("_id").in(docIds));
+//        Update update = new Update();
+//        update.set("reviewing", false);
+//        mongoTemplate.updateMulti(query, update, COLLECTION_NAME);
+//        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+
+        return documentRepository.findByIdList(docIds);
     }
 
     @Override
     public List<FileDocument> queryFileDocument(BasePageDTO pageDTO, boolean reviewing) {
 
-        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
-        query.addCriteria(Criteria.where("reviewing").is(reviewing));
-        int pageIndex = pageDTO.getPage();
-        int pageSize = pageDTO.getRows();
-        long skip = (long) (pageIndex - 1) * pageSize;
-        query.skip(skip);
-        query.limit(pageSize);
-        Field field = query.fields();
-        field.exclude(CONTENT);
-
-        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+//        Query query = new Query().with(Sort.by(Sort.Direction.DESC, "uploadDate"));
+//        query.addCriteria(Criteria.where("reviewing").is(reviewing));
+//        int pageIndex = pageDTO.getPage();
+//        int pageSize = pageDTO.getRows();
+//        long skip = (long) (pageIndex - 1) * pageSize;
+//        query.skip(skip);
+//        query.limit(pageSize);
+//        Field field = query.fields();
+//        field.exclude(CONTENT);
+//
+//        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        return documentRepository.findByPage(pageDTO.getPage(), pageDTO.getRows(), Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
@@ -1586,7 +1523,7 @@ public class DocumentServiceImpl implements DocumentService {
         query.addCriteria(Criteria.where("reviewing").is(reviewing));
         Map<String, Object> result = new HashMap<>();
         result.put("data", queryFileDocument(pageDTO, reviewing));
-        result.put("total", mongoTemplate.count(query, FileDocument.class, COLLECTION_NAME));
+        result.put("total", documentRepository.count());
         return result;
     }
 }

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 文档评审，日志查询
@@ -78,7 +79,7 @@ public class DocReviewController {
     @Operation(summary = "修改已读", description = "修改已读状态，普通用户可以标记自己上传的文档为已读")
     @PutMapping("userRead")
     public ApiResult<Object> updateDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
-                                        @Parameter(hidden = true) HttpServletRequest request) {
+                                             @Parameter(hidden = true) HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
         UpdateResult result = docReviewService.userRead(batchIdDTO.getIds(), userId);
         return ApiResult.success(result);
@@ -98,11 +99,12 @@ public class DocReviewController {
             throw BusinessExceptionBuilder.of(ErrorCode.DOCUMENT_NOT_FOUND).build();
         }
         // 校验某个文档是否存在, 查询并删除某个文档
-        List<FileDocument> fileDocumentList = fileService.queryAndRemove(docId);
-        if (CollectionUtils.isEmpty(fileDocumentList)) {
+        FileDocument fileDocument = fileService.queryById(docId);
+        fileService.queryAndRemove(docId);
+        if (Objects.isNull(fileDocument)) {
             throw BusinessExceptionBuilder.of(ErrorCode.DOCUMENT_NOT_FOUND).build();
         }
-        docReviewService.refuse(fileDocumentList.get(0), reason);
+        docReviewService.refuse(fileDocument, reason);
         return ApiResult.success();
     }
 
@@ -126,6 +128,7 @@ public class DocReviewController {
         docReviewService.refuseBatch(fileDocumentList, reason);
         return ApiResult.success("success");
     }
+
     /**
      * @author luojiarui
      **/
@@ -144,6 +147,7 @@ public class DocReviewController {
         docReviewService.approveBatch(fileDocumentList);
         return ApiResult.success("success");
     }
+
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
@@ -163,25 +167,26 @@ public class DocReviewController {
     @Operation(summary = "管理员和普通用户分别查询数据", description = "查询文档审批的列表")
     @GetMapping("queryMyReviewResultList")
     public ApiResult<PageVO<DocReview>> queryMyReviewResultList(@Parameter(description = "分页参数")
-                                                                    @ModelAttribute("pageParams")
-                                                                    @Valid BasePageDTO pageParams,
-                                               @Parameter(hidden = true) HttpServletRequest request) {
+                                                                @ModelAttribute("pageParams")
+                                                                @Valid BasePageDTO pageParams,
+                                                                @Parameter(hidden = true) HttpServletRequest request) {
         return ApiResult.success(docReviewService.queryReviewLog(pageParams, (String) request.getAttribute("id"), false));
     }
 
     /**
      * 普通用户删除，管理员删除，删除评审日志
+     *
      * @return BaseApiResult
      */
     @Operation(summary = "删除评审日志", description = "管理员和普通用户都可以删除评审结果")
     @DeleteMapping("removeDocReview")
     public ApiResult<Void> removeDocReview(@Parameter(description = "批量ID参数") @RequestBody
-                                                       @Valid BatchIdDTO batchIdDTO,
-                                       @Parameter(hidden = true) HttpServletRequest request) {
+                                           @Valid BatchIdDTO batchIdDTO,
+                                           @Parameter(hidden = true) HttpServletRequest request) {
         if (CollectionUtils.isEmpty(batchIdDTO.getIds())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-         docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
+        docReviewService.deleteReviewsBatch(batchIdDTO.getIds(), (String) request.getAttribute("id"));
         return ApiResult.success();
     }
 

@@ -123,7 +123,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         LocalDate lastDateOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth());
         Date endDate = Date.from(lastDateOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        List<MonthStatVO> resultList = documentRepository.xx(startDate, endDate);
+        List<MonthStatVO> resultList = documentRepository.stats(startDate, endDate);
 
         for (MonthStatVO monthStatVO : resultList) {
             monthStatResult.replace(monthStatVO.getDate(), monthStatVO.getCount());

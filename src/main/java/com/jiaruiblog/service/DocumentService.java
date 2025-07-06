@@ -230,7 +230,7 @@ public interface DocumentService {
      * @Param [docId]
      * @return com.jiaruiblog.entity.FileDocument
      **/
-    List<FileDocument> queryAndRemove(String ...docId);
+    void queryAndRemove(String ...docId);
 
     /**
      * @author luojiarui
