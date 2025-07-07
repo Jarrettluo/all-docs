@@ -41,7 +41,6 @@ import java.util.regex.Pattern;
 @Tag(name = "用户模块")
 @RestController
 @Slf4j
-@CrossOrigin
 @RequestMapping("/user")
 public class UserController {
 
@@ -68,11 +67,12 @@ public class UserController {
     @Operation(summary = "新增单个用户", description = "新增单个用户")
     @PostMapping(value = "/insert")
     public ApiResult<Object> insertObj(@RequestBody @Valid RegistryUserDTO userDTO) {
+        // 判断是否开启用户注册
         if (Boolean.FALSE.equals(systemConfig.getUserRegistry())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         userService.registry(userDTO);
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
     @Operation(summary = "批量新增用户", description = "批量新增用户; 支持使用xls进行导入用户信息")
@@ -81,10 +81,10 @@ public class UserController {
         for (RegistryUserDTO item : userDTOS) {
             userService.registry(item);
         }
-        return ApiResult.success("批量新增成功");
+        return ApiResult.success();
     }
 
-    @Operation(summary = "根据id查询", description = "批量新增用户")
+    @Operation(summary = "根据id查询", description = "根据id查询用户信息")
     @PostMapping(value = "/getById")
     public ApiResult<Object> getById(@RequestBody UserDTO user) {
         User one = userService.queryById(user.getId());
@@ -144,7 +144,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
         userService.removeUser(removeUserId);
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
     /**
@@ -165,7 +165,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         userService.deleteUserByIdBatch(userIdList, adminUserId);
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
 
@@ -245,7 +245,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
         userService.blockUser(userId);
-        return ApiResult.success("success");
+        return ApiResult.success();
     }
 
     /**

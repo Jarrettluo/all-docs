@@ -42,6 +42,22 @@ public class RegistryUserDTO {
     @Pattern(regexp = RegexConstant.NUM_WORD_REG, message = MessageConstant.PARAMS_FORMAT_ERROR)
     String password;
 
+    @Schema(description = "用户邮箱", required = true)
+    @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
+    @Pattern(regexp = RegexConstant.MAIL_REG, message = MessageConstant.PARAMS_FORMAT_ERROR)
+    String mail;    
+
+    @Schema(description = "用户手机号", required = true)
+    @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
+    @Pattern(regexp = RegexConstant.PHONE_REG, message = MessageConstant.PARAMS_FORMAT_ERROR)
+    String phone;
+
+    @Schema(description = "用户昵称", required = true)
+    @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)
+    @Size(min = 3, max = 32, message = MessageConstant.PARAMS_LENGTH_REQUIRED)
+    @Pattern(regexp = RegexConstant.NUM_WORD_REG, message = MessageConstant.PARAMS_FORMAT_ERROR)
+    String nickname;
+
     public String getEncodePassword() throws IllegalStateException{
         if (password == null) {
             return "";

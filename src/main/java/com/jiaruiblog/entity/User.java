@@ -55,6 +55,8 @@ public class User {
 
     private PermissionEnum permissionEnum;
 
+    private String nickname;
+
     private Date lastLogin;
 
     private Date createDate;

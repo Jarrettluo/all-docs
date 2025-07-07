@@ -14,6 +14,7 @@ import com.jiaruiblog.exception.BusinessException;
 import com.jiaruiblog.exception.ErrorCode;
 import com.jiaruiblog.repository.UserRepository;
 import com.jiaruiblog.service.IUserService;
+import com.jiaruiblog.service.DocumentService;
 import com.jiaruiblog.util.JwtUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,9 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     UserConvert userConvert;
+
+    @Resource
+    private DocumentService documentService;
 
     /**
      * 初始化第一个用户，默认从配置中取到第一个管理员账号密码
@@ -87,7 +91,7 @@ public class UserServiceImpl implements IUserService {
     public Map<String, String> login(RegistryUserDTO userDTO) {
         User dbUser = queryByUsername(userDTO.getUsername());
 
-        if (dbUser.getPassword().equals(userDTO.getEncodePassword())) {
+        if (!dbUser.getPassword().equals(userDTO.getEncodePassword())) {
             throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
         // 屏蔽用户禁止访问
@@ -123,6 +127,9 @@ public class UserServiceImpl implements IUserService {
         }
         user.setUsername(userDTO.getUsername());
         user.setPassword(userDTO.getEncodePassword());
+        user.setMail(userDTO.getMail());
+        user.setPhone(userDTO.getPhone());
+        user.setNickname(userDTO.getNickname());
         user.setCreateDate(new Date());
         user.setUpdateDate(new Date());
         user.setLastLogin(new Date());
@@ -207,19 +214,27 @@ public class UserServiceImpl implements IUserService {
     /**
      * 用户自行更新信息
      *
-     * @param user 用户业务对象
+     * @param userBO 用户业务对象
      * @return boolean 是否更新成功
      */
     @Override
-    public boolean updateUserBySelf(UserBO user) {
-//        Query query = new Query(Criteria.where("_id").is(user.getId()));
-        // 这里准备更新的user的密码已经经过了编码处理
-//        Update update = getUserUpdate(user);
-//        UpdateResult updateResult1 = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
-//        return updateResult1.getModifiedCount() > 0;
-//
-        // todo 更新用户
-        userRepository.update(new User());
+    public boolean updateUserBySelf(UserBO userBO) {
+        if (userBO == null || userBO.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User dbUser = userRepository.findById(userBO.getId());
+        if (dbUser == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        // 只允许用户更新自己的基础信息，不能改权限
+        if (userBO.getPassword() != null) dbUser.setPassword(userBO.getPassword());
+        if (userBO.getPhone() != null) dbUser.setPhone(userBO.getPhone());
+        if (userBO.getMail() != null) dbUser.setMail(userBO.getMail());
+        if (userBO.getMale() != null) dbUser.setMale(userBO.getMale());
+        if (userBO.getDescription() != null) dbUser.setDescription(userBO.getDescription());
+        if (userBO.getBirthtime() != null) dbUser.setBirthtime(userBO.getBirthtime());
+        dbUser.setUpdateDate(new Date());
+        userRepository.update(dbUser);
         return true;
     }
 
@@ -231,12 +246,23 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public boolean updateUserByAdmin(UserBO userBO) {
-//        Query query = new Query().addCriteria(Criteria.where("_id").is(userBO.getId()));
-//        Update update = getUserUpdate(userBO);
-//        update.set(ROLE, Optional.ofNullable(userBO.getRole()).orElse(PermissionEnum.USER));
-//        UpdateResult updateResult1 = mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
-//        return updateResult1.getModifiedCount() > 0;
-//
+        if (userBO == null || userBO.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User dbUser = userRepository.findById(userBO.getId());
+        if (dbUser == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        // 管理员可更新所有字段
+        if (userBO.getPassword() != null) dbUser.setPassword(userBO.getPassword());
+        if (userBO.getPhone() != null) dbUser.setPhone(userBO.getPhone());
+        if (userBO.getMail() != null) dbUser.setMail(userBO.getMail());
+        if (userBO.getMale() != null) dbUser.setMale(userBO.getMale());
+        if (userBO.getDescription() != null) dbUser.setDescription(userBO.getDescription());
+        if (userBO.getBirthtime() != null) dbUser.setBirthtime(userBO.getBirthtime());
+        if (userBO.getRole() != null) dbUser.setPermissionEnum(userBO.getRole());
+        dbUser.setUpdateDate(new Date());
+        userRepository.update(dbUser);
         return true;
     }
 
@@ -290,37 +316,27 @@ public class UserServiceImpl implements IUserService {
 
     /**
      * 上传用户头像
-     * TODO
+     *
      * @param userId 用户ID
      * @param file   头像文件
      */
     @Override
     public void uploadUserAvatar(String userId, MultipartFile file) {
-//        User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
-//
-//        if (user == null) {
-//            return;
-//        }
-//        String gridfsId;
-//        try {
-//            gridfsId = fileService.uploadFileToGridFs("userAvatar", file.getInputStream(), file.getContentType());
-//        } catch (IOException e) {
-//            log.error("上传dfs出错{}", e.getLocalizedMessage());
-//            return;
-//        }
-//        List<String> avatar = user.getAvatarList();
-//        avatar.add(gridfsId);
-//
-//        Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
-//        Update update = new Update();
-//        update.set("avatarList", avatar);
-//        update.set(UPDATE_TIME, new Date());
-//        update.set(AVATAR, gridfsId);
-//        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, COLLECTION_NAME);
-//        long matchedCount = updateResult.getMatchedCount();
-//        if (matchedCount < 1) {
-//            throw new BusinessException(ErrorCode.USER_DISABLED);
-//        }
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        try {
+            String gridfsId = documentService.uploadFileToGridFs("userAvatar", file.getInputStream(), file.getContentType());
+            if (user.getAvatarList() == null) user.setAvatarList(new ArrayList<>());
+            user.getAvatarList().add(gridfsId);
+            user.setAvatar(gridfsId);
+            user.setUpdateDate(new Date());
+            userRepository.update(user);
+        } catch (Exception e) {
+            log.error("上传头像失败", e);
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
+        }
     }
 
     /**
@@ -331,15 +347,13 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public void removeUser(String userId) {
-//        User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
-//        if (user == null) {
-//            return;
-//        }
-//        log.warn("[删除警告]正在删除用户：{}", user);
-//        fileService.deleteGridFs(user.getAvatarList().toArray(new String[0]));
-//        Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
-//        mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
-
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        if (user.getAvatarList() != null && !user.getAvatarList().isEmpty()) {
+            documentService.deleteGridFs(user.getAvatarList().toArray(new String[0]));
+        }
         userRepository.deleteById(userId);
     }
 
@@ -351,20 +365,13 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public void deleteUserByIdBatch(List<String> userIdList, String adminUserId) {
-//        Query query = new Query().addCriteria(Criteria.where("_id").in(userIdList));
-//        List<User> userList = mongoTemplate.find(query, User.class, COLLECTION_NAME);
-//        if (CollectionUtils.isEmpty(userList) || userIdList.contains(adminUserId)) {
-//            return;
-//        }
-//        List<String> allUserId = new ArrayList<>();
-//        for (User user : userList) {
-//            log.warn("[删除警告]正在删除用户：{}", user);
-//            allUserId.addAll(user.getAvatarList());
-//        }
-//        fileService.deleteGridFs(allUserId.toArray(new String[0]));
-//        mongoTemplate.findAllAndRemove(query, User.class, COLLECTION_NAME);
-
-        // TODO 待开发
+        if (userIdList == null || userIdList.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        for (String userId : userIdList) {
+            if (userId.equals(adminUserId)) continue; // 不允许删除自己
+            removeUser(userId);
+        }
     }
 
     /**
@@ -374,19 +381,16 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public void removeUserAvatar(String userId) {
-//        User user = mongoTemplate.findById(userId, User.class, COLLECTION_NAME);
-//        if (user == null) {
-//            return;
-//        }
-//        fileService.deleteGridFs(user.getAvatar());
-//        Query query = new Query().addCriteria(Criteria.where("_id").is(userId));
-//        Update update = new Update();
-//        update.set(AVATAR, null);
-//        update.set(UPDATE_TIME, new Date());
-//        mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
-
-        // TODO 待开发
-
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        if (user.getAvatar() != null) {
+            documentService.deleteGridFs(user.getAvatar());
+            user.setAvatar(null);
+            user.setUpdateDate(new Date());
+            userRepository.update(user);
+        }
     }
 
     /**
@@ -397,16 +401,17 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public Map<String, String> queryUserAvatarBatch(List<String> userIdList) {
-//        if (CollectionUtils.isEmpty(userIdList) || userIdList.size() > 100) {
-//            return new HashMap<>();
-//        }
-//        Query query = new Query(Criteria.where("_id").in(userIdList));
-//        List<User> users = mongoTemplate.find(query, User.class, COLLECTION_NAME);
-//        return users.stream().filter(item -> item.getId() != null && item.getAvatar() != null)
-//                .collect(Collectors.toMap(User::getId, User::getAvatar, (v1, v2) -> v2));
-
-        // TODO 待开发
-        return new HashMap<>();
+        if (userIdList == null || userIdList.isEmpty() || userIdList.size() > 100) {
+            return new HashMap<>();
+        }
+        Map<String, String> result = new HashMap<>();
+        for (String userId : userIdList) {
+            User user = userRepository.findById(userId);
+            if (user != null && user.getAvatar() != null) {
+                result.put(userId, user.getAvatar());
+            }
+        }
+        return result;
     }
 
     /**
@@ -442,23 +447,4 @@ public class UserServiceImpl implements IUserService {
         userRepository.update(resetUser);
     }
 
-    /**
-     * 构建用户信息更新的Update对象
-     *
-     * @param user 用户业务对象，包含需要更新的字段信息
-     * @return Update 构建好的MongoDB更新对象
-     */
-    private Update getUserUpdate(UserBO user) {
-        Update update = new Update();
-        if (StringUtils.hasText(user.getPassword())) {
-            update.set("password", user.getPassword());
-        }
-        update.set("phone", user.getPhone());
-        update.set("mail", user.getMail());
-        update.set("male", user.getMale());
-        update.set("description", user.getDescription());
-        update.set(UPDATE_TIME, new Date());
-        update.set("birthtime", user.getBirthtime());
-        return update;
-    }
 }

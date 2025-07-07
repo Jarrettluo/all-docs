@@ -51,20 +51,27 @@ public class UserMongoRepository implements UserRepository {
     }
 
     @Override
-    public int insert(User user) {
+    public void insert(User user) {
         mongoTemplate.save(user, COLLECTION_NAME);
-        return 0;
     }
 
     @Override
     public int update(User user) {
-        Query query = new Query().addCriteria(Criteria.where(USERNAME).is(user.getUsername()));
+        if (user == null || user.getId() == null) {
+            return 0;
+        }
+        Query query = new Query().addCriteria(Criteria.where(OBJECT_ID).is(user.getId()));
         Update update = new Update();
-        update.set(ROLE, user.getPermissionEnum());
-        update.set("password", user.getPassword());
+        if (user.getPermissionEnum() != null) update.set(ROLE, user.getPermissionEnum());
+        if (user.getPassword() != null) update.set("password", user.getPassword());
+        if (user.getPhone() != null) update.set("phone", user.getPhone());
+        if (user.getMail() != null) update.set("mail", user.getMail());
+        if (user.getMale() != null) update.set("male", user.getMale());
+        if (user.getDescription() != null) update.set("description", user.getDescription());
+        if (user.getBirthtime() != null) update.set("birthtime", user.getBirthtime());
         update.set(UPDATE_TIME, new Date());
         mongoTemplate.updateFirst(query, update, User.class, COLLECTION_NAME);
-        return 0;
+        return 1;
     }
 
     @Override

@@ -18,7 +18,7 @@ public interface UserRepository {
 
     List<User> findByUsername(String username);
 
-    int insert(User user);
+    void insert(User user);
 
     int update(User user);
 
