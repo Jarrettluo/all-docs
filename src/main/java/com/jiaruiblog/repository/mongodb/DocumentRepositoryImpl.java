@@ -1,7 +1,6 @@
 package com.jiaruiblog.repository.mongodb;
 
 import com.jiaruiblog.entity.FileDocument;
-import com.jiaruiblog.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.entity.vo.MonthStatVO;
 import com.jiaruiblog.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public void save(FileDocument fileDocument) {
-
+        mongoTemplate.save(fileDocument, COLLECTION_NAME);
     }
 
     @Override
@@ -51,18 +50,20 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public long count() {
-        return 0;
+        Query query = new Query().addCriteria(Criteria.where("reviewing").is(false));
+        return mongoTemplate.count(query, COLLECTION_NAME);
     }
 
     @Override
     public FileDocument findById(String fileDocumentId) {
-
-        return new FileDocument();
+        Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocumentId));
+        return mongoTemplate.findOne(query, FileDocument.class, COLLECTION_NAME);
     }
 
     @Override
     public List<FileDocument> findByIdList(List<String> docIdList) {
-        return List.of();
+        Query query = new Query().addCriteria(Criteria.where("_id").in(docIdList));
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
     }
 
     @Override
@@ -83,15 +84,20 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     }
 
     @Override
-    public List<FileDocumentDTO> findByPageWithFussySearch(Integer pageNum, Integer pageSize, Sort sort, String keyWord) {
+    public List<FileDocument> findByPageWithFussySearch(Integer pageNum, Integer pageSize, Sort sort, String keyWord) {
 
         Pattern pattern = Pattern.compile("^.*" + keyWord + ".*$", Pattern.CASE_INSENSITIVE);
         Query query = new Query();
         query.addCriteria(Criteria.where("name").regex(pattern));
-
-        List<FileDocument> documents = mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+        query.addCriteria(Criteria.where("reviewing").is(false));
         
-        return List.of();
+        long skip = (long) (pageNum) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        Field field = query.fields();
+        field.exclude("content");
+
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
     }
 
     @Override
@@ -104,7 +110,9 @@ public class DocumentRepositoryImpl implements DocumentRepository {
 
     @Override
     public boolean deleteByIdList(List<String> idList) {
-        return false;
+        Query query = new Query().addCriteria(Criteria.where("_id").in(idList));
+        mongoTemplate.remove(query, COLLECTION_NAME);
+        return true;
     }
 
     public List<MonthStatVO> stats(Date startDate, Date endDate) {

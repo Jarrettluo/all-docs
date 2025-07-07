@@ -26,7 +26,6 @@ public class TagRepositoryImpl implements TagRepository {
 
     private static final String TAG_ID = "tagId";
     private static final String FILE_ID = "fileId";
-    private static final String DOC_ID = "docId";
 
     private static final String TAG_COLLECTION = "tagCollection";
     private static final String RELATION_COLLECTION = "relateTagCollection";

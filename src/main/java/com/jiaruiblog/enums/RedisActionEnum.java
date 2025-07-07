@@ -35,6 +35,10 @@ public enum RedisActionEnum implements BaseEnum {
         return this.code;
     }
 
+    public String getDescription() {
+        return this.description;
+    }
+
     public static RedisActionEnum getActionByCode(Integer code) {
         if (code == null) {
             return null;

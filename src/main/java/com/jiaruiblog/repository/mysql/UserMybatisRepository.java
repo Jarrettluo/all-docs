@@ -19,8 +19,6 @@ import org.springframework.stereotype.Repository;
 @Conditional(DataSourceCondition.MySQLCondition.class)
 public class UserMybatisRepository implements UserRepository {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
     @Override
     public User findById(Long id) {

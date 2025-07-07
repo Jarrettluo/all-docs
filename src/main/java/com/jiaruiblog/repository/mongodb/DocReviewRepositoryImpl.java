@@ -3,6 +3,9 @@ package com.jiaruiblog.repository.mongodb;
 import com.jiaruiblog.entity.DocReview;
 import com.jiaruiblog.repository.DocReviewRepository;
 import com.mongodb.client.result.UpdateResult;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -37,12 +40,35 @@ public class DocReviewRepositoryImpl implements DocReviewRepository {
     }
 
     @Override
+    public long countByUserId(String userId) {
+        Query query = new Query(Criteria.where(USER_ID).is(userId));
+        return mongoTemplate.count(query, DocReview.class, COLLECTION_NAME);
+    }
+
+    @Override
     public long countByUserId(String userId, boolean isAdmin) {
         Query query = new Query();
         if (!isAdmin && userId != null) {
             query.addCriteria(Criteria.where(USER_ID).is(userId));
         }
         return mongoTemplate.count(query, DocReview.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public List<DocReview> findByPage(Integer pageNum, Integer pageRows, String userId, boolean isAdmin) {
+        Query query = new Query();
+        if (!isAdmin && userId != null) {
+            query.addCriteria(Criteria.where(USER_ID).is(userId));
+        }
+        
+        // 设置分页
+        Pageable pageable = PageRequest.of(pageNum - 1, pageRows);
+        query.with(pageable);
+        
+        // 按创建时间倒序排列
+        query.with(Sort.by(Sort.Direction.DESC, "createDate"));
+        
+        return mongoTemplate.find(query, DocReview.class, COLLECTION_NAME);
     }
 
     @Override
@@ -68,6 +94,7 @@ public class DocReviewRepositoryImpl implements DocReviewRepository {
     @Override
     public void deleteByIdList(List<String> docIds) {
         Query query = new Query(Criteria.where(DOC_ID).in(docIds));
+        mongoTemplate.remove(query, DocReview.class, COLLECTION_NAME);
     }
 
     @Override
