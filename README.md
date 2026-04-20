@@ -53,6 +53,42 @@ In small teams, there is often a large number of collaborative documents. For ex
 
 > administrator account：admin123, administrator password： admin123
 
+## ARCHITECTURE
+
+### Multi-Module Architecture
+
+```
+all-docs (父工程)
+├── all-docs-common      # 公共模块：工具类、通用响应、异常处理
+├── all-docs-domain       # 领域模块：实体、值对象、领域服务
+├── all-docs-infrastructure # 基础设施模块：MongoDB、Redis、Elasticsearch、MinIO 适配
+├── all-docs-application  # 应用模块：业务编排、DTO、Service
+├── all-docs-api          # API 模块：Controller、配置
+└── all-docs-bootstrap    # 启动模块：应用入口
+```
+
+### Technology Stack
+
+| 组件 | 说明 |
+|------|------|
+| MinIO | S3 协议对象存储，替代 GridFS 存储文件（规划中） |
+| MongoDB | 主数据库，存储文档元数据和用户信息 |
+| Elasticsearch | 全文搜索引擎，支持中文分词检索 |
+| Redis | 缓存层，提升热点数据访问性能 |
+
+### Development Requirements
+
+- **Java**: 17+
+- **Maven**: 3.8+
+- **Node.js**: 14+ (前端开发)
+- **IDE**: IntelliJ IDEA
+
+### Module Dependencies
+
+```
+bootstrap -> api -> application -> infrastructure -> domain -> common
+```
+
 ## QUICK START
 > test on ubuntu 18.04
 > wait me for centos, thank you.

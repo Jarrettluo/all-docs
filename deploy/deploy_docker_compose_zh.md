@@ -115,6 +115,43 @@ vim .env
 
 ![](https://github.com/Jarrettluo/document-sharing-site/blob/main/deploy/assets/2023-03-07-21-01-08-image.png)
 
+#### MinIO 配置（可选，文件存储）
+
+全文档支持使用 MinIO 作为 S3 协议的对象存储来存储文件。如需启用，请在 `.env` 文件中添加以下配置：
+
+```shell
+# MinIO 配置
+MINIO_ENDPOINT=minio:9000
+MINIO_ACCESS_KEY=your_access_key
+MINIO_SECRET_KEY=your_secret_key
+MINIO_BUCKET=alldocs
+```
+
+在 `docker-compose.yml` 中添加 MinIO 服务：
+
+```yaml
+  ad_minio:
+    image: minio/minio:latest
+    container_name: ad_minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    volumes:
+      - ./data/minio:/data
+    ports:
+      - ${MINIO_PORT:-9000}:9000
+      - ${MINIO_CONSOLE_PORT:-9001}:9001
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+```
+
+> 注意：MinIO 控制台地址为 http://localhost:9001，默认账号为 access_key，密码为 secret_key。
+
 ### 执行docker-compose.yml脚本
 
 将该文件上传的linux服务器上，执行docker-compose up命令即可启动全文档所依赖的所有服务。

@@ -1,0 +1,95 @@
+server:
+  port: 8082
+
+app:
+  datasource:
+    type: mongodb  # 可配置为mysql或mongodb
+
+spring:
+  data:
+    mongodb:
+      database: ${MONGO_DATABASE:test}
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      threads-allowed-to-block-for-connection-multiplier: 20
+      connect-timeout: 10000
+      socket-timeout: 10000
+      max-wait-time: 5000
+      connections-per-host: 20
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/demo?useSSL=false&serverTimezone=UTC
+    username: root
+    password: ${MYSQL_PASSWORD}
+
+  redis:
+    database: 0
+    host: ${REDIS_HOST:127.0.0.1}
+    password: ${REDIS_PWD}
+    port: ${REDIS_PORT:6379}
+    timeout: 3000
+    jedis:
+      pool:
+        max-idle: 500
+        min-idle: 50
+        max-active: 2000
+        max-wait: ${REDIS_MAX_WAIT:3000}
+    testOnBorrow: true
+
+  servlet:
+    multipart:
+      max-file-size: 300MB
+      max-request-size: 500MB
+
+  thymeleaf:
+    mode: HTML
+    cache: ${THYMELEAF_CACHE:true}
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL:INFO}
+
+cloud:
+  elasticsearch:
+    host: ${ES_HOST:localhost}
+    port: ${ES_PORT:9200}
+
+all-docs:
+  config:
+    user-upload: ${AD_USER_UPLOAD:true}
+    admin-review: ${AD_ADMIN_REVIEW:false}
+    prohibited-word: ${AD_PROHIBITED_WORD:true}
+    user-registry: ${AD_USER_REGISTRY:true}
+    initial-username: ${AD_INITIAL_USERNAME:admin123}
+    initial-password: ${AD_INITIAL_PASSWORD}
+    cover-admin: ${COVER_ADMIN:true}
+  file-path:
+    sensitive-file: sensitive.txt
+
+hmac:
+  secret:
+    key: ${HMAC_SECRET_KEY}
+
+# MinIO 配置 (S3兼容对象存储)
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket: ${MINIO_BUCKET:alldocs}
+  url-expiration: 3600
+
+# 存储策略配置 (可选: minio, gridfs)
+storage:
+  type: ${STORAGE_TYPE:gridfs}
+
+# springdoc:
+#   api-docs:
+#     enabled: true
+#     path: /v3/api-docs
+#   swagger-ui:
+#     enabled: true
+#     path: /swagger-ui/index.html

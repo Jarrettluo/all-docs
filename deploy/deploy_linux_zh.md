@@ -106,6 +106,66 @@ curl -X GET "localhost:9200/"
 
 ![image-esHulZveBV9JWjHFrbbsNjtmVb20VD13](deploy_linux_zh.assets/image-esHulZveBV9JWjHFrbbsNjtmVb20VD13.png)
 
+## MinIO 安装（可选，文件存储）
+
+MinIO 是 S3 协议兼容的对象存储服务，可用于替代 GridFS 存储文件。
+
+```bash
+# 下载 MinIO
+wget https://dl.min.io/server/minio/release/linux-amd64/minio
+chmod +x minio
+
+# 移动到系统路径
+mv minio /usr/local/bin/
+
+# 创建数据目录
+mkdir -p /data/minio
+chmod 755 /data/minio
+
+# 启动 MinIO（生产环境建议使用 systemd 管理）
+MINIO_ROOT_USER=your_access_key MINIO_ROOT_PASSWORD=your_secret_key nohup /usr/local/bin/minio server /data/minio --console-address ":9001" > /var/log/minio.log 2>&1 &
+
+# 测试是否启动成功
+curl -X GET "localhost:9000/minio/health/live"
+```
+
+> MinIO 控制台地址：http://localhost:9001
+> API 地址：http://localhost:9000
+
+使用 systemd 管理 MinIO（可选）：
+
+```bash
+cat > /etc/systemd/system/minio.service << EOF
+[Unit]
+Description=MinIO
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/minio server /data/minio --console-address ":9001"
+Restart=always
+RestartSec=10
+Environment="MINIO_ROOT_USER=your_access_key"
+Environment="MINIO_ROOT_PASSWORD=your_secret_key"
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable minio
+systemctl start minio
+systemctl status minio
+```
+
+### MinIO 配置项说明
+
+| 配置项 | 说明 | 示例值 |
+|--------|------|--------|
+| MINIO_ENDPOINT | MinIO 服务地址 | localhost:9000 |
+| MINIO_ACCESS_KEY | 访问密钥 | minioadmin |
+| MINIO_SECRET_KEY | 秘密密钥 | minioadmin |
+| MINIO_BUCKET | 存储桶名称 | alldocs |
+
 ## Kibana安装
 
 ```bash

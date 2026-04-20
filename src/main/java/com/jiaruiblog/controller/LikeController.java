@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
+import com.jiaruiblog.entity.LikeRequest;
+import com.jiaruiblog.entity.LikeVO;
+import com.jiaruiblog.enums.RedisActionEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,85 +54,36 @@ public class LikeController{
 
     // entityType: 1:点赞
     // entityType: 2:收藏
-    @PostMapping("like")
-    public ApiResult<Map<String, Object>> like(@RequestParam("entityType") int entityType,
-                                  @RequestParam("entityId") String entityId,
-                                  HttpServletRequest request) {
-
-        if (entityType != 1 && entityType != 2) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        // 获取到当前用户
-        String userId = (String) request.getAttribute("id");
-        long likeCount = 0;
-        int likeStatus = 0;
-        try {
-            // 点赞
-            likeService.like(userId, entityType, entityId);
-            // 获取点赞的数量
-            likeCount = likeService.findEntityLikeCount(entityType, entityId);
-            // 获取当前用户点赞的状态
-            likeStatus = likeService.findEntityLikeStatus(userId, entityType, entityId);
-        } catch (RedisConnectionFailureException | RedisConnectionException e) {
-            throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
-        }
-
-
-        // 返回的结果，封装成一个Map集合
-        Map<String, Object> map = new HashMap<>();
-        map.put("likeCount", likeCount);
-        map.put("likeStatus", likeStatus);
-
-//        //触发点赞事件
-//        if (likeStatus == 1) {
-//            Event event = new Event().setTopic(TOPIC_LIKE)
-//                    .setEntityId(entityId)
-//                    .setEntityType(entityType)
-//                    .setUserId(hostHolder.getUser().getId())
-//                    .setEntityUserId(entityUserId)
-//                    .setData("postId", postId);
-//            eventProducer.fireEvent(event);
-//        }
-//        if (entityType == ENTITY_TYPE_POST) {
-//
-//            // 计算帖子分数
-//            String redisKey = RedisKeyUtil.getPostScoreKey();
-//            redisTemplate.opsForSet().add(redisKey, postId);
-//        }
-        return ApiResult.success(map);
+    @PostMapping("/like")
+    public ApiResult<LikeVO> like(@RequestBody LikeRequest request, HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("id");
+        likeService.like(userId, request.getEntityType(), request.getEntityId());
+        LikeVO result = buildLikeVO(userId, request.getEntityId());
+        return ApiResult.success(result);
     }
 
-    @GetMapping("queryLikeInfo")
-    public ApiResult<Object> queryLikeInfo(@RequestParam("entityId") String entityId,
-                                       HttpServletRequest request) {
-        // 获取到当前用户
-        String userId = (String) request.getAttribute("id");
-        // 返回的结果，封装成一个Map集合
-        Map<String, Object> map = new HashMap<>();
-        map.put("likeCount", 0);
-        map.put("likeStatus", 0);
-        map.put("collectCount", 0);
-        map.put("collectStatus", 0);
+    @GetMapping("/like/info")
+    public ApiResult<LikeVO> getLikeInfo(@RequestParam String entityId, HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("id");
+        LikeVO result = buildLikeVO(userId, entityId);
+        return ApiResult.success(result);
+    }
 
-        try {
-            // 获取点赞的数量
-            long likeCount = likeService.findEntityLikeCount(1, entityId);
-            map.put("likeCount", likeCount);
-            // 获取当前用户点赞的状态
-            int likeStatus = likeService.findEntityLikeStatus(userId, 1, entityId);
-            map.put("likeStatus", likeStatus);
+    private LikeVO buildLikeVO(String userId, String entityId) {
+        int likeType = RedisActionEnum.LIKE.getCode();
+        int collectType = RedisActionEnum.COLLECT.getCode();
 
-            // 获取收藏的数量
-            long collectCount = likeService.findEntityLikeCount(2, entityId);
-            map.put("collectCount", collectCount);
-            // 获取当前用户收藏的状态
-            int collectStatus = likeService.findEntityLikeStatus(userId, 2, entityId);
-            map.put("collectStatus", collectStatus);
+        long likeCount = likeService.findEntityLikeCount(likeType, entityId);
+        int likeStatus = likeService.findEntityLikeStatus(userId, likeType, entityId);
 
-        } catch (RedisConnectionFailureException | RedisConnectionException e) {
-            throw new BusinessException(ErrorCode.OPERATE_FAILED, e.getCause());
-        }
+        long collectCount = likeService.findEntityLikeCount(collectType, entityId);
+        int collectStatus = likeService.findEntityLikeStatus(userId, collectType, entityId);
 
-        return ApiResult.success(map);
+        LikeVO vo = new LikeVO();
+        vo.setLikeCount(likeCount);
+        vo.setLikeStatus(likeStatus);
+        vo.setCollectCount(collectCount);
+        vo.setCollectStatus(collectStatus);
+        return vo;
     }
 }
