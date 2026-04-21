@@ -10,7 +10,7 @@ import java.util.Objects;
 
 /**
  * @ClassName PO2VOConverter
- * @Description TODO
+ * @Description PO（持久化对象）到VO（视图对象）的转换器，用于将DocLog实体转换为DocLogVO视图对象
  * @author luojiarui
  * @Date 2024/8/17 10:41
  * @Version 1.0

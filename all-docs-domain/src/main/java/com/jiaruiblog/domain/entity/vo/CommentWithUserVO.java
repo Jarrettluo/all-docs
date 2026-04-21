@@ -8,11 +8,8 @@ import java.util.Date;
 
 /**
  * @ClassName CommentWithUserVO
- * @Description TODO
- * @author luojiarui
- * @Date 2023/1/9 22:19
- * @Version 1.0
- **/
+ * @Description 评论视图对象，包含评论信息
+ */
 @Data
 public class CommentWithUserVO extends CommentDTO {
 

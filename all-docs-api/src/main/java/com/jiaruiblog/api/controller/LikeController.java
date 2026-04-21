@@ -40,10 +40,6 @@ public class LikeController{
     @Autowired
     private RedisTemplate redisTemplate;
 
-
-    // // TODO: 2023/2/3 对评论进行点赞操作，以后再做了
-    // 点赞的信息越积越多怎么统计呢？
-
     // entityType: 1:点赞
     // entityType: 2:收藏
     @PostMapping("/like")

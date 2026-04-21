@@ -29,6 +29,12 @@ public class JwtUtil {
      */
     private static final String SECRET = System.getenv("JWT_SECRET");
 
+    static {
+        if (SECRET == null || SECRET.isEmpty()) {
+            throw new IllegalStateException("JWT_SECRET environment variable must be configured");
+        }
+    }
+
     /**
      * 过期时间：2天
      * 单位为秒

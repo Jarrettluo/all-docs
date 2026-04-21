@@ -16,7 +16,7 @@ public class DataSourceCondition implements Condition {
         @Override
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
             String dbType = context.getEnvironment().getProperty("app.datasource.type");
-            return "mongodb".equalsIgnoreCase(dbType);
+            return dbType == null || "mongodb".equalsIgnoreCase(dbType);
         }
     }
 

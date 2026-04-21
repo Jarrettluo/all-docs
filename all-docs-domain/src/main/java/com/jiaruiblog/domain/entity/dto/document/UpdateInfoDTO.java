@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @ClassName UpdateInfoDTO
- * @Description TODO
+ * @Description 更新文档基本信息的数据传输对象
  * @author luojiarui
  * @Date 2023/6/28 23:08
  * @Version 1.0

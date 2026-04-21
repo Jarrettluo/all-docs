@@ -113,8 +113,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public void handleAuthenticationException(HttpServletResponse response) {
+    public ResponseEntity<ApiResult<Void>> handleAuthenticationException(HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResult.error(403, "Authentication failed"));
     }
 
     private HttpStatus resolveHttpStatus(ErrorCode errorCode) {

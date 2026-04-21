@@ -72,6 +72,7 @@ public class JwtFilter implements Filter {
             if (OPTIONS.equals(request.getMethod())) {
                 response.setStatus(HttpServletResponse.SC_OK);
                 chain.doFilter(request, response);
+                return;
             }
             // Except OPTIONS, other request should be checked by JWT
             else {

@@ -3,6 +3,7 @@ package com.jiaruiblog.infrastructure.repository.mysql;
 import com.jiaruiblog.config.datasource.DataSourceCondition;
 import com.jiaruiblog.domain.entity.User;
 import com.jiaruiblog.infrastructure.repository.UserRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.data.domain.Sort;
 
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Sort;
  * @author Jarrett Luo
  * @version 1.0
  */
+@ConditionalOnProperty(name = "app.datasource.type", havingValue = "mysql", matchIfMissing = false)
 @Conditional(DataSourceCondition.MySQLCondition.class)
 public class UserMybatisRepository implements UserRepository {
 

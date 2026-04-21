@@ -5,6 +5,8 @@ import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,8 @@ import java.io.ByteArrayOutputStream;
  */
 @Component
 public class GridFSStorageStrategy implements StorageStrategy {
+
+    private static final Logger log = LoggerFactory.getLogger(GridFSStorageStrategy.class);
 
     @Autowired
     private GridFSBucket gridFSBucket;
@@ -44,7 +48,7 @@ public class GridFSStorageStrategy implements StorageStrategy {
             }
             return new java.io.ByteArrayInputStream(outputStream.toByteArray());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("GridFS operation failed", e);
             return null;
         }
     }
@@ -55,7 +59,7 @@ public class GridFSStorageStrategy implements StorageStrategy {
             gridFSBucket.delete(new ObjectId(fileId));
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("GridFS operation failed", e);
             return false;
         }
     }

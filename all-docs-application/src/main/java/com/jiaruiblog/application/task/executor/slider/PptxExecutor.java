@@ -3,6 +3,7 @@ package com.jiaruiblog.application.task.executor.slider;
 import com.jiaruiblog.application.task.data.TaskData;
 import com.jiaruiblog.application.task.executor.DocxExecutor;
 import com.jiaruiblog.application.task.exception.TaskRunException;
+import com.jiaruiblog.domain.entity.FileDocument;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -29,9 +30,6 @@ public class PptxExecutor extends DocxExecutor {
 
     public void uploadFileToEs(InputStream is, FileDocument fileDocument, TaskData taskData) {
         // TODO: Implement
-    }
-
-    private static final class FileDocument extends com.jiaruiblog.domain.entity.FileDocument {
     }
 
     private static FileDocument getFileDocument(TaskData taskData) {

@@ -13,19 +13,6 @@ public class MessageConstant {
         throw new IllegalStateException("MessageConstant class");
     }
 
-    /**
-     * @deprecated Use {@link com.jiaruiblog.common.exception.ErrorCode#PARAMS_ERROR} instead.
-     * This constant is kept for backward compatibility only.
-     */
-    @Deprecated
-    public static final Integer PARAMS_ERROR_CODE = 1201;
-    /**
-     * @deprecated Use {@link com.jiaruiblog.common.exception.ErrorCode#PROCESS_ERROR} instead.
-     * This constant is kept for backward compatibility only.
-     */
-    @Deprecated
-    public static final Integer PROCESS_ERROR_CODE = 1202;
-
     public static final String PARAMS_IS_NOT_NULL = "参数是必需的！";
     public static final String PARAMS_LENGTH_REQUIRED = "参数的长度必须符合要求！";
     public static final String PARAMS_FORMAT_ERROR = "参数格式错误！";

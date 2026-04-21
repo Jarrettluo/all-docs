@@ -253,7 +253,7 @@ public class UserController {
      */
     @RequestMapping("/secure/getUserInfo")
     public String login(HttpServletRequest request) {
-        Integer id = (Integer) request.getAttribute("id");
+        String id = (String) request.getAttribute("id");
         String userName = request.getAttribute("username").toString();
         return "当前用户信息id=" + id + ",userName=" + userName;
     }
@@ -311,22 +311,13 @@ public class UserController {
     @Operation(summary = "用户发起找回密码的请求，发送token给邮箱")
     @PostMapping("/generateResetToken")
     public ApiResult<Object> generateResetToken() {
-        // 用户发送邮件信息
-        // 查找相应的用户名；如果用户名不存在则报错
-        // 用户名找到以后发送对应的重置邮箱给用户
-        // 使用88 邮箱给邮件发消息
-        return ApiResult.success();
+        throw new UnsupportedOperationException("Password reset via email is not yet implemented");
     }
 
     @Operation(summary = "用户重置密码")
     @PostMapping("/resetPassword")
     public ApiResult<Object> resetPassword() {
-        // 用户发送邮件/token/新密码
-        // 首先验证token是否存在，不存在则禁止
-        // 如果令牌有效，允许用户重置密码，并在成功后从 Redis 中删除令牌。
-        // 其次根据邮箱找到对应的用户信息，修改用户密码
-        // 用户自动登录
-        return ApiResult.success();
+        throw new UnsupportedOperationException("Password reset via email is not yet implemented");
     }
 
     private static boolean patternMatch(String s, String regex) {

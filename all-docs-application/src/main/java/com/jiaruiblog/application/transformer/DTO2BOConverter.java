@@ -10,7 +10,7 @@ import java.util.Objects;
 
 /**
  * @ClassName DTO2BOConverter
- * @Description TODO
+ * @Description DTO（数据传输对象）到BO（业务对象）的转换器，用于将UserDTO转换为UserBO
  * @author luojiarui
  * @Date 2024/7/23 17:34
  * @Version 1.0

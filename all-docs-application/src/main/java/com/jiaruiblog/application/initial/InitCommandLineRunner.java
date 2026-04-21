@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @ClassName InitCommandLineRunner
- * @Description TODO
+ * @Description 系统启动时执行初始化操作，包括初始化第一个管理员用户
  * @author luojiarui
  * @Date 2023/2/20 22:27
  * @Version 1.0
@@ -28,6 +28,6 @@ public class InitCommandLineRunner implements CommandLineRunner {
      **/
     @Override
     public void run(String... args) throws Exception {
-//        userService.initFirstUser();
+        userService.initFirstUser();
     }
 }

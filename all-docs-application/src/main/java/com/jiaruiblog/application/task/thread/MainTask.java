@@ -107,8 +107,20 @@ public class MainTask implements RunnableTask, Runnable {
         // 删除相关的文件
         removeExistGridFs();
 
-        // TODO 删除es中的数据
-
+        // 删除es中的数据
+        try {
+            FileDocument fileDocument = taskData.getFileDocument();
+            if (fileDocument != null && fileDocument.getMd5() != null) {
+                com.jiaruiblog.application.service.ElasticService elasticService =
+                    com.jiaruiblog.util.SpringApplicationContext.getBean(com.jiaruiblog.application.service.ElasticService.class);
+                if (elasticService != null) {
+                    elasticService.deleteById(fileDocument.getMd5());
+                    log.info("ES document deleted: md5={}", fileDocument.getMd5());
+                }
+            }
+        } catch (Exception e) {
+            log.error("删除ES数据失败: {}", e.getMessage(), e);
+        }
     }
 
     private void removeFileIfExist(String picFilePath) throws IOException {

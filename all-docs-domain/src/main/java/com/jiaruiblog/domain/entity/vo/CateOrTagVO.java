@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * @ClassName CateOrTagVO
- * @Description TODO
+ * @Description 分类或标签视图对象，包含id、名称及关联数量
  * @author luojiarui
  * @Date 2023/5/20 16:28
  * @Version 1.0

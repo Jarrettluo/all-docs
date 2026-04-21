@@ -93,4 +93,16 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     public long countAll() {
         return mongoTemplate.getCollection(COLLECTION_NAME).estimatedDocumentCount();
     }
+
+    @Override
+    public List<CateDocRelationship> findByDocIdIn(List<String> docIds) {
+        Query query = new Query(Criteria.where("fileId").in(docIds));
+        return mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
+    }
+
+    @Override
+    public List<CateDocRelationship> findByCategoryIdAndDocIdIn(String categoryId, List<String> docIds) {
+        Query query = new Query(Criteria.where("categoryId").is(categoryId).and("fileId").in(docIds));
+        return mongoTemplate.find(query, CateDocRelationship.class, RELATE_COLLECTION_NAME);
+    }
 }

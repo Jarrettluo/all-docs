@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  * @ClassName UserBO
- * @Description TODO
+ * @Description 用户业务对象，包含用户基本信息、角色权限等
  * @author luojiarui
  * @Date 2024/7/23 17:37
  * @Version 1.0

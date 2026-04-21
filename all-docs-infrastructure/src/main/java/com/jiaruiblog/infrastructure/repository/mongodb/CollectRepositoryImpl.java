@@ -51,4 +51,16 @@ public class CollectRepositoryImpl implements CollectRepository {
         Query query = new Query(Criteria.where("docId").is(docId));
         return mongoTemplate.find(query, CollectDocRelationship.class, COLLECTION_NAME);
     }
+
+    @Override
+    public List<CollectDocRelationship> findByUserId(String userId) {
+        Query query = new Query(Criteria.where("userId").is(userId));
+        return mongoTemplate.find(query, CollectDocRelationship.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public List<CollectDocRelationship> findByDocIdInAndUserId(List<String> docIds, String userId) {
+        Query query = new Query(Criteria.where("docId").in(docIds).and("userId").is(userId));
+        return mongoTemplate.find(query, CollectDocRelationship.class, COLLECTION_NAME);
+    }
 }

@@ -158,33 +158,83 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public List<String> getSearchHistoryByUserId(String userId) {
-        return List.of();
+        if (userId == null || userId.isEmpty()) {
+            return List.of();
+        }
+        String key = "search:history:" + userId;
+        List<String> history = redisSearchTemplate.opsForList().range(key, 0, 9);
+        return history != null ? history : List.of();
     }
 
     @Override
     public List<String> getHotList(String userId, String key) {
-        return List.of();
+        if (key == null || key.isEmpty()) {
+            key = SEARCH_KEY;
+        }
+        // 使用ZSet获取热门搜索词
+        Set<String> hotSet = redisSearchTemplate.opsForZSet().reverseRange(key, 0, 9);
+        return hotSet != null ? List.copyOf(hotSet) : List.of();
     }
 
     @Override
     public Long delSearchHistoryByUserId(String userId, String searchWord) {
-        return 0L;
+        if (userId == null || userId.isEmpty() || searchWord == null || searchWord.isEmpty()) {
+            return 0L;
+        }
+        String key = "search:history:" + userId;
+        Long removed = redisSearchTemplate.opsForList().remove(key, 1, searchWord);
+        return removed != null ? removed : 0L;
     }
 
     @Override
     public double score(String key, String docId) {
-        return 0.0;
+        if (key == null || key.isEmpty() || docId == null || docId.isEmpty()) {
+            return 0.0;
+        }
+        Double score = redisSearchTemplate.opsForZSet().score(key, docId);
+        return score != null ? score : 0.0;
     }
 
     @Override
     public void removeByDocId(String docId) {
+        if (docId == null || docId.isEmpty()) {
+            return;
+        }
+        // 删除文档相关的搜索热度和历史记录
+        redisSearchTemplate.opsForZSet().remove(SEARCH_KEY, docId);
+        redisSearchTemplate.opsForZSet().remove(DOC_KEY, docId);
+        log.info("删除文档相关的Redis数据：docId={}", docId);
     }
 
     @Override
     public void incrementScoreByUserId(String searchWord, String key) {
+        if (searchWord == null || searchWord.isEmpty()) {
+            return;
+        }
+        if (key == null || key.isEmpty()) {
+            key = SEARCH_KEY;
+        }
+        // 增加搜索词的热度分数
+        redisSearchTemplate.opsForZSet().incrementScore(key, searchWord, 1);
+        // 设置过期时间，避免热词永不消失
+        redisSearchTemplate.expire(key, java.time.Duration.ofDays(7));
+        log.debug("搜索词热度增加：word={}, key={}", searchWord, key);
     }
 
     @Override
     public void addSearchHistoryByUserId(String userId, String searchWord) {
+        if (userId == null || userId.isEmpty() || searchWord == null || searchWord.isEmpty()) {
+            return;
+        }
+        String key = "search:history:" + userId;
+        // 先移除已存在的相同记录，避免重复
+        redisSearchTemplate.opsForList().remove(key, 1, searchWord);
+        // 添加到列表头部
+        redisSearchTemplate.opsForList().leftPush(key, searchWord);
+        // 只保留最近10条记录
+        redisSearchTemplate.opsForList().trim(key, 0, 9);
+        // 设置过期时间
+        redisSearchTemplate.expire(key, java.time.Duration.ofDays(30));
+        log.debug("添加搜索历史：userId={}, word={}", userId, searchWord);
     }
 }

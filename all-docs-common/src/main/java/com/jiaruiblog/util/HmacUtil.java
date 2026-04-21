@@ -25,8 +25,7 @@ public class HmacUtil {
     }
 
     public boolean validateHmac(String data, String hmac) throws Exception {
-        // First validate length to prevent timing attack via length variation
-        if (data == null || hmac == null || data.length() != hmac.length()) {
+        if (data == null || hmac == null) {
             return false;
         }
         String generatedHmac = generateHmac(data);

@@ -20,7 +20,6 @@ public class StorageFactory {
 
     /**
      * 获取默认的存储策略
-     * 可以根据配置动态选择，目前默认返回GridFS
      *
      * @return 存储策略
      */

@@ -40,4 +40,7 @@ public interface CategoryRepository {
 
     long countAll();
 
+    List<CateDocRelationship> findByDocIdIn(List<String> docIds);
+
+    List<CateDocRelationship> findByCategoryIdAndDocIdIn(String categoryId, List<String> docIds);
 }

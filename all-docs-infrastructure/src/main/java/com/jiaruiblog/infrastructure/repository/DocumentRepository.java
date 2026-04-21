@@ -32,6 +32,10 @@ public interface DocumentRepository {
 
     List<FileDocument> findByPageWithFussySearch(Integer pageNum, Integer pageSize, Sort sort, String keyWord);
 
+    List<FileDocument> findByUserId(String userId, Integer pageNum, Integer pageSize, Sort sort);
+
+    List<FileDocument> findByUserIdAndNameContaining(String userId, String name, Integer pageNum, Integer pageSize, Sort sort);
+
     boolean delete(String fileDocumentId);
 
     boolean deleteByIdList(List<String> idList);

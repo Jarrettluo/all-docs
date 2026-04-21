@@ -103,6 +103,34 @@ public class DocumentRepositoryImpl implements DocumentRepository {
     }
 
     @Override
+    public List<FileDocument> findByUserId(String userId, Integer pageNum, Integer pageSize, Sort sort) {
+        Query query = new Query()
+                .addCriteria(Criteria.where("userId").is(userId))
+                .addCriteria(Criteria.where("reviewing").is(false))
+                .with(sort);
+        long skip = (long) (pageNum - 1) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        query.fields().exclude("content");
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    @Override
+    public List<FileDocument> findByUserIdAndNameContaining(String userId, String name, Integer pageNum, Integer pageSize, Sort sort) {
+        Pattern pattern = Pattern.compile("^.*" + Pattern.quote(name) + ".*$", Pattern.CASE_INSENSITIVE);
+        Query query = new Query()
+                .addCriteria(Criteria.where("userId").is(userId))
+                .addCriteria(Criteria.where("name").regex(pattern))
+                .addCriteria(Criteria.where("reviewing").is(false))
+                .with(sort);
+        long skip = (long) (pageNum - 1) * pageSize;
+        query.skip(skip);
+        query.limit(pageSize);
+        query.fields().exclude("content");
+        return mongoTemplate.find(query, FileDocument.class, COLLECTION_NAME);
+    }
+
+    @Override
     public boolean delete(String fileDocumentId) {
 
         Query query = new Query().addCriteria(Criteria.where("_id").is(fileDocumentId));

@@ -118,12 +118,12 @@ public class DocReviewController {
         if (docReviewService.docIdExist(docIds)) {
             throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }
-//        String[] array = docIds.toArray(new String[0]);
-//        List<FileDocument> fileDocumentList = fileService.queryAndRemove(array);
-//        if (CollectionUtils.isEmpty(fileDocumentList)) {
-//            throw new BusinessException(ErrorCode.OPERATE_FAILED);
-//        }
-//        docReviewService.refuseBatch(fileDocumentList, reason);
+        String[] array = docIds.toArray(new String[0]);
+        List<FileDocument> fileDocumentList = fileService.queryAndRemove(array);
+        if (CollectionUtils.isEmpty(fileDocumentList)) {
+            throw new BusinessException(ErrorCode.OPERATE_FAILED);
+        }
+        docReviewService.refuseBatch(fileDocumentList, reason);
         return ApiResult.success("success");
     }
 

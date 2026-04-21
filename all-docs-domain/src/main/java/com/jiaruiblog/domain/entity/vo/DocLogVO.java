@@ -6,7 +6,7 @@ import java.util.Date;
 
 /**
  * @ClassName DocLogVO
- * @Description TODO
+ * @Description 文档操作日志视图对象，记录用户对文档的操作行为
  * @author luojiarui
  * @Date 2024/8/17 10:40
  * @Version 1.0

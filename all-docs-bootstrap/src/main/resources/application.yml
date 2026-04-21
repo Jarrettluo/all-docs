@@ -64,8 +64,8 @@ all-docs:
     admin-review: ${AD_ADMIN_REVIEW:false}
     prohibited-word: ${AD_PROHIBITED_WORD:true}
     user-registry: ${AD_USER_REGISTRY:true}
-    initial-username: ${AD_INITIAL_USERNAME:admin123}
-    initial-password: ${AD_INITIAL_PASSWORD}
+    initial-username: ${AD_INITIAL_USERNAME}
+    initial-password: ${AD_INITIAL_PASSWORD:}
     cover-admin: ${COVER_ADMIN:true}
   file-path:
     sensitive-file: sensitive.txt
@@ -77,7 +77,7 @@ hmac:
 # MinIO 配置 (S3兼容对象存储)
 minio:
   endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
-  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
   bucket: ${MINIO_BUCKET:alldocs}
   url-expiration: 3600

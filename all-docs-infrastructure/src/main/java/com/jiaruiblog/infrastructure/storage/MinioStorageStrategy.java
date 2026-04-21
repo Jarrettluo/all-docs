@@ -8,6 +8,8 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.http.Method;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,8 @@ import java.util.Map;
  */
 @Component
 public class MinioStorageStrategy implements StorageStrategy {
+
+    private static final Logger log = LoggerFactory.getLogger(MinioStorageStrategy.class);
 
     @Autowired
     private MinioClient minioClient;
@@ -48,11 +52,17 @@ public class MinioStorageStrategy implements StorageStrategy {
 
             return filename;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("MinIO operation failed", e);
             return null;
         }
     }
 
+    /**
+     * 下载文件
+     *
+     * @param fileId 文件ID
+     * @return InputStream，调用者负责关闭该流
+     */
     @Override
     public InputStream download(String fileId) {
         try {
@@ -61,7 +71,7 @@ public class MinioStorageStrategy implements StorageStrategy {
                     .object(fileId)
                     .build());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("MinIO operation failed", e);
             return null;
         }
     }
@@ -75,7 +85,7 @@ public class MinioStorageStrategy implements StorageStrategy {
                     .build());
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("MinIO operation failed", e);
             return false;
         }
     }
@@ -93,7 +103,7 @@ public class MinioStorageStrategy implements StorageStrategy {
                     .extraQueryParams(extraQueryParams)
                     .build());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("MinIO operation failed", e);
             return null;
         }
     }

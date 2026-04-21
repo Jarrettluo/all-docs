@@ -71,10 +71,11 @@ public class SensitiveWordInit {
         File file = new File(sensitiveFile);
         if (file.exists()) {
             return getStrings(new FileInputStream(file), ENCODING);
-        } else  {
+        } else {
             ClassPathResource classPathResource = new ClassPathResource("static/censorWord.txt");
-            InputStream inputStream = classPathResource.getInputStream();
-            return getStrings(inputStream, ENCODING);
+            try (InputStream inputStream = classPathResource.getInputStream()) {
+                return getStrings(inputStream, ENCODING);
+            }
         }
     }
 
@@ -93,7 +94,7 @@ public class SensitiveWordInit {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("读取敏感词文件错误", e);
         }
         return wordSet;
     }

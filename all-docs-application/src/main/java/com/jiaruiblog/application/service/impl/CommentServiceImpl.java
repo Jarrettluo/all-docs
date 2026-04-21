@@ -9,11 +9,20 @@ import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.infrastructure.repository.CommentRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author luojiarui
@@ -27,6 +36,10 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public void insert(Comment comment) {
+        if (comment == null || !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
+            return;
+        }
+        // Note: Sensitive filtering should be done at the API layer before calling this method
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
         commentRepository.save(comment);
@@ -34,12 +47,19 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public void update(Comment comment) {
+        if (comment == null) {
+            return;
+        }
         comment.setUpdateDate(new Date());
         commentRepository.save(comment);
     }
 
     @Override
     public void remove(Comment comment, String userId) {
+        Optional<Comment> commentDb = commentRepository.findById(comment.getId());
+        if (commentDb.isEmpty() || !commentDb.get().getUserId().equals(userId)) {
+            return;
+        }
         commentRepository.deleteById(comment.getId());
     }
 
@@ -54,7 +74,30 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public Map<String, Object> queryById(CommentListDTO comment) {
-        return Map.of();
+        if (comment == null || comment.getDocId() == null) {
+            return new HashMap<>();
+        }
+
+        List<Comment> comments = commentRepository.findByDocId(comment.getDocId());
+
+        comments = comments.stream()
+                .skip((long) comment.getPage() * comment.getRows())
+                .limit(comment.getRows())
+                .toList();
+
+        Long totalNum = commentRepository.countByDocId(comment.getDocId());
+        List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
+        for (Comment item : comments) {
+            CommentWithUserVO commentWithUserVO = new CommentWithUserVO();
+            BeanUtils.copyProperties(item, commentWithUserVO);
+            commentWithUserVOList.add(commentWithUserVO);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalNum", totalNum);
+        result.put("comments", commentWithUserVOList);
+
+        return result;
     }
 
     @Override
@@ -64,7 +107,11 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public List<String> fuzzySearchDoc(String keyWord) {
-        return List.of();
+        if (keyWord == null || "".equalsIgnoreCase(keyWord)) {
+            return new ArrayList<>();
+        }
+        List<Comment> comments = commentRepository.findByContentContaining(keyWord);
+        return comments.stream().map(Comment::getDocId).collect(Collectors.toList());
     }
 
     @Override
@@ -79,6 +126,32 @@ public class CommentServiceImpl implements ICommentService {
 
     @Override
     public PageVO<CommentWithUserVO> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
-        return PageVO.<CommentWithUserVO>builder().build();
+        log.info("查询的参数是：{}, {}", page, userId);
+        Criteria criteria = new Criteria();
+        if (Boolean.FALSE.equals(isAdmin)) {
+            criteria = Criteria.where("userId").is(userId);
+        }
+
+        Query query = new Query(criteria)
+                .with(Sort.by(Sort.Direction.DESC, "createDate"))
+                .skip((long) (page.getPage() - 1) * page.getRows())
+                .limit(page.getRows());
+
+        List<Comment> comments = commentRepository.findByQuery(query);
+        List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
+
+        for (Comment comment : comments) {
+            CommentWithUserVO vo = new CommentWithUserVO();
+            BeanUtils.copyProperties(comment, vo);
+            commentWithUserVOList.add(vo);
+        }
+
+        long count = commentRepository.countByQuery(new Query(criteria));
+        return PageVO.<CommentWithUserVO>builder()
+                .total((int) count)
+                .list(commentWithUserVOList)
+                .pageNum(page.getPage())
+                .pageSize(page.getRows())
+                .build();
     }
 }

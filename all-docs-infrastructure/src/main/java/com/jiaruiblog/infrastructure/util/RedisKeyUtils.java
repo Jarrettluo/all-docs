@@ -30,11 +30,7 @@ public class RedisKeyUtils {
      * @return
      */
     public static String getLikedKey(String likedUserId, String likedPostId){
-        StringBuilder builder = new StringBuilder();
-        builder.append(likedUserId);
-        builder.append("::");
-        builder.append(likedPostId);
-        return builder.toString();
+        return likedUserId + "::" + likedPostId;
     }
 
 

@@ -46,4 +46,6 @@ public interface TagRepository {
     // Batch operations
     void deleteRelationshipsByIds(List<String> relationshipIds);
     long countRelationshipsByTagId(String tagId);
+
+    List<TagDocRelationship> findByDocIdIn(List<String> docIds);
 }

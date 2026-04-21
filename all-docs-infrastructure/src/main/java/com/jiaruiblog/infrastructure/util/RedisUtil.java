@@ -3,6 +3,8 @@ package com.jiaruiblog.util;
 import jakarta.annotation.Resource;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.compress.utils.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -20,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public final class RedisUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(RedisUtil.class);
+
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
@@ -27,7 +31,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.keys(keys);
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return Sets.newHashSet();
         }
     }
@@ -45,7 +49,7 @@ public final class RedisUtil {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -66,7 +70,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.hasKey(key);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -103,7 +107,7 @@ public final class RedisUtil {
             redisTemplate.opsForValue().set(key, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -123,7 +127,7 @@ public final class RedisUtil {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -179,7 +183,7 @@ public final class RedisUtil {
             redisTemplate.opsForHash().putAll(key, map);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -198,7 +202,7 @@ public final class RedisUtil {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -214,7 +218,7 @@ public final class RedisUtil {
             redisTemplate.opsForHash().put(key, item, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -234,7 +238,7 @@ public final class RedisUtil {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -284,7 +288,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.opsForSet().members(key);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return Sets.newHashSet();
         }
     }
@@ -298,7 +302,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.opsForSet().isMember(key, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -312,7 +316,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.opsForSet().add(key, values);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return 0;
         }
     }
@@ -331,7 +335,7 @@ public final class RedisUtil {
             }
             return count;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return 0;
         }
     }
@@ -344,7 +348,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.opsForSet().size(key);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return 0;
         }
     }
@@ -358,7 +362,7 @@ public final class RedisUtil {
         try {
             return Optional.ofNullable(redisTemplate.opsForSet().remove(key, values)).orElse(0l);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return 0;
         }
     }
@@ -374,7 +378,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.opsForList().range(key, start, end);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return Lists.newArrayList();
         }
     }
@@ -387,7 +391,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.opsForList().size(key);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return 0;
         }
     }
@@ -401,7 +405,7 @@ public final class RedisUtil {
         try {
             return redisTemplate.opsForList().index(key, index);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return null;
         }
     }
@@ -416,7 +420,7 @@ public final class RedisUtil {
             redisTemplate.opsForList().rightPush(key, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -435,7 +439,7 @@ public final class RedisUtil {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -450,7 +454,7 @@ public final class RedisUtil {
             redisTemplate.opsForList().rightPushAll(key, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -470,7 +474,7 @@ public final class RedisUtil {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -486,7 +490,7 @@ public final class RedisUtil {
             redisTemplate.opsForList().set(key, index, value);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return false;
         }
     }
@@ -501,7 +505,7 @@ public final class RedisUtil {
         try {
             return Optional.ofNullable(redisTemplate.opsForList().remove(key, count, value)).orElse(0l);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Redis operation failed", e);
             return 0;
         }
     }

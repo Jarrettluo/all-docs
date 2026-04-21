@@ -16,7 +16,7 @@ import lombok.Data;
  * @Date 2022/6/19 5:32 下午
  * @Version 1.0
  **/
-@Schema($schema = "分类的对象")
+@Schema(description = "分类的对象")
 @Data
 public class CategoryDTO {
 

@@ -1,5 +1,6 @@
 package com.jiaruiblog.domain.entity;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -23,7 +24,6 @@ import java.util.Base64;
  **/
 @Slf4j
 @Data
-@Document(indexName = "docwrite")
 public class FileObj {
 
     /**
@@ -52,7 +52,7 @@ public class FileObj {
     private String content;
 
 
-    public void readFile(String path){
+    public void readFile(String path) throws IOException {
         //读文件
         File file = new File(path);
         byte[] bytes = getContent(file);
@@ -60,7 +60,7 @@ public class FileObj {
         this.content = Base64.getEncoder().encodeToString(bytes);
     }
 
-    public void readFile(InputStream inputStream) {
+    public void readFile(InputStream inputStream) throws IOException {
         byte[] bytes = getContent(inputStream);
         //将文件内容转化为base64编码
         this.content = Base64.getEncoder().encodeToString(bytes);
@@ -70,7 +70,7 @@ public class FileObj {
      * @deprecated 大文件不应使用byte[]加载到内存，应使用GridFS streaming
      */
     @Deprecated
-    private byte[] getContent(File file) {
+    private byte[] getContent(File file) throws IOException {
         long fileLength = file.length();
         if (fileLength > Integer.MAX_VALUE) {
             throw new IllegalStateException("File too large to load into memory: " + file.getName());
@@ -82,6 +82,7 @@ public class FileObj {
             }
         } catch (IOException e) {
             log.error("Failed to read file: {}", file.getName(), e);
+            throw e;
         }
         return bytesArray;
     }
@@ -90,8 +91,7 @@ public class FileObj {
      * @deprecated 大文件不应使用byte[]加载到内存，应使用GridFS streaming
      */
     @Deprecated
-    private byte[] getContent(InputStream inputStream) {
-        byte[] bytesArray = new byte[]{};
+    private byte[] getContent(InputStream inputStream) throws IOException {
         try (BufferedInputStream bis = new BufferedInputStream(inputStream);
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[8192];
@@ -99,11 +99,11 @@ public class FileObj {
             while ((bytesRead = bis.read(buffer)) != -1) {
                 baos.write(buffer, 0, bytesRead);
             }
-            bytesArray = baos.toByteArray();
+            return baos.toByteArray();
         } catch (IOException e) {
             log.error("Failed to read input stream", e);
+            throw e;
         }
-        return bytesArray;
     }
 
 }

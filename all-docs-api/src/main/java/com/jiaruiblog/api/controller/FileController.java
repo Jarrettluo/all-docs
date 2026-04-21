@@ -242,109 +242,6 @@ public class FileController {
     }
 
     /**
-     * JS传字节流上传 - 暂时未完成
-     *
-     * @param md5
-     * @param request
-     * @return
-     * @deprecated 废弃
-     */
-    @Deprecated
-    @PostMapping("/upload/{md5}/{ext}")
-    public ResponseModel jsUpload(@PathVariable String md5, @PathVariable String ext, HttpServletRequest request, @RequestBody byte[] data) {
-        ResponseModel model = ResponseModel.getInstance();
-        if (StrUtil.isEmpty(md5)) {
-            model.setMessage("请传入文件的md5值");
-            return model;
-        }
-        if (!StrUtil.isEmpty(ext) && !ext.startsWith(DOT)) {
-            ext = DOT + ext;
-        }
-        try {
-
-            String name = request.getParameter("name");
-            String description = request.getParameter("description");
-            InputStream in = new ByteArrayInputStream(data);
-            if (data.length > 0) {
-                FileDocument fileDocument = new FileDocument();
-                fileDocument.setName(name);
-                fileDocument.setSize(data.length);
-                fileDocument.setContentType(FileContentTypeUtils.getContentType(ext));
-                fileDocument.setUploadDate(new Date());
-                fileDocument.setSuffix(ext);
-                String fileMd5 = SecureUtil.md5(in);
-                fileDocument.setMd5(fileMd5);
-                fileDocument.setDescription(description);
-                fileService.saveFile(fileDocument, in);
-
-                model.setData(fileDocument.getId());
-                model.setCode(ResponseModel.SUCCESS);
-                model.setMessage("上传成功");
-            } else {
-                model.setMessage("请传入文件");
-            }
-            in.close();
-        } catch (Exception ex) {
-            model.setMessage("上传失败");
-        }
-        return model;
-    }
-
-    /**
-     * 表单上传文件
-     * 当数据库中存在该md5值时，可以实现秒传功能
-     * <p>
-     * 由于增加了用户登录后上传的验证，因此该方法废弃
-     * 最新的上传方式使用：documentUpload
-     *
-     * @param file 文件
-     * @return
-     */
-    @Deprecated
-    @PostMapping("/upload")
-    public ResponseModel formUpload(@RequestParam("file") MultipartFile file) throws IOException {
-        List<String> availableSuffixList = List.of("pdf", "png", "docx", "pptx", "xlsx");
-        ResponseModel model = ResponseModel.getInstance();
-        try {
-            if (file != null && !file.isEmpty()) {
-                String originFileName = file.getOriginalFilename();
-                if (!StringUtils.hasText(originFileName)) {
-                    model.setMessage("格式不支持！");
-                    return model;
-                }
-                //获取文件后缀名
-                String suffix = originFileName.substring(originFileName.lastIndexOf(".") + 1);
-                if (!availableSuffixList.contains(suffix)) {
-                    model.setMessage("格式不支持！");
-                    return model;
-                }
-                String fileMd5 = SecureUtil.md5(file.getInputStream());
-                FileDocument fileDocument = fileService.saveFile(fileMd5, file);
-
-                switch (suffix) {
-                    case "pdf":
-                    case "docx":
-                    case "pptx":
-                    case "xlsx":
-                        taskExecuteService.execute(fileDocument);
-                        break;
-                    default:
-                        break;
-                }
-
-                model.setData(fileDocument.getId());
-                model.setCode(ResponseModel.SUCCESS);
-                model.setMessage("上传成功");
-            } else {
-                model.setMessage("请传入文件");
-            }
-        } catch (IOException ex) {
-            model.setMessage(ex.getMessage());
-        }
-        return model;
-    }
-
-    /**
      * 表单上传文件
      * 当数据库中存在该md5值时，可以实现秒传功能
      *
@@ -545,14 +442,14 @@ public class FileController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return new byte[]{};
         }
-        InputStream inputStream = fileService.getFileThumb(thumbId);
-        FileInputStream fileInputStream = (FileInputStream) (inputStream);
-        if (inputStream == null) {
-            return new byte[0];
+        try (InputStream inputStream = fileService.getFileThumb(thumbId)) {
+            if (inputStream == null) {
+                return new byte[0];
+            }
+            byte[] bytes = new byte[inputStream.available()];
+            inputStream.read(bytes, 0, inputStream.available());
+            return bytes;
         }
-        byte[] bytes = new byte[fileInputStream.available()];
-        fileInputStream.read(bytes, 0, fileInputStream.available());
-        return bytes;
     }
 
     @GetMapping(value = "/image", produces = MediaType.IMAGE_PNG_VALUE)
@@ -572,15 +469,22 @@ public class FileController {
 
 
     @GetMapping("/thumb/{id}")
-    public ResponseEntity<Object> previewThumb1(@PathVariable String id) {
+    public ResponseEntity<Object> previewThumb1(@PathVariable String id) throws IOException {
 
         if (StringUtils.hasText(id)) {
             InputStream inputStream = fileService.getFileThumb(id);
+            if (inputStream == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            }
+            byte[] bytes;
+            try (inputStream) {
+                bytes = IoUtil.readBytes(inputStream);
+            }
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + id)
                     .header(HttpHeaders.CONTENT_TYPE, "image/png")
-                    .header(HttpHeaders.CONTENT_LENGTH, "123")
-                    .body(IoUtil.readBytes(inputStream));
+                    .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(bytes.length))
+                    .body(bytes);
         } else {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -613,7 +517,7 @@ public class FileController {
             byte[] buffer = fileService.getFileBytes(txtId);
             extracted(response, buffer);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            log.error("下载文本文件错误", ex);
         }
     }
 
@@ -635,10 +539,11 @@ public class FileController {
         response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("字符文件", "UTF-8") + ".txt");
         // 告知浏览器文件的大小
         response.addHeader("Content-Length", "" + buffer.length);
-        OutputStream outputStream = new BufferedOutputStream(response.getOutputStream());
-        response.setContentType("application/octet-stream");
-        outputStream.write(buffer);
-        outputStream.flush();
+        try (OutputStream outputStream = new BufferedOutputStream(response.getOutputStream())) {
+            response.setContentType("application/octet-stream");
+            outputStream.write(buffer);
+            outputStream.flush();
+        }
     }
 
     /**
@@ -662,54 +567,4 @@ public class FileController {
         }
     }
 
-    @PostMapping("/temporaryFileDownloadLink")
-    public ApiResult<Object> temporaryFileDownloadLink() {
-
-//
-//        public class TemporaryFileDownloadLink {
-//
-//            private static final String REDIS_HOST = "localhost"; // Redis 服务器地址
-//            private static final int REDIS_PORT = 6379; // Redis 端口
-//
-//            public static void main(String[] args) {
-//                Jedis jedis = new Jedis(REDIS_HOST, REDIS_PORT);
-//
-//                // 生成一个随机的下载链接令牌
-//                String downloadToken = generateRandomToken();
-//
-//                // 设置下载链接有效期（例如，1小时，单位秒）
-//                int expirationSeconds = 3600;
-//
-//                // 存储下载链接信息到 Redis 中，包括文件信息和过期时间
-//                String fileKey = "download:" + downloadToken; // 使用前缀以区分不同类型的链接
-//                String fileUrl = "https://example.com/files/sample.pdf"; // 文件的实际下载链接
-
-        // jedis.setex 是 Redis 客户端库 Jedis 提供的方法，用于设置 Redis 中的键的过期时间。
-//                jedis.setex(fileKey, expirationSeconds, fileUrl);
-//
-//                System.out.println("Temporary download link: " + downloadToken);
-//
-//                // 模拟用户访问下载链接
-//                String userToken = "your_user_token"; // 用户提供的令牌
-//
-//                if (jedis.exists("download:" + userToken)) {
-//                    String downloadUrl = jedis.get("download:" + userToken);
-//                    System.out.println("Accessing download link: " + downloadUrl);
-//                    // 此时可以重定向用户到 downloadUrl 进行文件下载
-//                } else {
-//                    System.out.println("Invalid or expired download link.");
-//                }
-//
-//                jedis.close();
-//            }
-//
-//            private static String generateRandomToken() {
-//                // 生成一个随机的UUID作为下载链接令牌
-//                return UUID.randomUUID().toString();
-//            }
-//        }
-
-
-        return ApiResult.success();
     }
-}

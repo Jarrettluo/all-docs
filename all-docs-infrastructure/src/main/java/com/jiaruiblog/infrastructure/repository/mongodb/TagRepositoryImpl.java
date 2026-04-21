@@ -197,6 +197,12 @@ public class TagRepositoryImpl implements TagRepository {
         return mongoTemplate.count(query, TagDocRelationship.class, RELATION_COLLECTION);
     }
 
+    @Override
+    public List<TagDocRelationship> findByDocIdIn(List<String> docIds) {
+        Query query = new Query(Criteria.where(FILE_ID).in(docIds));
+        return mongoTemplate.find(query, TagDocRelationship.class, RELATION_COLLECTION);
+    }
+
     /**
      * 聚合查询方法，用于获取标签列表及其关联文档数量
      */

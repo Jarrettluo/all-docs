@@ -47,15 +47,6 @@ public class CommentController {
     @Resource
     ICommentService commentService;
 
-    @Operation(summary = "查询评论列表", description = "获取文档评论列表")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "请求成功", content = @Content(schema = @Schema(implementation = String.class)))
-    })
-    @GetMapping("queryDocReviewList")
-    public ApiResult<Void> queryDocReviewList(@ModelAttribute("pageParams") BasePageDTO pageParams) {
-        return ApiResult.success();
-    }
-
     @Operation(summary = "新增单个评论", description = "添加新的评论")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "评论添加成功"),

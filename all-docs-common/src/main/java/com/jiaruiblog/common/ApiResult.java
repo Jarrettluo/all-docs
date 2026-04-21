@@ -13,7 +13,6 @@ public record ApiResult<T>(int code, String message, T data) {
      * 快速构建成功响应（带数据和默认消息）
      * @deprecated Use {@link ApiResultFactory#success(Object)} instead
      */
-    @Deprecated
     public static <T> ApiResult<T> success(T data) {
         return new ApiResult<>(200, "success", data);
     }
@@ -22,7 +21,6 @@ public record ApiResult<T>(int code, String message, T data) {
      * 快速构建成功响应（带自定义消息和数据）
      * @deprecated Use {@link ApiResultFactory#success(String, Object)} instead
      */
-    @Deprecated
     public static <T> ApiResult<T> success(String message, T data) {
         return new ApiResult<>(200, message, data);
     }
@@ -31,7 +29,6 @@ public record ApiResult<T>(int code, String message, T data) {
      * 快速构建成功响应（仅消息，无数据）
      * @deprecated Use {@link ApiResultFactory#success(String)} instead
      */
-    @Deprecated
     public static <T> ApiResult<T> success(String message) {
         return new ApiResult<>(200, message, null);
     }
@@ -40,7 +37,6 @@ public record ApiResult<T>(int code, String message, T data) {
      * 快速构建成功响应（无数据，使用默认消息）
      * @deprecated Use {@link ApiResultFactory#success()} instead
      */
-    @Deprecated
     public static <T> ApiResult<T> success() {
         return new ApiResult<>(200, "success", null);
     }
@@ -49,7 +45,6 @@ public record ApiResult<T>(int code, String message, T data) {
      * 快速构建错误响应
      * @deprecated Use {@link ApiResultFactory#error(int, String)} instead
      */
-    @Deprecated
     public static <T> ApiResult<T> error(int code, String message) {
         return new ApiResult<>(code, message, null);
     }
@@ -58,7 +53,6 @@ public record ApiResult<T>(int code, String message, T data) {
      * 快速构建错误响应
      * @deprecated Use {@link ApiResultFactory#error(ErrorCode)} instead
      */
-    @Deprecated
     public static <T> ApiResult<T> error(com.jiaruiblog.common.exception.ErrorCode errorCode) {
         return new ApiResult<>(errorCode.getCode(), errorCode.getMessageKey(), null);
     }
@@ -67,7 +61,6 @@ public record ApiResult<T>(int code, String message, T data) {
      * 国际化支持的错误响应
      * @deprecated Use {@link ApiResultFactory#error(ErrorCode, MessageSource, Locale, Object...)} instead
      */
-    @Deprecated
     public static <T> ApiResult<T> error(com.jiaruiblog.common.exception.ErrorCode errorCode,
                                          org.springframework.context.MessageSource messageSource,
                                          java.util.Locale locale,
@@ -84,7 +77,6 @@ public record ApiResult<T>(int code, String message, T data) {
      * 支持详细错误信息的版本
      * @deprecated Use {@link ApiResultFactory#error(ErrorCode, MessageSource, Locale, String, Object...)} instead
      */
-    @Deprecated
     public static <T> ApiResult<T> error(com.jiaruiblog.common.exception.ErrorCode errorCode,
                                          org.springframework.context.MessageSource messageSource,
                                          java.util.Locale locale,

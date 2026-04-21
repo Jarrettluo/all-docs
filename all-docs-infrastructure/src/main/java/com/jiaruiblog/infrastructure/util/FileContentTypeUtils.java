@@ -31,10 +31,6 @@ public class FileContentTypeUtils {
     static Map<String, String> contentType = new HashMap<>();
 
     static {
-        contentType.put(".jpg", "image/jpeg");
-        contentType.put(".jpeg", "image/jpeg");
-
-    static {
         contentType.put(".load", "text/html");
         contentType.put(".123", "application/vnd.lotus-1-2-3");
         contentType.put(".3ds", "image/x-3ds");

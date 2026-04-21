@@ -3,6 +3,9 @@ package com.jiaruiblog.application.service.impl;
 import com.jiaruiblog.application.service.CategoryService;
 import com.jiaruiblog.domain.entity.CateDocRelationship;
 import com.jiaruiblog.domain.entity.Category;
+import com.jiaruiblog.domain.entity.CollectDocRelationship;
+import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.TagDocRelationship;
 import com.jiaruiblog.domain.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.domain.entity.vo.CateOrTagVO;
 import com.jiaruiblog.domain.entity.vo.CategoryVO;
@@ -11,9 +14,13 @@ import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.infrastructure.repository.CategoryRepository;
+import com.jiaruiblog.infrastructure.repository.CollectRepository;
+import com.jiaruiblog.infrastructure.repository.DocumentRepository;
+import com.jiaruiblog.infrastructure.repository.TagRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -23,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +48,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Resource
     CategoryRepository categoryRepository;  // 分类数据访问接口
+
+    @Resource
+    DocumentRepository documentRepository;
+
+    @Resource
+    TagRepository tagRepository;
+
+    @Resource
+    CollectRepository collectRepository;
 
     /**
      * 新增分类记录
@@ -68,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void update(Category category) {
         // 检查分类名称是否为null
         if (category.getName() == null || category.getName().isEmpty()) {
-            throw BusinessExceptionBuilder.of(ErrorCode.PARAM_ERROR).withMessage("分类名称不能为空").build();
+            throw BusinessExceptionBuilder.of(ErrorCode.INVALID_PARAM).detail("分类名称不能为空").build();
         }
         // 检查分类是否存在
         Optional<Category> existing = categoryRepository.findById(category.getId());
@@ -168,8 +185,6 @@ public class CategoryServiceImpl implements CategoryService {
             CateOrTagVO vo = new CateOrTagVO();
             vo.setId(category.getId());
             vo.setName(category.getName());
-            vo.setCreateDate(category.getCreateDate());
-            vo.setUpdateDate(category.getUpdateDate());
             // 查询并设置该分类下的文档数量
             vo.setNum(categoryRepository.findRelationshipsByCategoryId(category.getId(), Sort.unsorted()).size());
             return vo;
@@ -178,7 +193,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void addRelationShip(CateDocRelationship relationship) {
-
+        if (relationship == null || !StringUtils.hasText(relationship.getCategoryId())
+                || !StringUtils.hasText(relationship.getFileId())) {
+            throw BusinessExceptionBuilder.of(ErrorCode.INVALID_PARAM).detail("分类关系不能为空").build();
+        }
+        categoryRepository.saveRelationship(relationship);
+        log.info("分类关联创建成功：categoryId={}, fileId={}", relationship.getCategoryId(), relationship.getFileId());
     }
 
     /**
@@ -293,12 +313,26 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void addRelationShipDefault(String categoryId, String docId) {
-
+        if (!StringUtils.hasText(categoryId) || !StringUtils.hasText(docId)) {
+            return;
+        }
+        CateDocRelationship relationship = new CateDocRelationship();
+        relationship.setCategoryId(categoryId);
+        relationship.setFileId(docId);
+        relationship.setCreateDate(new Date());
+        categoryRepository.saveRelationship(relationship);
+        log.info("默认分类关联创建成功：categoryId={}, docId={}", categoryId, docId);
     }
 
     @Override
     public void addRelationShipDefault(String categoryId, List<String> docIds) {
-
+        if (!StringUtils.hasText(categoryId) || docIds == null || docIds.isEmpty()) {
+            return;
+        }
+        for (String docId : docIds) {
+            addRelationShipDefault(categoryId, docId);
+        }
+        log.info("批量默认分类关联创建成功：categoryId={}, docIds={}", categoryId, docIds.size());
     }
 
     /**
@@ -345,15 +379,56 @@ public class CategoryServiceImpl implements CategoryService {
      **/
     @Override
     public PageVO<FileDocumentDTO> getDocByTagAndCate(String cateId, String tagId, String keyword, Long pageNum, Long pageSize) {
-        List<FileDocumentDTO> mappedResults = new ArrayList<>();
-        int count = 0;
+        List<String> docIds;
 
-        // Implement logic using CategoryRepository instead of mongoTemplate
-        // This is a placeholder - actual implementation will depend on your repository methods
+        // Step 1: Get doc IDs based on tag and category filters
+        if (StringUtils.hasText(tagId)) {
+            List<TagDocRelationship> tagRelationships = tagRepository.findRelationshipsByTagId(tagId);
+            docIds = tagRelationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
+        } else if (StringUtils.hasText(cateId)) {
+            List<CateDocRelationship> cateRelationships = categoryRepository.findRelationshipsByCategoryId(cateId, Sort.unsorted());
+            docIds = cateRelationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
+        } else {
+            docIds = new ArrayList<>();
+        }
+
+        if (docIds.isEmpty()) {
+            return PageVO.<FileDocumentDTO>builder()
+                    .pageSize(pageSize.intValue())
+                    .pageNum(pageNum.intValue())
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .build();
+        }
+
+        // Step 2: Apply keyword filter if provided
+        List<FileDocument> documents;
+        int pageNumInt = pageNum != null ? pageNum.intValue() : 0;
+        int pageSizeInt = pageSize != null ? pageSize.intValue() : 10;
+
+        if (StringUtils.hasText(keyword)) {
+            documents = documentRepository.findByPageWithFussySearch(pageNumInt, pageSizeInt, Sort.by(Sort.Direction.DESC, "uploadDate"), keyword);
+        } else {
+            documents = documentRepository.findByPage(pageNumInt, pageSizeInt, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        }
+
+        // Step 3: Filter documents by the docIds from tag/category
+        Set<String> docIdSet = Set.copyOf(docIds);
+        List<FileDocument> filteredDocs = documents.stream()
+                .filter(doc -> docIdSet.contains(doc.getId()))
+                .collect(Collectors.toList());
+
+        // Step 4: Convert to DTO
+        List<FileDocumentDTO> mappedResults = filteredDocs.stream().map(doc -> {
+            FileDocumentDTO dto = new FileDocumentDTO();
+            BeanUtils.copyProperties(doc, dto);
+            return dto;
+        }).collect(Collectors.toList());
+
         return PageVO.<FileDocumentDTO>builder()
-                .pageSize(pageSize.intValue())
-                .pageNum(pageNum.intValue())
-                .total(count)
+                .pageSize(pageSizeInt)
+                .pageNum(pageNumInt)
+                .total(mappedResults.size())
                 .list(mappedResults)
                 .build();
     }
@@ -362,31 +437,98 @@ public class CategoryServiceImpl implements CategoryService {
     public PageVO<FileDocumentDTO> getMyCollection(String cateId, String tagId,
                                                    String keyword, Long pageNum,
                                                    Long pageSize, String userId) {
-        List<FileDocumentDTO> mappedResults = new ArrayList<>();
-        int count = 0;
+        if (!StringUtils.hasText(userId)) {
+            return PageVO.<FileDocumentDTO>builder()
+                    .pageSize(pageSize != null ? pageSize.intValue() : 10)
+                    .pageNum(pageNum != null ? pageNum.intValue() : 0)
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .build();
+        }
 
-        // Implement logic using CategoryRepository instead of mongoTemplate
-        // This is a placeholder - actual implementation will depend on your repository methods
+        // Step 1: Get user's collection doc IDs
+        List<CollectDocRelationship> collections = collectRepository.findByUserId(userId);
+        if (collections.isEmpty()) {
+            return PageVO.<FileDocumentDTO>builder()
+                    .pageSize(pageSize != null ? pageSize.intValue() : 10)
+                    .pageNum(pageNum != null ? pageNum.intValue() : 0)
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .build();
+        }
+        List<String> collectedDocIds = collections.stream()
+                .map(CollectDocRelationship::getDocId)
+                .collect(Collectors.toList());
+
+        // Step 2: Get documents for the user
+        int pageNumInt = pageNum != null ? pageNum.intValue() : 0;
+        int pageSizeInt = pageSize != null ? pageSize.intValue() : 10;
+
+        List<FileDocument> documents;
+        if (StringUtils.hasText(keyword)) {
+            documents = documentRepository.findByUserIdAndNameContaining(userId, keyword, pageNumInt, pageSizeInt,
+                    Sort.by(Sort.Direction.DESC, "uploadDate"));
+        } else {
+            documents = documentRepository.findByUserId(userId, pageNumInt, pageSizeInt,
+                    Sort.by(Sort.Direction.DESC, "uploadDate"));
+        }
+
+        // Step 3: Filter to only collected docs
+        Set<String> collectedDocIdSet = Set.copyOf(collectedDocIds);
+        List<FileDocument> filteredDocs = documents.stream()
+                .filter(doc -> collectedDocIdSet.contains(doc.getId()))
+                .collect(Collectors.toList());
+
+        // Step 4: Convert to DTO
+        List<FileDocumentDTO> mappedResults = filteredDocs.stream().map(doc -> {
+            FileDocumentDTO dto = new FileDocumentDTO();
+            BeanUtils.copyProperties(doc, dto);
+            return dto;
+        }).collect(Collectors.toList());
+
         return PageVO.<FileDocumentDTO>builder()
-                .pageSize(pageSize.intValue())
-                .pageNum(pageNum.intValue())
-                .total(count)
+                .pageSize(pageSizeInt)
+                .pageNum(pageNumInt)
+                .total(mappedResults.size())
                 .list(mappedResults)
                 .build();
     }
 
     @Override
     public PageVO<FileDocumentDTO> getMyUploaded(String cateId, String tagId, String keyword, Long pageNum, Long pageSize, String userId) {
-        List<FileDocumentDTO> mappedResults = new ArrayList<>();
-        int count = 0;
+        if (!StringUtils.hasText(userId)) {
+            return PageVO.<FileDocumentDTO>builder()
+                    .pageSize(pageSize != null ? pageSize.intValue() : 10)
+                    .pageNum(pageNum != null ? pageNum.intValue() : 0)
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .build();
+        }
 
-        // Implement logic using CategoryRepository instead of mongoTemplate
-        // This is a placeholder - actual implementation will depend on your repository methods
+        int pageNumInt = pageNum != null ? pageNum.intValue() : 0;
+        int pageSizeInt = pageSize != null ? pageSize.intValue() : 10;
+
+        List<FileDocument> documents;
+        if (StringUtils.hasText(keyword)) {
+            documents = documentRepository.findByUserIdAndNameContaining(userId, keyword, pageNumInt, pageSizeInt,
+                    Sort.by(Sort.Direction.DESC, "uploadDate"));
+        } else {
+            documents = documentRepository.findByUserId(userId, pageNumInt, pageSizeInt,
+                    Sort.by(Sort.Direction.DESC, "uploadDate"));
+        }
+
+        // Convert to DTO
+        List<FileDocumentDTO> mappedResults = documents.stream().map(doc -> {
+            FileDocumentDTO dto = new FileDocumentDTO();
+            BeanUtils.copyProperties(doc, dto);
+            return dto;
+        }).collect(Collectors.toList());
+
         return PageVO.<FileDocumentDTO>builder()
-                .total(count)
+                .pageSize(pageSizeInt)
+                .pageNum(pageNumInt)
+                .total(mappedResults.size())
                 .list(mappedResults)
-                .pageNum(pageNum.intValue())
-                .pageSize(pageSize.intValue())
                 .build();
     }
 }

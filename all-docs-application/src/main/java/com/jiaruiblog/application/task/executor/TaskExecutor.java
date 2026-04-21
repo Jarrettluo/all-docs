@@ -135,7 +135,7 @@ public abstract class TaskExecutor {
             }
             fileDocument.setDescription(str);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("读取文件描述失败: {}", textFilePath, e);
         }
     }
 

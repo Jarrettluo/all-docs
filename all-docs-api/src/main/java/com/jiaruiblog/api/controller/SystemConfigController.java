@@ -91,9 +91,10 @@ public class SystemConfigController {
                 extracted(response, buffer);
             } else {
                 ClassPathResource classPathResource = new ClassPathResource(STATIC_CENSOR_WORD_TXT);
-                InputStream inputStream = classPathResource.getInputStream();
-                byte[] buffer = IoUtil.readBytes(inputStream);
-                extracted(response, buffer);
+                try (InputStream inputStream = classPathResource.getInputStream()) {
+                    byte[] buffer = IoUtil.readBytes(inputStream);
+                    extracted(response, buffer);
+                }
             }
         } catch (IOException ex) {
             log.error("下载最新的违禁词错误");
@@ -143,7 +144,7 @@ public class SystemConfigController {
             out.write(replacedTxt);
             out.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("写入文件错误", e);
         }
     }
 }

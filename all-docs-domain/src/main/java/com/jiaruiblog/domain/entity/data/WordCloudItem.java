@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * @ClassName WordCloudItem
- * @Description TODO
+ * @Description 词云数据项，包含词汇、出现次数及颜色配置
  * @author luojiarui
  * @Date 2023/5/21 10:04
  * @Version 1.0
