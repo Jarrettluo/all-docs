@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.TagMapper">
+
+    <resultMap id="TagResultMap" type="com.jiaruiblog.domain.entity.Tag">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.Tag">
+        INSERT INTO tag (id, name, create_date, update_date)
+        VALUES (#{id}, #{name}, #{createDate}, #{updateDate})
+    </insert>
+
+    <select id="findById" resultMap="TagResultMap">
+        SELECT * FROM tag WHERE id = #{id}
+    </select>
+
+    <select id="findByIds" resultMap="TagResultMap">
+        SELECT * FROM tag WHERE id IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="findByName" resultMap="TagResultMap">
+        SELECT * FROM tag WHERE name = #{name}
+    </select>
+
+    <select id="findByNames" resultMap="TagResultMap">
+        SELECT * FROM tag WHERE name IN
+        <foreach collection="nameList" item="name" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM tag
+    </select>
+
+    <select id="findAll" resultMap="TagResultMap">
+        SELECT * FROM tag ORDER BY create_date DESC
+    </select>
+
+    <delete id="delete" parameterType="com.jiaruiblog.domain.entity.Tag">
+        DELETE FROM tag WHERE id = #{id}
+    </delete>
+
+</mapper>

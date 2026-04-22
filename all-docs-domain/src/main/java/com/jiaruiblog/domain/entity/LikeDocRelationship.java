@@ -1,8 +1,8 @@
 package com.jiaruiblog.domain.entity;
 
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
@@ -13,8 +13,7 @@ import java.util.Date;
  * @Date 2024/11/9
  * @Version 1.0
  **/
-@Data
-@Document(collection = "like_relationships")
+@Table(name = "like_relationship")
 public class LikeDocRelationship {
 
     @Id
@@ -45,4 +44,20 @@ public class LikeDocRelationship {
      */
     public static final int TYPE_LIKE = 0;
     public static final int TYPE_COLLECT = 1;
+
+    /**
+     * 获取文档ID（兼容方法）
+     * @return 实体ID
+     */
+    public String getDocId() {
+        return this.entityId;
+    }
+
+    public String getUserId() {
+        return this.userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

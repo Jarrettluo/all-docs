@@ -1,9 +1,9 @@
 package com.jiaruiblog.domain.entity;
 
 import com.jiaruiblog.common.MessageConstant;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import java.util.Date;
 

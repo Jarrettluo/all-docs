@@ -2,9 +2,7 @@ package com.jiaruiblog.infrastructure.repository;
 
 import com.jiaruiblog.domain.entity.Tag;
 import com.jiaruiblog.domain.entity.TagDocRelationship;
-import com.mongodb.client.result.UpdateResult;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.domain.Sort;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,10 +16,10 @@ public interface TagRepository {
     List<Tag> findByIds(List<String> ids);
     List<Tag> findByName(String name);
     List<Tag> findByNames(List<String> names);
+    List<Tag> findAll(Sort sort);
     long count();
     void delete(Tag tag);
     void update(Tag tag);
-    UpdateResult update(Query query, Update update);
 
     // Relationship operations
     TagDocRelationship saveRelationship(TagDocRelationship relationship);

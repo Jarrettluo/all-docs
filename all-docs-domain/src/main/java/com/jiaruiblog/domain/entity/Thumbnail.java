@@ -2,9 +2,9 @@ package com.jiaruiblog.domain.entity;
 
 import com.jiaruiblog.enums.ThumbSizeEnum;
 import com.jiaruiblog.enums.ThumbnailEnum;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * @ClassName Thumbnail
@@ -13,7 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @Date 2022/7/23 5:57 下午
  * @Version 1.0
  **/
-@Document
+@Table(name = "thumbnail")
 @Data
 public class Thumbnail {
 

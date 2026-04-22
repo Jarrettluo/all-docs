@@ -1,7 +1,6 @@
 package com.jiaruiblog.infrastructure.repository;
 
 import com.jiaruiblog.domain.entity.DocLog;
-import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +22,4 @@ public interface DocLogRepository {
     void deleteById(String id);
 
     void deleteAllByIdIn(List<String> ids);
-
-    List<DocLog> findByQuery(Query query);
-
-    long countByQuery(Query query);
 }

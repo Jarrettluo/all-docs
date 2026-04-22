@@ -4,6 +4,7 @@ import com.jiaruiblog.common.util.property.PropertiesUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
@@ -27,6 +28,7 @@ import java.util.Set;
  * @Version 1.0
  **/
 @Data
+@Slf4j
 @Configuration
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SensitiveWordInit {

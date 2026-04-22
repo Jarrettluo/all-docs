@@ -1,8 +1,8 @@
 package com.jiaruiblog.domain.entity;
 
 import com.jiaruiblog.enums.RedisActionEnum;
+import jakarta.persistence.Id;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import java.util.Date;
 

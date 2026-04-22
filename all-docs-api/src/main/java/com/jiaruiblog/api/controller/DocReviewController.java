@@ -15,7 +15,6 @@ import com.jiaruiblog.common.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.application.service.DocReviewService;
 import com.jiaruiblog.application.service.DocumentService;
-import com.mongodb.client.result.UpdateResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,7 +37,7 @@ import java.util.*;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("/docReview")
+@RequestMapping("/api/v1/doc-review")
 public class DocReviewController {
 
     @Resource
@@ -78,8 +77,8 @@ public class DocReviewController {
     public ApiResult<Object> updateDocReview(@Parameter(description = "批量ID参数") @RequestBody @Valid BatchIdDTO batchIdDTO,
                                              @Parameter(hidden = true) HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        UpdateResult result = docReviewService.userRead(batchIdDTO.getIds(), userId);
-        return ApiResult.success(result);
+        docReviewService.userRead(batchIdDTO.getIds(), userId);
+        return ApiResult.success(null);
     }
 
     /**

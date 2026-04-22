@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 @Tag(name = "用户模块")
 @RestController
 @Slf4j
-@RequestMapping("/user")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
     private static final String REQUEST_USER_ID = "id";

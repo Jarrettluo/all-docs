@@ -1,7 +1,7 @@
 package com.jiaruiblog.domain.entity;
 
+import jakarta.persistence.Id;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import java.util.Date;
 

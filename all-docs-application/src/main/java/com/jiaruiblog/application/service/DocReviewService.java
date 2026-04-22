@@ -4,7 +4,6 @@ import com.jiaruiblog.domain.entity.DocReview;
 import com.jiaruiblog.domain.entity.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.mongodb.client.result.UpdateResult;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public interface DocReviewService {
 
     void search(FileDocument document);
 
-    UpdateResult userRead(List<String> ids, String userId);
+    void userRead(List<String> ids, String userId);
 
     void refuse(FileDocument fileDocument, String reason);
 

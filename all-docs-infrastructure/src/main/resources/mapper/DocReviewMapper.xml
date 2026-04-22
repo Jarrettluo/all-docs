@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.DocReviewMapper">
+
+    <resultMap id="DocReviewResultMap" type="com.jiaruiblog.domain.entity.DocReview">
+        <id property="id" column="id"/>
+        <result property="docId" column="doc_id"/>
+        <result property="docName" column="doc_name"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="checkState" column="check_state"/>
+        <result property="readState" column="read_state"/>
+        <result property="userRemove" column="user_remove"/>
+        <result property="adminRemove" column="admin_remove"/>
+        <result property="reviewLog" column="review_log"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.DocReview">
+        INSERT INTO doc_review (id, doc_id, doc_name, user_id, user_name, check_state, read_state,
+            user_remove, admin_remove, review_log, create_date, update_date)
+        VALUES (#{id}, #{docId}, #{docName}, #{userId}, #{userName}, #{checkState}, #{readState},
+            #{userRemove}, #{adminRemove}, #{reviewLog}, #{createDate}, #{updateDate})
+    </insert>
+
+    <insert id="saveAll">
+        INSERT INTO doc_review (id, doc_id, doc_name, user_id, user_name, check_state, read_state,
+            user_remove, admin_remove, review_log, create_date, update_date)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.docId}, #{item.docName}, #{item.userId}, #{item.userName},
+            #{item.checkState}, #{item.readState}, #{item.userRemove}, #{item.adminRemove},
+            #{item.reviewLog}, #{item.createDate}, #{item.updateDate})
+        </foreach>
+    </insert>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM doc_review WHERE user_id = #{userId}
+    </select>
+
+    <select id="findByPage" resultMap="DocReviewResultMap">
+        SELECT * FROM doc_review
+        WHERE user_id = #{userId}
+        ORDER BY create_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <delete id="deleteByIdList">
+        DELETE FROM doc_review WHERE id IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="existsByDocIdIn" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM doc_review WHERE doc_id IN
+        <foreach collection="docIdList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        LIMIT 1
+    </select>
+
+</mapper>

@@ -41,7 +41,7 @@ import java.util.Optional;
 @RestController
 @Slf4j
 @CrossOrigin
-@RequestMapping("/comment")
+@RequestMapping("/api/v1/comment")
 public class CommentController {
 
     @Resource

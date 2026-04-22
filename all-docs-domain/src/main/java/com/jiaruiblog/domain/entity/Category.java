@@ -2,12 +2,12 @@ package com.jiaruiblog.domain.entity;
 
 import com.alibaba.fastjson.JSON;
 import com.jiaruiblog.common.MessageConstant;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
@@ -18,7 +18,7 @@ import java.util.Date;
  * @Date 2022/6/4 10:28 上午
  * @Version 1.0
  **/
-@Document
+@Table(name = "category")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

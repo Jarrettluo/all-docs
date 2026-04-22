@@ -1,31 +1,23 @@
 server:
   port: 8082
 
-app:
-  datasource:
-    type: mongodb  # 可配置为mysql或mongodb
-
 spring:
-  data:
-    mongodb:
-      database: ${MONGO_DATABASE:test}
-      host: ${MONGO_HOST:localhost}
-      port: ${MONGO_PORT:27017}
-      threads-allowed-to-block-for-connection-multiplier: 20
-      connect-timeout: 10000
-      socket-timeout: 10000
-      max-wait-time: 5000
-      connections-per-host: 20
-
   datasource:
-    url: jdbc:mysql://localhost:3306/demo?useSSL=false&serverTimezone=UTC
-    username: root
-    password: ${MYSQL_PASSWORD}
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:demo}?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   redis:
     database: 0
     host: ${REDIS_HOST:127.0.0.1}
-    password: ${REDIS_PWD}
+    password: ${REDIS_PWD:}
     port: ${REDIS_PORT:6379}
     timeout: 3000
     jedis:
@@ -64,7 +56,7 @@ all-docs:
     admin-review: ${AD_ADMIN_REVIEW:false}
     prohibited-word: ${AD_PROHIBITED_WORD:true}
     user-registry: ${AD_USER_REGISTRY:true}
-    initial-username: ${AD_INITIAL_USERNAME}
+    initial-username: ${AD_INITIAL_USERNAME:}
     initial-password: ${AD_INITIAL_PASSWORD:}
     cover-admin: ${COVER_ADMIN:true}
   file-path:
@@ -72,19 +64,19 @@ all-docs:
 
 hmac:
   secret:
-    key: ${HMAC_SECRET_KEY}
+    key: ${HMAC_SECRET_KEY:}
 
 # MinIO 配置 (S3兼容对象存储)
 minio:
   endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
-  access-key: ${MINIO_ACCESS_KEY}
-  secret-key: ${MINIO_SECRET_KEY}
+  access-key: ${MINIO_ACCESS_KEY:}
+  secret-key: ${MINIO_SECRET_KEY:}
   bucket: ${MINIO_BUCKET:alldocs}
   url-expiration: 3600
 
-# 存储策略配置 (可选: minio, gridfs)
+# 存储策略配置 (固定使用 minio)
 storage:
-  type: ${STORAGE_TYPE:gridfs}
+  type: minio
 
 # springdoc:
 #   api-docs:

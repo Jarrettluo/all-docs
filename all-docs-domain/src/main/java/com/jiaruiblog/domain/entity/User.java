@@ -2,12 +2,13 @@ package com.jiaruiblog.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jiaruiblog.common.enums.PermissionEnum;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,7 +22,7 @@ import java.util.List;
  * @Date 2022/6/4 9:37 上午
  * @Version 1.0
  **/
-@Document(collection = "users") // Mongo
+@Table(name = "user")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

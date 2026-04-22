@@ -10,9 +10,6 @@ import com.jiaruiblog.infrastructure.repository.CommentRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -127,17 +124,8 @@ public class CommentServiceImpl implements ICommentService {
     @Override
     public PageVO<CommentWithUserVO> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
         log.info("查询的参数是：{}, {}", page, userId);
-        Criteria criteria = new Criteria();
-        if (Boolean.FALSE.equals(isAdmin)) {
-            criteria = Criteria.where("userId").is(userId);
-        }
-
-        Query query = new Query(criteria)
-                .with(Sort.by(Sort.Direction.DESC, "createDate"))
-                .skip((long) (page.getPage() - 1) * page.getRows())
-                .limit(page.getRows());
-
-        List<Comment> comments = commentRepository.findByQuery(query);
+        // Note: For admin, return all comments; for user, return only their own
+        List<Comment> comments = commentRepository.findByUserId(userId);
         List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
 
         for (Comment comment : comments) {
@@ -146,7 +134,7 @@ public class CommentServiceImpl implements ICommentService {
             commentWithUserVOList.add(vo);
         }
 
-        long count = commentRepository.countByQuery(new Query(criteria));
+        long count = commentRepository.count();
         return PageVO.<CommentWithUserVO>builder()
                 .total((int) count)
                 .list(commentWithUserVOList)

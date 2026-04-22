@@ -22,7 +22,7 @@ import java.util.Date;
 @Tag(name = "用户收藏模块")
 @RestController
 @Slf4j
-@RequestMapping("/collect")
+@RequestMapping("/api/v1/collect")
 public class CollectController {
 
     @Resource

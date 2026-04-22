@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.CollectMapper">
+
+    <resultMap id="CollectResultMap" type="com.jiaruiblog.domain.entity.CollectDocRelationship">
+        <id property="id" column="id"/>
+        <result property="redisActionEnum" column="redis_action_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+        <result property="userId" column="user_id"/>
+        <result property="docId" column="doc_id"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.CollectDocRelationship">
+        INSERT INTO collect_doc_relationship (id, redis_action_enum, user_id, doc_id, create_date, update_date)
+        VALUES (#{id}, #{redisActionEnum}, #{userId}, #{docId}, #{createDate}, #{updateDate})
+    </insert>
+
+    <delete id="remove" parameterType="com.jiaruiblog.domain.entity.CollectDocRelationship">
+        DELETE FROM collect_doc_relationship WHERE user_id = #{userId} AND doc_id = #{docId}
+    </delete>
+
+    <select id="findByDocIdAndUserId" resultMap="CollectResultMap">
+        SELECT * FROM collect_doc_relationship WHERE doc_id = #{docId} AND user_id = #{userId}
+    </select>
+
+    <select id="countByDocId" resultType="long">
+        SELECT COUNT(*) FROM collect_doc_relationship WHERE doc_id = #{docId}
+    </select>
+
+    <select id="findAllByDocId" resultMap="CollectResultMap">
+        SELECT * FROM collect_doc_relationship WHERE doc_id = #{docId}
+    </select>
+
+    <select id="findByUserId" resultMap="CollectResultMap">
+        SELECT * FROM collect_doc_relationship WHERE user_id = #{userId} ORDER BY create_date DESC
+    </select>
+
+</mapper>

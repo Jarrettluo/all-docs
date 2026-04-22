@@ -1,9 +1,10 @@
 package com.jiaruiblog.domain.entity;
 
 import com.jiaruiblog.common.enums.DocStateEnum;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * @author jiarui.luo
  */
 @Data
-@Document
+@Table(name = "file_document")
 public class FileDocument {
 
     /**

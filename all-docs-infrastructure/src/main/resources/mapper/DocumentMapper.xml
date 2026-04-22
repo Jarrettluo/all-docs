@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.DocumentMapper">
+
+    <resultMap id="FileDocumentResultMap" type="com.jiaruiblog.domain.entity.FileDocument">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="size" column="size"/>
+        <result property="uploadDate" column="upload_date"/>
+        <result property="md5" column="md5"/>
+        <result property="content" column="content"/>
+        <result property="contentType" column="content_type"/>
+        <result property="suffix" column="suffix"/>
+        <result property="description" column="description"/>
+        <result property="gridfsId" column="gridfs_id"/>
+        <result property="thumbId" column="thumb_id"/>
+        <result property="textFileId" column="text_file_id"/>
+        <result property="previewFileId" column="preview_file_id"/>
+        <result property="docState" column="doc_state" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+        <result property="errorMsg" column="error_msg"/>
+        <result property="reviewing" column="reviewing"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.FileDocument">
+        INSERT INTO file_document (id, name, size, upload_date, md5, content, content_type, suffix,
+            description, gridfs_id, thumb_id, text_file_id, preview_file_id, doc_state,
+            error_msg, reviewing, user_id, user_name)
+        VALUES (#{id}, #{name}, #{size}, #{uploadDate}, #{md5}, #{content}, #{contentType},
+            #{suffix}, #{description}, #{gridfsId}, #{thumbId}, #{textFileId}, #{previewFileId},
+            #{docState}, #{errorMsg}, #{reviewing}, #{userId}, #{userName})
+    </insert>
+
+    <update id="update" parameterType="com.jiaruiblog.domain.entity.FileDocument">
+        UPDATE file_document
+        SET text_file_id = #{textFileId},
+            thumb_id = #{thumbId},
+            preview_file_id = #{previewFileId},
+            description = #{description}
+        WHERE id = #{id}
+    </update>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM file_document WHERE reviewing = false
+    </select>
+
+    <select id="findById" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document WHERE id = #{id}
+    </select>
+
+    <select id="findByIdList" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document WHERE id IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="findByMd5" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document WHERE md5 = #{md5}
+    </select>
+
+    <select id="findByPage" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document WHERE reviewing = false
+        ORDER BY upload_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="findByPageWithFussySearch" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document
+        WHERE reviewing = false AND name LIKE CONCAT('%', #{keyWord}, '%')
+        ORDER BY upload_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="findByUserId" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document
+        WHERE reviewing = false AND user_id = #{userId}
+        ORDER BY upload_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="findByUserIdAndNameContaining" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document
+        WHERE reviewing = false AND user_id = #{userId} AND name LIKE CONCAT('%', #{name}, '%')
+        ORDER BY upload_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <delete id="delete">
+        DELETE FROM file_document WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByIdList">
+        DELETE FROM file_document WHERE id IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="stats" resultType="com.jiaruiblog.domain.entity.vo.MonthStatVO">
+        SELECT DATE_FORMAT(upload_date, '%Y-%m-%d') as date, COUNT(*) as count
+        FROM file_document
+        WHERE upload_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY DATE_FORMAT(upload_date, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+</mapper>

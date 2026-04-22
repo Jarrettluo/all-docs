@@ -1,0 +1,47 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE}?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PWD}
+
+  thymeleaf:
+    cache: true
+
+logging:
+  level:
+    root: INFO
+
+cloud:
+  elasticsearch:
+    host: ${ES_HOST}
+    port: ${ES_PORT:9200}
+
+minio:
+  endpoint: ${MINIO_ENDPOINT}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket: ${MINIO_BUCKET}
+
+storage:
+  type: minio
+
+async:
+  core-pool-size: 20
+  max-pool-size: 100
+  queue-capacity: 500
+  keep-alive-seconds: 60

@@ -171,7 +171,7 @@ public interface DocumentService {
     /**
      * 查询并删除某个文档
      */
-    void queryAndRemove(String ...docId);
+    List<FileDocument> queryAndRemove(String ...docId);
 
     /**
      * 查询并更新文档

@@ -32,7 +32,14 @@ public class JwtFilter implements Filter {
     /**
      * 安全的url，不需要令牌; 游客可以访问的
      */
-    private static final List<String> SAFE_URL_LIST = Arrays.asList("*/user/login", "*/user/register");
+    private static final List<String> SAFE_URL_LIST = Arrays.asList(
+            "/api/v1/user/login",
+            "/api/v1/user/register",
+            "/api/v1/file/view",
+            "/api/v1/file/image",
+            "/api/v1/document/list",
+            "/api/v1/category/all"
+    );
 
 
     @Override
@@ -50,17 +57,24 @@ public class JwtFilter implements Filter {
 
             response.setCharacterEncoding("UTF-8");
             String url = request.getRequestURI().substring(request.getContextPath().length());
-            // 登录和注册等请求不需要令牌
-            if (url.contains("login") || url.contains("/user/insert")
-                    || url.contains("/files/view")
-                    || url.contains("/document/listNew")
-                    || url.contains("/category/all")
-                    || url.contains("/files/image2")
-                    || url.startsWith("/swagger-ui")
-                    || url.startsWith("/api/v1.0")
+            // 检查是否是安全的白名单路径（精确匹配或子路径匹配）
+            boolean isSafeUrl = false;
+            for (String safeUrl : SAFE_URL_LIST) {
+                if (url.equals(safeUrl) || url.startsWith(safeUrl + "/")) {
+                    isSafeUrl = true;
+                    break;
+                }
+            }
+            // Swagger/OpenAPI 路径也不需要令牌
+            if (url.startsWith("/swagger-ui")
                     || url.startsWith("/v3/api-docs")
                     || url.startsWith("/webjars")
-                    || url.startsWith("/swagger-resources")) {
+                    || url.startsWith("/swagger-resources")
+                    || url.startsWith("/api/v1.0")) {
+                isSafeUrl = true;
+            }
+
+            if (isSafeUrl) {
                 response.setStatus(HttpServletResponse.SC_OK);
                 chain.doFilter(request, response);
                 return;

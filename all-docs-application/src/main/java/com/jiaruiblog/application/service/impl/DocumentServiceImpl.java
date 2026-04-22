@@ -14,16 +14,16 @@ import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
+import com.jiaruiblog.infrastructure.storage.StorageFactory;
+import com.jiaruiblog.infrastructure.storage.StorageStrategy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,7 +38,7 @@ public class DocumentServiceImpl implements DocumentService {
     private DocumentRepository documentRepository;
 
     @Resource
-    private GridFsTemplate gridFsTemplate;
+    private StorageFactory storageFactory;
 
     @Resource
     private ICommentService commentService;
@@ -56,10 +56,11 @@ public class DocumentServiceImpl implements DocumentService {
         if (inputStream == null) {
             throw new IllegalArgumentException("InputStream cannot be null");
         }
-        String gridfsId = IdUtil.simpleUUID();
-        gridFsTemplate.store(inputStream, gridfsId, contentType);
-        log.info("Uploaded file to GridFS: gridfsId={}, filename={}", gridfsId, fileName);
-        return gridfsId;
+        StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
+        String objectId = IdUtil.simpleUUID();
+        storageStrategy.upload(inputStream, objectId, contentType);
+        log.info("Uploaded file to MinIO: objectId={}, filename={}", objectId, fileName);
+        return objectId;
     }
 
     @Override
@@ -80,10 +81,11 @@ public class DocumentServiceImpl implements DocumentService {
         if (fileIds == null || fileIds.length == 0) {
             return;
         }
-        List<String> ids = Arrays.asList(fileIds);
-        Query deleteQuery = new Query().addCriteria(Criteria.where(FILE_NAME).in(ids));
-        gridFsTemplate.delete(deleteQuery);
-        log.info("Deleted files from GridFS: {}", ids);
+        StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
+        for (String fileId : fileIds) {
+            storageStrategy.delete(fileId);
+        }
+        log.info("Deleted files from MinIO: {}", Arrays.asList(fileIds));
     }
 
     @Override
@@ -91,9 +93,9 @@ public class DocumentServiceImpl implements DocumentService {
         if (document == null || document.getId() == null) {
             return;
         }
-        // Delete from MongoDB
+        // Delete from MySQL
         documentRepository.delete(document.getId());
-        // Delete from GridFS
+        // Delete from MinIO
         if (document.getGridfsId() != null) {
             deleteGridFs(document.getGridfsId());
         }
@@ -134,7 +136,6 @@ public class DocumentServiceImpl implements DocumentService {
         if (userId == null || userId.isEmpty()) {
             return Collections.emptyList();
         }
-        Query query = new Query(Criteria.where("userId").is(userId));
         return Collections.emptyList(); // Placeholder - would need repository method
     }
 
@@ -168,8 +169,23 @@ public class DocumentServiceImpl implements DocumentService {
         if (gridfsId == null || gridfsId.isEmpty()) {
             return new byte[0];
         }
-        // Implementation would read from GridFS
-        return new byte[0];
+        StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
+        InputStream inputStream = storageStrategy.download(gridfsId);
+        if (inputStream == null) {
+            return new byte[0];
+        }
+        try {
+            return inputStream.readAllBytes();
+        } catch (java.io.IOException e) {
+            log.error("Failed to read file bytes", e);
+            return new byte[0];
+        } finally {
+            try {
+                inputStream.close();
+            } catch (java.io.IOException e) {
+                // ignore
+            }
+        }
     }
 
     @Override
@@ -236,8 +252,8 @@ public class DocumentServiceImpl implements DocumentService {
         if (fileDocument == null || inputStream == null) {
             return fileDocument;
         }
-        String gridfsId = uploadFileToGridFs(fileDocument.getName(), inputStream, fileDocument.getContentType(), fileDocument.getMd5());
-        fileDocument.setGridfsId(gridfsId);
+        String objectId = uploadFileToGridFs(fileDocument.getName(), inputStream, fileDocument.getContentType(), fileDocument.getMd5());
+        fileDocument.setGridfsId(objectId);
         documentRepository.save(fileDocument);
         return fileDocument;
     }
@@ -387,7 +403,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public InputStream getFileThumb(String thumbId) {
-        return null;
+        StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
+        return storageStrategy.download(thumbId);
     }
 
     @Override
@@ -395,9 +412,10 @@ public class DocumentServiceImpl implements DocumentService {
         if (in == null) {
             throw new IllegalArgumentException("InputStream cannot be null");
         }
-        String gridfsId = prefix + IdUtil.simpleUUID();
-        gridFsTemplate.store(in, gridfsId, contentType);
-        return gridfsId;
+        String objectId = prefix + IdUtil.simpleUUID();
+        StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
+        storageStrategy.upload(in, objectId, contentType);
+        return objectId;
     }
 
     @Override
@@ -409,12 +427,14 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public void queryAndRemove(String... docId) {
+    public List<FileDocument> queryAndRemove(String... docId) {
         if (docId == null || docId.length == 0) {
-            return;
+            return Collections.emptyList();
         }
+        List<FileDocument> result = documentRepository.findByIdList(Arrays.asList(docId));
         documentRepository.deleteByIdList(Arrays.asList(docId));
         log.info("Query and remove documents: {}", Arrays.asList(docId));
+        return result;
     }
 
     @Override

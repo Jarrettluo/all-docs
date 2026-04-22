@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.CommentMapper">
+
+    <resultMap id="CommentResultMap" type="com.jiaruiblog.domain.entity.Comment">
+        <id property="id" column="id"/>
+        <result property="createUser" column="create_user"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="content" column="content"/>
+        <result property="docId" column="doc_id"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.Comment">
+        INSERT INTO comment (id, create_user, user_id, user_name, content, doc_id, create_date, update_date)
+        VALUES (#{id}, #{createUser}, #{userId}, #{userName}, #{content}, #{docId}, #{createDate}, #{updateDate})
+    </insert>
+
+    <select id="findById" resultMap="CommentResultMap">
+        SELECT * FROM comment WHERE id = #{id}
+    </select>
+
+    <select id="findByDocId" resultMap="CommentResultMap">
+        SELECT * FROM comment WHERE doc_id = #{docId} ORDER BY create_date DESC
+    </select>
+
+    <select id="findByUserId" resultMap="CommentResultMap">
+        SELECT * FROM comment WHERE user_id = #{userId} ORDER BY create_date DESC
+    </select>
+
+    <select id="countByDocId" resultType="long">
+        SELECT COUNT(*) FROM comment WHERE doc_id = #{docId}
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM comment WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByDocId">
+        DELETE FROM comment WHERE doc_id = #{docId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.CategoryMapper">
+
+    <resultMap id="CategoryResultMap" type="com.jiaruiblog.domain.entity.Category">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.Category">
+        INSERT INTO category (id, name, create_date, update_date)
+        VALUES (#{id}, #{name}, #{createDate}, #{updateDate})
+    </insert>
+
+    <select id="findById" resultMap="CategoryResultMap">
+        SELECT * FROM category WHERE id = #{id}
+    </select>
+
+    <select id="findByName" resultMap="CategoryResultMap">
+        SELECT * FROM category WHERE name = #{name}
+    </select>
+
+    <select id="findAll" resultMap="CategoryResultMap">
+        SELECT * FROM category ORDER BY create_date DESC
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM category
+    </select>
+
+</mapper>

@@ -1,8 +1,8 @@
 package com.jiaruiblog.domain.entity;
 
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
@@ -13,7 +13,7 @@ import java.util.Date;
  * @Date 2022/6/4 10:30 上午
  * @Version 1.0
  **/
-@Document
+@Table(name = "cate_doc_relationship")
 @Data
 public class CateDocRelationship {
 

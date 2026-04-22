@@ -1,0 +1,44 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    root: DEBUG
+
+cloud:
+  elasticsearch:
+    host: localhost
+    port: 9200
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket: alldocs-dev
+
+storage:
+  type: minio
+
+async:
+  core-pool-size: 5
+  max-pool-size: 20
+  queue-capacity: 100
+  keep-alive-seconds: 30

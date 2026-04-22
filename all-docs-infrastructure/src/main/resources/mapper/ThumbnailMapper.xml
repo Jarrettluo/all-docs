@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.ThumbnailMapper">
+
+    <resultMap id="ThumbnailResultMap" type="com.jiaruiblog.domain.entity.Thumbnail">
+        <id property="id" column="id"/>
+        <result property="objectId" column="object_id"/>
+        <result property="thumbnailEnum" column="thumbnail_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+        <result property="gridfsId" column="gridfs_id"/>
+        <result property="thumbSizeEnum" column="thumb_size_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.Thumbnail">
+        INSERT INTO thumbnail (id, object_id, thumbnail_enum, gridfs_id, thumb_size_enum)
+        VALUES (#{id}, #{objectId}, #{thumbnailEnum}, #{gridfsId}, #{thumbSizeEnum})
+    </insert>
+
+    <select id="findByObjectId" resultMap="ThumbnailResultMap">
+        SELECT * FROM thumbnail WHERE object_id = #{objectId} LIMIT 1
+    </select>
+
+    <select id="findAllByObjectId" resultMap="ThumbnailResultMap">
+        SELECT * FROM thumbnail WHERE object_id = #{objectId}
+    </select>
+
+    <delete id="deleteByObjectId">
+        DELETE FROM thumbnail WHERE object_id = #{objectId}
+    </delete>
+
+</mapper>

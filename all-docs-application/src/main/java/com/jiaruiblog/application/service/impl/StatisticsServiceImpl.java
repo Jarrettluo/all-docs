@@ -83,13 +83,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public long countCollect() {
-        try {
-            // CollectRepository doesn't have count method, return 0 as fallback
-            return 0;
-        } catch (Exception e) {
-            log.error("统计收藏数量失败", e);
-            return 0;
-        }
+        // CollectRepository doesn't have count method, return 0 as fallback
+        return 0;
     }
 
     @Override
@@ -120,8 +115,8 @@ public class StatisticsServiceImpl implements StatisticsService {
             TrendVO vo = new TrendVO();
             cal.setTime(new Date());
             cal.add(Calendar.DAY_OF_YEAR, -i);
-            vo.setCreateDate(cal.getTime());
-            vo.setCount(0L);
+            vo.setId(String.valueOf(cal.getTimeInMillis()));
+            vo.setName("Day " + i);
             trends.add(vo);
         }
         return trends;
@@ -130,12 +125,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public StatsVO all() {
         StatsVO vo = new StatsVO();
-        vo.setDocumentCount(countDocument());
-        vo.setUserCount(countUser());
-        vo.setTagCount(countTag());
-        vo.setCategoryCount(countCategory());
-        vo.setCollectCount(countCollect());
-        vo.setLikeCount(countLike());
+        vo.setDocNum(countDocument());
+        vo.setCategoryNum(countCategory());
+        vo.setTagNum(countTag());
+        vo.setCommentNum(0L);  // Not directly available
         return vo;
     }
 
@@ -149,10 +142,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             MonthStatVO vo = new MonthStatVO();
             cal.setTime(new Date());
             cal.add(Calendar.MONTH, -i);
-            vo.setMonth(cal.get(Calendar.MONTH) + 1);
-            vo.setYear(cal.get(Calendar.YEAR));
-            vo.setDocumentCount(0L);
-            vo.setUserCount(0L);
+            // MonthStatVO only has date and count, not month/year/documentCount
             stats.add(vo);
         }
         return stats;

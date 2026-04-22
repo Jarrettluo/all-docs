@@ -2,13 +2,11 @@ package com.jiaruiblog.api.controller;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.infrastructure.config.SystemConfig;
 import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.api.entity.ResponseModel;
 import com.jiaruiblog.domain.entity.User;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.upload.FileUploadDTO;
@@ -58,10 +56,8 @@ import java.util.regex.Pattern;
 @Slf4j
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/files")
+@RequestMapping("/api/v1/file")
 public class FileController {
-
-    private static final String DOT = ".";
 
     private static final String USERNAME = "username";
 
@@ -390,19 +386,16 @@ public class FileController {
      * 删除附件
      *
      * @param id entity id
-     * @return ResponseModel
+     * @return ApiResult
      */
     @DeleteMapping("/{id}")
-    public ResponseModel deleteFile(@PathVariable String id) {
-        ResponseModel model = ResponseModel.getInstance();
+    public ApiResult<Object> deleteFile(@PathVariable String id) {
         if (!StrUtil.isEmpty(id)) {
             fileService.removeFile(id, true);
-            model.setCode(ResponseModel.SUCCESS);
-            model.setMessage("删除成功");
+            return ApiResult.success("删除成功");
         } else {
-            model.setMessage("请传入文件id");
+            return ApiResult.error(400, "请传入文件id");
         }
-        return model;
     }
 
 
@@ -413,16 +406,13 @@ public class FileController {
      * @return
      */
     @GetMapping("/delete/{id}")
-    public ResponseModel deleteFileByGetMethod(@PathVariable String id) {
-        ResponseModel model = ResponseModel.getInstance();
+    public ApiResult<Object> deleteFileByGetMethod(@PathVariable String id) {
         if (!StrUtil.isEmpty(id)) {
             fileService.removeFile(id, true);
-            model.setCode(ResponseModel.SUCCESS);
-            model.setMessage("删除成功");
+            return ApiResult.success("删除成功");
         } else {
-            model.setMessage("请传入文件id");
+            return ApiResult.error(400, "请传入文件id");
         }
-        return model;
     }
 
     /**

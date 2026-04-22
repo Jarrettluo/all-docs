@@ -1,7 +1,6 @@
 package com.jiaruiblog.infrastructure.repository;
 
 import com.jiaruiblog.domain.entity.Comment;
-import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,8 +26,4 @@ public interface CommentRepository {
     void deleteAllByIdIn(List<String> ids);
 
     long count();
-
-    long countByQuery(Query query);
-
-    List<Comment> findByQuery(Query query);
 }

@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 @CrossOrigin
-@RequestMapping("/statistics")
+@RequestMapping("/api/v1/statistics")
 public class StatisticsController {
 
     @Resource
