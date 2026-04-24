@@ -1,10 +1,12 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.FileOperationService;
+import com.jiaruiblog.application.service.TextExtractResult;
 import com.jiaruiblog.infrastructure.storage.MinioStorageStrategy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,40 +31,59 @@ public class FileOperationServiceImpl implements FileOperationService {
     private MinioStorageStrategy minioStorageStrategy;
 
     @Override
-    public String parseToStr(MultipartFile file) {
+    public TextExtractResult parseToStr(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             log.warn("解析文件失败：文件为空");
-            return "";
+            return TextExtractResult.failure("文件为空");
         }
         try {
             String contentType = file.getContentType();
             if (contentType != null && contentType.startsWith("text/")) {
-                return new String(file.getBytes());
+                return TextExtractResult.success(new String(file.getBytes()));
             }
-            // 使用Tika解析文件内容
-            return tika.parseToString(file.getInputStream());
+            String content = tika.parseToString(file.getInputStream());
+            if (content == null || content.isEmpty()) {
+                return TextExtractResult.failure("解析后内容为空");
+            }
+            return TextExtractResult.success(content);
+        } catch (TikaException e) {
+            log.error("Tika解析文件失败：{}", file.getOriginalFilename(), e);
+            return TextExtractResult.failure("Tika解析失败: " + e.getMessage());
+        } catch (IOException e) {
+            log.error("IO异常：{}", file.getOriginalFilename(), e);
+            return TextExtractResult.failure("IO异常: " + e.getMessage());
         } catch (Exception e) {
-            log.error("解析MultipartFile失败", e);
-            return "";
+            log.error("解析文件异常：{}", file.getOriginalFilename(), e);
+            return TextExtractResult.failure("解析异常: " + e.getMessage());
         }
     }
 
     @Override
-    public String parseToStr(String path) {
+    public TextExtractResult parseToStr(String path) {
         if (path == null || path.isEmpty()) {
             log.warn("解析文件失败：路径为空");
-            return "";
+            return TextExtractResult.failure("路径为空");
         }
         File file = new File(path);
         if (!file.exists() || !file.isFile()) {
             log.warn("解析文件失败：文件不存在或不是文件：{}", path);
-            return "";
+            return TextExtractResult.failure("文件不存在或不是文件");
         }
         try (FileInputStream fis = new FileInputStream(file)) {
-            return tika.parseToString(fis);
+            String content = tika.parseToString(fis);
+            if (content == null || content.isEmpty()) {
+                return TextExtractResult.failure("解析后内容为空");
+            }
+            return TextExtractResult.success(content);
+        } catch (TikaException e) {
+            log.error("Tika解析文件失败：{}", path, e);
+            return TextExtractResult.failure("Tika解析失败: " + e.getMessage());
+        } catch (IOException e) {
+            log.error("IO异常：{}", path, e);
+            return TextExtractResult.failure("IO异常: " + e.getMessage());
         } catch (Exception e) {
-            log.error("解析文件失败：{}", path, e);
-            return "";
+            log.error("解析文件异常：{}", path, e);
+            return TextExtractResult.failure("解析异常: " + e.getMessage());
         }
     }
 

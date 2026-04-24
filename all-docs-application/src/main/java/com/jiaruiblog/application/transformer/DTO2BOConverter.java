@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.transformer;
 
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.enums.PermissionEnum;
 import com.jiaruiblog.domain.entity.bo.UserBO;
 import com.jiaruiblog.domain.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.domain.entity.dto.UserDTO;

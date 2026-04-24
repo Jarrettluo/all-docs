@@ -1,14 +1,6 @@
 package com.jiaruiblog.application.task.executor;
 
-import com.jiaruiblog.application.task.data.TaskData;
-import com.jiaruiblog.common.enums.DocType;
-import com.jiaruiblog.application.task.executor.slider.PptExecutor;
-import com.jiaruiblog.application.task.executor.slider.PptxExecutor;
-
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import com.jiaruiblog.enums.FileFormatEnum;
 
 /**
  * @author Jarrett Luo
@@ -17,58 +9,24 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class TaskExecutorFactory {
 
-    private TaskExecutorFactory() {
+    private TaskExecutorFactory() {}
 
-    }
-
-    static ConcurrentMap<DocType, TaskExecutor> taskExecutorMap = new ConcurrentHashMap<>();
-
-    public static TaskExecutor getTaskExecutor(DocType docType) {
-        TaskExecutor taskExecutor = taskExecutorMap.get(docType);
-        if (null != taskExecutor) {
-            return taskExecutor;
-        }
-        return createTaskExecutor(docType);
-    }
-
-    /**
-     * 创建任务执行器
-     * @param docType 文档类型
-     * @return 任务执行器
-     */
-    private static TaskExecutor createTaskExecutor(DocType docType) {
-        TaskExecutor taskExecutor = null;
-        switch (docType) {
-            case PDF:
-                taskExecutor = new PdfWordTaskExecutor();
-                break;
+    public static TaskExecutor getTaskExecutor(FileFormatEnum format) {
+        if (format == null) return null;
+        switch (format) {
+            case PDF: return new PdfWordTaskExecutor();
             case DOCX:
             case XLSX:
-                taskExecutor = new DocxExecutor();
-                break;
-            case PPT:
-                taskExecutor = new PptExecutor();
-                break;
-            case PPTX:
-                taskExecutor = new PptxExecutor();
-                break;
+            case DOC: return new DocxExecutor();
+            case PPT: return new com.jiaruiblog.application.task.executor.slider.PptExecutor();
+            case PPTX: return new com.jiaruiblog.application.task.executor.slider.PptxExecutor();
             case MD:
             case HTML:
-            case TXT:
-                taskExecutor = new TxtExecutor();
-                break;
+            case TEXT: return new TxtExecutor();
             case JPG:
             case JPEG:
-            case PNG:
-                taskExecutor = new PicExecutor();
-                break;
-            default:
-                break;
+            case PNG: return new PicExecutor();
+            default: return null;
         }
-
-        if (null != taskExecutor) {
-            taskExecutorMap.put(docType, taskExecutor);
-        }
-        return taskExecutor;
     }
 }

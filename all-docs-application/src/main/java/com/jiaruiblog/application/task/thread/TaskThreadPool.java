@@ -1,7 +1,9 @@
 package com.jiaruiblog.application.task.thread;
 
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
@@ -17,13 +19,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Version 1.0
  */
 @Slf4j
+@Component
 public class TaskThreadPool {
 
     private final ThreadPoolTaskExecutor taskExecutor;
-    private static final TaskThreadPool INSTANCE = new TaskThreadPool(2, "Task_Thread_%d");
     private final List<MainTask> mainTaskList;
 
-    private TaskThreadPool(Integer threadsNum, String threadNameFormat) {
+    public TaskThreadPool() {
+        this(2, "Task_Thread_%d");
+    }
+
+    public TaskThreadPool(Integer threadsNum, String threadNameFormat) {
         ThreadFactory threadFactory = new ThreadFactory() {
             private final AtomicInteger threadNumber = new AtomicInteger(1);
             @Override
@@ -47,8 +53,12 @@ public class TaskThreadPool {
 
         mainTaskList = new CopyOnWriteArrayList<>();
     }
-    public static TaskThreadPool getInstance() {
-        return INSTANCE;
+
+    @PreDestroy
+    public void shutdown() {
+        log.info("关闭 TaskThreadPool 线程池...");
+        taskExecutor.shutdown();
+        log.info("TaskThreadPool 线程池已关闭");
     }
 
     public <V> void submit(MainTask mainTask) {

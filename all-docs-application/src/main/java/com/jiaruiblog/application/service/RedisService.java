@@ -113,6 +113,21 @@ public interface RedisService {
     void deleteSetMember(String key, String... values);
 
     /**
+     * 判断成员是否在集合中
+     * @param key 键
+     * @param value 成员值
+     * @return 是否存在
+     */
+    boolean isSetMember(String key, String value);
+
+    /**
+     * 模糊匹配获取键列表
+     * @param pattern 匹配模式，如 "like:entity:*"
+     * @return 匹配的键集合
+     */
+    Set<String> keys(String pattern);
+
+    /**
      * @author luojiarui
      * @Description 保存列表
      * @Date 16:12 2023/1/31

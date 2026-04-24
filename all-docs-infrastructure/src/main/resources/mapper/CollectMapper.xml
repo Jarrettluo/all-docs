@@ -36,4 +36,8 @@
         SELECT * FROM collect_doc_relationship WHERE user_id = #{userId} ORDER BY create_date DESC
     </select>
 
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM collect_doc_relationship
+    </select>
+
 </mapper>

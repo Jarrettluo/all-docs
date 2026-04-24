@@ -18,7 +18,7 @@ public enum DocStateEnum implements BaseEnum {
     /**
      * 建立索引时的等待状态，默认都是等待状态
      */
-    WAITE(0, "等待状态"),
+    WAIT(0, "等待状态"),
     /**
      * 进行中的状态
      */

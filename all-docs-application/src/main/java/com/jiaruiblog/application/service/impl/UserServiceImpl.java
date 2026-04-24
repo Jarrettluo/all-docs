@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.IUserService;
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.enums.PermissionEnum;
 import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.domain.entity.User;

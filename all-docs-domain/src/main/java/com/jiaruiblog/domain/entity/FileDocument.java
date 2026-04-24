@@ -2,12 +2,13 @@ package com.jiaruiblog.domain.entity;
 
 import com.jiaruiblog.common.enums.DocStateEnum;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author jiarui.luo
@@ -82,14 +83,10 @@ public class FileDocument {
     private String previewFileId;
 
     /**
-     * 缩略图
-     **/
-    private List<Thumbnail> thumbnailList;
-
-    /**
      * 文档的状态
      **/
-    private DocStateEnum docState = DocStateEnum.WAITE;
+    @Enumerated(EnumType.STRING)
+    private DocStateEnum docState = DocStateEnum.WAIT;
 
     /**
      * 文档错误信息
@@ -98,9 +95,6 @@ public class FileDocument {
 
     // true 正在审核；false 审核完毕
     private boolean reviewing = true;
-
-    // 违禁词列表
-    private List<String> wordList;
 
     private String userId;
 

@@ -1,6 +1,6 @@
 package com.jiaruiblog.domain.entity.dto;
 
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.enums.PermissionEnum;
 import com.jiaruiblog.common.MessageConstant;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

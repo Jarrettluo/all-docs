@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service;
 
 import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.common.enums.DocType;
+import com.jiaruiblog.enums.FileFormatEnum;
 
 import java.io.InputStream;
 
@@ -12,29 +12,9 @@ import java.io.InputStream;
  */
 public interface TaskExecuteService {
 
-    /**
-     * @author luojiarui
-     * @Description 执行任务
-     * @Date 16:48 2022/11/5
-     * @Param [document]
-     */
     void execute(FileDocument document);
 
-    /**
-     * @author luojiarui
-     * @Description 根据文档类型获取执行器类型
-     * @Date 16:48 2022/11/5
-     * @Param [docType]
-     * @return java.lang.String
-     */
-    String getExecutorType(DocType docType);
+    String getExecutorType(FileFormatEnum docType);
 
-    /**
-     * @author luojiarui
-     * @Description 上传文件并执行任务
-     * @Date 16:48 2022/11/5
-     * @Param [inputStream, fileName, contentType]
-     * @return java.lang.String
-     */
     String uploadAndExecute(InputStream inputStream, String fileName, String contentType);
 }

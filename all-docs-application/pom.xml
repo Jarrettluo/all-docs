@@ -70,6 +70,13 @@
             <artifactId>ansj_seg</artifactId>
         </dependency>
 
+        <!-- Thumbnailator 图片处理 -->
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.20</version>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

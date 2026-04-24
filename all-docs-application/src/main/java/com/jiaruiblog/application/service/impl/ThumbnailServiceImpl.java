@@ -1,16 +1,15 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.ThumbnailService;
-import com.jiaruiblog.enums.ThumbnailEnum;
 import com.jiaruiblog.domain.entity.Thumbnail;
 import com.jiaruiblog.infrastructure.repository.ThumbnailRepository;
 import com.jiaruiblog.infrastructure.storage.MinioStorageStrategy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -46,20 +45,19 @@ public class ThumbnailServiceImpl implements ThumbnailService {
         }
 
         try {
-            // 读取输入流内容
-            byte[] imageBytes = inputStream.readAllBytes();
-            ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+            // 使用 Thumbnailator 生成缩略图
+            byte[] thumbBytes = Thumbnails.of(inputStream)
+                    .size(width, height)
+                    .outputFormat("jpg")
+                    .asBytes(ByteArrayInputStream.class);
 
-            // 生成缩略图 - 这里简化处理，实际应该使用图片处理库如Thumbnailator
-            // 由于依赖问题，使用MinIO直接存储原图作为缩略图
             String thumbId = UUID.randomUUID().toString();
             String contentType = getContentType(fileName);
 
-            // 上传到MinIO
-            String result = minioStorageStrategy.upload(new ByteArrayInputStream(imageBytes), thumbId, contentType);
+            String result = minioStorageStrategy.upload(new ByteArrayInputStream(thumbBytes), thumbId, contentType);
 
             if (result != null) {
-                log.info("缩略图生成成功：fileName={}, thumbId={}", fileName, thumbId);
+                log.info("缩略图生成成功：fileName={}, thumbId={}, size={}x{}", fileName, thumbId, width, height);
                 return thumbId;
             }
 
@@ -79,13 +77,16 @@ public class ThumbnailServiceImpl implements ThumbnailService {
         }
 
         try {
-            // 读取输入流内容
-            byte[] imageBytes = inputStream.readAllBytes();
+            // 预览图使用较大的尺寸
+            byte[] previewBytes = Thumbnails.of(inputStream)
+                    .size(800, 800)
+                    .outputFormat("jpg")
+                    .asBytes(ByteArrayInputStream.class);
+
             String previewId = UUID.randomUUID().toString();
             String contentType = getContentType(fileName);
 
-            // 上传到MinIO作为预览图
-            String result = minioStorageStrategy.upload(new ByteArrayInputStream(imageBytes), previewId, contentType);
+            String result = minioStorageStrategy.upload(new ByteArrayInputStream(previewBytes), previewId, contentType);
 
             if (result != null) {
                 log.info("预览图生成成功：fileName={}, previewId={}", fileName, previewId);

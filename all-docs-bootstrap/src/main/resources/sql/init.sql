@@ -1,5 +1,6 @@
 -- All-Docs 数据库初始化脚本
 -- MySQL 8.0+
+-- WARNING: 此脚本包含 DROP TABLE 语句，生产环境使用前请手动备份数据！
 
 CREATE DATABASE IF NOT EXISTS alldocs DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE alldocs;
@@ -81,7 +82,7 @@ CREATE TABLE `tag` (
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment` (
     `id` VARCHAR(64) NOT NULL PRIMARY KEY COMMENT '主键',
-    `create_user` BIGINT NOT NULL COMMENT '创建用户ID',
+    `create_user` VARCHAR(64) NOT NULL COMMENT '创建用户ID',
     `user_id` VARCHAR(64) DEFAULT NULL COMMENT '用户ID',
     `user_name` VARCHAR(100) DEFAULT NULL COMMENT '用户名',
     `content` VARCHAR(500) NOT NULL COMMENT '评论内容',

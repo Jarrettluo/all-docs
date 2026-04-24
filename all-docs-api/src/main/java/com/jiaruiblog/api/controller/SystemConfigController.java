@@ -2,7 +2,7 @@ package com.jiaruiblog.api.controller;
 
 import cn.hutool.core.io.IoUtil;
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.infrastructure.config.SystemConfig;
 import com.jiaruiblog.common.exception.BusinessException;

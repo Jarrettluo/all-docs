@@ -2,7 +2,7 @@ package com.jiaruiblog.api.controller;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.infrastructure.config.SystemConfig;

@@ -3,7 +3,7 @@ package com.jiaruiblog.api.controller;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.auth0.jwt.interfaces.Claim;
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.infrastructure.config.SystemConfig;
 import com.jiaruiblog.domain.entity.FileDocument;

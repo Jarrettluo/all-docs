@@ -19,4 +19,6 @@ public interface CollectRepository {
     List<CollectDocRelationship> findByUserId(String userId);
 
     List<CollectDocRelationship> findByDocIdInAndUserId(List<String> docIds, String userId);
+
+    long count();
 }

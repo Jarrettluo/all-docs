@@ -2,7 +2,7 @@ package com.jiaruiblog.domain.entity.bo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.enums.PermissionEnum;
 import lombok.Data;
 
 import java.util.Date;

@@ -7,74 +7,32 @@ import com.jiaruiblog.common.converter.BaseEnum;
  */
 public enum FileFormatEnum implements BaseEnum {
 
-    /**
-     * PDF document
-     */
     PDF(1, "pdf"),
-
-    /**
-     * xls
-     */
     XLS(2, "xls"),
-
-    /**
-     * xlsx
-     */
     XLSX(3, "xlsx"),
-
-    /**
-     * doc
-     */
     DOC(4, "doc"),
-
-    /**
-     * docx
-     */
     DOCX(5, "docx"),
-
-    /**
-     * ppt
-     */
     PPT(6, "ppt"),
-
-    /**
-     * pptx
-     */
     PPTX(7, "pptx"),
-
-    /**
-     * markdown
-     */
     MD(8, "markdown"),
-
-    /**
-     * png
-     */
     PNG(9, "png", "png_", "image/png"),
+    JPEG(10, "jpeg"),
+    TEXT(11, "txt", "txt_", "text/plain"),
+    HTML(12, "html"),
+    JPG(13, "jpg");
 
-    /**
-     * jpeg
-     */
-    JPEG(10, "JPEG"),
-
-    TEXT(11,"txt","txt_","text/plain");
-
-
-    private Integer code;
-
-    private String description;
-
-    private String filePrefix;
-
-    private String contentType;
+    private final Integer code;
+    private final String description;
+    private final String filePrefix;
+    private final String contentType;
 
     FileFormatEnum(int code, String description) {
-        this.code = code;
-        this.description = description;
+        this(code, description, null, null);
     }
 
     FileFormatEnum(int code, String description, String filePrefix, String contentType) {
-        this(code, description);
+        this.code = code;
+        this.description = description;
         this.filePrefix = filePrefix;
         this.contentType = contentType;
     }
@@ -94,5 +52,28 @@ public enum FileFormatEnum implements BaseEnum {
 
     public String getContentType() {
         return this.contentType;
+    }
+
+    public static FileFormatEnum getDocType(String suffixName) {
+        if (suffixName == null) {
+            return null;
+        }
+        String lower = suffixName.toLowerCase(java.util.Locale.ROOT);
+        switch (lower) {
+            case ".pdf": return PDF;
+            case ".doc": return DOC;
+            case ".docx": return DOCX;
+            case ".ppt": return PPT;
+            case ".pptx": return PPTX;
+            case ".xls": return XLS;
+            case ".xlsx": return XLSX;
+            case ".md": return MD;
+            case ".html": case ".xhtml": case ".xht": case ".htm": return HTML;
+            case ".txt": return TEXT;
+            case ".jpeg": return JPEG;
+            case ".jpg": return JPG;
+            case ".png": return PNG;
+            default: return null;
+        }
     }
 }

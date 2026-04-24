@@ -18,18 +18,18 @@ public interface FileOperationService {
      * @Description 解析文件并返回内容
      * @Date 15:24 2022/11/5
      * @Param [file]
-     * @return String
+     * @return TextExtractResult
      */
-    String parseToStr(MultipartFile file);
+    TextExtractResult parseToStr(MultipartFile file);
 
     /**
      * @author luojiarui
      * @Description 解析文件并返回内容
      * @Date 15:24 2022/11/5
      * @Param [path]
-     * @return String
+     * @return TextExtractResult
      */
-    String parseToStr(String path);
+    TextExtractResult parseToStr(String path);
 
     /**
      * @author luojiarui

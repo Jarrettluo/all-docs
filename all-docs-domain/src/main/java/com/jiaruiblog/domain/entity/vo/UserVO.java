@@ -1,7 +1,7 @@
 package com.jiaruiblog.domain.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.enums.PermissionEnum;
 import com.jiaruiblog.common.context.TimeZoneContext;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

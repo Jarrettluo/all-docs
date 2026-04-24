@@ -6,7 +6,7 @@ import com.jiaruiblog.application.task.exception.TaskRunException;
 import com.jiaruiblog.application.task.executor.TaskExecutor;
 import com.jiaruiblog.application.task.executor.TaskExecutorFactory;
 import com.jiaruiblog.common.enums.DocStateEnum;
-import com.jiaruiblog.common.enums.DocType;
+import com.jiaruiblog.enums.FileFormatEnum;
 import com.jiaruiblog.domain.entity.FileDocument;
 import com.jiaruiblog.util.SpringApplicationContext;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class MainTask implements RunnableTask, Runnable {
     public MainTask(FileDocument fileDocument) {
         taskData.setFileDocument(fileDocument);
         String fileSuffix = fileDocument.getSuffix();
-        DocType docType = DocType.getDocType(fileSuffix);
+        FileFormatEnum docType = FileFormatEnum.getDocType(fileSuffix);
         taskData.setDocType(docType);
         this.taskExecutor = TaskExecutorFactory.getTaskExecutor(docType);
     }

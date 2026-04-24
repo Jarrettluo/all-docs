@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.task.data;
 
 import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.common.enums.DocType;
+import com.jiaruiblog.enums.FileFormatEnum;
 
 /**
  * @author Jarrett Luo
@@ -14,7 +14,7 @@ public class TaskData {
     private String txtFilePath;
     private String thumbFilePath;
     private String previewFilePath;
-    private DocType docType;
+    private FileFormatEnum docType;
 
     public FileDocument getFileDocument() { return fileDocument; }
     public void setFileDocument(FileDocument fileDocument) { this.fileDocument = fileDocument; }
@@ -24,6 +24,6 @@ public class TaskData {
     public void setThumbFilePath(String thumbFilePath) { this.thumbFilePath = thumbFilePath; }
     public String getPreviewFilePath() { return previewFilePath; }
     public void setPreviewFilePath(String previewFilePath) { this.previewFilePath = previewFilePath; }
-    public DocType getDocType() { return docType; }
-    public void setDocType(DocType docType) { this.docType = docType; }
+    public FileFormatEnum getDocType() { return docType; }
+    public void setDocType(FileFormatEnum docType) { this.docType = docType; }
 }

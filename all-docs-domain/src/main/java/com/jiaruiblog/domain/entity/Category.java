@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * @ClassName Classification
+ * @ClassName Category
  * @Description Category
  * @author luojiarui
  * @Date 2022/6/4 10:28 上午

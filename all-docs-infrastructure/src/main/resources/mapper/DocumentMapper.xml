@@ -34,10 +34,11 @@
 
     <update id="update" parameterType="com.jiaruiblog.domain.entity.FileDocument">
         UPDATE file_document
-        SET text_file_id = #{textFileId},
+        SET name = #{name},
+            description = #{description},
+            text_file_id = #{textFileId},
             thumb_id = #{thumbId},
-            preview_file_id = #{previewFileId},
-            description = #{description}
+            preview_file_id = #{previewFileId}
         WHERE id = #{id}
     </update>
 
@@ -99,6 +100,14 @@
     </delete>
 
     <select id="stats" resultType="com.jiaruiblog.domain.entity.vo.MonthStatVO">
+        SELECT DATE_FORMAT(upload_date, '%Y-%m') as date, COUNT(*) as count
+        FROM file_document
+        WHERE upload_date BETWEEN #{startDate} AND #{endDate}
+        GROUP BY DATE_FORMAT(upload_date, '%Y-%m')
+        ORDER BY date ASC
+    </select>
+
+    <select id="trend" resultType="com.jiaruiblog.domain.entity.vo.MonthStatVO">
         SELECT DATE_FORMAT(upload_date, '%Y-%m-%d') as date, COUNT(*) as count
         FROM file_document
         WHERE upload_date BETWEEN #{startDate} AND #{endDate}

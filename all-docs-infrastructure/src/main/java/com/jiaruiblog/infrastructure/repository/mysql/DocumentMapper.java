@@ -36,4 +36,6 @@ public interface DocumentMapper {
     boolean deleteByIdList(@Param("idList") List<String> idList);
 
     List<MonthStatVO> stats(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    List<MonthStatVO> trend(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }

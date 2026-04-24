@@ -1,6 +1,7 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.LikeService;
+import com.jiaruiblog.application.service.RedisService;
 import com.jiaruiblog.application.task.like.UserLikeDetail;
 import com.jiaruiblog.domain.entity.CollectDocRelationship;
 import com.jiaruiblog.domain.entity.LikeDocRelationship;
@@ -8,7 +9,6 @@ import com.jiaruiblog.application.service.CollectService;
 import com.jiaruiblog.enums.RedisActionEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -27,7 +27,7 @@ public class LikeServiceImpl implements LikeService {
     private CollectService collectService;
 
     @Resource
-    private StringRedisTemplate redisTemplate;
+    private RedisService redisService;
 
     // 对实体进行点赞的类型
     // 0: entityType，1表示点赞；2表示收藏信息
@@ -41,7 +41,7 @@ public class LikeServiceImpl implements LikeService {
         }
         try {
             String entityLikeKey = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT, entityType, entityId);
-            redisTemplate.opsForSet().add(entityLikeKey, userId);
+            redisService.setSet(entityLikeKey, userId);
             log.debug("用户 {} 点赞了类型为 {} 的实体 {}", userId, entityType, entityId);
         } catch (Exception e) {
             log.error("点赞失败: userId={}, entityType={}, entityId={}", userId, entityType, entityId, e);
@@ -55,8 +55,7 @@ public class LikeServiceImpl implements LikeService {
         }
         try {
             String entityLikeKey = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT, entityType, entityId);
-            Long count = redisTemplate.opsForSet().size(entityLikeKey);
-            return count != null ? count : 0L;
+            return redisService.getSetSize(entityLikeKey);
         } catch (Exception e) {
             log.error("查询点赞数量失败: entityType={}, entityId={}", entityType, entityId, e);
             return 0L;
@@ -70,8 +69,7 @@ public class LikeServiceImpl implements LikeService {
         }
         try {
             String entityLikeKey = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT, entityType, entityId);
-            Boolean isMember = redisTemplate.opsForSet().isMember(entityLikeKey, userId);
-            return Boolean.TRUE.equals(isMember) ? 1 : 0;
+            return redisService.isSetMember(entityLikeKey, userId) ? 1 : 0;
         } catch (Exception e) {
             log.error("查询点赞状态失败: userId={}, entityType={}, entityId={}", userId, entityType, entityId, e);
             return 0;
@@ -156,7 +154,7 @@ public class LikeServiceImpl implements LikeService {
             collectService.removeRelateByDocId(docId);
             // 从Redis删除相关点赞数据
             String likeKey = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT, RedisActionEnum.LIKE.getCode(), docId);
-            redisTemplate.delete(likeKey);
+            redisService.deleteKey(likeKey);
             log.info("删除文档关联的点赞关系: docId={}", docId);
         } catch (Exception e) {
             log.error("删除文档点赞关系失败: docId={}", docId, e);
@@ -213,7 +211,7 @@ public class LikeServiceImpl implements LikeService {
                 try {
                     String key = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT,
                             userLikeDetail.getAction().getCode(), userLikeDetail.getEntityId());
-                    redisTemplate.opsForSet().remove(key, userLikeDetail.getUserId());
+                    redisService.deleteSetMember(key, userLikeDetail.getUserId());
                 } catch (Exception e) {
                     log.error("从Redis移除失败数据时发生异常: userId={}, entityId={}",
                             userLikeDetail.getUserId(), userLikeDetail.getEntityId(), e);
@@ -236,7 +234,7 @@ public class LikeServiceImpl implements LikeService {
         List<UserLikeDetail> result = new ArrayList<>();
 
         try {
-            Set<String> setKeys = redisTemplate.keys("like:entity:*");
+            Set<String> setKeys = redisService.keys("like:entity:*");
             if (setKeys == null || setKeys.isEmpty()) {
                 log.debug("Redis中没有找到点赞相关的key");
                 return result;
@@ -245,7 +243,7 @@ public class LikeServiceImpl implements LikeService {
             log.info("从Redis中获取到 {} 个点赞相关的key", setKeys.size());
 
             for (String key : setKeys) {
-                Set<String> members = redisTemplate.opsForSet().members(key);
+                Set<String> members = redisService.getSet(key);
                 if (members == null || members.isEmpty()) {
                     continue;
                 }

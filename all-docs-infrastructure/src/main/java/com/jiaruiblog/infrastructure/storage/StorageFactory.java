@@ -25,16 +25,16 @@ public class StorageFactory {
     }
 
     /**
-     * 根据类型获取存储策略（仅支持 minio）
+     * 根据类型获取存储策略
      *
      * @param type 存储类型：minio
      * @return 存储策略
+     * @throws IllegalArgumentException 如果不支持该存储类型
      */
     public StorageStrategy getStorageStrategy(String type) {
         if ("minio".equalsIgnoreCase(type)) {
             return minioStorageStrategy;
         }
-        // 默认返回 MinIO
-        return minioStorageStrategy;
+        throw new IllegalArgumentException("Unsupported storage type: " + type);
     }
 }

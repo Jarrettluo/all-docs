@@ -2,6 +2,7 @@ package com.jiaruiblog.domain.entity;
 
 import com.jiaruiblog.common.MessageConstant;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,6 +18,7 @@ import java.util.Date;
  * @Version 1.0
  **/
 @Data
+@Table(name = "comment")
 public class Comment {
 
     @Id

@@ -19,12 +19,12 @@ public @interface Permission {
      * 权限数组，来自PermissionEnum
      */
     @AliasFor("value")
-    com.jiaruiblog.common.enums.PermissionEnum[] name() default {};
+    com.jiaruiblog.enums.PermissionEnum[] name() default {};
 
     /**
      * 权限数组，来自PermissionEnum
      */
     @AliasFor("name")
-    com.jiaruiblog.common.enums.PermissionEnum[] value() default {};
+    com.jiaruiblog.enums.PermissionEnum[] value() default {};
 
 }

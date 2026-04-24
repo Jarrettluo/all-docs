@@ -2,6 +2,7 @@ package com.jiaruiblog.domain.entity;
 
 import com.jiaruiblog.common.MessageConstant;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -14,8 +15,8 @@ import java.util.Date;
  * @Date 2022/6/4 10:31 上午
  * @Version 1.0
  **/
-
 @Data
+@Table(name = "tag")
 public class Tag {
 
     @Id

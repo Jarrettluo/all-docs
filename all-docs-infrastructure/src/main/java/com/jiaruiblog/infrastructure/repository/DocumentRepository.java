@@ -41,4 +41,6 @@ public interface DocumentRepository {
     boolean deleteByIdList(List<String> idList);
 
     List<MonthStatVO> stats(Date startDate, Date endDate);
+
+    List<MonthStatVO> trend(Date startDate, Date endDate);
 }

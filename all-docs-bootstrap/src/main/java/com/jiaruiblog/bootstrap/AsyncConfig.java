@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author jiarui.luo
  */
 @Configuration
-@EnableAsync(proxyTargetClass = true)
+@EnableAsync
 public class AsyncConfig {
 
     @Value("${async.core-pool-size:10}")

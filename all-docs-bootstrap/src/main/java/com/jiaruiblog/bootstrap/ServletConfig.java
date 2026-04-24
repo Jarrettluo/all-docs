@@ -1,5 +1,7 @@
 package com.jiaruiblog.bootstrap;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -13,4 +15,16 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class ServletConfig {
+
+    /**
+     * Disables the default Spring character encoding filter registration.
+     * Character encoding is handled by the application-level filter chain.
+     */
+    @Bean
+    public FilterRegistrationBean<org.springframework.web.filter.CharacterEncodingFilter> characterEncodingFilterRegistration() {
+        FilterRegistrationBean<org.springframework.web.filter.CharacterEncodingFilter> registration =
+                new FilterRegistrationBean<>();
+        registration.setEnabled(false);
+        return registration;
+    }
 }

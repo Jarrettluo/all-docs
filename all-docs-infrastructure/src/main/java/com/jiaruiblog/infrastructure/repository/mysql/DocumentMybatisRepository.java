@@ -90,4 +90,9 @@ public class DocumentMybatisRepository implements DocumentRepository {
     public List<MonthStatVO> stats(Date startDate, Date endDate) {
         return documentMapper.stats(startDate, endDate);
     }
+
+    @Override
+    public List<MonthStatVO> trend(Date startDate, Date endDate) {
+        return documentMapper.trend(startDate, endDate);
+    }
 }

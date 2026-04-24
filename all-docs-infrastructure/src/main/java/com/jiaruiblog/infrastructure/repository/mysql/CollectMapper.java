@@ -20,4 +20,6 @@ public interface CollectMapper {
     List<CollectDocRelationship> findAllByDocId(@Param("docId") String docId);
 
     List<CollectDocRelationship> findByUserId(@Param("userId") String userId);
+
+    long count();
 }

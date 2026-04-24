@@ -93,6 +93,18 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
+    public boolean isSetMember(String key, String value) {
+        Boolean isMember = redisSearchTemplate.opsForSet().isMember(key, value);
+        return Boolean.TRUE.equals(isMember);
+    }
+
+    @Override
+    public Set<String> keys(String pattern) {
+        Set<String> keys = redisSearchTemplate.keys(pattern);
+        return keys != null ? keys : Set.of();
+    }
+
+    @Override
     public void setList(String key, String... values) {
         redisSearchTemplate.opsForList().rightPushAll(key, values);
     }

@@ -5,19 +5,24 @@ import com.jiaruiblog.domain.entity.dto.StatisticsDTO;
 import com.jiaruiblog.domain.entity.vo.MonthStatVO;
 import com.jiaruiblog.domain.entity.vo.StatsVO;
 import com.jiaruiblog.domain.entity.vo.TrendVO;
+import com.jiaruiblog.enums.RedisActionEnum;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import com.jiaruiblog.infrastructure.repository.UserRepository;
 import com.jiaruiblog.infrastructure.repository.TagRepository;
 import com.jiaruiblog.infrastructure.repository.CategoryRepository;
 import com.jiaruiblog.infrastructure.repository.CollectRepository;
+import com.jiaruiblog.infrastructure.repository.CommentRepository;
+import com.jiaruiblog.application.service.RedisService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author luojiarui
@@ -40,6 +45,12 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Resource
     private CollectRepository collectRepository;
+
+    @Resource
+    private CommentRepository commentRepository;
+
+    @Resource
+    private RedisService redisService;
 
     @Override
     public long countDocument() {
@@ -83,14 +94,29 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public long countCollect() {
-        // CollectRepository doesn't have count method, return 0 as fallback
-        return 0;
+        try {
+            return collectRepository.count();
+        } catch (Exception e) {
+            log.error("统计收藏数量失败", e);
+            return 0;
+        }
     }
 
     @Override
     public long countLike() {
-        // 点赞数量统计需要通过Redis或其他方式获取
-        return 0;
+        try {
+            // 从 Redis 获取所有点赞 key 的总数
+            String likePattern = MessageFormat.format("like:entity:{0}:*", RedisActionEnum.LIKE.getCode());
+            Set<String> keys = redisService.keys(likePattern);
+            long total = 0;
+            for (String key : keys) {
+                total += redisService.getSetSize(key);
+            }
+            return total;
+        } catch (Exception e) {
+            log.error("统计点赞数量失败", e);
+            return 0;
+        }
     }
 
     @Override
@@ -107,19 +133,29 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<TrendVO> trend() {
-        // 返回最近7天的趋势数据
-        List<TrendVO> trends = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
+        try {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, -6);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            Date startDate = cal.getTime();
+            Date endDate = new Date();
 
-        for (int i = 6; i >= 0; i--) {
-            TrendVO vo = new TrendVO();
-            cal.setTime(new Date());
-            cal.add(Calendar.DAY_OF_YEAR, -i);
-            vo.setId(String.valueOf(cal.getTimeInMillis()));
-            vo.setName("Day " + i);
-            trends.add(vo);
+            List<MonthStatVO> dailyStats = documentRepository.trend(startDate, endDate);
+            List<TrendVO> trends = new ArrayList<>();
+
+            for (MonthStatVO stat : dailyStats) {
+                TrendVO vo = new TrendVO();
+                vo.setId(stat.getDate());
+                vo.setName(stat.getDate() + " (" + stat.getCount() + ")");
+                trends.add(vo);
+            }
+            return trends;
+        } catch (Exception e) {
+            log.error("获取趋势数据失败", e);
+            return List.of();
         }
-        return trends;
     }
 
     @Override
@@ -128,23 +164,22 @@ public class StatisticsServiceImpl implements StatisticsService {
         vo.setDocNum(countDocument());
         vo.setCategoryNum(countCategory());
         vo.setTagNum(countTag());
-        vo.setCommentNum(0L);  // Not directly available
+        vo.setCommentNum(commentRepository.count());
         return vo;
     }
 
     @Override
     public List<MonthStatVO> getMonthStat() {
-        // 返回最近6个月的月度统计
-        List<MonthStatVO> stats = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
-
-        for (int i = 5; i >= 0; i--) {
-            MonthStatVO vo = new MonthStatVO();
-            cal.setTime(new Date());
-            cal.add(Calendar.MONTH, -i);
-            // MonthStatVO only has date and count, not month/year/documentCount
-            stats.add(vo);
+        try {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.MONTH, -5);
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            Date startDate = cal.getTime();
+            Date endDate = new Date();
+            return documentRepository.stats(startDate, endDate);
+        } catch (Exception e) {
+            log.error("获取月度统计失败", e);
+            return List.of();
         }
-        return stats;
     }
 }
