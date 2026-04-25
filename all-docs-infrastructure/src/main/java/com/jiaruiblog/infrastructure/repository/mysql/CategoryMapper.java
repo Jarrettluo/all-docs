@@ -1,6 +1,6 @@
 package com.jiaruiblog.infrastructure.repository.mysql;
 
-import com.jiaruiblog.domain.entity.Category;
+import com.jiaruiblog.domain.entity.po.Category;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

@@ -1,6 +1,6 @@
 package com.jiaruiblog.infrastructure.repository.mysql;
 
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.vo.MonthStatVO;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;

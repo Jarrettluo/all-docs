@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.DocLogMapper">
 
-    <resultMap id="DocLogResultMap" type="com.jiaruiblog.domain.entity.DocLog">
+    <resultMap id="DocLogResultMap" type="com.jiaruiblog.domain.entity.po.DocLog">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="userName" column="user_name"/>
@@ -13,7 +13,7 @@
         <result property="updateDate" column="update_date"/>
     </resultMap>
 
-    <insert id="save" parameterType="com.jiaruiblog.domain.entity.DocLog">
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.DocLog">
         INSERT INTO doc_log (id, user_id, user_name, action, doc_id, doc_name, create_date, update_date)
         VALUES (#{id}, #{userId}, #{userName}, #{action}, #{docId}, #{docName}, #{createDate}, #{updateDate})
     </insert>

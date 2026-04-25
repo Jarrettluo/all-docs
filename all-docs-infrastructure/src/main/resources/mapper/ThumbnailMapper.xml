@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.ThumbnailMapper">
 
-    <resultMap id="ThumbnailResultMap" type="com.jiaruiblog.domain.entity.Thumbnail">
+    <resultMap id="ThumbnailResultMap" type="com.jiaruiblog.domain.entity.po.Thumbnail">
         <id property="id" column="id"/>
         <result property="objectId" column="object_id"/>
         <result property="thumbnailEnum" column="thumbnail_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
@@ -10,7 +10,7 @@
         <result property="thumbSizeEnum" column="thumb_size_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
     </resultMap>
 
-    <insert id="save" parameterType="com.jiaruiblog.domain.entity.Thumbnail">
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.Thumbnail">
         INSERT INTO thumbnail (id, object_id, thumbnail_enum, gridfs_id, thumb_size_enum)
         VALUES (#{id}, #{objectId}, #{thumbnailEnum}, #{gridfsId}, #{thumbSizeEnum})
     </insert>

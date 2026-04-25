@@ -1,7 +1,7 @@
 package com.jiaruiblog.infrastructure.repository.mysql;
 
-import com.jiaruiblog.domain.entity.Tag;
-import com.jiaruiblog.domain.entity.TagDocRelationship;
+import com.jiaruiblog.domain.entity.po.Tag;
+import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.infrastructure.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;

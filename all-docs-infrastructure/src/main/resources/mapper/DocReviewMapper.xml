@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.DocReviewMapper">
 
-    <resultMap id="DocReviewResultMap" type="com.jiaruiblog.domain.entity.DocReview">
+    <resultMap id="DocReviewResultMap" type="com.jiaruiblog.domain.entity.po.DocReview">
         <id property="id" column="id"/>
         <result property="docId" column="doc_id"/>
         <result property="docName" column="doc_name"/>
@@ -17,7 +17,7 @@
         <result property="updateDate" column="update_date"/>
     </resultMap>
 
-    <insert id="save" parameterType="com.jiaruiblog.domain.entity.DocReview">
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.DocReview">
         INSERT INTO doc_review (id, doc_id, doc_name, user_id, user_name, check_state, read_state,
             user_remove, admin_remove, review_log, create_date, update_date)
         VALUES (#{id}, #{docId}, #{docName}, #{userId}, #{userName}, #{checkState}, #{readState},

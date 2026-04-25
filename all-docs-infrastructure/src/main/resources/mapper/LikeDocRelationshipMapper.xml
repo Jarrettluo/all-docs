@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.LikeDocRelationshipMapper">
+
+    <resultMap id="LikeDocRelationshipResultMap" type="com.jiaruiblog.domain.entity.po.LikeDocRelationship">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="entityType" column="entity_type"/>
+        <result property="entityId" column="entity_id"/>
+        <result property="createDate" column="create_date"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.LikeDocRelationship">
+        INSERT INTO like_relationship (id, user_id, entity_type, entity_id, create_date)
+        VALUES (#{id}, #{userId}, #{entityType}, #{entityId}, #{createDate})
+    </insert>
+
+    <select id="findById" resultMap="LikeDocRelationshipResultMap">
+        SELECT * FROM like_relationship WHERE id = #{id}
+    </select>
+
+    <select id="findByUserId" resultMap="LikeDocRelationshipResultMap">
+        SELECT * FROM like_relationship WHERE user_id = #{userId} ORDER BY create_date DESC
+    </select>
+
+    <select id="findByEntityId" resultMap="LikeDocRelationshipResultMap">
+        SELECT * FROM like_relationship WHERE entity_id = #{entityId} ORDER BY create_date DESC
+    </select>
+
+    <select id="findByEntityType" resultMap="LikeDocRelationshipResultMap">
+        SELECT * FROM like_relationship WHERE entity_type = #{entityType} ORDER BY create_date DESC
+    </select>
+
+    <select id="findByUserIdAndEntityType" resultMap="LikeDocRelationshipResultMap">
+        SELECT * FROM like_relationship WHERE user_id = #{userId} AND entity_type = #{entityType}
+        ORDER BY create_date DESC
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM like_relationship
+    </select>
+
+    <select id="countByEntityId" resultType="long">
+        SELECT COUNT(*) FROM like_relationship WHERE entity_id = #{entityId}
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM like_relationship WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByUserId">
+        DELETE FROM like_relationship WHERE user_id = #{userId}
+    </delete>
+
+    <delete id="deleteByEntityId">
+        DELETE FROM like_relationship WHERE entity_id = #{entityId}
+    </delete>
+
+    <select id="exists" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM like_relationship
+        WHERE user_id = #{userId} AND entity_type = #{entityType} AND entity_id = #{entityId}
+    </select>
+
+</mapper>

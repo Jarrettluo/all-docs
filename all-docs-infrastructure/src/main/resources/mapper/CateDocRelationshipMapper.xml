@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.CateDocRelationshipMapper">
+
+    <resultMap id="CateDocRelationshipResultMap" type="com.jiaruiblog.domain.entity.po.CateDocRelationship">
+        <id property="id" column="id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="fileId" column="file_id"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.CateDocRelationship">
+        INSERT INTO cate_doc_relationship (id, category_id, file_id, create_date, update_date)
+        VALUES (#{id}, #{categoryId}, #{fileId}, #{createDate}, #{updateDate})
+    </insert>
+
+    <delete id="delete" parameterType="com.jiaruiblog.domain.entity.po.CateDocRelationship">
+        DELETE FROM cate_doc_relationship WHERE category_id = #{categoryId} AND file_id = #{fileId}
+    </delete>
+
+    <delete id="deleteById">
+        DELETE FROM cate_doc_relationship WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByCategoryId">
+        DELETE FROM cate_doc_relationship WHERE category_id = #{categoryId}
+    </delete>
+
+    <delete id="deleteByFileId">
+        DELETE FROM cate_doc_relationship WHERE file_id = #{fileId}
+    </delete>
+
+    <delete id="deleteByIds">
+        DELETE FROM cate_doc_relationship WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="findAll" resultMap="CateDocRelationshipResultMap">
+        SELECT * FROM cate_doc_relationship
+    </select>
+
+    <select id="findByCategoryId" resultMap="CateDocRelationshipResultMap">
+        SELECT * FROM cate_doc_relationship WHERE category_id = #{categoryId}
+    </select>
+
+    <select id="findByFileId" resultMap="CateDocRelationshipResultMap">
+        SELECT * FROM cate_doc_relationship WHERE file_id = #{fileId}
+    </select>
+
+    <select id="findByCategoryIdAndFileId" resultMap="CateDocRelationshipResultMap">
+        SELECT * FROM cate_doc_relationship WHERE category_id = #{categoryId} AND file_id = #{fileId}
+    </select>
+
+    <select id="findByCategoryIds" resultMap="CateDocRelationshipResultMap">
+        SELECT * FROM cate_doc_relationship WHERE category_id IN
+        <foreach collection="categoryIds" item="categoryId" open="(" separator="," close=")">
+            #{categoryId}
+        </foreach>
+    </select>
+
+    <select id="findByFileIds" resultMap="CateDocRelationshipResultMap">
+        SELECT * FROM cate_doc_relationship WHERE file_id IN
+        <foreach collection="fileIds" item="fileId" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM cate_doc_relationship
+    </select>
+
+    <select id="countByCategoryId" resultType="long">
+        SELECT COUNT(*) FROM cate_doc_relationship WHERE category_id = #{categoryId}
+    </select>
+
+    <select id="countByFileId" resultType="long">
+        SELECT COUNT(*) FROM cate_doc_relationship WHERE file_id = #{fileId}
+    </select>
+
+    <select id="exists" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM cate_doc_relationship WHERE category_id = #{categoryId} AND file_id = #{fileId}
+    </select>
+
+    <select id="findFileIdsByCategoryId" resultType="string">
+        SELECT file_id FROM cate_doc_relationship WHERE category_id = #{categoryId}
+    </select>
+
+    <select id="findFileIdsByCategoryIds" resultType="string">
+        SELECT file_id FROM cate_doc_relationship WHERE category_id IN
+        <foreach collection="categoryIds" item="categoryId" open="(" separator="," close=")">
+            #{categoryId}
+        </foreach>
+    </select>
+
+    <select id="findCategoryIdsByFileId" resultType="string">
+        SELECT category_id FROM cate_doc_relationship WHERE file_id = #{fileId}
+    </select>
+
+</mapper>

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.DocumentMapper">
 
-    <resultMap id="FileDocumentResultMap" type="com.jiaruiblog.domain.entity.FileDocument">
+    <resultMap id="FileDocumentResultMap" type="com.jiaruiblog.domain.entity.po.FileDocument">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="size" column="size"/>
@@ -21,24 +21,27 @@
         <result property="reviewing" column="reviewing"/>
         <result property="userId" column="user_id"/>
         <result property="userName" column="user_name"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
     </resultMap>
 
-    <insert id="save" parameterType="com.jiaruiblog.domain.entity.FileDocument">
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.FileDocument">
         INSERT INTO file_document (id, name, size, upload_date, md5, content, content_type, suffix,
             description, gridfs_id, thumb_id, text_file_id, preview_file_id, doc_state,
-            error_msg, reviewing, user_id, user_name)
+            error_msg, reviewing, user_id, user_name, create_date, update_date)
         VALUES (#{id}, #{name}, #{size}, #{uploadDate}, #{md5}, #{content}, #{contentType},
             #{suffix}, #{description}, #{gridfsId}, #{thumbId}, #{textFileId}, #{previewFileId},
-            #{docState}, #{errorMsg}, #{reviewing}, #{userId}, #{userName})
+            #{docState}, #{errorMsg}, #{reviewing}, #{userId}, #{userName}, #{createDate}, #{updateDate})
     </insert>
 
-    <update id="update" parameterType="com.jiaruiblog.domain.entity.FileDocument">
+    <update id="update" parameterType="com.jiaruiblog.domain.entity.po.FileDocument">
         UPDATE file_document
         SET name = #{name},
             description = #{description},
             text_file_id = #{textFileId},
             thumb_id = #{thumbId},
-            preview_file_id = #{previewFileId}
+            preview_file_id = #{previewFileId},
+            update_date = NOW()
         WHERE id = #{id}
     </update>
 

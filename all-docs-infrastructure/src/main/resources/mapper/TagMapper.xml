@@ -2,14 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.TagMapper">
 
-    <resultMap id="TagResultMap" type="com.jiaruiblog.domain.entity.Tag">
+    <resultMap id="TagResultMap" type="com.jiaruiblog.domain.entity.po.Tag">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="createDate" column="create_date"/>
         <result property="updateDate" column="update_date"/>
     </resultMap>
 
-    <insert id="save" parameterType="com.jiaruiblog.domain.entity.Tag">
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.Tag">
         INSERT INTO tag (id, name, create_date, update_date)
         VALUES (#{id}, #{name}, #{createDate}, #{updateDate})
     </insert>
@@ -44,7 +44,7 @@
         SELECT * FROM tag ORDER BY create_date DESC
     </select>
 
-    <delete id="delete" parameterType="com.jiaruiblog.domain.entity.Tag">
+    <delete id="delete" parameterType="com.jiaruiblog.domain.entity.po.Tag">
         DELETE FROM tag WHERE id = #{id}
     </delete>
 

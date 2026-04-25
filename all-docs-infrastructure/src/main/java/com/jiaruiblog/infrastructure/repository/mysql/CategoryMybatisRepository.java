@@ -1,6 +1,7 @@
 package com.jiaruiblog.infrastructure.repository.mysql;
 
-import com.jiaruiblog.domain.entity.Category;
+import com.jiaruiblog.domain.entity.po.CateDocRelationship;
+import com.jiaruiblog.domain.entity.po.Category;
 import com.jiaruiblog.infrastructure.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -24,7 +25,7 @@ public class CategoryMybatisRepository implements CategoryRepository {
     }
 
     @Override
-    public void saveRelationship(com.jiaruiblog.domain.entity.CateDocRelationship relationship) {
+    public void saveRelationship(CateDocRelationship relationship) {
         // Relationship is handled via CateDocRelationshipMapper
     }
 
@@ -34,7 +35,7 @@ public class CategoryMybatisRepository implements CategoryRepository {
     }
 
     @Override
-    public void deleteRelationship(com.jiaruiblog.domain.entity.CateDocRelationship relationship) {
+    public void deleteRelationship(CateDocRelationship relationship) {
         // Implemented via CateDocRelationshipMapper
     }
 
@@ -59,18 +60,18 @@ public class CategoryMybatisRepository implements CategoryRepository {
     }
 
     @Override
-    public List<com.jiaruiblog.domain.entity.CateDocRelationship> findRelationshipsByCategoryId(String categoryId, Sort sort) {
+    public List<CateDocRelationship> findRelationshipsByCategoryId(String categoryId, Sort sort) {
         // Implemented via CateDocRelationshipMapper
         return null;
     }
 
     @Override
-    public List<com.jiaruiblog.domain.entity.CateDocRelationship> findRelationshipsByDocId(String docId) {
+    public List<CateDocRelationship> findRelationshipsByDocId(String docId) {
         return null;
     }
 
     @Override
-    public List<com.jiaruiblog.domain.entity.CateDocRelationship> findRelationshipsByCategoryAndDoc(String categoryId, String docId) {
+    public List<CateDocRelationship> findRelationshipsByCategoryAndDoc(String categoryId, String docId) {
         return null;
     }
 
@@ -80,12 +81,12 @@ public class CategoryMybatisRepository implements CategoryRepository {
     }
 
     @Override
-    public List<com.jiaruiblog.domain.entity.CateDocRelationship> findByDocIdIn(List<String> docIds) {
+    public List<CateDocRelationship> findByDocIdIn(List<String> docIds) {
         return null;
     }
 
     @Override
-    public List<com.jiaruiblog.domain.entity.CateDocRelationship> findByCategoryIdAndDocIdIn(String categoryId, List<String> docIds) {
+    public List<CateDocRelationship> findByCategoryIdAndDocIdIn(String categoryId, List<String> docIds) {
         return null;
     }
 }

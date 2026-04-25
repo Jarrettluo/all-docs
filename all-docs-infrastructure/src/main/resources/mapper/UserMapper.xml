@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.UserMapper">
 
-    <resultMap id="UserResultMap" type="com.jiaruiblog.domain.entity.User">
+    <resultMap id="UserResultMap" type="com.jiaruiblog.domain.entity.po.User">
         <id property="id" column="id"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
@@ -29,7 +29,7 @@
         SELECT * FROM user WHERE username = #{username}
     </select>
 
-    <insert id="insert" parameterType="com.jiaruiblog.domain.entity.User">
+    <insert id="insert" parameterType="com.jiaruiblog.domain.entity.po.User">
         INSERT INTO user (id, username, password, phone, mail, male, description, avatar_list, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
@@ -37,7 +37,7 @@
             #{lastLogin}, #{createDate}, #{updateDate})
     </insert>
 
-    <update id="update" parameterType="com.jiaruiblog.domain.entity.User">
+    <update id="update" parameterType="com.jiaruiblog.domain.entity.po.User">
         UPDATE user
         SET username = #{username},
             password = #{password},
@@ -67,7 +67,7 @@
         DELETE FROM user WHERE id = #{id}
     </delete>
 
-    <insert id="save" parameterType="com.jiaruiblog.domain.entity.User">
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.User">
         INSERT INTO user (id, username, password, phone, mail, male, description, avatar_list, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},

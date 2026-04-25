@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.TagDocRelationshipMapper">
+
+    <resultMap id="TagDocRelationshipResultMap" type="com.jiaruiblog.domain.entity.po.TagDocRelationship">
+        <id property="id" column="id"/>
+        <result property="tagId" column="tag_id"/>
+        <result property="fileId" column="file_id"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.TagDocRelationship">
+        INSERT INTO tag_doc_relationship (id, tag_id, file_id, create_date, update_date)
+        VALUES (#{id}, #{tagId}, #{fileId}, #{createDate}, #{updateDate})
+    </insert>
+
+    <insert id="saveAll">
+        INSERT INTO tag_doc_relationship (id, tag_id, file_id, create_date, update_date)
+        VALUES
+        <foreach collection="relationships" item="item" separator=",">
+            (#{item.id}, #{item.tagId}, #{item.fileId}, #{item.createDate}, #{item.updateDate})
+        </foreach>
+    </insert>
+
+    <delete id="delete" parameterType="com.jiaruiblog.domain.entity.po.TagDocRelationship">
+        DELETE FROM tag_doc_relationship WHERE tag_id = #{tagId} AND file_id = #{fileId}
+    </delete>
+
+    <delete id="deleteById">
+        DELETE FROM tag_doc_relationship WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByTagId">
+        DELETE FROM tag_doc_relationship WHERE tag_id = #{tagId}
+    </delete>
+
+    <delete id="deleteByFileId">
+        DELETE FROM tag_doc_relationship WHERE file_id = #{fileId}
+    </delete>
+
+    <delete id="deleteByIds">
+        DELETE FROM tag_doc_relationship WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="findAll" resultMap="TagDocRelationshipResultMap">
+        SELECT * FROM tag_doc_relationship
+    </select>
+
+    <select id="findByTagId" resultMap="TagDocRelationshipResultMap">
+        SELECT * FROM tag_doc_relationship WHERE tag_id = #{tagId}
+    </select>
+
+    <select id="findByFileId" resultMap="TagDocRelationshipResultMap">
+        SELECT * FROM tag_doc_relationship WHERE file_id = #{fileId}
+    </select>
+
+    <select id="findByTagIdAndFileId" resultMap="TagDocRelationshipResultMap">
+        SELECT * FROM tag_doc_relationship WHERE tag_id = #{tagId} AND file_id = #{fileId}
+    </select>
+
+    <select id="findByTagIds" resultMap="TagDocRelationshipResultMap">
+        SELECT * FROM tag_doc_relationship WHERE tag_id IN
+        <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
+            #{tagId}
+        </foreach>
+    </select>
+
+    <select id="findByFileIds" resultMap="TagDocRelationshipResultMap">
+        SELECT * FROM tag_doc_relationship WHERE file_id IN
+        <foreach collection="fileIds" item="fileId" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM tag_doc_relationship
+    </select>
+
+    <select id="countByTagId" resultType="long">
+        SELECT COUNT(*) FROM tag_doc_relationship WHERE tag_id = #{tagId}
+    </select>
+
+    <select id="exists" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM tag_doc_relationship WHERE tag_id = #{tagId} AND file_id = #{fileId}
+    </select>
+
+    <select id="findFileIdsByTagId" resultType="string">
+        SELECT file_id FROM tag_doc_relationship WHERE tag_id = #{tagId}
+    </select>
+
+    <select id="findFileIdsByTagIds" resultType="string">
+        SELECT file_id FROM tag_doc_relationship WHERE tag_id IN
+        <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
+            #{tagId}
+        </foreach>
+    </select>
+
+</mapper>

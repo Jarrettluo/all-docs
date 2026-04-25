@@ -54,6 +54,7 @@ target/
 
 ### system ignore ###
 .DS_Store
+.worktrees/
 Thumbs.db
 Servers
 .metadata

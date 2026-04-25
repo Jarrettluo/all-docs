@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jiaruiblog.infrastructure.repository.mysql.CommentMapper">
 
-    <resultMap id="CommentResultMap" type="com.jiaruiblog.domain.entity.Comment">
+    <resultMap id="CommentResultMap" type="com.jiaruiblog.domain.entity.po.Comment">
         <id property="id" column="id"/>
         <result property="createUser" column="create_user"/>
         <result property="userId" column="user_id"/>
@@ -13,7 +13,7 @@
         <result property="updateDate" column="update_date"/>
     </resultMap>
 
-    <insert id="save" parameterType="com.jiaruiblog.domain.entity.Comment">
+    <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.Comment">
         INSERT INTO comment (id, create_user, user_id, user_name, content, doc_id, create_date, update_date)
         VALUES (#{id}, #{createUser}, #{userId}, #{userName}, #{content}, #{docId}, #{createDate}, #{updateDate})
     </insert>
