@@ -6,11 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @ClassName QuartzConfig
- * @Description 定时任务 Quartz
+ * 定时任务 Quartz
  * @author luojiarui
- * @Date 2023/4/3 22:07
- * @Version 1.0
  **/
 @Configuration
 public class QuartzConfig {

@@ -1,7 +1,7 @@
 package com.jiaruiblog.api.auth;
 
 import com.auth0.jwt.interfaces.Claim;
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.domain.entity.User;
 import com.jiaruiblog.application.service.IUserService;
 import com.jiaruiblog.api.util.JwtUtil;

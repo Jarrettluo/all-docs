@@ -1,6 +1,11 @@
 package com.jiaruiblog.api.controller;
 
+import com.jiaruiblog.application.service.*;
+import com.jiaruiblog.application.service.impl.DocumentServiceImpl;
+import com.jiaruiblog.application.service.impl.RedisServiceImpl;
 import com.jiaruiblog.common.ApiResult;
+import com.jiaruiblog.common.exception.BusinessException;
+import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.domain.entity.FileDocument;
 import com.jiaruiblog.domain.entity.Tag;
 import com.jiaruiblog.domain.entity.TagDocRelationship;
@@ -8,11 +13,6 @@ import com.jiaruiblog.domain.entity.dto.SearchKeyDTO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.StatsVO;
 import com.jiaruiblog.domain.entity.vo.TrendVO;
-import com.jiaruiblog.common.exception.BusinessException;
-import com.jiaruiblog.common.exception.ErrorCode;
-import com.jiaruiblog.application.service.*;
-import com.jiaruiblog.application.service.impl.DocumentServiceImpl;
-import com.jiaruiblog.application.service.impl.RedisServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,9 +29,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * @author luojiarui
  * @ClassName StatisticsController
  * @Description 统计模块
- * @author luojiarui
  * @Date 2022/6/26 2:24 下午
  * @Version 1.0
  **/
@@ -75,9 +74,7 @@ public class StatisticsController {
     /**
      * @return com.jiaruiblog.utils.ApiResult
      * @author luojiarui
-     * @Description 查询推荐的搜索记录
-     * @Date 15:46 2022/9/11
-     * @Param []
+     * 查询推荐的搜索记录
      **/
     @Operation(summary = "查询搜索结果", description = "查询列表")
     @GetMapping("getSearchResult")
@@ -117,9 +114,6 @@ public class StatisticsController {
      *
      * @return com.jiaruiblog.utils.ApiResult
      * @author luojiarui
-     * @Description 查看热榜
-     * @Date 15:51 2022/9/11
-     * @Param []
      **/
     @Operation(summary = "查询十条热门榜单", description = "查询列表")
     @GetMapping("getHotTrend")
@@ -158,7 +152,7 @@ public class StatisticsController {
         List<Object> others = new ArrayList<>();
         int count = 10;
         for (FileDocument fileDocument : fileDocumentList) {
-            Map<String, Object> otherInfo =new HashMap<>();
+            Map<String, Object> otherInfo = new HashMap<>();
             otherInfo.put("hit", count);
             otherInfo.put("name", fileDocument.getName());
             otherInfo.put("id", fileDocument.getId());
@@ -177,10 +171,8 @@ public class StatisticsController {
     /**
      * @return com.jiaruiblog.utils.ApiResult
      * @author luojiarui
-     * @Description 获取首页最近的数据
+     * 获取首页最近的数据
      * 展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档；
-     * @Date 21:58 2022/9/17
-     * @Param []
      **/
     @Operation(summary = "查询最新数据", description = "查询列表展示1、最近新提交的12篇文章；2、获取最近新连接关系的文档")
     @GetMapping("/recentDocs")
@@ -208,9 +200,7 @@ public class StatisticsController {
     /**
      * @return java.util.List<java.util.Map < java.lang.String, java.lang.Object>>
      * @author luojiarui
-     * @Description 文档列表转向为map
-     * @Date 22:47 2022/9/17
-     * @Param [fileDocuments]
+     * 文档列表转向为map
      **/
     private List<Map<String, Object>> doc2Map(List<FileDocument> fileDocuments) {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -231,9 +221,7 @@ public class StatisticsController {
     /**
      * @return java.util.Map<java.lang.String, java.lang.Object>
      * @author luojiarui
-     * @Description 生成返回的数据
-     * @Date 23:07 2022/9/17
-     * @Param [name, tagId, docList]
+     * 生成返回的数据
      **/
     private Map<String, Object> getTagMap(String name, String tagId, Object docList) {
         Map<String, Object> tagMap = new HashMap<>();
@@ -247,12 +235,12 @@ public class StatisticsController {
     }
 
     @GetMapping("monthStat")
-    private ApiResult<Object> getMonthStat() {
+    public ApiResult<Object> getMonthStat() {
         return ApiResult.success(statisticsService.getMonthStat());
     }
 
     @GetMapping("")
-    private ApiResult<Object> getWordStat() throws IOException {
+    public ApiResult<Object> getWordStat() {
         return ApiResult.success(elasticService.getWordStat());
     }
 }

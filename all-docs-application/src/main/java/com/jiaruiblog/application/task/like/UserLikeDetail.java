@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.task.like;
 
-import com.jiaruiblog.enums.RedisActionEnum;
+import com.jiaruiblog.common.enums.RedisActionEnum;
 import lombok.Data;
 
 /**

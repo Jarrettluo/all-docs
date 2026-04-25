@@ -12,7 +12,7 @@ import com.jiaruiblog.domain.entity.dto.QueryDocByTagCateDTO;
 import com.jiaruiblog.domain.entity.dto.RelationDTO;
 import com.jiaruiblog.domain.entity.vo.CateOrTagVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.enums.FilterTypeEnum;
+import com.jiaruiblog.common.enums.FilterTypeEnum;
 import com.jiaruiblog.common.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.application.service.CategoryService;

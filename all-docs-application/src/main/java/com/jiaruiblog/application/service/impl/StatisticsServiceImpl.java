@@ -5,7 +5,7 @@ import com.jiaruiblog.domain.entity.dto.StatisticsDTO;
 import com.jiaruiblog.domain.entity.vo.MonthStatVO;
 import com.jiaruiblog.domain.entity.vo.StatsVO;
 import com.jiaruiblog.domain.entity.vo.TrendVO;
-import com.jiaruiblog.enums.RedisActionEnum;
+import com.jiaruiblog.common.enums.RedisActionEnum;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import com.jiaruiblog.infrastructure.repository.UserRepository;
 import com.jiaruiblog.infrastructure.repository.TagRepository;

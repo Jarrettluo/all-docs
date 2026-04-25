@@ -1,4 +1,4 @@
-package com.jiaruiblog.util;
+package com.jiaruiblog.common.util;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;

@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.task.executor;
 
-import com.jiaruiblog.enums.FileFormatEnum;
+import com.jiaruiblog.common.enums.FileFormatEnum;
 
 /**
  * @author Jarrett Luo

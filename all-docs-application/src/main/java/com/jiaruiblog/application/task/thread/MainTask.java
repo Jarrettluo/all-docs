@@ -6,9 +6,9 @@ import com.jiaruiblog.application.task.exception.TaskRunException;
 import com.jiaruiblog.application.task.executor.TaskExecutor;
 import com.jiaruiblog.application.task.executor.TaskExecutorFactory;
 import com.jiaruiblog.common.enums.DocStateEnum;
-import com.jiaruiblog.enums.FileFormatEnum;
+import com.jiaruiblog.common.enums.FileFormatEnum;
 import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.util.SpringApplicationContext;
+import com.jiaruiblog.common.util.SpringApplicationContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -112,7 +112,7 @@ public class MainTask implements RunnableTask, Runnable {
             FileDocument fileDocument = taskData.getFileDocument();
             if (fileDocument != null && fileDocument.getMd5() != null) {
                 com.jiaruiblog.application.service.ElasticService elasticService =
-                    com.jiaruiblog.util.SpringApplicationContext.getBean(com.jiaruiblog.application.service.ElasticService.class);
+                    SpringApplicationContext.getBean(com.jiaruiblog.application.service.ElasticService.class);
                 if (elasticService != null) {
                     elasticService.deleteById(fileDocument.getMd5());
                     log.info("ES document deleted: md5={}", fileDocument.getMd5());

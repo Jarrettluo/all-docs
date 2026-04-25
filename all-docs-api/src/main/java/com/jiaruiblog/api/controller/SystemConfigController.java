@@ -2,7 +2,7 @@ package com.jiaruiblog.api.controller;
 
 import cn.hutool.core.io.IoUtil;
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.infrastructure.config.SystemConfig;
 import com.jiaruiblog.common.exception.BusinessException;
@@ -58,10 +58,6 @@ public class SystemConfigController {
 
     @Permission({PermissionEnum.ADMIN})
     @Operation(summary = "管理员修改系统设置", description = "只有管理员有权限修改系统的设置信息")
-    @ApiResponse(responseCode = "200", description = "操作成功",
-            content = @Content(schema = @Schema(implementation = ApiResult.class)))
-    @ApiResponse(responseCode = "400", description = "参数错误",
-            content = @Content(schema = @Schema(implementation = ApiResult.class)))
     @PutMapping("updateConfig")
     public ApiResult<SystemConfig> systemConfig(
             @Parameter(description = "系统配置参数", required = true,
@@ -102,12 +98,6 @@ public class SystemConfigController {
     }
 
     @Operation(summary = "管理员更新违禁词", description = "上传新的违禁词列表文件")
-    @ApiResponse(responseCode = "200", description = "更新成功",
-            content = @Content(schema = @Schema(implementation = ApiResult.class)))
-    @ApiResponse(responseCode = "400", description = "参数错误",
-            content = @Content(schema = @Schema(implementation = ApiResult.class)))
-    @ApiResponse(responseCode = "500", description = "服务器内部错误",
-            content = @Content(schema = @Schema(implementation = ApiResult.class)))
     @PostMapping(value = "updateProhibitedWord")
     public ApiResult<Object> updateProhibitedWord(
             @Parameter(description = "违禁词文件", required = true,

@@ -21,13 +21,10 @@ public class InitCommandLineRunner implements CommandLineRunner {
 
     /**
      * @author luojiarui
-     * @Description 系统启动时，执行初始化操作
-     * @Date 22:39 2023/2/20
-     * @Param [args]
-     * @return void
+     *  系统启动时，执行初始化操作
      **/
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         userService.initFirstUser();
     }
 }

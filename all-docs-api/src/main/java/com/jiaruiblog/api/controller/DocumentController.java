@@ -1,7 +1,7 @@
 package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.domain.entity.FileDocument;
 import com.jiaruiblog.domain.entity.User;
@@ -10,7 +10,7 @@ import com.jiaruiblog.domain.entity.dto.RemoveObjectDTO;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.enums.FilterTypeEnum;
+import com.jiaruiblog.common.enums.FilterTypeEnum;
 import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.api.intercepter.SensitiveFilter;
@@ -31,11 +31,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @ClassName DocumentController
- * @Description 文档查询删除控制器
+ * 文档查询删除控制器
  * @author luojiarui
- * @Date 2022/6/19 5:18 下午
- * @Version 1.0
  **/
 @Schema(description = "文档模块")
 @RestController
@@ -67,8 +64,6 @@ public class DocumentController {
             int n = filter.checkSensitiveWord(filterWord, 0, 1);
             //存在非法字符
             if (n > 0) {
-                // todo 非法字符的计算可能不准确：
-                // NullPointer， Null， java， on
                 log.error("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
             } else {
                 redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
@@ -80,37 +75,11 @@ public class DocumentController {
         return ApiResult.success(documentService.list(documentDTO));
     }
 
-    @Operation(summary = "2.1 查询文档的分页列表页", description = "根据参数查询文档列表，限制了分类和标签")
-    @PostMapping(value = "/listNew")
-    public ApiResult<Object> listNew(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
-            throws IOException {
-        String userId = documentDTO.getUserId();
-        if (StringUtils.hasText(documentDTO.getFilterWord()) &&
-                documentDTO.getType() == FilterTypeEnum.FILTER) {
-            String filterWord = documentDTO.getFilterWord();
-            //非法敏感词汇判断
-            SensitiveFilter filter = SensitiveFilter.getInstance();
-            int n = filter.checkSensitiveWord(filterWord, 0, 1);
-            //存在非法字符
-            if (n > 0) {
-                // todo 非法字符的计算可能不准确：
-                // NullPointer， Null， java， on
-                log.error("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
-            } else {
-                redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
-                if (StringUtils.hasText(userId)) {
-                    redisService.addSearchHistoryByUserId(userId, filterWord);
-                }
-            }
-        }
-        return ApiResult.success(documentService.listNew(documentDTO));
-    }
-
     @Operation(summary = "2.2 查询文档的详细信息", description = "查询文档的详细信息")
     @GetMapping(value = "/detail")
     public ApiResult<Object> detail(
             @RequestParam(value = "docId")
-            @Schema(description = "文档ID", required = true) String id) {
+            @Schema(description = "文档ID") String id) {
         return ApiResult.success(documentService.detail(id));
     }
 
@@ -118,7 +87,7 @@ public class DocumentController {
     @DeleteMapping(value = "/auth/remove")
     @Permission(value = PermissionEnum.ADMIN)
     public ApiResult<Object> remove(
-            @RequestBody @Schema(description = "文档删除DTO", required = true) RemoveObjectDTO removeObjectDTO,
+            @RequestBody @Schema(description = "文档删除DTO") RemoveObjectDTO removeObjectDTO,
             HttpServletRequest request) {
         FileDocument fileDocument = documentService.queryById(removeObjectDTO.getId());
         if (fileDocument == null) {

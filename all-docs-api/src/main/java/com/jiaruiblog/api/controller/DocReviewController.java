@@ -1,7 +1,7 @@
 package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.domain.entity.DocReview;
 import com.jiaruiblog.domain.entity.FileDocument;

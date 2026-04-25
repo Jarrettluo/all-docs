@@ -1,4 +1,4 @@
-package com.jiaruiblog.util;
+package com.jiaruiblog.common.util;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

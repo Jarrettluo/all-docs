@@ -1,8 +1,10 @@
 package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.application.service.ICommentService;
 import com.jiaruiblog.common.ApiResult;
+import com.jiaruiblog.common.exception.BusinessException;
+import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.domain.entity.Comment;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.BatchIdDTO;
@@ -10,17 +12,8 @@ import com.jiaruiblog.domain.entity.dto.CommentDTO;
 import com.jiaruiblog.domain.entity.dto.CommentListDTO;
 import com.jiaruiblog.domain.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.common.exception.BusinessException;
-import com.jiaruiblog.common.exception.ErrorCode;
-import com.jiaruiblog.application.service.ICommentService;
+import com.jiaruiblog.common.enums.PermissionEnum;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,10 +41,6 @@ public class CommentController {
     ICommentService commentService;
 
     @Operation(summary = "新增单个评论", description = "添加新的评论")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "评论添加成功"),
-            @ApiResponse(responseCode = "400", description = "参数错误")
-    })
     @PostMapping(value = "/auth/insert")
     public ApiResult<Void> insert(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
         commentService.insert(getComment(commentDTO, request));
@@ -59,10 +48,6 @@ public class CommentController {
     }
 
     @Operation(summary = "更新评论", description = "修改现有评论内容")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "评论更新成功"),
-            @ApiResponse(responseCode = "400", description = "参数错误")
-    })
     @PostMapping(value = "/auth/update")
     public ApiResult<Void> update(@RequestBody CommentDTO commentDTO, HttpServletRequest request) {
         commentService.update(getComment(commentDTO, request));
@@ -70,10 +55,6 @@ public class CommentController {
     }
 
     @Operation(summary = "删除评论", description = "根据ID删除单个评论")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "评论删除成功"),
-            @ApiResponse(responseCode = "400", description = "参数错误")
-    })
     @DeleteMapping(value = "/auth/remove")
     public ApiResult<Void> remove(@RequestBody Comment comment, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
@@ -86,11 +67,6 @@ public class CommentController {
 
     @Permission(value = PermissionEnum.ADMIN)
     @Operation(summary = "批量删除评论", description = "管理员批量删除评论")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "批量删除成功"),
-            @ApiResponse(responseCode = "400", description = "参数错误"),
-            @ApiResponse(responseCode = "403", description = "权限不足")
-    })
     @DeleteMapping(value = "/auth/removeBatch")
     public ApiResult<Void> removeBatch(@RequestBody BatchIdDTO batchIdDTO) {
         List<String> commentIdList = batchIdDTO.getIds();
@@ -102,15 +78,6 @@ public class CommentController {
     }
 
     @Operation(summary = "查询文档评论", description = "根据文档ID获取相关评论")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "请求成功",
-                content = @Content(schema = @Schema(implementation = ApiResult.class))),
-            @ApiResponse(responseCode = "400", description = "参数错误")
-    })
-    @Parameters({
-            @Parameter(name = "comment", description = "评论查询参数", required = true,
-                    content = @Content(schema = @Schema(implementation = CommentListDTO.class)))
-    })
     @PostMapping(value = "/list")
     public ApiResult<Map<String, Object>> queryById(@RequestBody CommentListDTO comment) {
         Map<String, Object> result = commentService.queryById(comment);
@@ -132,17 +99,6 @@ public class CommentController {
     }
 
     @Operation(summary = "查询用户评论", description = "查询当前用户的评论列表")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "请求成功",
-                    content = @Content(schema = @Schema(implementation = ApiResult.class))),
-            @ApiResponse(responseCode = "400", description = "参数错误"),
-            @ApiResponse(responseCode = "401", description = "未授权")
-    })
-    @Parameters({
-            @Parameter(name = "pageDTO", description = "分页参数", required = true,
-                    content = @Content(schema = @Schema(implementation = BasePageDTO.class))),
-            @Parameter(name = "request", in = ParameterIn.HEADER, hidden = true)
-    })
     @PostMapping(value = "/auth/myComments")
     public ApiResult<PageVO<CommentWithUserVO>> queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
@@ -151,16 +107,6 @@ public class CommentController {
     }
 
     @Operation(summary = "查询所有评论", description = "管理员查询所有用户的评论列表")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "请求成功",
-                    content = @Content(schema = @Schema(implementation = ApiResult.class))),
-            @ApiResponse(responseCode = "400", description = "参数错误"),
-            @ApiResponse(responseCode = "403", description = "权限不足")
-    })
-    @Parameters({
-            @Parameter(name = "pageDTO", description = "分页参数", required = true,
-                    content = @Content(schema = @Schema(implementation = BasePageDTO.class)))
-    })
     @Permission(PermissionEnum.ADMIN)
     @PostMapping(value = "/auth/allComments")
     public ApiResult<PageVO<CommentWithUserVO>> queryAllComments(@RequestBody BasePageDTO pageDTO) {

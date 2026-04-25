@@ -1,7 +1,7 @@
 package com.jiaruiblog.domain.entity.dto;
 
 import com.jiaruiblog.common.MessageConstant;
-import com.jiaruiblog.enums.FilterTypeEnum;
+import com.jiaruiblog.common.enums.FilterTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

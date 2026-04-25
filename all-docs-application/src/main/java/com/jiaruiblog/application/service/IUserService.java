@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.service;
 
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.domain.entity.User;
 import com.jiaruiblog.domain.entity.bo.UserBO;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;

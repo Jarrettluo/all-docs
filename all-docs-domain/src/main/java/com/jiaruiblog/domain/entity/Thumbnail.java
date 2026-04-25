@@ -1,7 +1,7 @@
 package com.jiaruiblog.domain.entity;
 
-import com.jiaruiblog.enums.ThumbSizeEnum;
-import com.jiaruiblog.enums.ThumbnailEnum;
+import com.jiaruiblog.common.enums.ThumbSizeEnum;
+import com.jiaruiblog.common.enums.ThumbnailEnum;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;

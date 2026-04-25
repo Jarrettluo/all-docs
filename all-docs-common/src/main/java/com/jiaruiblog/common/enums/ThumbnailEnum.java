@@ -1,4 +1,4 @@
-package com.jiaruiblog.enums;
+package com.jiaruiblog.common.enums;
 
 import com.jiaruiblog.common.converter.BaseEnum;
 

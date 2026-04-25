@@ -1,7 +1,7 @@
 package com.jiaruiblog.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

@@ -1,5 +1,6 @@
 package com.jiaruiblog.api.auth;
 
+import com.jiaruiblog.common.enums.PermissionEnum;
 import org.springframework.core.annotation.AliasFor;
 import java.lang.annotation.*;
 
@@ -19,12 +20,12 @@ public @interface Permission {
      * 权限数组，来自PermissionEnum
      */
     @AliasFor("value")
-    com.jiaruiblog.enums.PermissionEnum[] name() default {};
+    PermissionEnum[] name() default {};
 
     /**
      * 权限数组，来自PermissionEnum
      */
     @AliasFor("name")
-    com.jiaruiblog.enums.PermissionEnum[] value() default {};
+    PermissionEnum[] value() default {};
 
 }

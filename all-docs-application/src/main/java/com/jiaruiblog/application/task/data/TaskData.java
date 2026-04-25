@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.task.data;
 
 import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.enums.FileFormatEnum;
+import com.jiaruiblog.common.enums.FileFormatEnum;
 
 /**
  * @author Jarrett Luo

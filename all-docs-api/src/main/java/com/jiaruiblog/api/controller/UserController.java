@@ -2,7 +2,7 @@ package com.jiaruiblog.api.controller;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.infrastructure.config.SystemConfig;
@@ -32,11 +32,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * @ClassName UserController
- * @Description 关于用户的所有请求关系
+ * 关于用户的所有请求关系
  * @author luojiarui
- * @Date 2022/6/4 9:38 上午
- * @Version 1.0
  **/
 @Tag(name = "用户模块")
 @RestController
@@ -104,9 +101,7 @@ public class UserController {
 
     /**
      * @author luojiarui
-     * @Description 仅限普通用户对自身的信息进行更新；不能更新其权限信息
-     * @Date 23:25 2024/7/26
-     * @Param [userDTO]
+     * 仅限普通用户对自身的信息进行更新；不能更新其权限信息
      * @return com.jiaruiblog.util.BaseApiResult
      **/
     @Operation(summary = "更新用户hobby和company", description = "更新用户hobby和company")
@@ -129,9 +124,7 @@ public class UserController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 删除用户的时候必须要删除其头像信息
-     * @Date 22:40 2023/1/12
-     * @Param [user, request]
+     * 删除用户的时候必须要删除其头像信息
      **/
     @Permission(PermissionEnum.ADMIN)
     @Operation(summary = "根据id删除用户", description = "根据id删除用户")
@@ -150,9 +143,7 @@ public class UserController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 管理员批量删除， 注意删除用户的时候必须要删除其头像信息
-     * @Date 22:40 2023/1/12
-     * @Param [user, request]
+     * 管理员批量删除， 注意删除用户的时候必须要删除其头像信息
      **/
     @Operation(summary = "根据id删除用户", description = "根据id删除用户")
     @Permission(value = PermissionEnum.ADMIN)
@@ -201,9 +192,7 @@ public class UserController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 根据分页参数查询用户列表
-     * @Date 21:21 2023/1/10
-     * @Param []
+     * 根据分页参数查询用户列表
      **/
     @Operation(summary = "管理员查询全部用户信息", description = "只有管理员有权限进行用户列表查询")
     @Permission(PermissionEnum.ADMIN)
@@ -228,9 +217,7 @@ public class UserController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 屏蔽用户，使用户不可登录；再次调用此接口则取消屏蔽
-     * @Date 20:30 2023/2/12
-     * @Param [userId]
+     * 屏蔽用户，使用户不可登录；再次调用此接口则取消屏蔽
      **/
     @Operation(summary = "管理员屏蔽用户", description = "管理员不能屏蔽自己的账号")
     @Permission(PermissionEnum.ADMIN)
@@ -261,9 +248,7 @@ public class UserController {
     /**
      * @return com.jiaruiblog.util.BaseApiResult
      * @author luojiarui
-     * @Description 更新用户的基本信息，只有管理员具有修改权限
-     * @Date 13:07 2022/12/18
-     * @Param [userDTO]
+     * 更新用户的基本信息，只有管理员具有修改权限
      **/
     @Permission(PermissionEnum.ADMIN)
     @PutMapping("/auth/updateUserInfo")
@@ -326,9 +311,7 @@ public class UserController {
 
     /**
      * @author luojiarui
-     * @Description 检查用户更新的信息符合要求
-     * @Date 23:04 2024/7/23
-     * @Param [userDTO]
+     * 检查用户更新的信息符合要求
      * @return boolean 符合要求返回true，不符合要求返回false
      **/
     public static boolean checkUserDTOParams(UserDTO userDTO) {

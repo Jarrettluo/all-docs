@@ -6,7 +6,7 @@ import com.jiaruiblog.application.task.like.UserLikeDetail;
 import com.jiaruiblog.domain.entity.CollectDocRelationship;
 import com.jiaruiblog.domain.entity.LikeDocRelationship;
 import com.jiaruiblog.application.service.CollectService;
-import com.jiaruiblog.enums.RedisActionEnum;
+import com.jiaruiblog.common.enums.RedisActionEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

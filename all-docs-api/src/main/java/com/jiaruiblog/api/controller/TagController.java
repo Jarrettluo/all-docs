@@ -1,18 +1,15 @@
 package com.jiaruiblog.api.controller;
 
-import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.enums.PermissionEnum;
+import com.jiaruiblog.application.service.TagService;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.domain.entity.TagDocRelationship;
 import com.jiaruiblog.domain.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.domain.entity.vo.CateOrTagVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.application.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,11 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @ClassName TagController
- * @Description 标签管理控制器
+ *  标签管理控制器
  * @author luojiarui
- * @Date 2022/6/7 11:38
- * @Version 1.0
  **/
 @Tag(name = "标签管理模块")
 @RestController

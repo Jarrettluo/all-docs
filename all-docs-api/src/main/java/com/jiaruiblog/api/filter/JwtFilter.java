@@ -21,7 +21,6 @@ import java.util.Map;
  *
  * @author jiarui.luo
  * @version v2.0
- * @date 2022年10月8日
  */
 @Slf4j
 //@WebFilter(filterName = "JwtFilter", urlPatterns = {"/*"})
@@ -86,7 +85,6 @@ public class JwtFilter implements Filter {
             if (OPTIONS.equals(request.getMethod())) {
                 response.setStatus(HttpServletResponse.SC_OK);
                 chain.doFilter(request, response);
-                return;
             }
             // Except OPTIONS, other request should be checked by JWT
             else {
