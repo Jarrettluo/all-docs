@@ -2,10 +2,10 @@ package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.RegexConstant;
-import com.jiaruiblog.domain.entity.CateDocRelationship;
-import com.jiaruiblog.domain.entity.Category;
-import com.jiaruiblog.domain.entity.Tag;
-import com.jiaruiblog.domain.entity.TagDocRelationship;
+import com.jiaruiblog.domain.entity.po.CateDocRelationship;
+import com.jiaruiblog.domain.entity.po.Category;
+import com.jiaruiblog.domain.entity.po.Tag;
+import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.domain.entity.dto.CategoryDTO;
 import com.jiaruiblog.domain.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.domain.entity.dto.QueryDocByTagCateDTO;

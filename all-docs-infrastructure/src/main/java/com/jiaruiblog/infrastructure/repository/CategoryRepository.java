@@ -1,7 +1,7 @@
 package com.jiaruiblog.infrastructure.repository;
 
-import com.jiaruiblog.domain.entity.CateDocRelationship;
-import com.jiaruiblog.domain.entity.Category;
+import com.jiaruiblog.domain.entity.po.CateDocRelationship;
+import com.jiaruiblog.domain.entity.po.Category;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;

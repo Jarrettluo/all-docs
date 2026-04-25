@@ -1,13 +1,7 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.entity.po;
 
 import com.alibaba.fastjson.JSON;
-import com.jiaruiblog.common.MessageConstant;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -18,16 +12,11 @@ import java.util.Date;
  * @Date 2022/6/4 10:28 上午
  * @Version 1.0
  **/
-@Table(name = "category")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Category {
 
-    @Id
     protected String id;
 
-    @NotBlank(message = MessageConstant.PARAMS_IS_NOT_NULL)
     protected String name;
 
     protected Date createDate;

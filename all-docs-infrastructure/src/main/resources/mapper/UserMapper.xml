@@ -10,7 +10,6 @@
         <result property="mail" column="mail"/>
         <result property="male" column="male"/>
         <result property="description" column="description"/>
-        <result property="avatarList" column="avatar_list" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.JsonListTypeHandler"/>
         <result property="avatar" column="avatar"/>
         <result property="birthtime" column="birthtime"/>
         <result property="banning" column="banning"/>
@@ -30,10 +29,10 @@
     </select>
 
     <insert id="insert" parameterType="com.jiaruiblog.domain.entity.po.User">
-        INSERT INTO user (id, username, password, phone, mail, male, description, avatar_list, avatar,
+        INSERT INTO user (id, username, password, phone, mail, male, description, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
-            #{avatarList}, #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
+            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
             #{lastLogin}, #{createDate}, #{updateDate})
     </insert>
 
@@ -45,7 +44,6 @@
             mail = #{mail},
             male = #{male},
             description = #{description},
-            avatar_list = #{avatarList},
             avatar = #{avatar},
             birthtime = #{birthtime},
             banning = #{banning},
@@ -68,10 +66,10 @@
     </delete>
 
     <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.User">
-        INSERT INTO user (id, username, password, phone, mail, male, description, avatar_list, avatar,
+        INSERT INTO user (id, username, password, phone, mail, male, description, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
-            #{avatarList}, #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
+            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
             #{lastLogin}, #{createDate}, #{updateDate})
         ON DUPLICATE KEY UPDATE
             username = VALUES(username),
@@ -80,7 +78,6 @@
             mail = VALUES(mail),
             male = VALUES(male),
             description = VALUES(description),
-            avatar_list = VALUES(avatar_list),
             avatar = VALUES(avatar),
             birthtime = VALUES(birthtime),
             banning = VALUES(banning),

@@ -1,6 +1,6 @@
 package com.jiaruiblog.infrastructure.repository;
 
-import com.jiaruiblog.domain.entity.Comment;
+import com.jiaruiblog.domain.entity.po.Comment;
 
 import java.util.List;
 import java.util.Optional;

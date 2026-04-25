@@ -1,6 +1,6 @@
 package com.jiaruiblog.infrastructure.repository;
 
-import com.jiaruiblog.domain.entity.User;
+import com.jiaruiblog.domain.entity.po.User;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;

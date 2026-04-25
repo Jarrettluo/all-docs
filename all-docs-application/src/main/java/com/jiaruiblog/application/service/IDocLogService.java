@@ -1,9 +1,9 @@
 package com.jiaruiblog.application.service;
 
 import com.jiaruiblog.application.service.impl.DocLogServiceImpl;
-import com.jiaruiblog.domain.entity.DocLog;
-import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.domain.entity.User;
+import com.jiaruiblog.domain.entity.po.DocLog;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 

@@ -6,7 +6,7 @@ import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.ConfigConstant;
 import com.jiaruiblog.infrastructure.config.SystemConfig;
-import com.jiaruiblog.domain.entity.User;
+import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.bo.UserBO;
 import com.jiaruiblog.domain.entity.dto.*;
 import com.jiaruiblog.domain.entity.vo.PageVO;
@@ -25,6 +25,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -283,6 +284,17 @@ public class UserController {
     public ApiResult<Object> removeUserAvatar(HttpServletRequest request) {
         userService.removeUserAvatar((String) request.getAttribute("id"));
         return ApiResult.success();
+    }
+
+    @Operation(summary = "获取用户头像", description = "根据用户名获取用户头像")
+    @GetMapping(value = "/avatar/{username}", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public byte[] getUserAvatar(@PathVariable String username) {
+        User user = userService.queryByUsername(username);
+        if (user == null || user.getAvatar() == null || user.getAvatar().isEmpty()) {
+            return new byte[0];
+        }
+        return userService.getAvatarBytes(user.getAvatar());
     }
 
     @Operation(summary = "重置用户密码", description = "管理员对用户进行密码重置")

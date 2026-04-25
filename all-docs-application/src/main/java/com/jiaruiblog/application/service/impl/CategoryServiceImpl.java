@@ -1,11 +1,11 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.CategoryService;
-import com.jiaruiblog.domain.entity.CateDocRelationship;
-import com.jiaruiblog.domain.entity.Category;
-import com.jiaruiblog.domain.entity.CollectDocRelationship;
-import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.domain.entity.TagDocRelationship;
+import com.jiaruiblog.domain.entity.po.CateDocRelationship;
+import com.jiaruiblog.domain.entity.po.Category;
+import com.jiaruiblog.domain.entity.po.CollectDocRelationship;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.domain.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.domain.entity.vo.CateOrTagVO;
 import com.jiaruiblog.domain.entity.vo.CategoryVO;
@@ -241,7 +241,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * @return com.jiaruiblog.domain.entity.Category
+     * @return com.jiaruiblog.domain.entity.po.Category
      * @author luojiarui
      * 根据文档的信息返回分类信息
      **/
@@ -297,7 +297,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * @return java.util.List<com.jiaruiblog.domain.entity.Category>
+     * @return java.util.List<com.jiaruiblog.domain.entity.po.Category>
      * @author luojiarui
      * 热度随机产生22/6/26
      **/
@@ -336,7 +336,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * @return java.util.List<com.jiaruiblog.domain.entity.CateDocRelationship>
+     * @return java.util.List<com.jiaruiblog.domain.entity.po.CateDocRelationship>
      * @author luojiarui
      * 根据总类查询关系
      **/

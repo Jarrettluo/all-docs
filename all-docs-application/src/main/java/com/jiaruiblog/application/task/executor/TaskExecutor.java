@@ -1,15 +1,14 @@
 package com.jiaruiblog.application.task.executor;
 
-import com.jiaruiblog.application.task.data.TaskData;
-import com.jiaruiblog.application.task.exception.TaskRunException;
-import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.domain.entity.FileObj;
-import com.jiaruiblog.common.enums.FileFormatEnum;
 import com.jiaruiblog.application.service.DocumentService;
 import com.jiaruiblog.application.service.ElasticService;
+import com.jiaruiblog.application.task.data.TaskData;
+import com.jiaruiblog.application.task.exception.TaskRunException;
+import com.jiaruiblog.common.enums.FileFormatEnum;
 import com.jiaruiblog.common.util.SpringApplicationContext;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.SearchDocument;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -25,7 +24,6 @@ import java.util.List;
  */
 @Slf4j
 public abstract class TaskExecutor {
-    protected final Logger log = org.slf4j.LoggerFactory.getLogger(getClass());
 
     public void execute(TaskData taskData) throws TaskRunException {
 
@@ -77,12 +75,13 @@ public abstract class TaskExecutor {
             if (!new File(textFilePath).exists()) {
                 throw new TaskRunException("文本文件不存在，需要进行重新提取");
             }
-            FileObj fileObj = new FileObj();
-            fileObj.setId(fileDocument.getMd5());
-            fileObj.setName(fileDocument.getName());
-            fileObj.setType(fileDocument.getContentType());
-            fileObj.readFile(textFilePath);
-            this.upload(fileObj);
+            SearchDocument searchDocument = new SearchDocument();
+            searchDocument.setId(fileDocument.getMd5());
+            searchDocument.setName(fileDocument.getName());
+            searchDocument.setType(fileDocument.getContentType());
+            // 直接读取提取的文本内容，不做 base64 编码
+            searchDocument.setContent(Files.readString(Paths.get(textFilePath), StandardCharsets.UTF_8));
+            this.upload(searchDocument);
 
         } catch (IOException | TaskRunException e) {
             throw new TaskRunException("存入es的过程中报错了", e);
@@ -163,11 +162,11 @@ public abstract class TaskExecutor {
      * @author luojiarui
      * @Description // 上传整备好的文本文件进行上传到es中
      * @Date 15:11 2022/11/13
-     * @Param [fileObj]
+     * @Param [searchDocument]
      **/
-    public void upload(FileObj fileObj) throws IOException {
+    public void upload(SearchDocument searchDocument) throws IOException {
         ElasticService elasticService = SpringApplicationContext.getBean(ElasticService.class);
-        elasticService.upload(fileObj);
+        elasticService.upload(searchDocument);
     }
 
     /**

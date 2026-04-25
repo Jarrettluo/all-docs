@@ -1,4 +1,4 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.entity.po;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -6,12 +6,8 @@ import lombok.Data;
 
 import java.util.Date;
 
-/**
- * @ClassName DocLog
- * @Description 文档日志
+/** 文档日志
  * @author luojiarui
- * @Date 2022/12/10 10:58
- * @Version 1.0
  **/
 @Data
 @Table(name = "doc_log")

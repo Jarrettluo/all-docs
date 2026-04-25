@@ -1,8 +1,7 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.CollectService;
-import com.jiaruiblog.domain.entity.CollectDocRelationship;
-import com.jiaruiblog.common.exception.BusinessException;
+import com.jiaruiblog.domain.entity.po.CollectDocRelationship;
 import com.jiaruiblog.common.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.infrastructure.repository.CollectRepository;
@@ -11,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 收藏服务实现类

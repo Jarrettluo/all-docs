@@ -1,6 +1,6 @@
 package com.jiaruiblog.infrastructure.repository;
 
-import com.jiaruiblog.domain.entity.Thumbnail;
+import com.jiaruiblog.domain.entity.po.Thumbnail;
 
 import java.util.List;
 

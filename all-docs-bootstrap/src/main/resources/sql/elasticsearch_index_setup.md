@@ -66,8 +66,6 @@ curl -X GET "localhost:9200/_cluster/health?pretty"
 ```bash
 # 删除已存在的旧索引 (如果有)
 curl -X DELETE "localhost:9200/all_docs_document_index?pretty"
-# 如果之前使用的是旧索引名 docwrite
-curl -X DELETE "localhost:9200/docwrite?pretty"
 ```
 
 ### 2.3 创建 all_docs_document_index 索引
@@ -234,3 +232,7 @@ curl -X GET "localhost:9200/all_docs_document_index/_doc/<doc_id>?pretty"
 **文档版本**: v2.0
 **最后更新**: 2026-04-25
 **适用版本**: All-Docs 系统
+
+
+----
+注意安装方法已经发生了变化：https://github.com/infinilabs/analysis-ik/releases

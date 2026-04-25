@@ -33,6 +33,15 @@ public interface FileOperationService {
 
     /**
      * @author luojiarui
+     * @Description 解析输入流并返回内容
+     * @Date 15:24 2022/11/5
+     * @Param [inputStream]
+     * @return TextExtractResult
+     */
+    TextExtractResult parseToStr(InputStream inputStream);
+
+    /**
+     * @author luojiarui
      * @Description 将文件上传到minio中
      * @Date 15:24 2022/11/5
      * @Param [name, inputStream]

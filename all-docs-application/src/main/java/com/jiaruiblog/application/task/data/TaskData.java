@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.task.data;
 
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.common.enums.FileFormatEnum;
 
 /**

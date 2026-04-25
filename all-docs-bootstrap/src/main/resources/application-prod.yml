@@ -1,45 +1,85 @@
-server:
-  port: 8082
-
 spring:
+  # 生产环境 MySQL（必须通过环境变量注入）
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE}?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE}?useSSL=true&serverTimezone=UTC&characterEncoding=utf8mb4&rewriteBatchedStatements=true
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 20
-      minimum-idle: 5
+      minimum-idle: 10
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
 
-  redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PWD}
+  # 生产环境 Redis（新版 Spring Boot 格式）
+  data:
+    redis:
+      database: 0
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PWD}
+      timeout: 5000
+      jedis:
+        pool:
+          max-idle: 500
+          min-idle: 50
+          max-active: 2000
+          max-wait: 3000
 
   thymeleaf:
     cache: true
 
-logging:
-  level:
-    root: INFO
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
+# 生产环境 Elasticsearch
 cloud:
   elasticsearch:
     host: ${ES_HOST}
     port: ${ES_PORT:9200}
 
+# 生产环境 MinIO
 minio:
   endpoint: ${MINIO_ENDPOINT}
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
-  bucket: ${MINIO_BUCKET}
+  bucket: ${MINIO_BUCKET:alldocs}
+  url-expiration: 3600
 
+# 存储策略
 storage:
   type: minio
 
+# 生产环境 HMAC（必须设置环境变量）
+hmac:
+  secret:
+    key: ${HMAC_SECRET_KEY}
+
+# 生产环境 日志
+logging:
+  level:
+    root: WARN
+  file:
+    name: /var/log/alldocs/application.log
+    max-size: 100MB
+    max-history: 30
+
+# 生产环境配置开关
+all-docs:
+  config:
+    user-upload: ${AD_USER_UPLOAD:true}
+    admin-review: ${AD_ADMIN_REVIEW:true}
+    prohibited-word: ${AD_PROHIBITED_WORD:true}
+    user-registry: ${AD_USER_REGISTRY:false}
+    initial-username: ${AD_INITIAL_USERNAME:}
+    initial-password: ${AD_INITIAL_PASSWORD:}
+    cover-admin: ${COVER_ADMIN:true}
+  file-path:
+    sensitive-file: sensitive.txt
+
+# 异步线程池（生产环境大规模）
 async:
   core-pool-size: 20
   max-pool-size: 100

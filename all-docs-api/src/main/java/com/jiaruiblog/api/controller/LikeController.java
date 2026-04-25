@@ -2,8 +2,8 @@ package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.application.service.LikeService;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.domain.entity.LikeRequest;
-import com.jiaruiblog.domain.entity.LikeVO;
+import com.jiaruiblog.domain.request.LikeRequest;
+import com.jiaruiblog.domain.entity.vo.LikeVO;
 import com.jiaruiblog.common.enums.RedisActionEnum;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;

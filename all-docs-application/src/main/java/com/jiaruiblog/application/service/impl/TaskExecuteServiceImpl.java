@@ -6,7 +6,7 @@ import com.jiaruiblog.application.task.executor.TaskExecutorFactory;
 import com.jiaruiblog.application.task.thread.MainTask;
 import com.jiaruiblog.application.task.thread.TaskThreadPool;
 import com.jiaruiblog.common.enums.FileFormatEnum;
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

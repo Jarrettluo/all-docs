@@ -1,4 +1,4 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.request;
 
 import lombok.Data;
 

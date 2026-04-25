@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service;
 
-import com.jiaruiblog.domain.entity.Tag;
-import com.jiaruiblog.domain.entity.TagDocRelationship;
+import com.jiaruiblog.domain.entity.po.Tag;
+import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.domain.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.domain.entity.vo.CateOrTagVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;

@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.task.executor;
 
 import com.jiaruiblog.application.task.data.TaskData;
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

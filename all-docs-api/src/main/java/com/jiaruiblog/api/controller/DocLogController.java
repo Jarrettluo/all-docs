@@ -3,7 +3,7 @@ package com.jiaruiblog.api.controller;
 import com.jiaruiblog.api.auth.Permission;
 import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.domain.entity.DocLog;
+import com.jiaruiblog.domain.entity.po.DocLog;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.BatchIdDTO;
 import com.jiaruiblog.domain.entity.vo.DocLogVO;

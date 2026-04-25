@@ -5,7 +5,7 @@ import com.jiaruiblog.application.service.ICommentService;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.ErrorCode;
-import com.jiaruiblog.domain.entity.Comment;
+import com.jiaruiblog.domain.entity.po.Comment;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.BatchIdDTO;
 import com.jiaruiblog.domain.entity.dto.CommentDTO;

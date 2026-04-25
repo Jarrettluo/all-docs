@@ -1,6 +1,6 @@
 package com.jiaruiblog.infrastructure.repository;
 
-import com.jiaruiblog.domain.entity.DocReview;
+import com.jiaruiblog.domain.entity.po.DocReview;
 
 import java.util.List;
 

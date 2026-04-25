@@ -1,7 +1,7 @@
 package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.domain.entity.CollectDocRelationship;
+import com.jiaruiblog.domain.entity.po.CollectDocRelationship;
 import com.jiaruiblog.domain.entity.dto.CollectDTO;
 import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.ErrorCode;

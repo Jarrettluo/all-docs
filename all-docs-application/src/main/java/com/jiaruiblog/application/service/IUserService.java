@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service;
 
 import com.jiaruiblog.common.enums.PermissionEnum;
-import com.jiaruiblog.domain.entity.User;
+import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.bo.UserBO;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.RegistryUserDTO;
@@ -70,6 +70,13 @@ public interface IUserService {
      * @return BaseApiResult
      */
     void removeUserAvatar(String userId);
+
+    /**
+     * 获取用户头像字节数组
+     * @param objectKey MinIO中的对象key (包含路径前缀，如 avatars/{username}/{filename})
+     * @return 头像字节数组
+     */
+    byte[] getAvatarBytes(String objectKey);
 
     /**
      * remove user entity

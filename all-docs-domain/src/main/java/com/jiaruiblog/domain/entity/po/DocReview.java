@@ -1,7 +1,5 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.entity.po;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.util.Date;
@@ -12,13 +10,11 @@ import java.util.Date;
  * @Version 1.0
  */
 @Data
-@Table(name = "doc_review")
 public class DocReview {
 
     /**
      * 主键
      */
-    @Id
     private String id;
 
     /**

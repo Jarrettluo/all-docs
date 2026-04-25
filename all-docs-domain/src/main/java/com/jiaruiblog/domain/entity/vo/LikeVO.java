@@ -1,9 +1,6 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.entity.vo;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-
-import java.util.Date;
 
 /**
  * @ClassName LikeVO
@@ -14,8 +11,12 @@ import java.util.Date;
  **/
 @Data
 public class LikeVO {
+
     private long likeCount;
+
     private int likeStatus;
+
     private long collectCount;
+
     private int collectStatus;
 }

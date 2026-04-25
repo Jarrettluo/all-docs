@@ -68,7 +68,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public void deleteHash(String key, String... fields) {
-        redisSearchTemplate.opsForHash().delete(key, fields);
+        redisSearchTemplate.opsForHash().delete(key, (Object[]) fields);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public void deleteSetMember(String key, String... values) {
-        redisSearchTemplate.opsForSet().remove(key, values);
+        redisSearchTemplate.opsForSet().remove(key, (Object[]) values);
     }
 
     @Override

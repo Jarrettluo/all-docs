@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.service;
 
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.common.enums.FileFormatEnum;
 
 import java.io.InputStream;

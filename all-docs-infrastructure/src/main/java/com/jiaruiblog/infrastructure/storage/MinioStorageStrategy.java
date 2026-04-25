@@ -20,9 +20,7 @@ import java.util.Map;
 
 /**
  * MinIO存储策略实现
- *
- * @author luojiarui
- * @version 1.0
+ * 支持带前缀路径的存储: documents/, thumbs/, avatars/[username]/
  */
 @Component
 public class MinioStorageStrategy implements StorageStrategy {
@@ -35,77 +33,95 @@ public class MinioStorageStrategy implements StorageStrategy {
     @Value("${minio.bucket-name:alldocs}")
     private String bucketName;
 
-    @Override
-    public String upload(InputStream inputStream, String filename, String contentType) {
-        try (InputStream is = inputStream) {
-            // 确保bucket存在
-            boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
-            if (!found) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-            }
+    /**
+     * 确保bucket存在
+     */
+    private void ensureBucketExists() throws Exception {
+        boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+        if (!found) {
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+            log.info("Created MinIO bucket: {}", bucketName);
+        }
+    }
 
-            // 上传文件
+    @Override
+    public String upload(InputStream inputStream, String objectKey, String contentType) {
+        if (objectKey == null || objectKey.isEmpty()) {
+            log.error("Upload failed: objectKey is empty");
+            return null;
+        }
+        try (InputStream is = inputStream) {
+            ensureBucketExists();
+
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(filename)
-                    .stream(is, -1, 10485760)
+                    .object(objectKey)
+                    .stream(is, -1, 10485760) // 10MB buffer
                     .contentType(contentType)
                     .build());
 
-            return filename;
+            log.info("Uploaded to MinIO: bucket={}, objectKey={}", bucketName, objectKey);
+            return objectKey;
         } catch (Exception e) {
-            log.error("MinIO operation failed", e);
+            log.error("MinIO upload failed: objectKey={}", objectKey, e);
             return null;
         }
     }
 
-    /**
-     * 下载文件
-     *
-     * @param fileId 文件ID
-     * @return InputStream，调用者负责关闭该流
-     */
     @Override
-    public InputStream download(String fileId) {
+    public InputStream download(String objectKey) {
+        if (objectKey == null || objectKey.isEmpty()) {
+            log.error("Download failed: objectKey is empty");
+            return null;
+        }
         try {
             return minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(fileId)
+                    .object(objectKey)
                     .build());
         } catch (Exception e) {
-            log.error("MinIO operation failed", e);
+            log.error("MinIO download failed: objectKey={}", objectKey, e);
             return null;
         }
     }
 
     @Override
-    public boolean delete(String fileId) {
+    public boolean delete(String objectKey) {
+        if (objectKey == null || objectKey.isEmpty()) {
+            log.error("Delete failed: objectKey is empty");
+            return false;
+        }
         try {
             minioClient.removeObject(RemoveObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(fileId)
+                    .object(objectKey)
                     .build());
+            log.info("Deleted from MinIO: bucket={}, objectKey={}", bucketName, objectKey);
             return true;
         } catch (Exception e) {
-            log.error("MinIO operation failed", e);
+            log.error("MinIO delete failed: objectKey={}", objectKey, e);
             return false;
         }
     }
 
     @Override
-    public String getUrl(String fileId) {
+    public String getPresignedUrl(String objectKey, int expiry) {
+        if (objectKey == null || objectKey.isEmpty()) {
+            log.error("getPresignedUrl failed: objectKey is empty");
+            return null;
+        }
         try {
             Map<String, String> extraQueryParams = new HashMap<>();
-            extraQueryParams.put("expires", "3600");
+            extraQueryParams.put("expires", String.valueOf(expiry));
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                     .method(Method.GET)
                     .bucket(bucketName)
-                    .object(fileId)
-                    .expiry(3600)
+                    .object(objectKey)
+                    .expiry(expiry)
                     .extraQueryParams(extraQueryParams)
                     .build());
         } catch (Exception e) {
-            log.error("MinIO operation failed", e);
+            log.error("MinIO getPresignedUrl failed: objectKey={}", objectKey, e);
             return null;
         }
     }

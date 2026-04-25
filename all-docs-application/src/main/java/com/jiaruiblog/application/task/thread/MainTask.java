@@ -7,7 +7,7 @@ import com.jiaruiblog.application.task.executor.TaskExecutor;
 import com.jiaruiblog.application.task.executor.TaskExecutorFactory;
 import com.jiaruiblog.common.enums.DocStateEnum;
 import com.jiaruiblog.common.enums.FileFormatEnum;
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.common.util.SpringApplicationContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;

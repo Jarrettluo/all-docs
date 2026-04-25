@@ -11,11 +11,8 @@ import java.util.Date;
 import java.util.TimeZone;
 
 /**
- * @ClassName UserVO
- * @Description 返回查询的用户结果
+ * 返回查询的用户结果
  * @author luojiarui
- * @Date 2023/2/18 00:14
- * @Version 1.0
  **/
 @Data
 public class UserVO {

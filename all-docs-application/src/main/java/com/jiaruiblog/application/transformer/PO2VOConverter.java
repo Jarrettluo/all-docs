@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.transformer;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.jiaruiblog.domain.entity.DocLog;
+import com.jiaruiblog.domain.entity.po.DocLog;
 import com.jiaruiblog.domain.entity.vo.DocLogVO;
 
 import java.util.ArrayList;

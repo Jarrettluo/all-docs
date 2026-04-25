@@ -2,7 +2,7 @@ package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.application.service.TagService;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.domain.entity.TagDocRelationship;
+import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.domain.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.domain.entity.vo.CateOrTagVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
@@ -32,7 +32,7 @@ public class TagController {
 
     @Operation(summary = "新增标签", description = "创建新的标签")
     @PostMapping("/insert")
-    public ApiResult<Void> insert(@RequestBody com.jiaruiblog.domain.entity.Tag tag) {
+    public ApiResult<Void> insert(@RequestBody com.jiaruiblog.domain.entity.po.Tag tag) {
         tag.setId(null);
         tag.setCreateDate(new Date());
         tag.setUpdateDate(new Date());
@@ -42,7 +42,7 @@ public class TagController {
 
     @Operation(summary = "更新标签", description = "修改现有标签信息")
     @PutMapping("/update")
-    public ApiResult<Void> update(@RequestBody com.jiaruiblog.domain.entity.Tag tag) {
+    public ApiResult<Void> update(@RequestBody com.jiaruiblog.domain.entity.po.Tag tag) {
         tag.setUpdateDate(new Date());
         tagService.update(tag);
         return ApiResult.success();
@@ -50,7 +50,7 @@ public class TagController {
 
     @Operation(summary = "删除标签", description = "根据ID删除标签")
     @DeleteMapping("/remove")
-    public ApiResult<Void> remove(@RequestBody com.jiaruiblog.domain.entity.Tag tag) {
+    public ApiResult<Void> remove(@RequestBody com.jiaruiblog.domain.entity.po.Tag tag) {
         tagService.remove(tag);
         return ApiResult.success();
     }
@@ -63,31 +63,31 @@ public class TagController {
 
     @Operation(summary = "根据ID查询标签", description = "根据标签ID查询标签详情")
     @GetMapping("/detail")
-    public ApiResult<com.jiaruiblog.domain.entity.Tag> queryById(@Parameter(description = "标签ID", required = true)
+    public ApiResult<com.jiaruiblog.domain.entity.po.Tag> queryById(@Parameter(description = "标签ID", required = true)
                                     @RequestParam String tagId) {
-        com.jiaruiblog.domain.entity.Tag tag = tagService.queryById(tagId);
+        com.jiaruiblog.domain.entity.po.Tag tag = tagService.queryById(tagId);
         return ApiResult.success(tag);
     }
 
     @Operation(summary = "根据名称查询标签", description = "根据标签名称查询标签详情")
     @GetMapping("/detailByName")
-    public ApiResult<com.jiaruiblog.domain.entity.Tag> queryByName(@Parameter(description = "标签名称", required = true)
+    public ApiResult<com.jiaruiblog.domain.entity.po.Tag> queryByName(@Parameter(description = "标签名称", required = true)
                                       @RequestParam String tagName) {
-        com.jiaruiblog.domain.entity.Tag tag = tagService.queryByName(tagName);
+        com.jiaruiblog.domain.entity.po.Tag tag = tagService.queryByName(tagName);
         return ApiResult.success(tag);
     }
 
     @Operation(summary = "根据文档ID查询标签列表", description = "获取某个文档关联的所有标签")
     @GetMapping("/byDocId")
-    public ApiResult<List<com.jiaruiblog.domain.entity.Tag>> queryByDocId(@Parameter(description = "文档ID", required = true)
+    public ApiResult<List<com.jiaruiblog.domain.entity.po.Tag>> queryByDocId(@Parameter(description = "文档ID", required = true)
                                               @RequestParam String docId) {
-        List<com.jiaruiblog.domain.entity.Tag> tags = tagService.queryByDocId(docId);
+        List<com.jiaruiblog.domain.entity.po.Tag> tags = tagService.queryByDocId(docId);
         return ApiResult.success(tags);
     }
 
     @Operation(summary = "获取标签列表", description = "获取标签列表（用于下拉框）")
     @GetMapping("/list")
-    public ApiResult<List<com.jiaruiblog.domain.entity.Tag>> getTagList() {
+    public ApiResult<List<com.jiaruiblog.domain.entity.po.Tag>> getTagList() {
         return ApiResult.success(tagService.getTagList());
     }
 
@@ -125,7 +125,7 @@ public class TagController {
 
     @Operation(summary = "获取随机标签", description = "获取随机标签列表")
     @GetMapping("/random")
-    public ApiResult<List<com.jiaruiblog.domain.entity.Tag>> getRandom() {
+    public ApiResult<List<com.jiaruiblog.domain.entity.po.Tag>> getRandom() {
         return ApiResult.success(tagService.getRandom());
     }
 
@@ -151,7 +151,7 @@ public class TagController {
 
     @Operation(summary = "获取最近的标签关联关系", description = "获取最近创建的标签关联关系")
     @GetMapping("/recentRelationships")
-    public ApiResult<Map<com.jiaruiblog.domain.entity.Tag, List<TagDocRelationship>>> getRecentTagRelationship() {
+    public ApiResult<Map<com.jiaruiblog.domain.entity.po.Tag, List<TagDocRelationship>>> getRecentTagRelationship() {
         return ApiResult.success(tagService.getRecentTagRelationship());
     }
 }

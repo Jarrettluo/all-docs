@@ -37,10 +37,21 @@ public interface StorageStrategy {
     boolean delete(String fileId);
 
     /**
-     * 获取文件URL
+     * 获取文件预签名URL
      *
-     * @param fileId 文件ID
-     * @return 文件访问URL
+     * @param objectKey 对象key (包含路径前缀)
+     * @param expiry 过期时间(秒)
+     * @return 预签名URL
      */
-    String getUrl(String fileId);
+    String getPresignedUrl(String objectKey, int expiry);
+
+    /**
+     * 获取文件预签名URL (默认1小时过期)
+     *
+     * @param objectKey 对象key (包含路径前缀)
+     * @return 预签名URL
+     */
+    default String getPresignedUrl(String objectKey) {
+        return getPresignedUrl(objectKey, 3600);
+    }
 }

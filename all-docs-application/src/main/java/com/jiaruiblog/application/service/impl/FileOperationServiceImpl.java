@@ -88,6 +88,30 @@ public class FileOperationServiceImpl implements FileOperationService {
     }
 
     @Override
+    public TextExtractResult parseToStr(InputStream inputStream) {
+        if (inputStream == null) {
+            log.warn("解析文件失败：输入流为空");
+            return TextExtractResult.failure("输入流为空");
+        }
+        try {
+            String content = tika.parseToString(inputStream);
+            if (content == null || content.isEmpty()) {
+                return TextExtractResult.failure("解析后内容为空");
+            }
+            return TextExtractResult.success(content);
+        } catch (TikaException e) {
+            log.error("Tika解析文件失败", e);
+            return TextExtractResult.failure("Tika解析失败: " + e.getMessage());
+        } catch (IOException e) {
+            log.error("IO异常", e);
+            return TextExtractResult.failure("IO异常: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("解析文件异常", e);
+            return TextExtractResult.failure("解析异常: " + e.getMessage());
+        }
+    }
+
+    @Override
     public String uploadFile(String name, InputStream inputStream) {
         if (name == null || name.isEmpty() || inputStream == null) {
             log.warn("上传文件失败：参数为空");
@@ -172,7 +196,7 @@ public class FileOperationServiceImpl implements FileOperationService {
             return "";
         }
         try {
-            return minioStorageStrategy.getUrl(name);
+            return minioStorageStrategy.getPresignedUrl(name);
         } catch (Exception e) {
             log.error("获取文件URL失败：name={}", name, e);
             return "";
@@ -181,8 +205,16 @@ public class FileOperationServiceImpl implements FileOperationService {
 
     @Override
     public String getFileUrl(String name, Integer expires) {
-        // 同样简化处理
-        return getFileUrl(name);
+        if (name == null || name.isEmpty()) {
+            return "";
+        }
+        try {
+            int expiry = expires != null ? expires : 3600;
+            return minioStorageStrategy.getPresignedUrl(name, expiry);
+        } catch (Exception e) {
+            log.error("获取文件URL失败：name={}", name, e);
+            return "";
+        }
     }
 
     @Override

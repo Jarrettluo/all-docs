@@ -2,7 +2,7 @@ package com.jiaruiblog.api.auth;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.common.enums.PermissionEnum;
-import com.jiaruiblog.domain.entity.User;
+import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.application.service.IUserService;
 import com.jiaruiblog.api.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +41,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
         // 如果不是映射到方法直接通过
         if (!(handler instanceof HandlerMethod)) {
+            return true;
+        }
+
+        // 放行 OPTIONS 请求（跨域预检）
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
         // 获取方法中的注解

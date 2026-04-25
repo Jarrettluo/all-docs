@@ -1,7 +1,7 @@
 package com.jiaruiblog.infrastructure.repository;
 
-import com.jiaruiblog.domain.entity.Tag;
-import com.jiaruiblog.domain.entity.TagDocRelationship;
+import com.jiaruiblog.domain.entity.po.Tag;
+import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import org.springframework.data.domain.Sort;
 
 import java.util.Collection;

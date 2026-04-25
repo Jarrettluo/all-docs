@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service;
 
-import com.jiaruiblog.domain.entity.DocReview;
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.DocReview;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 

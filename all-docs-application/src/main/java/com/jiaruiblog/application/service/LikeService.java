@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.service;
 
-import com.jiaruiblog.domain.entity.LikeDocRelationship;
+import com.jiaruiblog.domain.entity.po.LikeDocRelationship;
 
 /**
  * @author Jarrett Luo

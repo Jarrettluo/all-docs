@@ -1,6 +1,6 @@
 package com.jiaruiblog.infrastructure.repository;
 
-import com.jiaruiblog.domain.entity.CollectDocRelationship;
+import com.jiaruiblog.domain.entity.po.CollectDocRelationship;
 
 import java.util.List;
 import java.util.Optional;

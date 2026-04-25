@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.service;
 
-import com.jiaruiblog.domain.entity.FileObj;
+import com.jiaruiblog.domain.entity.po.SearchDocument;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 
 import java.io.InputStream;
@@ -19,7 +19,7 @@ public interface ElasticService {
      * @Date 15:20 2022/11/5
      * @Param [fileObj]
      */
-    void upload(FileObj fileObj);
+    void upload(SearchDocument searchDocument);
 
     /**
      * @author luojiarui
@@ -46,7 +46,7 @@ public interface ElasticService {
      * @Param [docIds]
      * @Return List<FileObj>
      */
-    List<FileObj> queryFileObjListByIds(List<String> docIds);
+    List<SearchDocument> queryFileObjListByIds(List<String> docIds);
 
     /**
      * @author luojiarui
@@ -72,7 +72,7 @@ public interface ElasticService {
      * @Date 15:20 2022/11/5
      * @Param [inputStream, fileObj]
      */
-    void uploadFileObj(InputStream inputStream, FileObj fileObj);
+    void uploadFileObj(InputStream inputStream, SearchDocument searchDocument);
 
     /**
      * @author luojiarui
@@ -88,7 +88,7 @@ public interface ElasticService {
      * @Date 15:20 2022/11/5
      * @Param [inputStream, fileObj]
      */
-    void updateFileObj(InputStream inputStream, FileObj fileObj);
+    void updateFileObj(InputStream inputStream, SearchDocument searchDocument);
 
     /**
      * 获取词云统计数据

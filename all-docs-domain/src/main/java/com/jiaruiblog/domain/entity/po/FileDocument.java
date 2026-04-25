@@ -1,11 +1,9 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.entity.po;
 
 import com.jiaruiblog.common.enums.DocStateEnum;
-import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.util.Date;
@@ -14,7 +12,6 @@ import java.util.Date;
  * @author jiarui.luo
  */
 @Data
-@Table(name = "file_document")
 public class FileDocument {
 
     /**
@@ -42,13 +39,6 @@ public class FileDocument {
      * 文件MD5值
      */
     private String md5;
-
-    /**
-     * 文件内容 (deprecated: 大文件应使用GridFS存储，此字段仅用于小文件)
-     * @deprecated use gridfsId for large files
-     */
-    @Deprecated
-    private byte[] content;
 
     /**
      * 文件类型
@@ -83,6 +73,11 @@ public class FileDocument {
     private String previewFileId;
 
     /**
+     * 文件内容
+     */
+    private byte[] content;
+
+    /**
      * 文档的状态
      **/
     @Enumerated(EnumType.STRING)
@@ -100,5 +95,8 @@ public class FileDocument {
 
     private String userName;
 
+    private Date createDate;
+
+    private Date updateDate;
 
 }

@@ -1,19 +1,12 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.entity.po;
 
 import com.jiaruiblog.common.enums.ThumbSizeEnum;
 import com.jiaruiblog.common.enums.ThumbnailEnum;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.Data;
 
-/**
- * @ClassName Thumbnail
- * @Description 缩略图相关的类
- * @author luojiarui
- * @Date 2022/7/23 5:57 下午
- * @Version 1.0
+/**缩略图相关的类
  **/
-@Table(name = "thumbnail")
 @Data
 public class Thumbnail {
 

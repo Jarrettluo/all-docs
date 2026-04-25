@@ -3,11 +3,12 @@ package com.jiaruiblog.api.controller;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.auth0.jwt.interfaces.Claim;
+import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.infrastructure.config.SystemConfig;
-import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.domain.entity.User;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.upload.FileUploadDTO;
 import com.jiaruiblog.domain.entity.dto.upload.UrlUploadDTO;
@@ -97,26 +98,32 @@ public class FileController {
      */
     @Operation(summary = "查询文档预览结果")
     @GetMapping("/view/{id}")
-    public ResponseEntity<Object> serveFileOnline(@PathVariable String id,
-                                                  HttpServletResponse response)
+    public ResponseEntity<Object> serveFileOnline(@PathVariable String id)
             throws UnsupportedEncodingException {
-        Optional<FileDocument> file = fileService.getById(id);
-        if (file.isEmpty()) {
+        Optional<FileDocument> fileOpt = fileService.getById(id);
+        if (fileOpt.isEmpty()) {
             throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
 
+        FileDocument fileDocument = fileOpt.get();
         User user = new User();
-        FileDocument fileDocument1 = file.get();
-        docLogService.addLog(user, fileDocument1, DocLogServiceImpl.Action.PREVIEW);
+        docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.PREVIEW);
+
+        // 从MinIO下载文件内容
+        byte[] content;
+        if (fileDocument.getGridfsId() != null) {
+            content = fileService.getFileBytes(fileDocument.getGridfsId(), StorageConstants.DOCUMENTS);
+        } else {
+            content = fileDocument.getContent();
+        }
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8"))
-                .header(HttpHeaders.CONTENT_TYPE, file.get().getContentType())
-                .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
+                        "fileName=" + URLEncoder.encode(fileDocument.getName(), "utf-8"))
+                .header(HttpHeaders.CONTENT_TYPE, fileDocument.getContentType())
+                .header(HttpHeaders.CONTENT_LENGTH, content.length + "")
                 .header("Connection", "close")
-                .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
-                .body(file.get().getContent());
+                .body(content);
     }
 
     @Autowired
@@ -183,11 +190,19 @@ public class FileController {
             }
             FileDocument fileDocument = file.get();
 
+            // 从MinIO下载文件内容
+            byte[] content;
+            if (fileDocument.getGridfsId() != null) {
+                content = fileService.getFileBytes(fileDocument.getGridfsId(), StorageConstants.DOCUMENTS);
+            } else {
+                content = fileDocument.getContent();
+            }
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; fileName=" + URLEncoder.encode(fileDocument.getName(), "utf-8"))
                     .contentType(MediaType.parseMediaType(fileDocument.getContentType()))
-                    .body(new ByteArrayResource(fileDocument.getContent()));
+                    .body(new ByteArrayResource(content));
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -202,17 +217,27 @@ public class FileController {
     @GetMapping("/view2/{id}")
     public ResponseEntity<Object> previewFileOnline(@PathVariable String id) throws UnsupportedEncodingException {
         Optional<FileDocument> file = fileService.getPreviewById(id);
-        if (file.isPresent()) {
-            return ResponseEntity.ok()
-                    // 这里需要进行中文编码
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + URLEncoder.encode(file.get().getName(), "utf-8") + ".pdf")
-                    .header(HttpHeaders.CONTENT_TYPE, FileContentTypeUtils.getContentType("pdf"))
-                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "").header("Connection", "close")
-                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
-                    .body(file.get().getContent());
-        } else {
+        if (file.isEmpty()) {
             throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
+        FileDocument fileDocument = file.get();
+
+        // 从MinIO下载文件内容
+        byte[] content;
+        if (fileDocument.getPreviewFileId() != null) {
+            content = fileService.getFileBytes(fileDocument.getPreviewFileId(), StorageConstants.PREVIEWS);
+        } else if (fileDocument.getGridfsId() != null) {
+            content = fileService.getFileBytes(fileDocument.getGridfsId(), StorageConstants.DOCUMENTS);
+        } else {
+            content = fileDocument.getContent();
+        }
+
+        return ResponseEntity.ok()
+                // 这里需要进行中文编码
+                .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + URLEncoder.encode(fileDocument.getName(), "utf-8") + ".pdf")
+                .header(HttpHeaders.CONTENT_TYPE, FileContentTypeUtils.getContentType("pdf"))
+                .header(HttpHeaders.CONTENT_LENGTH, content.length + "").header("Connection", "close")
+                .body(content);
     }
 
     /**
@@ -225,16 +250,24 @@ public class FileController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> downloadFileById(@PathVariable String id) throws UnsupportedEncodingException {
         Optional<FileDocument> file = fileService.getById(id);
-        if (file.isPresent()) {
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=" + URLEncoder.encode(file.get().getName(), "utf-8"))
-                    .header(HttpHeaders.CONTENT_TYPE, "application/octet-stream")
-                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "").header("Connection", "close")
-                    .header(HttpHeaders.CONTENT_LENGTH, file.get().getSize() + "")
-                    .body(file.get().getContent());
-        } else {
+        if (file.isEmpty()) {
             throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
+        FileDocument fileDocument = file.get();
+
+        // 从MinIO下载文件内容
+        byte[] content;
+        if (fileDocument.getGridfsId() != null) {
+            content = fileService.getFileBytes(fileDocument.getGridfsId(), StorageConstants.DOCUMENTS);
+        } else {
+            content = fileDocument.getContent();
+        }
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=" + URLEncoder.encode(fileDocument.getName(), "utf-8"))
+                .header(HttpHeaders.CONTENT_TYPE, "application/octet-stream")
+                .header(HttpHeaders.CONTENT_LENGTH, content.length + "").header("Connection", "close")
+                .body(content);
     }
 
     /**
@@ -491,20 +524,20 @@ public class FileController {
 //        }
         // 设置响应头，缓存 1 小时
         response.setHeader("Cache-Control", "max-age=3600, public");
-        return fileService.getFileBytes(thumbId);
+        return fileService.getFileBytes(thumbId, StorageConstants.THUMBS);
     }
 
     @GetMapping(value = "/text2/{txtId}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public byte[] previewTxt(@PathVariable String txtId) {
-        return fileService.getFileBytes(txtId);
+        return fileService.getFileBytes(txtId, StorageConstants.TEXTS);
     }
 
     @GetMapping(value = "/text/{txtId}", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public void downloadTxt(@PathVariable String txtId, HttpServletResponse response) {
         try {
-            byte[] buffer = fileService.getFileBytes(txtId);
+            byte[] buffer = fileService.getFileBytes(txtId, StorageConstants.TEXTS);
             extracted(response, buffer);
         } catch (IOException ex) {
             log.error("下载文本文件错误", ex);

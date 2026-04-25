@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service;
 
-import com.jiaruiblog.domain.entity.CateDocRelationship;
-import com.jiaruiblog.domain.entity.Category;
+import com.jiaruiblog.domain.entity.po.CateDocRelationship;
+import com.jiaruiblog.domain.entity.po.Category;
 import com.jiaruiblog.domain.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.domain.entity.vo.CateOrTagVO;
 import com.jiaruiblog.domain.entity.vo.CategoryVO;

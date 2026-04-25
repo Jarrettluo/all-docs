@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.ThumbnailService;
-import com.jiaruiblog.domain.entity.Thumbnail;
+import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.infrastructure.repository.ThumbnailRepository;
 import com.jiaruiblog.infrastructure.storage.MinioStorageStrategy;
 import jakarta.annotation.Resource;
@@ -9,7 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -45,20 +48,24 @@ public class ThumbnailServiceImpl implements ThumbnailService {
         }
 
         try {
-            // 使用 Thumbnailator 生成缩略图
-            byte[] thumbBytes = Thumbnails.of(inputStream)
+            // 先将 InputStream 转换为 BufferedImage，再生成缩略图
+            BufferedImage thumbImage = Thumbnails.of(ImageIO.read(inputStream))
                     .size(width, height)
                     .outputFormat("jpg")
-                    .asBytes(ByteArrayInputStream.class);
+                    .asBufferedImage();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(thumbImage, "jpg", baos);
+            byte[] thumbBytes = baos.toByteArray();
 
             String thumbId = UUID.randomUUID().toString();
-            String contentType = getContentType(fileName);
+            String objectKey = StorageConstants.thumbPath(thumbId);
 
-            String result = minioStorageStrategy.upload(new ByteArrayInputStream(thumbBytes), thumbId, contentType);
+            String result = minioStorageStrategy.upload(new ByteArrayInputStream(thumbBytes), objectKey, "image/jpeg");
 
             if (result != null) {
-                log.info("缩略图生成成功：fileName={}, thumbId={}, size={}x{}", fileName, thumbId, width, height);
-                return thumbId;
+                log.info("缩略图生成成功：fileName={}, thumbId={}, objectKey={}, size={}x{}", fileName, thumbId, objectKey, width, height);
+                return thumbId; // 返回thumbId，调用方保存到MySQL
             }
 
             log.error("缩略图上传失败：fileName={}", fileName);
@@ -78,19 +85,23 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
         try {
             // 预览图使用较大的尺寸
-            byte[] previewBytes = Thumbnails.of(inputStream)
+            BufferedImage previewImage = Thumbnails.of(ImageIO.read(inputStream))
                     .size(800, 800)
                     .outputFormat("jpg")
-                    .asBytes(ByteArrayInputStream.class);
+                    .asBufferedImage();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(previewImage, "jpg", baos);
+            byte[] previewBytes = baos.toByteArray();
 
             String previewId = UUID.randomUUID().toString();
-            String contentType = getContentType(fileName);
+            String objectKey = StorageConstants.previewPath(previewId);
 
-            String result = minioStorageStrategy.upload(new ByteArrayInputStream(previewBytes), previewId, contentType);
+            String result = minioStorageStrategy.upload(new ByteArrayInputStream(previewBytes), objectKey, "image/jpeg");
 
             if (result != null) {
-                log.info("预览图生成成功：fileName={}, previewId={}", fileName, previewId);
-                return previewId;
+                log.info("预览图生成成功：fileName={}, previewId={}, objectKey={}", fileName, previewId, objectKey);
+                return previewId; // 返回previewId，调用方保存到MySQL
             }
 
             log.error("预览图上传失败：fileName={}", fileName);
@@ -98,25 +109,6 @@ public class ThumbnailServiceImpl implements ThumbnailService {
         } catch (Exception e) {
             log.error("生成预览图异常：fileName={}", fileName, e);
             return "";
-        }
-    }
-
-    /**
-     * 根据文件扩展名获取内容类型
-     */
-    private String getContentType(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "image/jpeg";
-        }
-        String lowerFileName = fileName.toLowerCase();
-        if (lowerFileName.endsWith(".png")) {
-            return "image/png";
-        } else if (lowerFileName.endsWith(".gif")) {
-            return "image/gif";
-        } else if (lowerFileName.endsWith(".bmp")) {
-            return "image/bmp";
-        } else {
-            return "image/jpeg";
         }
     }
 }

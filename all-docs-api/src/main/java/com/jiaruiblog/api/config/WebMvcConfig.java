@@ -29,9 +29,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://example.com", "https://www.example.com")  // 配置具体允许的域名
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedOrigins("http://localhost:8080", "https://example.com", "https://www.example.com")  // 配置具体允许的域名
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600)
                 .exposedHeaders("Content-Disposition"); // 允许前端访问 Content-Disposition
     }
 

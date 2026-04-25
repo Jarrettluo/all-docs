@@ -3,7 +3,6 @@ package com.jiaruiblog.domain.entity.vo;
 import com.jiaruiblog.common.enums.DocStateEnum;
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 
 /**

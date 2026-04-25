@@ -1,4 +1,4 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.entity.po;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jiaruiblog.common.enums.PermissionEnum;
@@ -16,11 +16,7 @@ import java.util.Date;
 
 
 /**
- * @ClassName User
- * @Description User
  * @author luojiarui
- * @Date 2022/6/4 9:37 上午
- * @Version 1.0
  **/
 @Table(name = "user")
 @Data

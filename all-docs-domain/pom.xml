@@ -27,7 +27,6 @@
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
             <version>3.1.0</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Elasticsearch (provided - 仅接口) -->
@@ -48,8 +47,7 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>2.2.21</version>
-            <scope>provided</scope>
+            <version>2.2.22</version>
         </dependency>
 
         <!-- FastJSON -->

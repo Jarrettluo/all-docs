@@ -1,17 +1,15 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.TagService;
-import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.BusinessExceptionBuilder;
 import com.jiaruiblog.common.exception.ErrorCode;
-import com.jiaruiblog.domain.entity.CateDocRelationship;
-import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.domain.entity.Tag;
-import com.jiaruiblog.domain.entity.TagDocRelationship;
+import com.jiaruiblog.domain.entity.po.CateDocRelationship;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.Tag;
+import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.domain.entity.dto.FileDocumentDTO;
 import com.jiaruiblog.domain.entity.vo.CateOrTagVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.domain.entity.vo.TagVO;
 import com.jiaruiblog.infrastructure.repository.CategoryRepository;
 import com.jiaruiblog.infrastructure.repository.TagRepository;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
@@ -20,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;

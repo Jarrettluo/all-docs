@@ -1,6 +1,5 @@
-package com.jiaruiblog.domain.entity;
+package com.jiaruiblog.domain.entity.po;
 
-import jakarta.persistence.Id;
 import lombok.Data;
 
 import java.util.Date;
@@ -18,7 +17,6 @@ public class TagDocRelationship {
     /**
      * id
      */
-    @Id
     private String id;
 
     /**

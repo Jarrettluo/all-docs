@@ -1,10 +1,11 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.IUserService;
+import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.ErrorCode;
-import com.jiaruiblog.domain.entity.User;
+import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.bo.UserBO;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.RegistryUserDTO;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -249,23 +251,32 @@ public class UserServiceImpl implements IUserService {
         }
 
         try {
-            String avatarId = UUID.randomUUID().toString();
+            // 获取原始文件名
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.isEmpty()) {
+                originalFilename = "avatar.jpg";
+            }
+
+            // 生成唯一文件名
+            String uuid = UUID.randomUUID().toString();
+            String extension = getFileExtension(originalFilename);
+            String newFilename = uuid + extension;
+
+            // 构建存储路径: avatars/{username}/{filename}
+            String objectKey = StorageConstants.avatarPath(user.getUsername(), newFilename);
             String contentType = file.getContentType() != null ? file.getContentType() : "image/jpeg";
 
-            String result = minioStorageStrategy.upload(file.getInputStream(), avatarId, contentType);
+            String result = minioStorageStrategy.upload(file.getInputStream(), objectKey, contentType);
             if (result == null) {
                 throw new BusinessException(ErrorCode.OPERATE_FAILED, "头像上传失败");
             }
 
-            if (user.getAvatarList() == null) {
-                user.setAvatarList(new ArrayList<>());
-            }
-            user.getAvatarList().add(avatarId);
-            user.setAvatar(avatarId);
+            // 保存完整objectKey到用户记录
+            user.setAvatar(objectKey);
             user.setUpdateDate(new Date());
             userRepository.update(user);
 
-            log.info("用户头像上传成功：userId={}, avatarId={}", userId, avatarId);
+            log.info("用户头像上传成功：userId={}, username={}, objectKey={}", userId, user.getUsername(), objectKey);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
@@ -283,11 +294,12 @@ public class UserServiceImpl implements IUserService {
         if (user == null) {
             return;
         }
-        if (user.getAvatar() != null) {
+        // avatar字段现在存储完整objectKey
+        if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
             try {
                 minioStorageStrategy.delete(user.getAvatar());
             } catch (Exception e) {
-                log.error("删除用户头像文件失败：avatarId={}", user.getAvatar(), e);
+                log.error("删除用户头像文件失败：objectKey={}", user.getAvatar(), e);
             }
             user.setAvatar(null);
             user.setUpdateDate(new Date());
@@ -473,5 +485,36 @@ public class UserServiceImpl implements IUserService {
      */
     private boolean verifyPassword(String rawPassword, String encodedPassword) {
         return encodePassword(rawPassword).equals(encodedPassword);
+    }
+
+    @Override
+    public byte[] getAvatarBytes(String objectKey) {
+        if (objectKey == null || objectKey.isEmpty()) {
+            return new byte[0];
+        }
+        try {
+            InputStream inputStream = minioStorageStrategy.download(objectKey);
+            if (inputStream == null) {
+                return new byte[0];
+            }
+            return inputStream.readAllBytes();
+        } catch (Exception e) {
+            log.error("获取用户头像失败：objectKey={}", objectKey, e);
+            return new byte[0];
+        }
+    }
+
+    /**
+     * 获取文件扩展名
+     */
+    private String getFileExtension(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            return ".jpg";
+        }
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex > 0) {
+            return filename.substring(dotIndex);
+        }
+        return ".jpg";
     }
 }

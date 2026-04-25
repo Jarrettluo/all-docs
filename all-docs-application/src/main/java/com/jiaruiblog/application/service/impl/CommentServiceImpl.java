@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.ICommentService;
-import com.jiaruiblog.domain.entity.Comment;
+import com.jiaruiblog.domain.entity.po.Comment;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.CommentListDTO;
 import com.jiaruiblog.domain.entity.vo.CommentWithUserVO;
