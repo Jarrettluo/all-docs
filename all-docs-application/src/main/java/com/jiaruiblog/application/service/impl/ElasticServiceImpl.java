@@ -1,7 +1,7 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.ElasticService;
-import com.jiaruiblog.domain.entity.FileObj;
+import com.jiaruiblog.domain.entity.po.SearchDocument;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,22 +29,20 @@ import java.util.stream.Collectors;
 @Service
 public class ElasticServiceImpl implements ElasticService {
 
-    private static final String INDEX_NAME = "docwrite";
-
     @Resource
     private ElasticsearchOperations elasticsearchOperations;
 
     @Override
-    public void upload(FileObj fileObj) {
+    public void upload(SearchDocument fileObj) {
         if (fileObj == null || fileObj.getId() == null) {
-            log.warn("Cannot upload null or id-less FileObj to Elasticsearch");
+            log.warn("Cannot upload null or id-less SearchDocument to Elasticsearch");
             return;
         }
         try {
             elasticsearchOperations.save(fileObj);
-            log.info("FileObj uploaded to ES: id={}, name={}", fileObj.getId(), fileObj.getName());
+            log.info("SearchDocument uploaded to ES: id={}, name={}", fileObj.getId(), fileObj.getName());
         } catch (Exception e) {
-            log.error("Failed to upload FileObj to ES: id={}", fileObj.getId(), e);
+            log.error("Failed to upload SearchDocument to ES: id={}", fileObj.getId(), e);
         }
     }
 
@@ -63,11 +62,11 @@ public class ElasticServiceImpl implements ElasticService {
             Query query = new CriteriaQuery(criteria)
                     .setPageable(org.springframework.data.domain.PageRequest.of(pageNum - 1, pageSize));
 
-            SearchHits<FileObj> searchHits = elasticsearchOperations.search(query, FileObj.class);
+            SearchHits<SearchDocument> searchHits = elasticsearchOperations.search(query, SearchDocument.class);
 
             List<String> results = searchHits.getSearchHits().stream()
                     .map(SearchHit::getContent)
-                    .map(FileObj::getName)
+                    .map(SearchDocument::getName)
                     .collect(Collectors.toList());
 
             return PageVO.<String>builder()
@@ -94,10 +93,10 @@ public class ElasticServiceImpl implements ElasticService {
         }
         try {
             Query query = new CriteriaQuery(new Criteria("id").in(docIds));
-            SearchHits<FileObj> searchHits = elasticsearchOperations.search(query, FileObj.class);
+            SearchHits<SearchDocument> searchHits = elasticsearchOperations.search(query, SearchDocument.class);
             return searchHits.getSearchHits().stream()
                     .map(SearchHit::getContent)
-                    .map(FileObj::getName)
+                    .map(SearchDocument::getName)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("Failed to query file names by ids", e);
@@ -106,20 +105,8 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     @Override
-    public List<FileObj> queryFileObjListByIds(List<String> docIds) {
-        if (docIds == null || docIds.isEmpty()) {
-            return new ArrayList<>();
-        }
-        try {
-            Query query = new CriteriaQuery(new Criteria("id").in(docIds));
-            SearchHits<FileObj> searchHits = elasticsearchOperations.search(query, FileObj.class);
-            return searchHits.getSearchHits().stream()
-                    .map(SearchHit::getContent)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            log.error("Failed to query file objects by ids", e);
-            return new ArrayList<>();
-        }
+    public List<SearchDocument> queryFileObjListByIds(List<String> docIds) {
+        return List.of();
     }
 
     @Override
@@ -129,11 +116,11 @@ public class ElasticServiceImpl implements ElasticService {
         }
         try {
             Query query = new CriteriaQuery(new Criteria("id").is(docId));
-            SearchHits<FileObj> searchHits = elasticsearchOperations.search(query, FileObj.class);
+            SearchHits<SearchDocument> searchHits = elasticsearchOperations.search(query, SearchDocument.class);
             return searchHits.getSearchHits().stream()
                     .findFirst()
                     .map(SearchHit::getContent)
-                    .map(FileObj::getContent)
+                    .map(SearchDocument::getContent)
                     .orElse("");
         } catch (Exception e) {
             log.error("Failed to query content by id: {}", docId, e);
@@ -151,10 +138,10 @@ public class ElasticServiceImpl implements ElasticService {
                     .or(new Criteria("name").matches(keyword));
             Query query = new CriteriaQuery(criteria);
 
-            SearchHits<FileObj> searchHits = elasticsearchOperations.search(query, FileObj.class);
+            SearchHits<SearchDocument> searchHits = elasticsearchOperations.search(query, SearchDocument.class);
             return searchHits.getSearchHits().stream()
                     .map(SearchHit::getContent)
-                    .map(FileObj::getId)
+                    .map(SearchDocument::getId)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("Elasticsearch searchIds failed for keyword: {}", keyword, e);
@@ -163,20 +150,8 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     @Override
-    public void uploadFileObj(InputStream inputStream, FileObj fileObj) {
-        if (inputStream == null || fileObj == null) {
-            log.warn("Cannot upload null input stream or FileObj");
-            return;
-        }
-        try {
-            byte[] bytes = inputStream.readAllBytes();
-            String content = java.util.Base64.getEncoder().encodeToString(bytes);
-            fileObj.setContent(content);
-            elasticsearchOperations.save(fileObj);
-            log.info("FileObj with content uploaded to ES: id={}", fileObj.getId());
-        } catch (Exception e) {
-            log.error("Failed to upload file obj with content to ES", e);
-        }
+    public void uploadFileObj(InputStream inputStream, SearchDocument searchDocument) {
+
     }
 
     @Override
@@ -185,41 +160,57 @@ public class ElasticServiceImpl implements ElasticService {
             return;
         }
         try {
-            elasticsearchOperations.delete(id, FileObj.class);
-            log.info("FileObj deleted from ES: id={}", id);
+            elasticsearchOperations.delete(id, SearchDocument.class);
+            log.info("SearchDocument deleted from ES: id={}", id);
         } catch (Exception e) {
             log.error("Failed to delete from ES: id={}", id, e);
         }
     }
 
     @Override
-    public void updateFileObj(InputStream inputStream, FileObj fileObj) {
-        if (fileObj == null || fileObj.getId() == null) {
-            log.warn("Cannot update null or id-less FileObj");
+    public void updateFileObj(InputStream inputStream, SearchDocument searchDocument) {
+        if (searchDocument == null || searchDocument.getId() == null) {
+            log.warn("Cannot update null or id-less SearchDocument in Elasticsearch");
             return;
         }
         try {
-            if (inputStream != null) {
-                byte[] bytes = inputStream.readAllBytes();
-                String content = java.util.Base64.getEncoder().encodeToString(bytes);
-                fileObj.setContent(content);
-            }
-            elasticsearchOperations.save(fileObj);
-            log.info("FileObj updated in ES: id={}", fileObj.getId());
+            // ES 中 SearchDocument 以 id 为主键，直接 save 即可覆盖
+            elasticsearchOperations.save(searchDocument);
+            log.info("SearchDocument updated in ES: id={}, name={}", searchDocument.getId(), searchDocument.getName());
         } catch (Exception e) {
-            log.error("Failed to update FileObj in ES", e);
+            log.error("Failed to update SearchDocument in ES: id={}", searchDocument.getId(), e);
         }
     }
 
     @Override
     public List<Map<String, Object>> getWordStat() {
         try {
-            // Return basic index statistics
-            Map<String, Object> stat = Map.of(
-                    "index", INDEX_NAME,
-                    "status", "available"
-            );
-            return List.of(stat);
+            // 查询所有文档，统计词频
+            Criteria criteria = new Criteria("content").exists();
+            Query query = new CriteriaQuery(criteria);
+            SearchHits<SearchDocument> hits = elasticsearchOperations.search(query, SearchDocument.class);
+
+            // 收集所有文档内容进行词频统计
+            Map<String, Long> wordCount = new HashMap<>();
+            for (SearchHit<SearchDocument> hit : hits.getSearchHits()) {
+                String content = hit.getContent().getContent();
+                if (content != null) {
+                    // 简单分词，按空格/标点分割（生产环境建议用 IK 分词器的 analyze API）
+                    String[] words = content.split("[\\s，。、！？；：\"『』（）(){},.!?;:'「」[\\]]+");
+                    for (String word : words) {
+                        if (word.length() >= 2) { // 过滤单字
+                            wordCount.merge(word, 1L, Long::sum);
+                        }
+                    }
+                }
+            }
+
+            // 返回 top 100 高频词
+            return wordCount.entrySet().stream()
+                    .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                    .limit(100)
+                    .map(e -> Map.<String, Object>of("word", e.getKey(), "count", e.getValue()))
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("Failed to get word statistics", e);
             return new ArrayList<>();
