@@ -12,6 +12,7 @@ import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -86,6 +87,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     @Override
+    @Transactional
     public void refuse(FileDocument fileDocument, String reason) {
         if (fileDocument == null || fileDocument.getId() == null) {
             return;
@@ -110,6 +112,7 @@ public class DocReviewServiceImpl implements DocReviewService {
     }
 
     @Override
+    @Transactional
     public void approveBatch(List<FileDocument> fileFileDocumentList) {
         if (fileFileDocumentList == null || fileFileDocumentList.isEmpty()) {
             return;
