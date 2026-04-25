@@ -1,39 +1,44 @@
 package com.jiaruiblog.application.task.executor.slider;
 
+import com.jiaruiblog.application.service.FileOperationService;
 import com.jiaruiblog.application.task.data.TaskData;
-import com.jiaruiblog.application.task.exception.TaskRunException;
 import com.jiaruiblog.application.task.executor.TaskExecutor;
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.common.util.SpringApplicationContext;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
- * <p></p>
- * edit at 2024/11/11 6:47
- *
- * @author Jarrett Luo
- * @version 1.0
+ * PPT 文档解析执行器，使用 Apache Tika 提取文字
  */
+@Slf4j
 public class PptExecutor extends TaskExecutor {
 
     @Override
     protected void readText(InputStream is, String textFilePath) throws IOException {
-
+        if (is == null) {
+            throw new IOException("输入流为空");
+        }
+        FileOperationService fileOperationService = SpringApplicationContext.getBean(FileOperationService.class);
+        com.jiaruiblog.application.service.TextExtractResult result =
+                fileOperationService.parseToStr(is);
+        String content = result.isSuccess() ? result.getContent() : "";
+        File file = new File(textFilePath);
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            writer.write(content != null ? content : "");
+        }
+        log.info("PPT 文字提取完成，输出路径: {}", textFilePath);
     }
 
     @Override
     protected void makeThumb(InputStream is, String picPath) throws IOException {
-        // TODO: Implement with PPTUtil
+        log.debug("PPT 缩略图生成暂未实现");
     }
 
     @Override
     protected void makePreviewFile(InputStream inStream, TaskData taskData) {
-        // TODO: Implement with PptToPDFConverter
-    }
-
-    @Override
-    public void uploadFileToEs(InputStream is, FileDocument fileDocument, TaskData taskData) {
-        // TODO: Implement
+        // 预览文件暂未实现
     }
 }
