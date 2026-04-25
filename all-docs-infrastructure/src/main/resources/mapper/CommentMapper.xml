@@ -42,4 +42,19 @@
         DELETE FROM comment WHERE doc_id = #{docId}
     </delete>
 
+    <select id="findByContentContaining" resultMap="CommentResultMap">
+        SELECT * FROM comment WHERE content LIKE CONCAT('%', #{keyword}, '%') ORDER BY create_date DESC
+    </select>
+
+    <delete id="deleteAllByIdIn">
+        DELETE FROM comment WHERE id IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM comment
+    </select>
+
 </mapper>

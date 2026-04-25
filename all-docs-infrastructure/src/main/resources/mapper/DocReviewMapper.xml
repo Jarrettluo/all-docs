@@ -39,12 +39,32 @@
         SELECT COUNT(*) FROM doc_review WHERE user_id = #{userId}
     </select>
 
+    <select id="countByUserIdWithAdmin" resultType="long">
+        SELECT COUNT(*) FROM doc_review
+        <where>
+            <if test="!isAdmin">AND user_id = #{userId}</if>
+        </where>
+    </select>
+
     <select id="findByPage" resultMap="DocReviewResultMap">
         SELECT * FROM doc_review
         WHERE user_id = #{userId}
         ORDER BY create_date DESC
         LIMIT #{offset}, #{limit}
     </select>
+
+    <select id="findByPageWithAdmin" resultMap="DocReviewResultMap">
+        SELECT * FROM doc_review
+        <where>
+            <if test="!isAdmin">AND user_id = #{userId}</if>
+        </where>
+        ORDER BY create_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <delete id="deleteByQuery">
+        DELETE FROM doc_review
+    </delete>
 
     <delete id="deleteByIdList">
         DELETE FROM doc_review WHERE id IN

@@ -27,4 +27,12 @@
         DELETE FROM thumbnail WHERE object_id = #{objectId}
     </delete>
 
+    <select id="findByObjectIdAndType" resultMap="ThumbnailResultMap">
+        SELECT * FROM thumbnail WHERE object_id = #{objectId} AND thumbnail_enum = #{thumbnailEnum} LIMIT 1
+    </select>
+
+    <select id="findByObjectIdAndSize" resultMap="ThumbnailResultMap">
+        SELECT * FROM thumbnail WHERE object_id = #{objectId} AND thumb_size_enum = #{thumbSizeEnum} LIMIT 1
+    </select>
+
 </mapper>

@@ -22,4 +22,10 @@ public interface CommentMapper {
     void deleteById(@Param("id") String id);
 
     void deleteByDocId(@Param("docId") String docId);
+
+    List<Comment> findByContentContaining(@Param("keyword") String keyword);
+
+    void deleteAllByIdIn(@Param("idList") List<String> idList);
+
+    long count();
 }

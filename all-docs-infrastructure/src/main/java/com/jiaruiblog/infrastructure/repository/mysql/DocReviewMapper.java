@@ -15,7 +15,13 @@ public interface DocReviewMapper {
 
     long countByUserId(@Param("userId") String userId);
 
+    long countByUserIdWithAdmin(@Param("userId") String userId, @Param("isAdmin") boolean isAdmin);
+
     List<DocReview> findByPage(@Param("offset") int offset, @Param("limit") int limit, @Param("userId") String userId);
+
+    List<DocReview> findByPageWithAdmin(@Param("offset") int offset, @Param("limit") int limit, @Param("userId") String userId, @Param("isAdmin") boolean isAdmin);
+
+    long deleteByQuery();
 
     void deleteByIdList(@Param("idList") List<String> idList);
 

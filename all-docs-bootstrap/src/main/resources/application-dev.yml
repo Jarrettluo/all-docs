@@ -24,7 +24,7 @@ spring:
       database: 0
       host: ${REDIS_HOST:192.168.1.29}
       port: ${REDIS_PORT:16379}
-      password: ${REDIS_PWD:}
+      password: ${REDIS_PWD:infini_rag_flow}
       timeout: 3000
       jedis:
         pool:
@@ -74,6 +74,11 @@ all-docs:
     cover-admin: ${COVER_ADMIN:false}
   file-path:
     sensitive-file: sensitive.txt
+
+# 开发环境 HMAC
+hmac:
+  secret:
+    key: ${HMAC_SECRET_KEY:dev-hmac-secret-key}
 
 # 异步线程池
 async:
