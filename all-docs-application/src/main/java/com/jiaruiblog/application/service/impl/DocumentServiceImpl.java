@@ -5,8 +5,9 @@ import com.jiaruiblog.application.service.DocumentService;
 import com.jiaruiblog.application.service.ElasticService;
 import com.jiaruiblog.application.service.CollectService;
 import com.jiaruiblog.application.service.ICommentService;
+import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.DocStateEnum;
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
@@ -23,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,10 +57,12 @@ public class DocumentServiceImpl implements DocumentService {
             throw new IllegalArgumentException("InputStream cannot be null");
         }
         StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
-        String objectId = IdUtil.simpleUUID();
-        storageStrategy.upload(inputStream, objectId, contentType);
-        log.info("Uploaded file to MinIO: objectId={}, filename={}", objectId, fileName);
-        return objectId;
+        // 使用UUID作为唯一key，路径前缀为 documents/
+        String uniqueKey = IdUtil.simpleUUID();
+        String objectKey = StorageConstants.documentPath(uniqueKey);
+        storageStrategy.upload(inputStream, objectKey, contentType);
+        log.info("Uploaded file to MinIO: objectKey={}, filename={}", objectKey, fileName);
+        return uniqueKey; // 返回唯一key，用于存储到MySQL的gridfsId字段
     }
 
     @Override
@@ -83,7 +85,9 @@ public class DocumentServiceImpl implements DocumentService {
         }
         StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
         for (String fileId : fileIds) {
-            storageStrategy.delete(fileId);
+            // fileId 是唯一key，需要构建完整路径
+            String objectKey = StorageConstants.documentPath(fileId);
+            storageStrategy.delete(objectKey);
         }
         log.info("Deleted files from MinIO: {}", Arrays.asList(fileIds));
     }
@@ -95,9 +99,21 @@ public class DocumentServiceImpl implements DocumentService {
         }
         // Delete from MySQL
         documentRepository.delete(document.getId());
-        // Delete from MinIO
+        // Delete from MinIO - 文档原文
         if (document.getGridfsId() != null) {
-            deleteGridFs(document.getGridfsId());
+            storageFactory.getStorageStrategy().delete(StorageConstants.documentPath(document.getGridfsId()));
+        }
+        // Delete from MinIO - 缩略图
+        if (document.getThumbId() != null) {
+            storageFactory.getStorageStrategy().delete(StorageConstants.thumbPath(document.getThumbId()));
+        }
+        // Delete from MinIO - 预览图
+        if (document.getPreviewFileId() != null) {
+            storageFactory.getStorageStrategy().delete(StorageConstants.previewPath(document.getPreviewFileId()));
+        }
+        // Delete from MinIO - 文本文件
+        if (document.getTextFileId() != null) {
+            storageFactory.getStorageStrategy().delete(StorageConstants.textPath(document.getTextFileId()));
         }
         // Delete from ES
         if (document.getMd5() != null) {
@@ -165,19 +181,26 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public byte[] getFileBytes(String gridfsId) {
-        if (gridfsId == null || gridfsId.isEmpty()) {
+    public byte[] getFileBytes(String id) {
+        // 默认使用 documents/ 前缀，保持向后兼容
+        return getFileBytes(id, StorageConstants.DOCUMENTS);
+    }
+
+    @Override
+    public byte[] getFileBytes(String id, String pathPrefix) {
+        if (id == null || id.isEmpty()) {
             return new byte[0];
         }
         StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
-        InputStream inputStream = storageStrategy.download(gridfsId);
+        String objectKey = pathPrefix + id;
+        InputStream inputStream = storageStrategy.download(objectKey);
         if (inputStream == null) {
             return new byte[0];
         }
         try {
             return inputStream.readAllBytes();
         } catch (java.io.IOException e) {
-            log.error("Failed to read file bytes", e);
+            log.error("Failed to read file bytes: objectKey={}", objectKey, e);
             return new byte[0];
         } finally {
             try {
@@ -286,8 +309,23 @@ public class DocumentServiceImpl implements DocumentService {
         FileDocument document = documentRepository.findById(id);
         if (document != null) {
             documentRepository.delete(id);
-            if (isDeleteFile && document.getGridfsId() != null) {
-                deleteGridFs(document.getGridfsId());
+            if (isDeleteFile) {
+                // 删除文档原文
+                if (document.getGridfsId() != null) {
+                    storageFactory.getStorageStrategy().delete(StorageConstants.documentPath(document.getGridfsId()));
+                }
+                // 删除缩略图
+                if (document.getThumbId() != null) {
+                    storageFactory.getStorageStrategy().delete(StorageConstants.thumbPath(document.getThumbId()));
+                }
+                // 删除预览图
+                if (document.getPreviewFileId() != null) {
+                    storageFactory.getStorageStrategy().delete(StorageConstants.previewPath(document.getPreviewFileId()));
+                }
+                // 删除文本文件
+                if (document.getTextFileId() != null) {
+                    storageFactory.getStorageStrategy().delete(StorageConstants.textPath(document.getTextFileId()));
+                }
             }
         }
     }
@@ -403,8 +441,12 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public InputStream getFileThumb(String thumbId) {
+        if (thumbId == null || thumbId.isEmpty()) {
+            return null;
+        }
         StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
-        return storageStrategy.download(thumbId);
+        String objectKey = StorageConstants.thumbPath(thumbId);
+        return storageStrategy.download(objectKey);
     }
 
     @Override
@@ -501,5 +543,61 @@ public class DocumentServiceImpl implements DocumentService {
         documentVO.setTxtId(fileDocument.getTextFileId());
         documentVO.setPreviewFileId(fileDocument.getPreviewFileId());
         return documentVO;
+    }
+
+    @Override
+    public PageVO<DocumentVO> search(String keyword, int pageNum, int pageSize) {
+        if (keyword == null || keyword.isEmpty()) {
+            return PageVO.<DocumentVO>builder()
+                    .pageNum(pageNum)
+                    .pageSize(pageSize)
+                    .total(0)
+                    .list(new java.util.ArrayList<>())
+                    .build();
+        }
+        // Step 1: Get matching doc IDs from ES
+        java.util.List<String> matchedIds = elasticService.searchIds(keyword);
+        if (matchedIds == null || matchedIds.isEmpty()) {
+            return PageVO.<DocumentVO>builder()
+                    .pageNum(pageNum)
+                    .pageSize(pageSize)
+                    .total(0)
+                    .list(new java.util.ArrayList<>())
+                    .build();
+        }
+        // Step 2: Query MySQL, filter by reviewing=false AND docState=SUCCESS
+        java.util.List<FileDocument> allMatchedDocs = documentRepository.findByIdList(matchedIds);
+        java.util.List<FileDocument> filteredDocs = allMatchedDocs.stream()
+                .filter(doc -> !doc.isReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
+                .collect(java.util.stream.Collectors.toList());
+        // Step 3: Pagination
+        int total = filteredDocs.size();
+        int start = (pageNum - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        java.util.List<FileDocument> pagedDocs = (start >= total)
+                ? new java.util.ArrayList<>()
+                : filteredDocs.subList(start, end);
+        // Step 4: Convert to VO
+        java.util.List<DocumentVO> voList = pagedDocs.stream()
+                .map(this::convertToVO)
+                .collect(java.util.stream.Collectors.toList());
+        return PageVO.<DocumentVO>builder()
+                .pageNum(pageNum)
+                .pageSize(pageSize)
+                .total(total)
+                .list(voList)
+                .build();
+    }
+
+    private DocumentVO convertToVO(FileDocument doc) {
+        DocumentVO vo = new DocumentVO();
+        vo.setId(doc.getId());
+        vo.setTitle(doc.getName());
+        vo.setSize(doc.getSize());
+        vo.setDescription(doc.getDescription());
+        vo.setThumbId(doc.getThumbId());
+        vo.setUserName(doc.getUserName());
+        vo.setCreateTime(doc.getUploadDate());
+        return vo;
     }
 }

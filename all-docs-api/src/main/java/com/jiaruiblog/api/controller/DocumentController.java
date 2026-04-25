@@ -3,12 +3,13 @@ package com.jiaruiblog.api.controller;
 import com.jiaruiblog.api.auth.Permission;
 import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.domain.entity.FileDocument;
-import com.jiaruiblog.domain.entity.User;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.RemoveObjectDTO;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
+import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.common.enums.FilterTypeEnum;
 import com.jiaruiblog.common.exception.BusinessException;
@@ -145,5 +146,33 @@ public class DocumentController {
     public ApiResult<Object> hot() {
         List<String> keyList = redisService.getHotList(null, RedisServiceImpl.SEARCH_KEY);
         return ApiResult.success(keyList);
+    }
+
+    @Operation(summary = "2.4 文档全文搜索", description = "根据关键字搜索已审核且解析成功的文档")
+    @GetMapping(value = "/search")
+    public ApiResult<Object> search(
+            @RequestParam(value = "keyword")
+            @Schema(description = "搜索关键字") String keyword,
+            @RequestParam(value = "page", defaultValue = "1")
+            @Schema(description = "页码") int page,
+            @RequestParam(value = "size", defaultValue = "10")
+            @Schema(description = "每页大小") int size) throws IOException {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return ApiResult.success(PageVO.<DocumentVO>builder()
+                    .pageNum(page)
+                    .pageSize(size)
+                    .total(0)
+                    .list(new java.util.ArrayList<>())
+                    .build());
+        }
+        // 记录搜索词
+        if (StringUtils.hasText(keyword)) {
+            SensitiveFilter filter = SensitiveFilter.getInstance();
+            int n = filter.checkSensitiveWord(keyword, 0, 1);
+            if (n <= 0) {
+                redisService.incrementScoreByUserId(keyword, RedisServiceImpl.SEARCH_KEY);
+            }
+        }
+        return ApiResult.success(documentService.search(keyword.trim(), page, size));
     }
 }

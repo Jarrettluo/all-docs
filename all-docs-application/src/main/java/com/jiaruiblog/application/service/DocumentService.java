@@ -1,6 +1,6 @@
 package com.jiaruiblog.application.service;
 
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
@@ -156,7 +156,14 @@ public interface DocumentService {
     /**
      * 获取文件字节数组
      */
-    byte[] getFileBytes(String thumbId);
+    byte[] getFileBytes(String id);
+
+    /**
+     * 根据存储路径前缀获取文件字节数组
+     * @param id 文件唯一标识符(UUID)
+     * @param pathPrefix 存储路径前缀，如 "thumbs/"、"texts/"、"previews/"、"documents/"
+     */
+    byte[] getFileBytes(String id, String pathPrefix);
 
     /**
      * 保存文件流到dfs系统中
@@ -215,4 +222,14 @@ public interface DocumentService {
      * 转换文档对象为VO
      */
     DocumentVO convertDocument(DocumentVO documentVO, FileDocument fileDocument);
+
+    /**
+     * 根据关键字搜索已审核且解析成功的文档
+     *
+     * @param keyword  搜索关键字
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    PageVO<DocumentVO> search(String keyword, int pageNum, int pageSize);
 }
