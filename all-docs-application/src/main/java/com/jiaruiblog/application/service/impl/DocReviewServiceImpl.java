@@ -1,9 +1,10 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.DocReviewService;
+import com.jiaruiblog.application.service.TaskExecuteService;
 import com.jiaruiblog.common.enums.DocStateEnum;
-import com.jiaruiblog.domain.entity.DocReview;
-import com.jiaruiblog.domain.entity.FileDocument;
+import com.jiaruiblog.domain.entity.po.DocReview;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.infrastructure.repository.DocReviewRepository;
@@ -28,6 +29,9 @@ public class DocReviewServiceImpl implements DocReviewService {
 
     @Resource
     private DocumentRepository documentRepository;
+
+    @Resource
+    private TaskExecuteService taskExecuteService;
 
     @Override
     public void insert(FileDocument document) {
@@ -87,6 +91,7 @@ public class DocReviewServiceImpl implements DocReviewService {
             return;
         }
         // Update document state
+        fileDocument.setReviewing(false);
         fileDocument.setDocState(DocStateEnum.FAIL);
         fileDocument.setErrorMsg(reason);
         documentRepository.update(fileDocument);
@@ -120,9 +125,11 @@ public class DocReviewServiceImpl implements DocReviewService {
             return;
         }
         // Update document state
-        doc.setDocState(DocStateEnum.SUCCESS);
+        doc.setReviewing(false);
+        doc.setDocState(DocStateEnum.WAIT);
         documentRepository.update(doc);
-        log.info("文档审核通过：docId={}", doc.getId());
+        taskExecuteService.execute(doc);
+        log.info("文档审核通过，已触发解析任务：docId={}", doc.getId());
     }
 
     @Override
