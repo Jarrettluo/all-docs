@@ -387,10 +387,10 @@ public class CategoryServiceImpl implements CategoryService {
         // Step 1: Get doc IDs based on tag and category filters
         if (StringUtils.hasText(tagId)) {
             List<TagDocRelationship> tagRelationships = tagRepository.findRelationshipsByTagId(tagId);
-            docIds = tagRelationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
+            docIds = tagRelationships == null ? new ArrayList<>() : tagRelationships.stream().map(TagDocRelationship::getFileId).collect(Collectors.toList());
         } else if (StringUtils.hasText(cateId)) {
             List<CateDocRelationship> cateRelationships = categoryRepository.findRelationshipsByCategoryId(cateId, Sort.unsorted());
-            docIds = cateRelationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
+            docIds = cateRelationships == null ? new ArrayList<>() : cateRelationships.stream().map(CateDocRelationship::getFileId).collect(Collectors.toList());
         } else {
             docIds = new ArrayList<>();
         }

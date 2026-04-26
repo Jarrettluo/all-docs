@@ -1,6 +1,8 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.IDocLogService;
+import com.jiaruiblog.common.exception.BusinessException;
+import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.domain.entity.po.DocLog;
 import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.po.User;
@@ -15,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author luojiarui
@@ -29,16 +32,6 @@ public class DocLogServiceImpl implements IDocLogService {
 
     @Resource
     private DocLogRepository docLogRepository;
-
-    @Override
-    public void insert(DocLog docLog) {
-        if (docLog == null) {
-            return;
-        }
-        docLog.setCreateDate(new Date());
-        docLog.setUpdateDate(new Date());
-        docLogRepository.save(docLog);
-    }
 
     @Override
     public void remove(DocLog docLog) {
@@ -94,6 +87,7 @@ public class DocLogServiceImpl implements IDocLogService {
             return null;
         }
         DocLog docLog = new DocLog();
+        docLog.setId(UUID.randomUUID().toString());
         docLog.setUserId(user.getId());
         docLog.setUserName(user.getUsername());
         docLog.setDocId(document.getId());
@@ -101,13 +95,27 @@ public class DocLogServiceImpl implements IDocLogService {
         docLog.setAction(action.name());
         docLog.setCreateDate(new Date());
         docLog.setUpdateDate(new Date());
-        return docLogRepository.save(docLog).getId();
+        int save = docLogRepository.save(docLog);
+        if (save < 1) {
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+        }
+        return docLog.getId();
     }
 
     @Override
     public Map<String, Object> queryDocLogs(BasePageDTO page) {
-        List<DocLog> docLogList = docLogRepository.findByUserId(""); // Placeholder
-        long count = docLogRepository.count();
+        List<DocLog> docLogList = docLogRepository.findAll();
+        long count = docLogList.size();
+
+        // Pagination: page is 1-indexed, convert to 0-indexed for skip
+        int pageNum = page.getPage();
+        int pageSize = page.getRows();
+        int skip = (pageNum - 1) * pageSize;
+        docLogList = docLogList.stream()
+                .skip(skip)
+                .limit(pageSize)
+                .toList();
+
         Map<String, Object> result = new HashMap<>();
         result.put("total", count);
         result.put("data", docLogList);

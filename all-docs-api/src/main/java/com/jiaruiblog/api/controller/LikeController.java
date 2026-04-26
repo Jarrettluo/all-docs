@@ -28,7 +28,7 @@ public class LikeController{
 
     // entityType: 1:点赞
     // entityType: 2:收藏
-    @PostMapping("")
+    @PostMapping("/")
     public ApiResult<LikeVO> like(@RequestBody LikeRequest request, HttpServletRequest httpRequest) {
         String userId = (String) httpRequest.getAttribute("id");
         likeService.like(userId, request.getEntityType(), request.getEntityId());

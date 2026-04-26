@@ -57,17 +57,18 @@ public class DocumentController {
     public ApiResult<Object> list(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
             throws IOException {
         String userId = documentDTO.getUserId();
-        if (StringUtils.hasText(documentDTO.getFilterWord()) &&
-                documentDTO.getType() == FilterTypeEnum.FILTER) {
+        if (StringUtils.hasText(documentDTO.getFilterWord())) {
             String filterWord = documentDTO.getFilterWord();
-            //非法敏感词汇判断
+            // 敏感词汇判断
             SensitiveFilter filter = SensitiveFilter.getInstance();
             int n = filter.checkSensitiveWord(filterWord, 0, 1);
-            //存在非法字符
+            // 存在非法字符时仅记录日志，不影响搜索
             if (n > 0) {
                 log.error("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
             } else {
+                // 热门搜索词所有人都能看，记录到 ZSet
                 redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
+                // 用户搜索历史，只在用户已登录时记录
                 if (StringUtils.hasText(userId)) {
                     redisService.addSearchHistoryByUserId(userId, filterWord);
                 }

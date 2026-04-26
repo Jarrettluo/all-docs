@@ -48,7 +48,8 @@
       "Bash(mvn spring-boot:run -pl all-docs-bootstrap)",
       "Bash(grep:*)",
       "Bash(ls -la *.md *.sql)",
-      "Bash(mvn dependency:tree)"
+      "Bash(mvn dependency:tree)",
+      "Bash(git:*)"
     ]
   }
 }

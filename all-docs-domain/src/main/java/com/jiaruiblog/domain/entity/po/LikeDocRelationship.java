@@ -51,11 +51,4 @@ public class LikeDocRelationship {
         return this.entityId;
     }
 
-    public String getUserId() {
-        return this.userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 }

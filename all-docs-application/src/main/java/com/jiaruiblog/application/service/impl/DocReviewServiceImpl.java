@@ -43,7 +43,9 @@ public class DocReviewServiceImpl implements DocReviewService {
         DocReview review = new DocReview();
         review.setId(UUID.randomUUID().toString());
         review.setDocId(document.getId());
+        review.setDocName(document.getName());
         review.setUserId(document.getUserId());
+        review.setUserName(document.getUserName());
         review.setCreateDate(new Date());
         docReviewRepository.save(review);
         log.info("文档审核记录创建：docId={}", document.getId());

@@ -5,6 +5,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -170,7 +171,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public List<String> getSearchHistoryByUserId(String userId) {
-        if (userId == null || userId.isEmpty()) {
+        if (!StringUtils.hasText(userId)) {
             return List.of();
         }
         String key = "search:history:" + userId;
@@ -190,7 +191,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Long delSearchHistoryByUserId(String userId, String searchWord) {
-        if (userId == null || userId.isEmpty() || searchWord == null || searchWord.isEmpty()) {
+        if (!StringUtils.hasText(userId) || !StringUtils.hasText(searchWord)) {
             return 0L;
         }
         String key = "search:history:" + userId;
@@ -200,7 +201,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public double score(String key, String docId) {
-        if (key == null || key.isEmpty() || docId == null || docId.isEmpty()) {
+        if (!StringUtils.hasText(key) || !StringUtils.hasText(docId)) {
             return 0.0;
         }
         Double score = redisSearchTemplate.opsForZSet().score(key, docId);
@@ -209,7 +210,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public void removeByDocId(String docId) {
-        if (docId == null || docId.isEmpty()) {
+        if (!StringUtils.hasText(docId)) {
             return;
         }
         // 删除文档相关的搜索热度和历史记录
@@ -220,22 +221,22 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public void incrementScoreByUserId(String searchWord, String key) {
-        if (searchWord == null || searchWord.isEmpty()) {
+        if (!StringUtils.hasText(searchWord)) {
             return;
         }
-        if (key == null || key.isEmpty()) {
+        if (!StringUtils.hasText(key)) {
             key = SEARCH_KEY;
         }
         // 增加搜索词的热度分数
         redisSearchTemplate.opsForZSet().incrementScore(key, searchWord, 1);
         // 设置过期时间，避免热词永不消失
         redisSearchTemplate.expire(key, java.time.Duration.ofDays(7));
-        log.debug("搜索词热度增加：word={}, key={}", searchWord, key);
+        log.info("搜索词热度增加：word={}, key={}", searchWord, key);
     }
 
     @Override
     public void addSearchHistoryByUserId(String userId, String searchWord) {
-        if (userId == null || userId.isEmpty() || searchWord == null || searchWord.isEmpty()) {
+        if (!StringUtils.hasText(userId) || !StringUtils.hasText(searchWord)) {
             return;
         }
         String key = "search:history:" + userId;
@@ -247,6 +248,6 @@ public class RedisServiceImpl implements RedisService {
         redisSearchTemplate.opsForList().trim(key, 0, 9);
         // 设置过期时间
         redisSearchTemplate.expire(key, java.time.Duration.ofDays(30));
-        log.debug("添加搜索历史：userId={}, word={}", userId, searchWord);
+        log.info("添加搜索历史：userId={}, word={}", userId, searchWord);
     }
 }

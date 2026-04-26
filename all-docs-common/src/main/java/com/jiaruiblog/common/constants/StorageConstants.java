@@ -114,4 +114,14 @@ public final class StorageConstants {
     public static String previewPathWithName(String objectKey) {
         return PREVIEWS + objectKey;
     }
+
+    /**
+     * 生成预览文件存储路径，带文件扩展名
+     * @param objectKey 存储对象key (md5_filename)
+     * @param format 文件格式，如 png、jpg、jpeg
+     * @return previews/{objectKey}.{format}
+     */
+    public static String previewPath(String objectKey, String format) {
+        return PREVIEWS + objectKey + "." + format;
+    }
 }

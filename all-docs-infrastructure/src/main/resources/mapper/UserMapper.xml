@@ -8,12 +8,12 @@
         <result property="password" column="password"/>
         <result property="phone" column="phone"/>
         <result property="mail" column="mail"/>
-        <result property="male" column="male"/>
+        <result property="male" column="male" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler"/>
         <result property="description" column="description"/>
         <result property="avatar" column="avatar"/>
         <result property="birthtime" column="birthtime"/>
-        <result property="banning" column="banning"/>
-        <result property="permissionEnum" column="permission_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+        <result property="banning" column="banning" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler"/>
+        <result property="permissionEnum" column="permission_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.PermissionEnumTypeHandler"/>
         <result property="nickname" column="nickname"/>
         <result property="lastLogin" column="last_login"/>
         <result property="createDate" column="create_date"/>
@@ -32,7 +32,7 @@
         INSERT INTO user (id, username, password, phone, mail, male, description, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
-            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
+            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum, jdbcType=INTEGER}, #{nickname},
             #{lastLogin}, #{createDate}, #{updateDate})
     </insert>
 
@@ -47,7 +47,7 @@
             avatar = #{avatar},
             birthtime = #{birthtime},
             banning = #{banning},
-            permission_enum = #{permissionEnum},
+            permission_enum = #{permissionEnum, jdbcType=INTEGER},
             nickname = #{nickname},
             update_date = NOW()
         WHERE id = #{id}
@@ -69,7 +69,7 @@
         INSERT INTO user (id, username, password, phone, mail, male, description, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
-            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
+            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum, jdbcType=INTEGER}, #{nickname},
             #{lastLogin}, #{createDate}, #{updateDate})
         ON DUPLICATE KEY UPDATE
             username = VALUES(username),

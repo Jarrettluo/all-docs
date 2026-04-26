@@ -38,4 +38,12 @@ public interface DocumentMapper {
     List<MonthStatVO> stats(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
     List<MonthStatVO> trend(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    List<FileDocument> findByPageByTag(@Param("tagId") String tagId, @Param("offset") long offset, @Param("limit") int limit);
+
+    List<FileDocument> findByPageByCategory(@Param("categoryId") String categoryId, @Param("offset") long offset, @Param("limit") int limit);
+
+    long countByTagId(@Param("tagId") String tagId);
+
+    long countByCategoryId(@Param("categoryId") String categoryId);
 }

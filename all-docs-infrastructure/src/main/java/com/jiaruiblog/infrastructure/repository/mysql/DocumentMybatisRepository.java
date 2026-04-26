@@ -95,4 +95,32 @@ public class DocumentMybatisRepository implements DocumentRepository {
     public List<MonthStatVO> trend(Date startDate, Date endDate) {
         return documentMapper.trend(startDate, endDate);
     }
+
+    @Override
+    public List<FileDocument> findByPageByTag(String tagId, int pageNum, int pageSize) {
+        if (pageNum < 1) {
+            pageNum = 1;
+        }
+        long offset = (long) (pageNum - 1) * pageSize;
+        return documentMapper.findByPageByTag(tagId, offset, pageSize);
+    }
+
+    @Override
+    public List<FileDocument> findByPageByCategory(String categoryId, int pageNum, int pageSize) {
+        if (pageNum < 1) {
+            pageNum = 1;
+        }
+        long offset = (long) (pageNum - 1) * pageSize;
+        return documentMapper.findByPageByCategory(categoryId, offset, pageSize);
+    }
+
+    @Override
+    public long countByTagId(String tagId) {
+        return documentMapper.countByTagId(tagId);
+    }
+
+    @Override
+    public long countByCategoryId(String categoryId) {
+        return documentMapper.countByCategoryId(categoryId);
+    }
 }

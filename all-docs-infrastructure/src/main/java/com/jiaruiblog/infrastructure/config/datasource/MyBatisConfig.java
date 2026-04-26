@@ -2,6 +2,11 @@ package com.jiaruiblog.infrastructure.config.datasource;
 
 import com.jiaruiblog.common.enums.DocStateEnum;
 import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.common.enums.RedisActionEnum;
+import com.jiaruiblog.common.enums.ThumbSizeEnum;
+import com.jiaruiblog.common.enums.ThumbnailEnum;
+import com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler;
+import com.jiaruiblog.infrastructure.config.mybatis.DocStateEnumTypeHandler;
 import com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -24,8 +29,12 @@ public class MyBatisConfig {
             new PathMatchingResourcePatternResolver().getResources("classpath:mapper/*.xml")
         );
         factory.setTypeHandlers(
+            new BooleanTypeHandler(),
             new EnumTypeHandler<>(PermissionEnum.class),
-            new EnumTypeHandler<>(DocStateEnum.class)
+            new DocStateEnumTypeHandler(),
+            new EnumTypeHandler<>(RedisActionEnum.class),
+            new EnumTypeHandler<>(ThumbnailEnum.class),
+            new EnumTypeHandler<>(ThumbSizeEnum.class)
         );
         return factory.getObject();
     }

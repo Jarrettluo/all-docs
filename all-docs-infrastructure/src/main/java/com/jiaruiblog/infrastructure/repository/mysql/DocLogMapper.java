@@ -9,13 +9,15 @@ import java.util.List;
 @Mapper
 public interface DocLogMapper {
 
-    DocLog save(DocLog docLog);
+    int save(DocLog docLog);
 
     DocLog findById(@Param("id") String id);
 
     List<DocLog> findByDocId(@Param("docId") String docId);
 
     List<DocLog> findByUserId(@Param("userId") String userId);
+
+    List<DocLog> findAll();
 
     List<DocLog> findByAction(@Param("action") String action);
 

@@ -20,7 +20,7 @@ public class DocLogMybatisRepository implements DocLogRepository {
     private DocLogMapper docLogMapper;
 
     @Override
-    public DocLog save(DocLog docLog) {
+    public int save(DocLog docLog) {
         return docLogMapper.save(docLog);
     }
 
@@ -37,6 +37,11 @@ public class DocLogMybatisRepository implements DocLogRepository {
     @Override
     public List<DocLog> findByUserId(String userId) {
         return docLogMapper.findByUserId(userId);
+    }
+
+    @Override
+    public List<DocLog> findAll() {
+        return docLogMapper.findAll();
     }
 
     @Override

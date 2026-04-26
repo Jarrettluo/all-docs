@@ -98,7 +98,8 @@ public abstract class TaskExecutor {
             // 使用 document-texts/{md5}_{originalName}.txt 路径存储文本文件
             String originalName = fileDocument.getName();
             String md5 = fileDocument.getMd5();
-            String textObjectKey = md5 + "_" + originalName + ".txt";
+            // textObjectKey 已经包含 .txt 后缀，documentTextPath 会再添加一次，所以传入时不带 .txt
+            String textObjectKey = md5 + "_" + originalName;
             String fullPath = StorageConstants.documentTextPath(textObjectKey);
 
             DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);

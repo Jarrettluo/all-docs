@@ -43,4 +43,12 @@ public interface DocumentRepository {
     List<MonthStatVO> stats(Date startDate, Date endDate);
 
     List<MonthStatVO> trend(Date startDate, Date endDate);
+
+    List<FileDocument> findByPageByTag(String tagId, int pageNum, int pageSize);
+
+    List<FileDocument> findByPageByCategory(String categoryId, int pageNum, int pageSize);
+
+    long countByTagId(String tagId);
+
+    long countByCategoryId(String categoryId);
 }

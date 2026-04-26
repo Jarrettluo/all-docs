@@ -7,13 +7,15 @@ import java.util.Optional;
 
 public interface CommentRepository {
 
-    Comment save(Comment comment);
+    int save(Comment comment);
 
     Optional<Comment> findById(String id);
 
     List<Comment> findByDocId(String docId);
 
     List<Comment> findByUserId(String userId);
+
+    List<Comment> findAll();
 
     List<Comment> findByContentContaining(String keyword);
 

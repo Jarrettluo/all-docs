@@ -2,10 +2,10 @@ package com.jiaruiblog.domain.entity.po;
 
 import com.jiaruiblog.common.enums.ThumbSizeEnum;
 import com.jiaruiblog.common.enums.ThumbnailEnum;
-import jakarta.persistence.Id;
 import lombok.Data;
 
-/**缩略图相关的类
+/**
+ * 缩略图相关的类
  **/
 @Data
 public class Thumbnail {
@@ -13,7 +13,6 @@ public class Thumbnail {
     /**
      * 缩略图id
      */
-    @Id
     private String id;
 
     /**

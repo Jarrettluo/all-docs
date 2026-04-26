@@ -9,13 +9,15 @@ import java.util.List;
 @Mapper
 public interface CommentMapper {
 
-    Comment save(Comment comment);
+    int save(Comment comment);
 
     Comment findById(@Param("id") String id);
 
     List<Comment> findByDocId(@Param("docId") String docId);
 
     List<Comment> findByUserId(@Param("userId") String userId);
+
+    List<Comment> findAll();
 
     long countByDocId(@Param("docId") String docId);
 

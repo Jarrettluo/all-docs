@@ -1,28 +1,31 @@
 package com.jiaruiblog.application.service.impl;
 
 import cn.hutool.core.util.IdUtil;
-import com.jiaruiblog.application.service.CollectService;
-import com.jiaruiblog.application.service.DocReviewService;
-import com.jiaruiblog.application.service.DocumentService;
-import com.jiaruiblog.application.service.ElasticService;
-import com.jiaruiblog.application.service.ICommentService;
-import com.jiaruiblog.application.service.TaskExecuteService;
+import com.jiaruiblog.application.service.*;
 import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.DocStateEnum;
+import com.jiaruiblog.common.enums.FilterTypeEnum;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
+import com.jiaruiblog.domain.entity.po.CateDocRelationship;
 import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.TagDocRelationship;
+import com.jiaruiblog.domain.entity.vo.CategoryVO;
 import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
+import com.jiaruiblog.domain.entity.vo.TagVO;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
+import com.jiaruiblog.infrastructure.repository.mysql.CateDocRelationshipMapper;
+import com.jiaruiblog.infrastructure.repository.mysql.TagDocRelationshipMapper;
 import com.jiaruiblog.infrastructure.storage.StorageFactory;
 import com.jiaruiblog.infrastructure.storage.StorageStrategy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -58,6 +61,12 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Resource
     private DocReviewService docReviewService;
+
+    @Resource
+    private CateDocRelationshipMapper cateDocRelationshipMapper;
+
+    @Resource
+    private TagDocRelationshipMapper tagDocRelationshipMapper;
 
     private static final String FILE_NAME = "filename";
 
@@ -527,14 +536,31 @@ public class DocumentServiceImpl implements DocumentService {
         if (documentDTO == null) {
             return PageVO.<DocumentVO>builder().build();
         }
-        List<FileDocument> documents = listFilesByPage(documentDTO.getPage(), documentDTO.getRows());
+
+        List<FileDocument> documents;
+        long total;
+
+        FilterTypeEnum type = documentDTO.getType();
+        if (type == FilterTypeEnum.TAG && StringUtils.hasText(documentDTO.getTagId())) {
+            documents = documentRepository.findByPageByTag(documentDTO.getTagId(),
+                    documentDTO.getPage(), documentDTO.getRows());
+            total = documentRepository.countByTagId(documentDTO.getTagId());
+        } else if (type == FilterTypeEnum.CATEGORY && StringUtils.hasText(documentDTO.getCategoryId())) {
+            documents = documentRepository.findByPageByCategory(documentDTO.getCategoryId(),
+                    documentDTO.getPage(), documentDTO.getRows());
+            total = documentRepository.countByCategoryId(documentDTO.getCategoryId());
+        } else {
+            documents = listFilesByPage(documentDTO.getPage(), documentDTO.getRows());
+            total = documentRepository.count();
+        }
+
         List<DocumentVO> voList = documents.stream()
                 .map(doc -> convertDocument(new DocumentVO(), doc))
                 .toList();
         return PageVO.<DocumentVO>builder()
                 .pageNum(documentDTO.getPage())
                 .pageSize(documentDTO.getRows())
-                .total(documentRepository.count())
+                .total(total)
                 .list(voList)
                 .build();
     }
@@ -572,7 +598,73 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public PageVO<DocWithCateVO> listWithCategory(DocumentDTO documentDTO) {
-        return PageVO.<DocWithCateVO>builder().build();
+        if (documentDTO == null) {
+            return PageVO.<DocWithCateVO>builder().build();
+        }
+
+        List<FileDocument> documents;
+        long total;
+
+        FilterTypeEnum type = documentDTO.getType();
+        if (type == FilterTypeEnum.TAG && StringUtils.hasText(documentDTO.getTagId())) {
+            documents = documentRepository.findByPageByTag(documentDTO.getTagId(),
+                    documentDTO.getPage(), documentDTO.getRows());
+            total = documentRepository.countByTagId(documentDTO.getTagId());
+        } else if (type == FilterTypeEnum.CATEGORY && StringUtils.hasText(documentDTO.getCategoryId())) {
+            documents = documentRepository.findByPageByCategory(documentDTO.getCategoryId(),
+                    documentDTO.getPage(), documentDTO.getRows());
+            total = documentRepository.countByCategoryId(documentDTO.getCategoryId());
+        } else {
+            return PageVO.<DocWithCateVO>builder().build();
+        }
+
+        List<DocWithCateVO> voList = documents.stream()
+                .map(doc -> convertToDocWithCateVO(doc, documentDTO.getTagId(), documentDTO.getCategoryId()))
+                .toList();
+        return PageVO.<DocWithCateVO>builder()
+                .pageNum(documentDTO.getPage())
+                .pageSize(documentDTO.getRows())
+                .total(total)
+                .list(voList)
+                .build();
+    }
+
+    private DocWithCateVO convertToDocWithCateVO(FileDocument doc, String tagId, String categoryId) {
+        DocWithCateVO vo = new DocWithCateVO();
+        vo.setId(doc.getId());
+        vo.setTitle(doc.getName());
+        vo.setSize(doc.getSize());
+        vo.setUserName(doc.getUserName());
+        vo.setCreateTime(doc.getUploadDate());
+        vo.setChecked(false);
+
+        // Build category info
+        if (StringUtils.hasText(categoryId)) {
+            CategoryVO categoryVO = new CategoryVO();
+            categoryVO.setId(categoryId);
+            // Get category name from relationship if needed
+            List<CateDocRelationship> cateRels = cateDocRelationshipMapper.findByFileId(doc.getId());
+            cateRels.stream()
+                    .filter(rel -> rel.getCategoryId().equals(categoryId))
+                    .findFirst()
+                    .ifPresent(rel -> {
+                        categoryVO.setRelationShipId(rel.getId());
+                    });
+            vo.setCategoryVO(categoryVO);
+        }
+
+        // Build tag list info
+        List<TagDocRelationship> tagRels = tagDocRelationshipMapper.findByFileId(doc.getId());
+        List<TagVO> tagVOList = tagRels.stream()
+                .map(rel -> {
+                    TagVO tagVO = new TagVO();
+                    tagVO.setId(rel.getTagId());
+                    return tagVO;
+                })
+                .toList();
+        vo.setTagVOList(tagVOList);
+
+        return vo;
     }
 
     @Override

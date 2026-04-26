@@ -81,8 +81,9 @@ public class StatisticsController {
     public ApiResult<Map<String, List<String>>> getSearchResult(@RequestHeader HttpHeaders headers) {
         List<String> userSearchList = Lists.newArrayList();
         List<String> stringList = headers.get("id");
+        String userId = null;
         if (!CollectionUtils.isEmpty(stringList)) {
-            String userId = stringList.get(0);
+            userId = stringList.get(0);
             if (StringUtils.hasText(userId)) {
                 userSearchList = redisService.getSearchHistoryByUserId(userId);
             }
@@ -92,6 +93,8 @@ public class StatisticsController {
         Map<String, List<String>> result = new HashMap<>();
         result.put("userSearch", userSearchList);
         result.put("hotSearch", hotSearchList);
+        log.info("getSearchResult called, userId={}, userSearchSize={}, hotSearchSize={}",
+                userId, userSearchList.size(), hotSearchList.size());
         return ApiResult.success(result);
     }
 

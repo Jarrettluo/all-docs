@@ -105,7 +105,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
             if (previewId == null || previewId.isEmpty()) {
                 previewId = UUID.randomUUID().toString();
             }
-            String objectKey = StorageConstants.previewPath(previewId);
+            String objectKey = StorageConstants.previewPath(previewId, "jpg");
 
             String result = minioStorageStrategy.upload(new ByteArrayInputStream(previewBytes), objectKey, "image/jpeg");
 
@@ -144,7 +144,7 @@ public class ThumbnailServiceImpl implements ThumbnailService {
             if (previewId == null || previewId.isEmpty()) {
                 previewId = UUID.randomUUID().toString();
             }
-            String objectKey = StorageConstants.previewPath(previewId);
+            String objectKey = StorageConstants.previewPath(previewId, "jpg");
 
             String result = minioStorageStrategy.upload(new ByteArrayInputStream(previewBytes), objectKey, "image/jpeg");
 

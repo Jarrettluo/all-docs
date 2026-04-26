@@ -5,9 +5,9 @@
     <resultMap id="ThumbnailResultMap" type="com.jiaruiblog.domain.entity.po.Thumbnail">
         <id property="id" column="id"/>
         <result property="objectId" column="object_id"/>
-        <result property="thumbnailEnum" column="thumbnail_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+        <result property="thumbnailEnum" column="thumbnail_enum"/>
         <result property="gridfsId" column="gridfs_id"/>
-        <result property="thumbSizeEnum" column="thumb_size_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+        <result property="thumbSizeEnum" column="thumb_size_enum"/>
     </resultMap>
 
     <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.Thumbnail">

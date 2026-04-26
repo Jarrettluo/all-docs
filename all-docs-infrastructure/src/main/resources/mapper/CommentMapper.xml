@@ -30,6 +30,10 @@
         SELECT * FROM comment WHERE user_id = #{userId} ORDER BY create_date DESC
     </select>
 
+    <select id="findAll" resultMap="CommentResultMap">
+        SELECT * FROM comment ORDER BY create_date DESC
+    </select>
+
     <select id="countByDocId" resultType="long">
         SELECT COUNT(*) FROM comment WHERE doc_id = #{docId}
     </select>

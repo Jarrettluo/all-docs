@@ -20,7 +20,7 @@ public class CommentMybatisRepository implements CommentRepository {
     private CommentMapper commentMapper;
 
     @Override
-    public Comment save(Comment comment) {
+    public int save(Comment comment) {
         return commentMapper.save(comment);
     }
 
@@ -37,6 +37,11 @@ public class CommentMybatisRepository implements CommentRepository {
     @Override
     public List<Comment> findByUserId(String userId) {
         return commentMapper.findByUserId(userId);
+    }
+
+    @Override
+    public List<Comment> findAll() {
+        return commentMapper.findAll();
     }
 
     @Override
