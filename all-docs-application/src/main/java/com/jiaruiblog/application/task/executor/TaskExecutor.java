@@ -4,10 +4,13 @@ import com.jiaruiblog.application.service.DocumentService;
 import com.jiaruiblog.application.service.ElasticService;
 import com.jiaruiblog.application.task.data.TaskData;
 import com.jiaruiblog.application.task.exception.TaskRunException;
+import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.FileFormatEnum;
 import com.jiaruiblog.common.util.SpringApplicationContext;
 import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.po.SearchDocument;
+import com.jiaruiblog.infrastructure.storage.StorageFactory;
+import com.jiaruiblog.infrastructure.storage.StorageStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -92,12 +95,18 @@ public abstract class TaskExecutor {
         // 被文本文件上传到gridFS系统中
         try (FileInputStream inputStream = new FileInputStream(textFilePath)) {
 
+            // 使用 document-texts/{md5}_{originalName}.txt 路径存储文本文件
+            String originalName = fileDocument.getName();
+            String md5 = fileDocument.getMd5();
+            String textObjectKey = md5 + "_" + originalName + ".txt";
+            String fullPath = StorageConstants.documentTextPath(textObjectKey);
+
             DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
-            String txtObjId = fileService.uploadFileToGridFs(
-                    FileFormatEnum.TEXT.getFilePrefix(),
-                    inputStream,
-                    FileFormatEnum.TEXT.getContentType());
-            fileDocument.setTextFileId(txtObjId);
+            StorageFactory storageFactory = SpringApplicationContext.getBean(StorageFactory.class);
+            StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
+            storageStrategy.upload(inputStream, fullPath, FileFormatEnum.TEXT.getContentType());
+
+            fileDocument.setTextFileId(textObjectKey);
 
         } catch (IOException e) {
             throw new TaskRunException("存储文本文件报错了，请核对", e);

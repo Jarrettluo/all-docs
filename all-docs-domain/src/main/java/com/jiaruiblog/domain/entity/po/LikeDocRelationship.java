@@ -1,5 +1,6 @@
 package com.jiaruiblog.domain.entity.po;
 
+import com.jiaruiblog.common.enums.RedisActionEnum;
 import lombok.Data;
 
 import java.util.Date;
@@ -37,10 +38,10 @@ public class LikeDocRelationship {
     private Date createDate;
 
     /**
-     * 实体类型常量
+     * 实体类型常量（委托给 RedisActionEnum 保持一致）
      */
-    public static final int TYPE_LIKE = 0;
-    public static final int TYPE_COLLECT = 1;
+    public static final int TYPE_LIKE = RedisActionEnum.LIKE.getCode();
+    public static final int TYPE_COLLECT = RedisActionEnum.COLLECT.getCode();
 
     /**
      * 获取文档ID（兼容方法）

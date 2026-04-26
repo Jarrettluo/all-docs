@@ -37,7 +37,7 @@ import java.util.*;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1/doc-review")
+@RequestMapping("/api/v1/docReview")
 public class DocReviewController {
 
     @Resource

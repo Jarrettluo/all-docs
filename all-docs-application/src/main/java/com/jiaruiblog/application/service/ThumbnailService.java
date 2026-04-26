@@ -35,4 +35,25 @@ public interface ThumbnailService {
      * @return java.lang.String 预览图ID
      */
     String makePreview(InputStream inputStream, String fileName);
+
+    /**
+     * @Description 生成预览图
+     * @Param [inputStream, fileName, previewId] - previewId 为null时自动生成UUID
+     * @return java.lang.String 预览图ID
+     */
+    String makePreview(InputStream inputStream, String fileName, String previewId);
+
+    /**
+     * @Description 生成PDF预览图
+     * @Param [inputStream, fileName, previewId] - previewId 为null时自动生成UUID
+     * @return java.lang.String 预览图ID
+     */
+    String makePreviewForPdf(InputStream inputStream, String fileName, String previewId);
+
+    /**
+     * @Description 生成PPT/PPTX预览图
+     * @Param [inputStream, fileName, previewId] - previewId 为null时自动生成UUID
+     * @return java.lang.String 预览图ID
+     */
+    String makePreviewForPpt(InputStream inputStream, String fileName, String previewId);
 }

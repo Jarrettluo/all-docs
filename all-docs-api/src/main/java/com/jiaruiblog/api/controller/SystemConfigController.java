@@ -39,7 +39,7 @@ import static com.jiaruiblog.api.controller.FileController.extracted;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1/system-config")
+@RequestMapping("/api/v1/system")
 public class SystemConfigController {
 
     public static final String STATIC_CENSOR_WORD_TXT = "static" + File.separator + "censorWord.txt";
@@ -93,7 +93,7 @@ public class SystemConfigController {
                 }
             }
         } catch (IOException ex) {
-            log.error("下载最新的违禁词错误");
+            log.error("下载最新的违禁词错误", ex);
         }
     }
 

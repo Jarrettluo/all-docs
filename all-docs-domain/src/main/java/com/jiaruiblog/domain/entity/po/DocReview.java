@@ -40,22 +40,22 @@ public class DocReview {
     /**
      * 评审是否通过的状态
      */
-    private boolean checkState;
+    private Boolean checkState;
 
     /**
      * 用户是否已读的状态
      */
-    private boolean readState;
+    private Boolean readState;
 
     /**
      * 用户是否删除的状态
      */
-    private boolean userRemove;
+    private Boolean userRemove;
 
     /**
      * 管理员删除评审意见
      **/
-    private boolean adminRemove;
+    private Boolean adminRemove;
 
     /**
      * 评审意见

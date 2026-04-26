@@ -46,6 +46,7 @@ public class TagServiceImpl implements TagService {
         if (tag == null || !StringUtils.hasText(tag.getName())) {
             throw BusinessExceptionBuilder.of(ErrorCode.INVALID_PARAM).detail("标签名称不能为空").build();
         }
+        tag.setId(UUID.randomUUID().toString());
         tag.setCreateDate(new Date());
         tag.setUpdateDate(new Date());
         tagRepository.save(tag);
@@ -201,6 +202,7 @@ public class TagServiceImpl implements TagService {
             return existingTags.get(0).getId();
         }
         Tag tag = new Tag();
+        tag.setId(UUID.randomUUID().toString());
         tag.setName(tagName);
         tag.setCreateDate(new Date());
         tag.setUpdateDate(new Date());

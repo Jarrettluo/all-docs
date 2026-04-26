@@ -8,7 +8,6 @@ import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.common.enums.DocStateEnum;
-import org.apache.http.auth.AuthenticationException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
@@ -32,7 +31,7 @@ public interface DocumentService {
     /**
      * 用户上传文档
      */
-    void documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
+    void documentUpload(MultipartFile file, String userId, String username);
 
     /**
      * 批量上传

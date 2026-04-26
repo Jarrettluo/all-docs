@@ -1,6 +1,7 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.IUserService;
+import com.jiaruiblog.application.service.ITokenService;
 import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.exception.BusinessException;
@@ -8,13 +9,13 @@ import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.bo.UserBO;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
+import com.jiaruiblog.domain.entity.dto.BasicRegistryDTO;
 import com.jiaruiblog.domain.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.domain.entity.dto.UserRoleDTO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.domain.entity.vo.UserVO;
 import com.jiaruiblog.infrastructure.repository.UserRepository;
 import com.jiaruiblog.infrastructure.storage.MinioStorageStrategy;
-import com.jiaruiblog.common.util.HmacUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -48,7 +49,7 @@ public class UserServiceImpl implements IUserService {
     MinioStorageStrategy minioStorageStrategy;
 
     @Resource
-    HmacUtil hmacUtil;
+    ITokenService tokenService;
 
     @Override
     public void initFirstUser() {
@@ -56,6 +57,7 @@ public class UserServiceImpl implements IUserService {
         List<User> existingUsers = userRepository.findByUsername(DEFAULT_ADMIN_USERNAME);
         if (existingUsers == null || existingUsers.isEmpty()) {
             User admin = new User();
+            admin.setId(UUID.randomUUID().toString());
             admin.setUsername(DEFAULT_ADMIN_USERNAME);
             admin.setPassword(encodePassword(DEFAULT_ADMIN_PASSWORD));
             admin.setPermissionEnum(PermissionEnum.ADMIN);
@@ -88,10 +90,10 @@ public class UserServiceImpl implements IUserService {
         // 生成token
         String token;
         try {
-            token = hmacUtil.generateHmac(user.getId());
+            token = tokenService.createToken(user);
         } catch (Exception e) {
             log.error("生成token失败", e);
-            token = UUID.randomUUID().toString();
+            throw new BusinessException(ErrorCode.OPERATE_FAILED, "生成token失败");
         }
 
         log.info("用户登录成功：username={}, userId={}", userDTO.getUsername(), user.getId());
@@ -115,7 +117,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public void registry(RegistryUserDTO userDTO) {
+    public void registry(BasicRegistryDTO userDTO) {
         if (userDTO == null || !StringUtils.hasText(userDTO.getUsername()) || !StringUtils.hasText(userDTO.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "用户名或密码不能为空");
         }
@@ -126,6 +128,7 @@ public class UserServiceImpl implements IUserService {
         }
 
         User user = new User();
+        user.setId(UUID.randomUUID().toString());
         user.setUsername(userDTO.getUsername());
         user.setPassword(encodePassword(userDTO.getPassword()));
         user.setPermissionEnum(PermissionEnum.USER);
@@ -203,8 +206,10 @@ public class UserServiceImpl implements IUserService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
+        // 切换封禁状态
+        user.setBanning(!user.getBanning());
         userRepository.blockUser(user);
-        log.info("用户已被封禁：userId={}", userId);
+        log.info("用户封禁状态变更：userId={}, banning={}", userId, user.getBanning());
     }
 
     @Override
@@ -389,6 +394,9 @@ public class UserServiceImpl implements IUserService {
         if (userBO.getMail() != null) {
             user.setMail(userBO.getMail());
         }
+        if (userBO.getNickname() != null) {
+            user.setNickname(userBO.getNickname());
+        }
         if (userBO.getMale() != null) {
             user.setMale(userBO.getMale());
         }
@@ -422,6 +430,9 @@ public class UserServiceImpl implements IUserService {
         }
         if (userBO.getMail() != null) {
             user.setMail(userBO.getMail());
+        }
+        if (userBO.getNickname() != null) {
+            user.setNickname(userBO.getNickname());
         }
         if (userBO.getMale() != null) {
             user.setMale(userBO.getMale());

@@ -7,6 +7,9 @@ import com.jiaruiblog.infrastructure.storage.MinioStorageStrategy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.rendering.ImageType;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -78,6 +81,11 @@ public class ThumbnailServiceImpl implements ThumbnailService {
 
     @Override
     public String makePreview(InputStream inputStream, String fileName) {
+        return makePreview(inputStream, fileName, null);
+    }
+
+    @Override
+    public String makePreview(InputStream inputStream, String fileName, String previewId) {
         if (inputStream == null || fileName == null || fileName.isEmpty()) {
             log.warn("生成预览图失败：输入参数为空");
             return "";
@@ -94,7 +102,9 @@ public class ThumbnailServiceImpl implements ThumbnailService {
             ImageIO.write(previewImage, "jpg", baos);
             byte[] previewBytes = baos.toByteArray();
 
-            String previewId = UUID.randomUUID().toString();
+            if (previewId == null || previewId.isEmpty()) {
+                previewId = UUID.randomUUID().toString();
+            }
             String objectKey = StorageConstants.previewPath(previewId);
 
             String result = minioStorageStrategy.upload(new ByteArrayInputStream(previewBytes), objectKey, "image/jpeg");
@@ -108,6 +118,77 @@ public class ThumbnailServiceImpl implements ThumbnailService {
             return "";
         } catch (Exception e) {
             log.error("生成预览图异常：fileName={}", fileName, e);
+            return "";
+        }
+    }
+
+    @Override
+    public String makePreviewForPdf(InputStream inputStream, String fileName, String previewId) {
+        if (inputStream == null || fileName == null || fileName.isEmpty()) {
+            log.warn("生成PDF预览图失败：输入参数为空");
+            return "";
+        }
+
+        PDDocument document = null;
+        try {
+            document = PDDocument.load(inputStream);
+            PDFRenderer pdfRenderer = new PDFRenderer(document);
+
+            // 渲染第一页
+            BufferedImage pdfImage = pdfRenderer.renderImageWithDPI(0, 150, ImageType.RGB);
+            // 转换为 jpg
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(pdfImage, "jpg", baos);
+            byte[] previewBytes = baos.toByteArray();
+
+            if (previewId == null || previewId.isEmpty()) {
+                previewId = UUID.randomUUID().toString();
+            }
+            String objectKey = StorageConstants.previewPath(previewId);
+
+            String result = minioStorageStrategy.upload(new ByteArrayInputStream(previewBytes), objectKey, "image/jpeg");
+
+            if (result != null) {
+                log.info("PDF预览图生成成功：fileName={}, previewId={}, objectKey={}, pages={}",
+                        fileName, previewId, objectKey, document.getNumberOfPages());
+                return previewId;
+            }
+
+            log.error("PDF预览图上传失败：fileName={}", fileName);
+            return "";
+        } catch (Exception e) {
+            log.error("生成PDF预览图异常：fileName={}", fileName, e);
+            return "";
+        } finally {
+            if (document != null) {
+                try {
+                    document.close();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+    @Override
+    public String makePreviewForPpt(InputStream inputStream, String fileName, String previewId) {
+        if (inputStream == null || fileName == null || fileName.isEmpty()) {
+            log.warn("生成PPT预览图失败：输入参数为空");
+            return "";
+        }
+
+        try {
+            String lowerName = fileName.toLowerCase();
+            if (!lowerName.endsWith(".pptx")) {
+                log.warn("PPT预览图仅支持PPTX格式：fileName={}", fileName);
+                return "";
+            }
+
+            // PPTX 预览图生成需要 POI 5.x 与 Java Graphics2D 配合
+            // 由于 POI 5.x API 变化，暂时标记为不支持
+            log.info("PPT预览图生成暂未完全支持：fileName={}，需要进一步适配 POI 5.x API", fileName);
+            return "";
+        } catch (Exception e) {
+            log.error("生成PPT预览图异常：fileName={}", fileName, e);
             return "";
         }
     }

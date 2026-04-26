@@ -1,16 +1,18 @@
 package com.jiaruiblog.application.service.impl;
 
 import cn.hutool.core.util.IdUtil;
+import com.jiaruiblog.application.service.CollectService;
+import com.jiaruiblog.application.service.DocReviewService;
 import com.jiaruiblog.application.service.DocumentService;
 import com.jiaruiblog.application.service.ElasticService;
-import com.jiaruiblog.application.service.CollectService;
 import com.jiaruiblog.application.service.ICommentService;
+import com.jiaruiblog.application.service.TaskExecuteService;
 import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.DocStateEnum;
-import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
@@ -23,9 +25,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author jiarui.luo
@@ -49,6 +53,12 @@ public class DocumentServiceImpl implements DocumentService {
     @Resource
     private ElasticService elasticService;
 
+    @Resource
+    private TaskExecuteService taskExecuteService;
+
+    @Resource
+    private DocReviewService docReviewService;
+
     private static final String FILE_NAME = "filename";
 
     @Override
@@ -57,12 +67,12 @@ public class DocumentServiceImpl implements DocumentService {
             throw new IllegalArgumentException("InputStream cannot be null");
         }
         StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
-        // 使用UUID作为唯一key，路径前缀为 documents/
-        String uniqueKey = IdUtil.simpleUUID();
-        String objectKey = StorageConstants.documentPath(uniqueKey);
-        storageStrategy.upload(inputStream, objectKey, contentType);
-        log.info("Uploaded file to MinIO: objectKey={}, filename={}", objectKey, fileName);
-        return uniqueKey; // 返回唯一key，用于存储到MySQL的gridfsId字段
+        // 使用 md5 + originalFilename 作为 objectKey
+        String objectKey = md5 + "_" + fileName;
+        String fullPath = StorageConstants.documentPath(objectKey);
+        storageStrategy.upload(inputStream, fullPath, contentType);
+        log.info("Uploaded file to MinIO: objectKey={}, filename={}", fullPath, fileName);
+        return objectKey; // 返回 objectKey，用于存储到MySQL的gridfsId字段
     }
 
     @Override
@@ -113,7 +123,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
         // Delete from MinIO - 文本文件
         if (document.getTextFileId() != null) {
-            storageFactory.getStorageStrategy().delete(StorageConstants.textPath(document.getTextFileId()));
+            storageFactory.getStorageStrategy().delete(StorageConstants.documentTextPath(document.getTextFileId()));
         }
         // Delete from ES
         if (document.getMd5() != null) {
@@ -256,8 +266,80 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void documentUpload(MultipartFile file, String userId, String username) {
-        // Implementation for document upload
-        log.info("Document upload: userId={}, username={}", userId, username);
+        if (file == null || file.isEmpty()) {
+            log.warn("Document upload failed: file is empty");
+            return;
+        }
+
+        try {
+            // 1. Read file bytes once for both MD5 calculation and upload
+            byte[] fileBytes = file.getBytes();
+
+            // 2. Calculate MD5
+            String md5 = calculateMd5(fileBytes);
+
+            // 3. Check for duplicate
+            FileDocument existing = documentRepository.findByMd5(md5);
+            if (existing != null) {
+                log.info("Document already exists: md5={}, docId={}", md5, existing.getId());
+                return;
+            }
+
+            // 4. Upload to MinIO
+            String uniqueKey = uploadFileToGridFs(file.getOriginalFilename(), new ByteArrayInputStream(fileBytes),
+                    file.getContentType(), md5);
+
+            // 5. Create and save FileDocument
+            FileDocument document = new FileDocument();
+            document.setId(IdUtil.simpleUUID());
+            document.setName(file.getOriginalFilename());
+            document.setSize(file.getSize());
+            document.setMd5(md5);
+            document.setContentType(file.getContentType());
+            document.setSuffix(getFileSuffix(file.getOriginalFilename()));
+            document.setUploadDate(new Date());
+            document.setGridfsId(uniqueKey);
+            document.setUserId(userId);
+            document.setUserName(username);
+            document.setDocState(DocStateEnum.WAIT);
+            document.setReviewing(true);
+            document.setCreateDate(new Date());
+            documentRepository.save(document);
+
+            // 6. Create review record
+            docReviewService.insert(document);
+
+            // 7. Submit async task for text extraction and ES indexing
+            taskExecuteService.execute(document);
+
+            log.info("Document upload success: userId={}, username={}, docId={}, filename={}",
+                    userId, username, document.getId(), file.getOriginalFilename());
+        } catch (IOException e) {
+            log.error("Document upload failed: userId={}, username={}, error={}",
+                    userId, username, e.getMessage());
+        }
+    }
+
+    private String calculateMd5(byte[] fileBytes) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (Exception e) {
+            throw new RuntimeException("MD5 calculation failed", e);
+        }
+        byte[] digest = md.digest(fileBytes);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    private String getFileSuffix(String fileName) {
+        if (fileName != null && fileName.contains(".")) {
+            return fileName.substring(fileName.lastIndexOf("."));
+        }
+        return "";
     }
 
     @Override
@@ -267,7 +349,66 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void uploadByUrl(String category, List<String> tags, String name, String description, String url, String userId, String username) {
-        log.info("Upload by URL: {}", url);
+        if (url == null || url.isEmpty()) {
+            log.warn("Upload by URL failed: url is empty");
+            return;
+        }
+
+        try {
+            // 1. Download file from URL
+            byte[] fileBytes = cn.hutool.http.HttpUtil.createGet(url).timeout(30000).execute().bodyBytes();
+            if (fileBytes == null || fileBytes.length == 0) {
+                log.warn("Upload by URL failed: downloaded content is empty, url={}", url);
+                return;
+            }
+
+            // 2. Calculate MD5
+            String md5 = calculateMd5(fileBytes);
+
+            // 3. Check for duplicate
+            FileDocument existing = documentRepository.findByMd5(md5);
+            if (existing != null) {
+                log.info("Document already exists: md5={}, docId={}", md5, existing.getId());
+                return;
+            }
+
+            // 4. Determine content type and suffix from name or URL
+            String contentType = cn.hutool.core.io.FileUtil.getMimeType(name != null ? name : url);
+            String suffix = getFileSuffix(name != null ? name : url);
+
+            // 5. Upload to MinIO
+            String uniqueKey = uploadFileToGridFs(name, new ByteArrayInputStream(fileBytes), contentType, md5);
+
+            // 6. Create and save FileDocument
+            FileDocument document = new FileDocument();
+            document.setId(IdUtil.simpleUUID());
+            document.setName(name);
+            document.setSize(fileBytes.length);
+            document.setMd5(md5);
+            document.setContentType(contentType);
+            document.setSuffix(suffix);
+            document.setDescription(description);
+            document.setUploadDate(new Date());
+            document.setGridfsId(uniqueKey);
+            document.setUserId(userId);
+            document.setUserName(username);
+            document.setDocState(DocStateEnum.WAIT);
+            document.setReviewing(true);
+            document.setCreateDate(new Date());
+            documentRepository.save(document);
+
+            // 7. Create review record
+            docReviewService.insert(document);
+
+            // 8. Submit async task for text extraction and ES indexing
+            taskExecuteService.execute(document);
+
+            log.info("Upload by URL success: userId={}, username={}, docId={}, filename={}, url={}",
+                    userId, username, document.getId(), name, url);
+        } catch (Exception e) {
+            log.error("Upload by URL failed: userId={}, username={}, url={}, error={}",
+                    userId, username, url, e.getMessage());
+        }
     }
 
     @Override
@@ -324,7 +465,7 @@ public class DocumentServiceImpl implements DocumentService {
                 }
                 // 删除文本文件
                 if (document.getTextFileId() != null) {
-                    storageFactory.getStorageStrategy().delete(StorageConstants.textPath(document.getTextFileId()));
+                    storageFactory.getStorageStrategy().delete(StorageConstants.documentTextPath(document.getTextFileId()));
                 }
             }
         }
@@ -389,7 +530,7 @@ public class DocumentServiceImpl implements DocumentService {
         List<FileDocument> documents = listFilesByPage(documentDTO.getPage(), documentDTO.getRows());
         List<DocumentVO> voList = documents.stream()
                 .map(doc -> convertDocument(new DocumentVO(), doc))
-                .collect(Collectors.toList());
+                .toList();
         return PageVO.<DocumentVO>builder()
                 .pageNum(documentDTO.getPage())
                 .pageSize(documentDTO.getRows())
@@ -568,8 +709,8 @@ public class DocumentServiceImpl implements DocumentService {
         // Step 2: Query MySQL, filter by reviewing=false AND docState=SUCCESS
         java.util.List<FileDocument> allMatchedDocs = documentRepository.findByIdList(matchedIds);
         java.util.List<FileDocument> filteredDocs = allMatchedDocs.stream()
-                .filter(doc -> !doc.isReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
-                .collect(java.util.stream.Collectors.toList());
+                .filter(doc -> !doc.getReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
+                .toList();
         // Step 3: Pagination
         int total = filteredDocs.size();
         int start = (pageNum - 1) * pageSize;
@@ -580,7 +721,7 @@ public class DocumentServiceImpl implements DocumentService {
         // Step 4: Convert to VO
         java.util.List<DocumentVO> voList = pagedDocs.stream()
                 .map(this::convertToVO)
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
         return PageVO.<DocumentVO>builder()
                 .pageNum(pageNum)
                 .pageSize(pageSize)

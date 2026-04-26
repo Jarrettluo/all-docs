@@ -89,7 +89,7 @@ public class FileDocument {
     private String errorMsg;
 
     // true 正在审核；false 审核完毕
-    private boolean reviewing = true;
+    private Boolean reviewing = true;
 
     private String userId;
 

@@ -4,6 +4,7 @@ import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.bo.UserBO;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
+import com.jiaruiblog.domain.entity.dto.BasicRegistryDTO;
 import com.jiaruiblog.domain.entity.dto.RegistryUserDTO;
 import com.jiaruiblog.domain.entity.dto.UserRoleDTO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
@@ -25,9 +26,9 @@ public interface IUserService {
 
     /**
      * 注册用户
-     * @param userDTO 用户注册信息
+     * @param userDTO 用户注册信息（简化版，仅需账号密码）
      */
-    void registry(RegistryUserDTO userDTO);
+    void registry(BasicRegistryDTO userDTO);
 
     /**
      * @author luojiarui

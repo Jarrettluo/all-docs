@@ -1,7 +1,7 @@
 spring:
   # 生产环境 MySQL（必须通过环境变量注入）
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE}?useSSL=true&serverTimezone=UTC&characterEncoding=utf8mb4&rewriteBatchedStatements=true
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT:3306}/${MYSQL_DATABASE}?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8&rewriteBatchedStatements=true
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -39,6 +39,21 @@ cloud:
   elasticsearch:
     host: ${ES_HOST}
     port: ${ES_PORT:9200}
+    username: ${ES_USERNAME:elastic}
+    password: ${ES_PASSWORD:infini_rag_flow}
+
+# 禁用 ES 健康检查
+management:
+  health:
+    elasticsearch:
+      enabled: false
+
+# Spring Data Elasticsearch 配置
+spring:
+  elasticsearch:
+    uris: http://${ES_HOST}:${ES_PORT:9200}
+    username: ${ES_USERNAME:elastic}
+    password: ${ES_PASSWORD:infini_rag_flow}
 
 # 生产环境 MinIO
 minio:
@@ -85,3 +100,8 @@ async:
   max-pool-size: 100
   queue-capacity: 500
   keep-alive-seconds: 60
+
+# JWT 配置（生产环境必须设置环境变量）
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 172800000

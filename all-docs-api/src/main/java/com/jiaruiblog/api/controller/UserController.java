@@ -14,8 +14,8 @@ import com.jiaruiblog.domain.entity.vo.UserVO;
 import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.application.service.IUserService;
+import com.jiaruiblog.application.service.ITokenService;
 import com.jiaruiblog.application.transformer.DTO2BOConverter;
-import com.jiaruiblog.api.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -59,12 +59,15 @@ public class UserController {
     IUserService userService;
 
     @Resource
+    ITokenService tokenService;
+
+    @Resource
     SystemConfig systemConfig;
 
 
     @Operation(summary = "新增单个用户", description = "新增单个用户")
     @PostMapping(value = "/insert")
-    public ApiResult<Object> insertObj(@RequestBody @Valid RegistryUserDTO userDTO) {
+    public ApiResult<Object> insertObj(@RequestBody @Valid BasicRegistryDTO userDTO) {
         // 判断是否开启用户注册
         if (Boolean.FALSE.equals(systemConfig.getUserRegistry())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -75,8 +78,8 @@ public class UserController {
 
     @Operation(summary = "批量新增用户", description = "批量新增用户; 支持使用xls进行导入用户信息")
     @PostMapping(value = "/batchInsert")
-    public ApiResult<Object> batchInsert(@RequestBody List<RegistryUserDTO> userDTOS) {
-        for (RegistryUserDTO item : userDTOS) {
+    public ApiResult<Object> batchInsert(@RequestBody List<BasicRegistryDTO> userDTOS) {
+        for (BasicRegistryDTO item : userDTOS) {
             userService.registry(item);
         }
         return ApiResult.success();
@@ -183,7 +186,7 @@ public class UserController {
         if (!StringUtils.hasText(token)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Map<String, Claim> userData = JwtUtil.verifyToken(token);
+        Map<String, Claim> userData = tokenService.verifyToken(token);
         if (CollectionUtils.isEmpty(userData)) {
             throw new BusinessException(ErrorCode.OPERATE_FAILED);
         }

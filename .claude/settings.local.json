@@ -38,7 +38,17 @@
       "Bash(mvn install:*)",
       "Bash(mvn spring-boot:run -q)",
       "Bash(git config:*)",
-      "Bash(env)"
+      "Bash(env)",
+      "Bash(javap -p C:/Project/java/all-docs/all-docs-infrastructure/target/classes/com/jiaruiblog/infrastructure/config/datasource/MyBatisConfig.class)",
+      "Bash(javap:*)",
+      "Bash(git log:*)",
+      "Bash(mvn spring-boot:run -pl all-docs-bootstrap -q)",
+      "Bash(taskkill //F //IM java.exe)",
+      "Bash(netstat -ano)",
+      "Bash(mvn spring-boot:run -pl all-docs-bootstrap)",
+      "Bash(grep:*)",
+      "Bash(ls -la *.md *.sql)",
+      "Bash(mvn dependency:tree)"
     ]
   }
 }

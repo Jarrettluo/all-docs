@@ -68,7 +68,7 @@ public class UserMybatisRepository implements UserRepository {
 
     @Override
     public List<User> findByPage(int pageNum, int pageSize, Sort sort) {
-        int offset = pageNum * pageSize;
+        int offset = (pageNum - 1) * pageSize;
         return userMapper.findByPage(offset, pageSize);
     }
 }

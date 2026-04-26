@@ -36,7 +36,7 @@ import java.util.Map;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1/doc-log")
+@RequestMapping("/api/v1/docLog")
 public class DocLogController {
 
     @Resource

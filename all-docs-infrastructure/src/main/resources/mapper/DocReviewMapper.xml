@@ -8,10 +8,10 @@
         <result property="docName" column="doc_name"/>
         <result property="userId" column="user_id"/>
         <result property="userName" column="user_name"/>
-        <result property="checkState" column="check_state"/>
-        <result property="readState" column="read_state"/>
-        <result property="userRemove" column="user_remove"/>
-        <result property="adminRemove" column="admin_remove"/>
+        <result property="checkState" column="check_state" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler"/>
+        <result property="readState" column="read_state" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler"/>
+        <result property="userRemove" column="user_remove" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler"/>
+        <result property="adminRemove" column="admin_remove" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler"/>
         <result property="reviewLog" column="review_log"/>
         <result property="createDate" column="create_date"/>
         <result property="updateDate" column="update_date"/>

@@ -121,7 +121,10 @@ public class StatisticsController {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
 
         if (CollectionUtils.isEmpty(docIdList)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            Map<String, Object> result = new HashMap<>();
+            result.put("top1", null);
+            result.put("others", List.of());
+            return ApiResult.success(result);
         }
 
 

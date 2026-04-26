@@ -19,6 +19,9 @@ public class CategoryMybatisRepository implements CategoryRepository {
     @Autowired
     private CategoryMapper categoryMapper;
 
+    @Autowired
+    private CateDocRelationshipMapper cateDocRelationshipMapper;
+
     @Override
     public void save(Category category) {
         categoryMapper.save(category);
@@ -26,7 +29,7 @@ public class CategoryMybatisRepository implements CategoryRepository {
 
     @Override
     public void saveRelationship(CateDocRelationship relationship) {
-        // Relationship is handled via CateDocRelationshipMapper
+        cateDocRelationshipMapper.save(relationship);
     }
 
     @Override
@@ -61,8 +64,7 @@ public class CategoryMybatisRepository implements CategoryRepository {
 
     @Override
     public List<CateDocRelationship> findRelationshipsByCategoryId(String categoryId, Sort sort) {
-        // Implemented via CateDocRelationshipMapper
-        return null;
+        return cateDocRelationshipMapper.findByCategoryId(categoryId);
     }
 
     @Override

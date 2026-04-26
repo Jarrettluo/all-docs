@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface DocReviewMapper {
 
-    DocReview save(DocReview docReview);
+    int save(DocReview docReview);
 
     void saveAll(@Param("list") List<DocReview> docReviews);
 

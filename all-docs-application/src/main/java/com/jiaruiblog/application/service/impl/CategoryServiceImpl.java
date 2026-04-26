@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +72,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (!isNameExist(category.getName()).isEmpty()) {
             throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
         }
+        category.setId(UUID.randomUUID().toString());
         // 保存分类信息
         categoryRepository.save(category);
     }
@@ -117,6 +119,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (nameExist.isEmpty()) {
             // 创建新分类
             Category category = new Category();
+            category.setId(UUID.randomUUID().toString());
             category.setUpdateDate(new Date());
             category.setCreateDate(new Date());
             category.setName(cateName);

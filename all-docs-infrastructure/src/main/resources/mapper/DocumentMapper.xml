@@ -18,7 +18,7 @@
         <result property="previewFileId" column="preview_file_id"/>
         <result property="docState" column="doc_state" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
         <result property="errorMsg" column="error_msg"/>
-        <result property="reviewing" column="reviewing"/>
+        <result property="reviewing" column="reviewing" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler"/>
         <result property="userId" column="user_id"/>
         <result property="userName" column="user_name"/>
         <result property="createDate" column="create_date"/>
@@ -41,6 +41,9 @@
             text_file_id = #{textFileId},
             thumb_id = #{thumbId},
             preview_file_id = #{previewFileId},
+            doc_state = #{docState},
+            error_msg = #{errorMsg},
+            reviewing = #{reviewing},
             update_date = NOW()
         WHERE id = #{id}
     </update>

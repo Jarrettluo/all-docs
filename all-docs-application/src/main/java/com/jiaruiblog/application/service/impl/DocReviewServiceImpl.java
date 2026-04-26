@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author luojiarui
@@ -40,6 +41,7 @@ public class DocReviewServiceImpl implements DocReviewService {
             return;
         }
         DocReview review = new DocReview();
+        review.setId(UUID.randomUUID().toString());
         review.setDocId(document.getId());
         review.setUserId(document.getUserId());
         review.setCreateDate(new Date());
