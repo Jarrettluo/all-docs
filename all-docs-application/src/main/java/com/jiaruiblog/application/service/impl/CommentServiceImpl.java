@@ -125,9 +125,8 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public PageVO<CommentWithUserVO> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
+    public PageVO<Comment> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
         log.info("查询的参数是：{}, {}", page, userId);
-        // Note: For admin, return all comments; for user, return only their own
         List<Comment> comments;
         if (Boolean.TRUE.equals(isAdmin)) {
             comments = commentRepository.findAll();
@@ -137,7 +136,6 @@ public class CommentServiceImpl implements ICommentService {
 
         long count = comments.size();
 
-        // Pagination: page is 1-indexed, convert to 0-indexed for skip
         int pageNum = page.getPage();
         int pageSize = page.getRows();
         int skip = (pageNum - 1) * pageSize;
@@ -146,16 +144,9 @@ public class CommentServiceImpl implements ICommentService {
                 .limit(pageSize)
                 .toList();
 
-        List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
-        for (Comment comment : comments) {
-            CommentWithUserVO vo = new CommentWithUserVO();
-            BeanUtils.copyProperties(comment, vo);
-            commentWithUserVOList.add(vo);
-        }
-
-        return PageVO.<CommentWithUserVO>builder()
+        return PageVO.<Comment>builder()
                 .total((int) count)
-                .list(commentWithUserVOList)
+                .list(comments)
                 .pageNum(pageNum)
                 .pageSize(pageSize)
                 .build();
