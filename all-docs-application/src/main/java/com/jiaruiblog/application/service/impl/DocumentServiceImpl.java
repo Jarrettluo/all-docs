@@ -9,22 +9,13 @@ import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.SearchQuery;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
-import com.jiaruiblog.domain.entity.po.Category;
-import com.jiaruiblog.domain.entity.po.Tag;
-import com.jiaruiblog.domain.entity.po.FileDocument;
-import com.jiaruiblog.domain.entity.po.SearchDocument;
-import com.jiaruiblog.domain.entity.po.TagDocRelationship;
-import com.jiaruiblog.domain.entity.vo.CategoryVO;
-import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
-import com.jiaruiblog.domain.entity.vo.DocumentVO;
-import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.domain.entity.vo.TagVO;
-import com.jiaruiblog.domain.entity.vo.DocSearchVO;
-import com.jiaruiblog.domain.entity.vo.TagColorVO;
+import com.jiaruiblog.domain.entity.po.*;
+import com.jiaruiblog.domain.entity.vo.*;
 import com.jiaruiblog.infrastructure.repository.CategoryRepository;
 import com.jiaruiblog.infrastructure.repository.CollectRepository;
 import com.jiaruiblog.infrastructure.repository.TagRepository;
 import com.jiaruiblog.infrastructure.repository.mysql.CateDocRelationshipMapper;
+import com.jiaruiblog.infrastructure.repository.mysql.DocumentMybatisRepository;
 import com.jiaruiblog.infrastructure.repository.mysql.TagDocRelationshipMapper;
 import com.jiaruiblog.infrastructure.storage.StorageFactory;
 import com.jiaruiblog.infrastructure.storage.StorageStrategy;
@@ -50,7 +41,7 @@ import java.util.stream.Collectors;
 public class DocumentServiceImpl implements DocumentService {
 
     @Resource
-    private DocumentRepository documentRepository;
+    private DocumentMybatisRepository documentMybatisRepository;
 
     @Resource
     private StorageFactory storageFactory;
@@ -106,7 +97,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public List<FileDocument> list() {
-        return documentRepository.findByPage(1, 100, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        return documentMybatisRepository.findByPage(1, 100, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
@@ -114,7 +105,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (document == null) {
             return;
         }
-        documentRepository.save(document);
+        documentMybatisRepository.save(document);
     }
 
     @Override
@@ -137,7 +128,7 @@ public class DocumentServiceImpl implements DocumentService {
             return;
         }
         // Delete from MySQL
-        documentRepository.delete(document.getId());
+        documentMybatisRepository.delete(document.getId());
         // Delete from MinIO - 文档原文
         if (document.getGridfsId() != null) {
             storageFactory.getStorageStrategy().delete(StorageConstants.documentPath(document.getGridfsId()));
@@ -175,7 +166,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (documentId == null || documentId.isEmpty()) {
             return null;
         }
-        return documentRepository.findById(documentId);
+        return documentMybatisRepository.findById(documentId);
     }
 
     @Override
@@ -183,7 +174,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (md5 == null || md5.isEmpty()) {
             return null;
         }
-        return documentRepository.findByMd5(md5);
+        return documentMybatisRepository.findByMd5(md5);
     }
 
     @Override
@@ -199,12 +190,12 @@ public class DocumentServiceImpl implements DocumentService {
         if (docIds == null || docIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return documentRepository.findByIdList(docIds);
+        return documentMybatisRepository.findByIdList(docIds);
     }
 
     @Override
     public List<FileDocument> queryAll() {
-        return documentRepository.findByPage(1, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        return documentMybatisRepository.findByPage(1, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
@@ -255,14 +246,14 @@ public class DocumentServiceImpl implements DocumentService {
         if (document == null) {
             return null;
         }
-        documentRepository.save(document);
+        documentMybatisRepository.save(document);
         return document;
     }
 
     @Override
     public PageVO<FileDocument> queryByPage(FileDocument document, int pageNum, int pageSize) {
-        List<FileDocument> documents = documentRepository.findByPage(pageNum, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
-        long total = documentRepository.count();
+        List<FileDocument> documents = documentMybatisRepository.findByPage(pageNum, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        long total = documentMybatisRepository.count();
         return PageVO.<FileDocument>builder()
                 .pageNum(pageNum)
                 .pageSize(pageSize)
@@ -276,7 +267,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (md5 == null || file == null) {
             return null;
         }
-        FileDocument existing = documentRepository.findByMd5(md5);
+        FileDocument existing = documentMybatisRepository.findByMd5(md5);
         if (existing != null) {
             return existing;
         }
@@ -289,7 +280,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (file.getOriginalFilename() != null && file.getOriginalFilename().contains(".")) {
             document.setSuffix(file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")));
         }
-        documentRepository.save(document);
+        documentMybatisRepository.save(document);
         return document;
     }
 
@@ -308,7 +299,7 @@ public class DocumentServiceImpl implements DocumentService {
             String md5 = calculateMd5(fileBytes);
 
             // 3. Check for duplicate
-            FileDocument existing = documentRepository.findByMd5(md5);
+            FileDocument existing = documentMybatisRepository.findByMd5(md5);
             if (existing != null) {
                 log.info("Document already exists: md5={}, docId={}", md5, existing.getId());
                 return;
@@ -333,7 +324,7 @@ public class DocumentServiceImpl implements DocumentService {
             document.setDocState(DocStateEnum.WAIT);
             document.setReviewing(true);
             document.setCreateDate(new Date());
-            documentRepository.save(document);
+            documentMybatisRepository.save(document);
 
             // 6. Index document to ES
             indexDocumentToEs(document);
@@ -398,7 +389,7 @@ public class DocumentServiceImpl implements DocumentService {
             String md5 = calculateMd5(fileBytes);
 
             // 3. Check for duplicate
-            FileDocument existing = documentRepository.findByMd5(md5);
+            FileDocument existing = documentMybatisRepository.findByMd5(md5);
             if (existing != null) {
                 log.info("Document already exists: md5={}, docId={}", md5, existing.getId());
                 return;
@@ -427,7 +418,7 @@ public class DocumentServiceImpl implements DocumentService {
             document.setDocState(DocStateEnum.WAIT);
             document.setReviewing(true);
             document.setCreateDate(new Date());
-            documentRepository.save(document);
+            documentMybatisRepository.save(document);
 
             // 7. Index document to ES
             indexDocumentToEs(document);
@@ -453,7 +444,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
         String objectId = uploadFileToGridFs(fileDocument.getName(), inputStream, fileDocument.getContentType(), fileDocument.getMd5());
         fileDocument.setGridfsId(objectId);
-        documentRepository.save(fileDocument);
+        documentMybatisRepository.save(fileDocument);
         return fileDocument;
     }
 
@@ -462,7 +453,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (fileDocument == null || fileDocument.getId() == null) {
             return;
         }
-        documentRepository.update(fileDocument);
+        documentMybatisRepository.update(fileDocument);
     }
 
     @Override
@@ -474,7 +465,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (errorMsg != null) {
             fileDocument.setErrorMsg(errorMsg);
         }
-        documentRepository.update(fileDocument);
+        documentMybatisRepository.update(fileDocument);
     }
 
     @Override
@@ -482,9 +473,9 @@ public class DocumentServiceImpl implements DocumentService {
         if (id == null || id.isEmpty()) {
             return;
         }
-        FileDocument document = documentRepository.findById(id);
+        FileDocument document = documentMybatisRepository.findById(id);
         if (document != null) {
-            documentRepository.delete(id);
+            documentMybatisRepository.delete(id);
             if (isDeleteFile) {
                 // 删除文档原文
                 if (document.getGridfsId() != null) {
@@ -511,7 +502,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (id == null || id.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(documentRepository.findById(id));
+        return Optional.ofNullable(documentMybatisRepository.findById(id));
     }
 
     @Override
@@ -521,7 +512,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public FileDocument getByMd5(String md5) {
-        return documentRepository.findByMd5(md5);
+        return documentMybatisRepository.findByMd5(md5);
     }
 
     @Override
@@ -531,7 +522,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
         List<FileDocument> result = new ArrayList<>();
         for (String md5 : md5Set) {
-            FileDocument doc = documentRepository.findByMd5(md5);
+            FileDocument doc = documentMybatisRepository.findByMd5(md5);
             if (doc != null) {
                 result.add(doc);
             }
@@ -541,7 +532,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
-        return documentRepository.findByPage(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        return documentMybatisRepository.findByPage(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
@@ -549,7 +540,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
-        return documentRepository.findByIdList(new ArrayList<>(ids));
+        return documentMybatisRepository.findByIdList(new ArrayList<>(ids));
     }
 
     @Override
@@ -568,16 +559,16 @@ public class DocumentServiceImpl implements DocumentService {
 
         FilterTypeEnum type = documentDTO.getType();
         if (type == FilterTypeEnum.TAG && StringUtils.hasText(documentDTO.getTagId())) {
-            documents = documentRepository.findByPageByTag(documentDTO.getTagId(),
+            documents = documentMybatisRepository.findByPageByTag(documentDTO.getTagId(),
                     documentDTO.getPage(), documentDTO.getRows());
-            total = documentRepository.countByTagId(documentDTO.getTagId());
+            total = documentMybatisRepository.countByTagId(documentDTO.getTagId());
         } else if (type == FilterTypeEnum.CATEGORY && StringUtils.hasText(documentDTO.getCategoryId())) {
-            documents = documentRepository.findByPageByCategory(documentDTO.getCategoryId(),
+            documents = documentMybatisRepository.findByPageByCategory(documentDTO.getCategoryId(),
                     documentDTO.getPage(), documentDTO.getRows());
-            total = documentRepository.countByCategoryId(documentDTO.getCategoryId());
+            total = documentMybatisRepository.countByCategoryId(documentDTO.getCategoryId());
         } else {
             documents = listFilesByPage(documentDTO.getPage(), documentDTO.getRows());
-            total = documentRepository.count();
+            total = documentMybatisRepository.count();
         }
 
         List<DocumentVO> voList = documents.stream()
@@ -610,7 +601,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (updateInfoDTO == null || updateInfoDTO.getId() == null) {
             return;
         }
-        FileDocument document = documentRepository.findById(updateInfoDTO.getId());
+        FileDocument document = documentMybatisRepository.findById(updateInfoDTO.getId());
         if (document != null) {
             if (updateInfoDTO.getName() != null) {
                 document.setName(updateInfoDTO.getName());
@@ -618,7 +609,7 @@ public class DocumentServiceImpl implements DocumentService {
             if (updateInfoDTO.getDesc() != null) {
                 document.setDescription(updateInfoDTO.getDesc());
             }
-            documentRepository.update(document);
+            documentMybatisRepository.update(document);
         }
     }
 
@@ -633,13 +624,13 @@ public class DocumentServiceImpl implements DocumentService {
 
         FilterTypeEnum type = documentDTO.getType();
         if (type == FilterTypeEnum.TAG && StringUtils.hasText(documentDTO.getTagId())) {
-            documents = documentRepository.findByPageByTag(documentDTO.getTagId(),
+            documents = documentMybatisRepository.findByPageByTag(documentDTO.getTagId(),
                     documentDTO.getPage(), documentDTO.getRows());
-            total = documentRepository.countByTagId(documentDTO.getTagId());
+            total = documentMybatisRepository.countByTagId(documentDTO.getTagId());
         } else if (type == FilterTypeEnum.CATEGORY && StringUtils.hasText(documentDTO.getCategoryId())) {
-            documents = documentRepository.findByPageByCategory(documentDTO.getCategoryId(),
+            documents = documentMybatisRepository.findByPageByCategory(documentDTO.getCategoryId(),
                     documentDTO.getPage(), documentDTO.getRows());
-            total = documentRepository.countByCategoryId(documentDTO.getCategoryId());
+            total = documentMybatisRepository.countByCategoryId(documentDTO.getCategoryId());
         } else {
             return PageVO.<DocWithCateVO>builder().build();
         }
@@ -724,7 +715,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.length == 0) {
             return Collections.emptyList();
         }
-        return documentRepository.findByIdList(Arrays.asList(docId));
+        return documentMybatisRepository.findByIdList(Arrays.asList(docId));
     }
 
     @Override
@@ -732,8 +723,8 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.length == 0) {
             return Collections.emptyList();
         }
-        List<FileDocument> result = documentRepository.findByIdList(Arrays.asList(docId));
-        documentRepository.deleteByIdList(Arrays.asList(docId));
+        List<FileDocument> result = documentMybatisRepository.findByIdList(Arrays.asList(docId));
+        documentMybatisRepository.deleteByIdList(Arrays.asList(docId));
         log.info("Query and remove documents: {}", Arrays.asList(docId));
         return result;
     }
@@ -743,7 +734,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.length == 0) {
             return Collections.emptyList();
         }
-        return documentRepository.findByIdList(Arrays.asList(docId));
+        return documentMybatisRepository.findByIdList(Arrays.asList(docId));
     }
 
     @Override
@@ -753,20 +744,20 @@ public class DocumentServiceImpl implements DocumentService {
         }
         int page = pageDTO.getPage() != null ? pageDTO.getPage() : 1;
         int size = pageDTO.getRows() != null ? pageDTO.getRows() : 10;
-        return documentRepository.findByPage(page, size, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        return documentMybatisRepository.findByPage(page, size, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
     public Map<String, Object> queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing) {
         Map<String, Object> result = new HashMap<>();
         result.put("data", queryFileDocument(pageDTO, reviewing));
-        result.put("total", documentRepository.count());
+        result.put("total", documentMybatisRepository.count());
         return result;
     }
 
     @Override
     public long countAllFile() {
-        return documentRepository.count();
+        return documentMybatisRepository.count();
     }
 
     @Override
@@ -774,7 +765,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.isEmpty()) {
             return false;
         }
-        return documentRepository.findById(docId) != null;
+        return documentMybatisRepository.findById(docId) != null;
     }
 
     @Override
@@ -828,7 +819,7 @@ public class DocumentServiceImpl implements DocumentService {
                     .build();
         }
         // Step 2: Query MySQL, filter by reviewing=false AND docState=SUCCESS
-        java.util.List<FileDocument> allMatchedDocs = documentRepository.findByIdList(matchedIds);
+        java.util.List<FileDocument> allMatchedDocs = documentMybatisRepository.findByIdList(matchedIds);
         java.util.List<FileDocument> filteredDocs = allMatchedDocs.stream()
                 .filter(doc -> !doc.getReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
                 .toList();
@@ -926,8 +917,9 @@ public class DocumentServiceImpl implements DocumentService {
                         .build();
             }
             String categoryId = categories.get(0).getId();
-            List<String> docIdsInCategory = cateDocRelationshipMapper.findByCategoryIdAndFileIdIn(categoryId, new ArrayList<>(candidateIds))
+            List<String> docIdsInCategory = cateDocRelationshipMapper.findByFileIds(new ArrayList<>(candidateIds))
                     .stream()
+                    .filter(rel -> categoryId.equals(rel.getCategoryId()))
                     .map(CateDocRelationship::getFileId)
                     .toList();
             candidateIds.retainAll(docIdsInCategory);
@@ -942,7 +934,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         // Step 4: Query documents from MySQL
-        List<FileDocument> documents = documentRepository.findByIdList(new ArrayList<>(candidateIds));
+        List<FileDocument> documents = documentMybatisRepository.findByIdList(new ArrayList<>(candidateIds));
         // Filter by reviewing=false AND docState=SUCCESS
         List<FileDocument> filteredDocs = documents.stream()
                 .filter(doc -> !doc.getReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
@@ -1121,7 +1113,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.isEmpty()) {
             return;
         }
-        FileDocument document = documentRepository.findById(docId);
+        FileDocument document = documentMybatisRepository.findById(docId);
         if (document == null || document.getMd5() == null) {
             log.warn("Cannot update ES content: document not found for docId={}", docId);
             return;
