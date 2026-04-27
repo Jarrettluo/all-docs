@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date 2022/6/19 5:07 下午
  * @Version 1.0
  **/
-public class StringToEnumConverter<T extends BaseEnum> implements Converter<String, T> {
+public class StringToEnumConverter<T extends Enum<T> & BaseEnum> implements Converter<String, T> {
     private Map<String, T> enumMap = new ConcurrentHashMap<>();
 
     public StringToEnumConverter(Class<T> enumType) {
