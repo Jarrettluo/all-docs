@@ -7,6 +7,7 @@ import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.RemoveObjectDTO;
+import com.jiaruiblog.domain.entity.dto.SearchQuery;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
@@ -149,31 +150,13 @@ public class DocumentController {
         return ApiResult.success(keyList);
     }
 
-    @Operation(summary = "2.4 文档全文搜索", description = "根据关键字搜索已审核且解析成功的文档")
-    @GetMapping(value = "/search")
+    @Operation(summary = "文档搜索", description = "根据多条件搜索文档")
+    @PostMapping(value = "/search")
+    @Permission(value = PermissionEnum.USER)
     public ApiResult<Object> search(
-            @RequestParam(value = "keyword")
-            @Schema(description = "搜索关键字") String keyword,
-            @RequestParam(value = "page", defaultValue = "1")
-            @Schema(description = "页码") int page,
-            @RequestParam(value = "size", defaultValue = "10")
-            @Schema(description = "每页大小") int size) throws IOException {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return ApiResult.success(PageVO.<DocumentVO>builder()
-                    .pageNum(page)
-                    .pageSize(size)
-                    .total(0)
-                    .list(new java.util.ArrayList<>())
-                    .build());
-        }
-        // 记录搜索词
-        if (StringUtils.hasText(keyword)) {
-            SensitiveFilter filter = SensitiveFilter.getInstance();
-            int n = filter.checkSensitiveWord(keyword, 0, 1);
-            if (n <= 0) {
-                redisService.incrementScoreByUserId(keyword, RedisServiceImpl.SEARCH_KEY);
-            }
-        }
-        return ApiResult.success(documentService.search(keyword.trim(), page, size));
+            @RequestBody @Schema(description = "搜索参数") SearchQuery query,
+            HttpServletRequest request) {
+        String userId = (String) request.getAttribute("id");
+        return ApiResult.success(documentService.search(query, userId));
     }
 }
