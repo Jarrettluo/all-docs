@@ -29,7 +29,7 @@ public class StringCodeToEnumConverterFactory implements ConverterFactory<String
     public <T extends Enum<?>> Converter<String, T> getConverter(Class<T> targetType) {
        Converter<String, T> converter = CONVERTERS.get(targetType);
         if (converter == null) {
-            converter = (Converter<String, T>) new StringToEnumConverter<>(targetType);
+            converter = (Converter<String, T>) new StringToEnumConverter(targetType);
             CONVERTERS.put(targetType, converter);
         }
         return converter;
