@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date 2022/6/19 5:08 下午
  * @Version 1.0
  **/
-public class StringCodeToEnumConverterFactory implements ConverterFactory<String, BaseEnum> {
+public class StringCodeToEnumConverterFactory implements ConverterFactory<String, Enum<?>> {
     private static final Map<Class, Converter> CONVERTERS =
             new ConcurrentHashMap<>();
 
@@ -25,10 +25,11 @@ public class StringCodeToEnumConverterFactory implements ConverterFactory<String
      * @return 返回一个转化器
      */
     @Override
-    public <T extends BaseEnum> Converter<String, T> getConverter(Class<T> targetType) {
+    @SuppressWarnings("unchecked")
+    public <T extends Enum<?>> Converter<String, T> getConverter(Class<T> targetType) {
        Converter<String, T> converter = CONVERTERS.get(targetType);
         if (converter == null) {
-            converter = new StringToEnumConverter<>(targetType);
+            converter = (Converter<String, T>) new StringToEnumConverter<>(targetType);
             CONVERTERS.put(targetType, converter);
         }
         return converter;
