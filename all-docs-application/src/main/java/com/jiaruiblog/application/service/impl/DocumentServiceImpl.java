@@ -12,6 +12,7 @@ import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.domain.entity.po.Category;
 import com.jiaruiblog.domain.entity.po.Tag;
 import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.SearchDocument;
 import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.domain.entity.vo.CategoryVO;
 import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author jiarui.luo
@@ -333,10 +335,13 @@ public class DocumentServiceImpl implements DocumentService {
             document.setCreateDate(new Date());
             documentRepository.save(document);
 
-            // 6. Create review record
+            // 6. Index document to ES
+            indexDocumentToEs(document);
+
+            // 7. Create review record
             docReviewService.insert(document);
 
-            // 7. Submit async task for text extraction and ES indexing
+            // 8. Submit async task for text extraction and ES indexing
             taskExecuteService.execute(document);
 
             log.info("Document upload success: userId={}, username={}, docId={}, filename={}",
@@ -424,10 +429,13 @@ public class DocumentServiceImpl implements DocumentService {
             document.setCreateDate(new Date());
             documentRepository.save(document);
 
-            // 7. Create review record
+            // 7. Index document to ES
+            indexDocumentToEs(document);
+
+            // 8. Create review record
             docReviewService.insert(document);
 
-            // 8. Submit async task for text extraction and ES indexing
+            // 9. Submit async task for text extraction and ES indexing
             taskExecuteService.execute(document);
 
             log.info("Upload by URL success: userId={}, username={}, docId={}, filename={}, url={}",
@@ -789,6 +797,9 @@ public class DocumentServiceImpl implements DocumentService {
         if (collectService != null) {
             documentVO.setCollectNum(collectService.collectNum(docId));
         }
+        if (likeService != null) {
+            documentVO.setLikeNum(likeService.likeNum(docId));
+        }
         documentVO.setDocState(fileDocument.getDocState());
         documentVO.setErrorMsg(fileDocument.getErrorMsg());
         documentVO.setTxtId(fileDocument.getTextFileId());
@@ -1030,5 +1041,103 @@ public class DocumentServiceImpl implements DocumentService {
         if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
         if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
         return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
+    }
+
+    /**
+     * Index document to Elasticsearch
+     */
+    private void indexDocumentToEs(FileDocument document) {
+        if (document == null || document.getMd5() == null) {
+            log.warn("Cannot index null or md5-less document to ES");
+            return;
+        }
+        try {
+            SearchDocument searchDocument = new SearchDocument();
+            searchDocument.setId(document.getMd5());
+            searchDocument.setName(document.getName());
+            searchDocument.setType(document.getSuffix());
+            searchDocument.setContent(""); // empty initially, will be filled by text extraction task
+            searchDocument.setTagNames(getTagNamesByDocId(document.getId()));
+            searchDocument.setCategoryName(getCategoryNameByDocId(document.getId()));
+            elasticService.upload(searchDocument);
+            log.info("Document indexed to ES: id={}, name={}", document.getMd5(), document.getName());
+        } catch (Exception e) {
+            log.error("Failed to index document to ES: id={}", document.getMd5(), e);
+        }
+    }
+
+    /**
+     * Get tag names for a document
+     */
+    private List<String> getTagNamesByDocId(String docId) {
+        if (docId == null || docId.isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            List<TagDocRelationship> relationships = tagDocRelationshipMapper.findByFileId(docId);
+            if (relationships == null || relationships.isEmpty()) {
+                return Collections.emptyList();
+            }
+            List<String> tagIds = relationships.stream()
+                    .map(TagDocRelationship::getTagId)
+                    .collect(Collectors.toList());
+            List<Tag> tags = tagRepository.findByIds(tagIds);
+            return tags.stream()
+                    .map(Tag::getName)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Failed to get tag names for docId={}", docId, e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Get category name for a document
+     */
+    private String getCategoryNameByDocId(String docId) {
+        if (docId == null || docId.isEmpty()) {
+            return "";
+        }
+        try {
+            List<CateDocRelationship> relationships = cateDocRelationshipMapper.findByFileId(docId);
+            if (relationships == null || relationships.isEmpty()) {
+                return "";
+            }
+            // Return the first category's name
+            String categoryId = relationships.get(0).getCategoryId();
+            Optional<Category> category = categoryRepository.findById(categoryId);
+            return category.map(Category::getName).orElse("");
+        } catch (Exception e) {
+            log.error("Failed to get category name for docId={}", docId, e);
+            return "";
+        }
+    }
+
+    /**
+     * Update document content in ES after text extraction
+     */
+    private void updateFileContentToEs(String docId, String content) {
+        if (docId == null || docId.isEmpty()) {
+            return;
+        }
+        FileDocument document = documentRepository.findById(docId);
+        if (document == null || document.getMd5() == null) {
+            log.warn("Cannot update ES content: document not found for docId={}", docId);
+            return;
+        }
+        try {
+            SearchDocument searchDocument = new SearchDocument();
+            searchDocument.setId(document.getMd5());
+            searchDocument.setName(document.getName());
+            searchDocument.setType(document.getSuffix());
+            searchDocument.setContent(content);
+            searchDocument.setTagNames(getTagNamesByDocId(docId));
+            searchDocument.setCategoryName(getCategoryNameByDocId(docId));
+            elasticService.updateFileObj(null, searchDocument);
+            log.info("Document content updated in ES: docId={}, md5={}", docId, document.getMd5());
+        } catch (Exception e) {
+            log.error("Failed to update document content in ES: docId={}", docId, e);
+        }
     }
 }
