@@ -938,7 +938,7 @@ public class DocumentServiceImpl implements DocumentService {
         // Filter by reviewing=false AND docState=SUCCESS
         List<FileDocument> filteredDocs = documents.stream()
                 .filter(doc -> !doc.getReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
-                .toList();
+                .collect(Collectors.toList());
 
         // Step 5: Sorting
         String sortField = query.getSortField();
