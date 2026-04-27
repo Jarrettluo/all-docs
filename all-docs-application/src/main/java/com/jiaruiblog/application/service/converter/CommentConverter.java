@@ -16,7 +16,6 @@ public class CommentConverter {
         vo.setDocId(comment.getDocId());
         vo.setDocName(docName);
         vo.setCreateDate(comment.getCreateDate());
-        vo.setUpdateDate(comment.getUpdateDate());
         return vo;
     }
 }
