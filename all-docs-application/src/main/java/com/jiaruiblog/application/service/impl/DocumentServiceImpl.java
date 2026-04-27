@@ -146,8 +146,8 @@ public class DocumentServiceImpl implements DocumentService {
             storageFactory.getStorageStrategy().delete(StorageConstants.documentTextPath(document.getTextFileId()));
         }
         // Delete from ES
-        if (document.getMd5() != null) {
-            elasticService.deleteById(document.getMd5());
+        if (document.getId() != null) {
+            elasticService.deleteById(document.getId());
         }
         log.info("Removed document: id={}", document.getId());
     }
@@ -1039,22 +1039,22 @@ public class DocumentServiceImpl implements DocumentService {
      * Index document to Elasticsearch
      */
     private void indexDocumentToEs(FileDocument document) {
-        if (document == null || document.getMd5() == null) {
-            log.warn("Cannot index null or md5-less document to ES");
+        if (document == null || document.getId() == null) {
+            log.warn("Cannot index null or id-less document to ES");
             return;
         }
         try {
             SearchDocument searchDocument = new SearchDocument();
-            searchDocument.setId(document.getMd5());
+            searchDocument.setId(document.getId());  // Use UUID as ES document ID
             searchDocument.setName(document.getName());
             searchDocument.setType(document.getSuffix());
             searchDocument.setContent(""); // empty initially, will be filled by text extraction task
             searchDocument.setTagNames(getTagNamesByDocId(document.getId()));
             searchDocument.setCategoryName(getCategoryNameByDocId(document.getId()));
             elasticService.upload(searchDocument);
-            log.info("Document indexed to ES: id={}, name={}", document.getMd5(), document.getName());
+            log.info("Document indexed to ES: id={}, name={}", document.getId(), document.getName());
         } catch (Exception e) {
-            log.error("Failed to index document to ES: id={}", document.getMd5(), e);
+            log.error("Failed to index document to ES: id={}", document.getId(), e);
         }
     }
 
@@ -1114,20 +1114,20 @@ public class DocumentServiceImpl implements DocumentService {
             return;
         }
         FileDocument document = documentMybatisRepository.findById(docId);
-        if (document == null || document.getMd5() == null) {
+        if (document == null || document.getId() == null) {
             log.warn("Cannot update ES content: document not found for docId={}", docId);
             return;
         }
         try {
             SearchDocument searchDocument = new SearchDocument();
-            searchDocument.setId(document.getMd5());
+            searchDocument.setId(document.getId());  // Use UUID as ES document ID
             searchDocument.setName(document.getName());
             searchDocument.setType(document.getSuffix());
             searchDocument.setContent(content);
             searchDocument.setTagNames(getTagNamesByDocId(docId));
             searchDocument.setCategoryName(getCategoryNameByDocId(docId));
             elasticService.updateFileObj(null, searchDocument);
-            log.info("Document content updated in ES: docId={}, md5={}", docId, document.getMd5());
+            log.info("Document content updated in ES: docId={}", docId);
         } catch (Exception e) {
             log.error("Failed to update document content in ES: docId={}", docId, e);
         }
