@@ -7,8 +7,10 @@ import com.jiaruiblog.common.enums.DocStateEnum;
 import com.jiaruiblog.common.enums.FilterTypeEnum;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
+import com.jiaruiblog.domain.entity.dto.SearchQuery;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
-import com.jiaruiblog.domain.entity.po.CateDocRelationship;
+import com.jiaruiblog.domain.entity.po.Category;
+import com.jiaruiblog.domain.entity.po.Tag;
 import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.domain.entity.vo.CategoryVO;
@@ -16,7 +18,11 @@ import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.domain.entity.vo.TagVO;
-import com.jiaruiblog.infrastructure.repository.DocumentRepository;
+import com.jiaruiblog.domain.entity.vo.DocSearchVO;
+import com.jiaruiblog.domain.entity.vo.TagColorVO;
+import com.jiaruiblog.infrastructure.repository.CategoryRepository;
+import com.jiaruiblog.infrastructure.repository.CollectRepository;
+import com.jiaruiblog.infrastructure.repository.TagRepository;
 import com.jiaruiblog.infrastructure.repository.mysql.CateDocRelationshipMapper;
 import com.jiaruiblog.infrastructure.repository.mysql.TagDocRelationshipMapper;
 import com.jiaruiblog.infrastructure.storage.StorageFactory;
@@ -67,6 +73,18 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Resource
     private TagDocRelationshipMapper tagDocRelationshipMapper;
+
+    @Resource
+    private TagRepository tagRepository;
+
+    @Resource
+    private CategoryRepository categoryRepository;
+
+    @Resource
+    private CollectRepository collectRepository;
+
+    @Resource
+    private LikeService likeService;
 
     private static final String FILE_NAME = "filename";
 
@@ -832,5 +850,185 @@ public class DocumentServiceImpl implements DocumentService {
         vo.setUserName(doc.getUserName());
         vo.setCreateTime(doc.getUploadDate());
         return vo;
+    }
+
+    @Override
+    public PageVO<DocSearchVO> search(SearchQuery query, String userId) {
+        // Step 1: ES retrieval - get candidate doc IDs
+        List<String> esMatchedIds = elasticService.searchDocuments(query);
+        if (esMatchedIds == null || esMatchedIds.isEmpty()) {
+            return PageVO.<DocSearchVO>builder()
+                    .pageNum(query.getPage())
+                    .pageSize(query.getPageSize())
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .build();
+        }
+
+        Set<String> candidateIds = new HashSet<>(esMatchedIds);
+
+        // Step 2: Tags filtering - intersect with docs that have ALL specified tags
+        if (query.getTags() != null && !query.getTags().isEmpty()) {
+            List<Tag> tags = tagRepository.findByNames(query.getTags());
+            if (tags.isEmpty()) {
+                // No matching tags found, return empty result
+                return PageVO.<DocSearchVO>builder()
+                        .pageNum(query.getPage())
+                        .pageSize(query.getPageSize())
+                        .total(0)
+                        .list(new ArrayList<>())
+                        .build();
+            }
+            List<String> tagIds = tags.stream().map(Tag::getId).toList();
+            List<String> docIdsWithAllTags = tagDocRelationshipMapper.findByFileIds(new ArrayList<>(candidateIds))
+                    .stream()
+                    .collect(java.util.stream.Collectors.groupingBy(TagDocRelationship::getFileId))
+                    .entrySet().stream()
+                    .filter(entry -> {
+                        Set<String> docTagIds = entry.getValue().stream()
+                                .map(TagDocRelationship::getTagId)
+                                .collect(Collectors.toSet());
+                        return docTagIds.containsAll(tagIds);
+                    })
+                    .map(Map.Entry::getKey)
+                    .toList();
+            candidateIds.retainAll(docIdsWithAllTags);
+            if (candidateIds.isEmpty()) {
+                return PageVO.<DocSearchVO>builder()
+                        .pageNum(query.getPage())
+                        .pageSize(query.getPageSize())
+                        .total(0)
+                        .list(new ArrayList<>())
+                        .build();
+            }
+        }
+
+        // Step 3: Category filtering - intersect with docs in the specified category
+        if (StringUtils.hasText(query.getCategory())) {
+            List<Category> categories = categoryRepository.findByName(query.getCategory());
+            if (categories.isEmpty()) {
+                return PageVO.<DocSearchVO>builder()
+                        .pageNum(query.getPage())
+                        .pageSize(query.getPageSize())
+                        .total(0)
+                        .list(new ArrayList<>())
+                        .build();
+            }
+            String categoryId = categories.get(0).getId();
+            List<String> docIdsInCategory = cateDocRelationshipMapper.findByCategoryIdAndFileIdIn(categoryId, new ArrayList<>(candidateIds))
+                    .stream()
+                    .map(CateDocRelationship::getFileId)
+                    .toList();
+            candidateIds.retainAll(docIdsInCategory);
+            if (candidateIds.isEmpty()) {
+                return PageVO.<DocSearchVO>builder()
+                        .pageNum(query.getPage())
+                        .pageSize(query.getPageSize())
+                        .total(0)
+                        .list(new ArrayList<>())
+                        .build();
+            }
+        }
+
+        // Step 4: Query documents from MySQL
+        List<FileDocument> documents = documentRepository.findByIdList(new ArrayList<>(candidateIds));
+        // Filter by reviewing=false AND docState=SUCCESS
+        List<FileDocument> filteredDocs = documents.stream()
+                .filter(doc -> !doc.getReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
+                .toList();
+
+        // Step 5: Sorting
+        String sortField = query.getSortField();
+        String sortOrder = query.getSortOrder();
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortOrder) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Comparator<FileDocument> comparator = switch (sortField != null ? sortField : "createTime") {
+            case "name" -> Comparator.comparing(FileDocument::getName, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "size" -> Comparator.comparing(FileDocument::getSize, Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(FileDocument::getUploadDate, Comparator.nullsLast(Comparator.naturalOrder()));
+        };
+        if (direction == Sort.Direction.DESC) {
+            comparator = comparator.reversed();
+        }
+        filteredDocs.sort(comparator);
+
+        // Step 6: Pagination
+        int total = filteredDocs.size();
+        int page = query.getPage() != null ? query.getPage() : 1;
+        int pageSize = query.getPageSize() != null ? query.getPageSize() : 20;
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        List<FileDocument> pagedDocs = (start >= total)
+                ? new ArrayList<>()
+                : filteredDocs.subList(start, end);
+
+        // Step 7: Assemble results - get liked/collected status and tags
+        List<DocSearchVO> voList = pagedDocs.stream()
+                .map(doc -> convertToDocSearchVO(doc, userId))
+                .toList();
+
+        return PageVO.<DocSearchVO>builder()
+                .pageNum(page)
+                .pageSize(pageSize)
+                .total(total)
+                .list(voList)
+                .build();
+    }
+
+    private DocSearchVO convertToDocSearchVO(FileDocument doc, String userId) {
+        DocSearchVO vo = new DocSearchVO();
+        vo.setId(doc.getId());
+        vo.setName(doc.getName());
+        vo.setType(doc.getSuffix());
+        vo.setSize(doc.getSize());
+        vo.setSizeDisplay(formatSize(doc.getSize()));
+        vo.setDescription(doc.getDescription());
+        vo.setCreateTime(doc.getUploadDate());
+        vo.setUpdateTime(doc.getUpdateDate());
+
+        // Query liked status
+        if (StringUtils.hasText(userId)) {
+            int likeStatus = likeService.findEntityLikeStatus(userId, 1, doc.getId());
+            vo.setLiked(likeStatus > 0);
+            int collectStatus = likeService.findEntityLikeStatus(userId, 2, doc.getId());
+            vo.setCollected(collectStatus > 0);
+        } else {
+            vo.setLiked(false);
+            vo.setCollected(false);
+        }
+
+        // Query tags with color
+        List<TagDocRelationship> tagRels = tagDocRelationshipMapper.findByFileId(doc.getId());
+        List<TagColorVO> tagColorVOList = tagRels.stream()
+                .map(rel -> {
+                    Tag tag = tagRepository.findById(rel.getTagId());
+                    TagColorVO tagColorVO = new TagColorVO();
+                    if (tag != null) {
+                        tagColorVO.setName(tag.getName());
+                        tagColorVO.setColor(tag.getColor());
+                    }
+                    return tagColorVO;
+                })
+                .filter(t -> t.getName() != null)
+                .toList();
+        vo.setTags(tagColorVOList);
+
+        // Query category
+        List<CateDocRelationship> cateRels = cateDocRelationshipMapper.findByFileId(doc.getId());
+        if (!cateRels.isEmpty()) {
+            Category category = categoryRepository.findById(cateRels.get(0).getCategoryId()).orElse(null);
+            if (category != null) {
+                vo.setCategory(category.getName());
+            }
+        }
+
+        return vo;
+    }
+
+    private String formatSize(Long size) {
+        if (size == null) return "0 B";
+        if (size < 1024) return size + " B";
+        if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
+        if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
+        return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
     }
 }
