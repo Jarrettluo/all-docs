@@ -2,10 +2,12 @@ package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.api.auth.Permission;
 import com.jiaruiblog.application.service.ICommentService;
+import com.jiaruiblog.application.service.converter.CommentConverter;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.exception.BusinessException;
 import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.domain.entity.po.Comment;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.BatchIdDTO;
 import com.jiaruiblog.domain.entity.dto.CommentDTO;
@@ -13,6 +15,7 @@ import com.jiaruiblog.domain.entity.dto.CommentListDTO;
 import com.jiaruiblog.domain.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -22,9 +25,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 评论系统的控制器
@@ -39,6 +44,12 @@ public class CommentController {
 
     @Resource
     ICommentService commentService;
+
+    @Resource
+    CommentConverter commentConverter;
+
+    @Resource
+    DocumentRepository documentRepository;
 
     @Operation(summary = "新增单个评论", description = "添加新的评论")
     @PostMapping(value = "/auth/insert")
@@ -102,7 +113,8 @@ public class CommentController {
     @PostMapping(value = "/auth/myComments")
     public ApiResult<PageVO<CommentWithUserVO>> queryMyComments(@RequestBody BasePageDTO pageDTO, HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
-        PageVO<CommentWithUserVO> result = commentService.queryAllComments(pageDTO, userId, false);
+        PageVO<Comment> commentPage = commentService.queryAllComments(pageDTO, userId, false);
+        PageVO<CommentWithUserVO> result = buildCommentWithUserVO(commentPage);
         return ApiResult.success(result);
     }
 
@@ -110,7 +122,38 @@ public class CommentController {
     @Permission(PermissionEnum.ADMIN)
     @PostMapping(value = "/auth/allComments")
     public ApiResult<PageVO<CommentWithUserVO>> queryAllComments(@RequestBody BasePageDTO pageDTO) {
-        PageVO<CommentWithUserVO> result = commentService.queryAllComments(pageDTO, null, true);
+        PageVO<Comment> commentPage = commentService.queryAllComments(pageDTO, null, true);
+        PageVO<CommentWithUserVO> result = buildCommentWithUserVO(commentPage);
         return ApiResult.success(result);
+    }
+
+    private PageVO<CommentWithUserVO> buildCommentWithUserVO(PageVO<Comment> commentPage) {
+        if (commentPage == null || commentPage.getList() == null || commentPage.getList().isEmpty()) {
+            return PageVO.<CommentWithUserVO>builder()
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .pageNum(commentPage != null ? commentPage.getPageNum() : 1)
+                    .pageSize(commentPage != null ? commentPage.getPageSize() : 10)
+                    .build();
+        }
+
+        List<String> docIdList = commentPage.getList().stream()
+                .map(Comment::getDocId)
+                .collect(Collectors.toList());
+
+        List<FileDocument> documents = documentRepository.findByIdList(docIdList);
+        Map<String, String> docNameMap = documents.stream()
+                .collect(Collectors.toMap(FileDocument::getId, FileDocument::getName));
+
+        List<CommentWithUserVO> voList = commentPage.getList().stream()
+                .map(comment -> commentConverter.toVO(comment, docNameMap.get(comment.getDocId())))
+                .collect(Collectors.toList());
+
+        return PageVO.<CommentWithUserVO>builder()
+                .total(commentPage.getTotal())
+                .list(voList)
+                .pageNum(commentPage.getPageNum())
+                .pageSize(commentPage.getPageSize())
+                .build();
     }
 }
