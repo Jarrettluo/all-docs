@@ -49,23 +49,9 @@ public class PicExecutor extends TaskExecutor {
 
     @Override
     protected void makePreviewFile(InputStream is, TaskData taskData) {
-        if (is == null) {
-            log.warn("图片预览图生成失败：输入流为空");
-            return;
-        }
-        try {
-            ThumbnailService thumbnailService = SpringApplicationContext.getBean(ThumbnailService.class);
-            FileDocument fileDocument = taskData.getFileDocument();
-            // 使用 md5 + filename 作为预览图ID，保持与文档路径一致
-            String previewId = fileDocument.getMd5() + "_" + fileDocument.getName();
-            String result = thumbnailService.makePreview(is, fileDocument.getName(), previewId);
-            if (result != null && !result.isEmpty()) {
-                fileDocument.setPreviewFileId(previewId);
-                log.info("图片预览图生成成功：docId={}, previewId={}", fileDocument.getId(), previewId);
-            }
-        } catch (Exception e) {
-            log.error("图片预览图生成异常：docId={}", taskData.getFileDocument().getId(), e);
-        }
+        // 图片文件不需要格式转换，预览图直接使用缩略图即可
+        // previewFileId 不需要设置，图片本身即是预览
+        log.debug("图片文件不需要生成预览文件，直接使用缩略图即可");
     }
 
 

@@ -29,9 +29,9 @@ public final class StorageConstants {
 
     /**
      * 缩略图存储路径前缀
-     * 完整路径格式: thumbs/{uniqueKey}
+     * 完整路径格式: thumbnails/{uniqueKey}
      */
-    public static final String THUMBS = "thumbs/";
+    public static final String THUMBNAILS = "thumbnails/";
 
     /**
      * 头像存储路径前缀
@@ -72,10 +72,20 @@ public final class StorageConstants {
     /**
      * 生成缩略图存储路径
      * @param uniqueKey 唯一标识符(UUID)
-     * @return thumbs/{uniqueKey}
+     * @return thumbnails/{uniqueKey}
      */
     public static String thumbPath(String uniqueKey) {
-        return THUMBS + uniqueKey;
+        return THUMBNAILS + uniqueKey;
+    }
+
+    /**
+     * 生成缩略图存储路径，带文件扩展名
+     * @param uniqueKey 唯一标识符(UUID)
+     * @param format 文件格式，如 png、jpg、jpeg
+     * @return thumbnails/{uniqueKey}.{format}
+     */
+    public static String thumbPath(String uniqueKey, String format) {
+        return THUMBNAILS + uniqueKey + "." + format;
     }
 
     /**

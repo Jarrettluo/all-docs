@@ -1,26 +1,25 @@
 package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.api.intercepter.SensitiveFilter;
+import com.jiaruiblog.application.service.DocumentService;
+import com.jiaruiblog.application.service.IDocLogService;
+import com.jiaruiblog.application.service.RedisService;
+import com.jiaruiblog.application.service.impl.DocLogServiceImpl;
+import com.jiaruiblog.application.service.impl.RedisServiceImpl;
 import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.domain.entity.po.FileDocument;
-import com.jiaruiblog.domain.entity.po.User;
+import com.jiaruiblog.common.enums.FilterTypeEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.common.exception.BusinessException;
+import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.RemoveObjectDTO;
 import com.jiaruiblog.domain.entity.dto.SearchQuery;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.User;
 import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
-import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.common.enums.FilterTypeEnum;
-import com.jiaruiblog.common.exception.BusinessException;
-import com.jiaruiblog.common.exception.ErrorCode;
-import com.jiaruiblog.api.intercepter.SensitiveFilter;
-import com.jiaruiblog.application.service.IDocLogService;
-import com.jiaruiblog.application.service.DocumentService;
-import com.jiaruiblog.application.service.RedisService;
-import com.jiaruiblog.application.service.impl.DocLogServiceImpl;
-import com.jiaruiblog.application.service.impl.RedisServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Resource;
@@ -151,7 +150,7 @@ public class DocumentController {
     }
 
     @Operation(summary = "文档搜索", description = "根据多条件搜索文档")
-    @PostMapping(value = "/search")
+    @PostMapping(value = "/searchList")
     @Permission(value = PermissionEnum.USER)
     public ApiResult<Object> search(
             @RequestBody @Schema(description = "搜索参数") SearchQuery query,

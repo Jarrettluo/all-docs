@@ -111,7 +111,7 @@ public class UserServiceImpl implements IUserService {
 
         // 更新登录时间
         user.setLastLogin(new Date());
-        userRepository.update(user);
+        userRepository.updateLoginTime(user);
 
         return result;
     }
@@ -473,7 +473,7 @@ public class UserServiceImpl implements IUserService {
     /**
      * 简单密码加密（实际应用中应使用BCrypt等更安全的方案）
      */
-    private String encodePassword(String password) {
+    private static String encodePassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hash = md.digest(password.getBytes(StandardCharsets.UTF_8));

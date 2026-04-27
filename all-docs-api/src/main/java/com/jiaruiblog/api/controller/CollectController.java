@@ -53,8 +53,13 @@ public class CollectController {
             log.error("文档不存在，文档ID: {}", relationship.getDocId());
             throw new BusinessException(ErrorCode.DOCUMENT_NOT_FOUND);
         }
-        collectService.insert(relationship);
-        log.info("文档收藏成功，文档ID: {}, 用户ID: {}", relationship.getDocId(), relationship.getUserId());
+        try {
+            collectService.insert(relationship);
+            log.info("文档收藏成功，文档ID: {}, 用户ID: {}", relationship.getDocId(), relationship.getUserId());
+        } catch (Exception e) {
+            log.error("文档收藏失败，文档ID: {}, 用户ID: {}, 错误: {}", relationship.getDocId(), relationship.getUserId(), e.getMessage(), e);
+            throw e;
+        }
         return ApiResult.success();
     }
 
@@ -68,8 +73,13 @@ public class CollectController {
     public ApiResult<Void> remove(@RequestBody CollectDTO collect, HttpServletRequest request) {
         log.info("开始执行取消收藏操作，文档ID: {}, 用户ID: {}", collect.getDocId(), request.getAttribute("id"));
         CollectDocRelationship relationship = setRelationshipValue(collect, request);
-        collectService.remove(relationship);
-        log.info("取消收藏成功，文档ID: {}, 用户ID: {}", relationship.getDocId(), relationship.getUserId());
+        try {
+            collectService.remove(relationship);
+            log.info("取消收藏成功，文档ID: {}, 用户ID: {}", relationship.getDocId(), relationship.getUserId());
+        } catch (Exception e) {
+            log.error("取消收藏失败，文档ID: {}, 用户ID: {}, 错误: {}", relationship.getDocId(), relationship.getUserId(), e.getMessage(), e);
+            throw e;
+        }
         return ApiResult.success();
     }
 

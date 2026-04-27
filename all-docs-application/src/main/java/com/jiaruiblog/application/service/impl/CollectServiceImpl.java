@@ -9,7 +9,9 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 收藏服务实现类
@@ -40,6 +42,9 @@ public class CollectServiceImpl implements CollectService {
         if (collectDb != null) {
             return false;
         }
+        collect.setId(UUID.randomUUID().toString());
+        collect.setCreateDate(new Date());
+        collect.setUpdateDate(new Date());
         collectRepository.save(collect);
         return true;
     }

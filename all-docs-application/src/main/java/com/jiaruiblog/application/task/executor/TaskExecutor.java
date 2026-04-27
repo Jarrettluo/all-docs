@@ -43,17 +43,14 @@ public abstract class TaskExecutor {
         }
         docInputStream = new ByteArrayInputStream(dfsBytes);
         try {
-            // 制作不同分辨率的缩略图
+            // 第三步 制作不同分辨率的缩略图
             updateFileThumb(docInputStream, taskData.getFileDocument(), taskData);
         } catch (Exception e) {
             throw new TaskRunException("建立缩略图的时候出错啦！", e);
         }
-        // 第三步 制作预览文件
+        // 第四步 制作预览文件；例如ppt需要转成pdf进行预览
         docInputStream = new ByteArrayInputStream(dfsBytes);
         makePreviewFile(docInputStream, taskData);
-
-        // 清空内存占用
-        dfsBytes = new byte[]{};
     }
 
     /**
@@ -188,11 +185,12 @@ public abstract class TaskExecutor {
     public void updateFileThumb(InputStream inputStream, FileDocument fileDocument,
                                 TaskData taskData) throws IOException {
 
-        String picPath = "./" + java.util.UUID.randomUUID().toString() + ".png";
+        String picPath = "./" + java.util.UUID.randomUUID() + ".png";
         taskData.setThumbFilePath(picPath);
 
-        // 将pdf输入流转换为图片并临时保存下来
+        // 将文档输入流转换为图片并临时保存下来
         makeThumb(inputStream, picPath);
+
         if ( !new File(picPath).exists()) {
             return;
         }
@@ -212,7 +210,7 @@ public abstract class TaskExecutor {
         try {
             Files.delete(Paths.get(picPath));
         } catch (IOException e) {
-            log.error("删除文件路径{} ==> 失败信息{}", picPath, e);
+            log.error("删除文件路径{} ==> 失败信息{}", picPath, e.getMessage());
         }
 
     }

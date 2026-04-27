@@ -20,7 +20,7 @@ public class PO2VOConverter {
     public static final String DELETE = "DELETE";
     public static final String DOWNLOAD = "DOWNLOAD";
     public static final String UPLOAD = "UPLOAD";
-    public static final String PREVIEW = "VIEW";
+    public static final String PREVIEW = "PREVIEW";
 
     public static List<DocLogVO> docLogListConvert(List<DocLog> docLogList) {
         if (CollectionUtil.isEmpty(docLogList)) {
@@ -41,6 +41,7 @@ public class PO2VOConverter {
         DocLogVO docLogVO = new DocLogVO();
 
         docLogVO.setId(docLog.getId());
+        docLogVO.setUserId(docLog.getUserId());
         docLogVO.setUserName(docLog.getUserName());
         docLogVO.setDocName(docLog.getDocName());
         docLogVO.setCreateDate(docLog.getCreateDate());

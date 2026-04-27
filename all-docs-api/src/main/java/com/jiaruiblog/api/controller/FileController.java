@@ -97,7 +97,7 @@ public class FileController {
      */
     @Operation(summary = "查询文档预览结果")
     @GetMapping("/view/{id}")
-    public ResponseEntity<Object> serveFileOnline(@PathVariable String id)
+    public ResponseEntity<Object> serveFileOnline(@PathVariable String id, HttpServletRequest request)
             throws UnsupportedEncodingException {
         Optional<FileDocument> fileOpt = fileService.getById(id);
         if (fileOpt.isEmpty()) {
@@ -105,7 +105,11 @@ public class FileController {
         }
 
         FileDocument fileDocument = fileOpt.get();
+        String username = (String) request.getAttribute("username");
+        String userId = (String) request.getAttribute("id");
         User user = new User();
+        user.setUsername(username);
+        user.setId(userId);
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.PREVIEW);
 
         // 从MinIO下载文件内容
@@ -520,7 +524,7 @@ public class FileController {
 //        }
         // 设置响应头，缓存 1 小时
         response.setHeader("Cache-Control", "max-age=3600, public");
-        return fileService.getFileBytes(thumbId, StorageConstants.THUMBS);
+        return fileService.getFileBytes(thumbId, StorageConstants.THUMBNAILS);
     }
 
     @GetMapping(value = "/text2/{txtId}", produces = MediaType.TEXT_PLAIN_VALUE)

@@ -49,7 +49,9 @@
       "Bash(grep:*)",
       "Bash(ls -la *.md *.sql)",
       "Bash(mvn dependency:tree)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(xxd \"C:\\\\Project\\\\java\\\\all-docs\\\\all-docs-bootstrap\\\\src\\\\main\\\\resources\\\\i18n\\\\messages_zh_CN.properties\")",
+      "Bash(./mvnw compile:*)"
     ]
   }
 }

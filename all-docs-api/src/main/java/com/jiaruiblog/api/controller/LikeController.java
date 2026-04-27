@@ -31,9 +31,16 @@ public class LikeController{
     @PostMapping("/")
     public ApiResult<LikeVO> like(@RequestBody LikeRequest request, HttpServletRequest httpRequest) {
         String userId = (String) httpRequest.getAttribute("id");
-        likeService.like(userId, request.getEntityType(), request.getEntityId());
-        LikeVO result = buildLikeVO(userId, request.getEntityId());
-        return ApiResult.success(result);
+        log.info("用户 {} 正在执行点赞操作，entityType={}, entityId={}", userId, request.getEntityType(), request.getEntityId());
+        try {
+            likeService.like(userId, request.getEntityType(), request.getEntityId());
+            LikeVO result = buildLikeVO(userId, request.getEntityId());
+            log.info("用户 {} 点赞操作成功，entityType={}, entityId={}", userId, request.getEntityType(), request.getEntityId());
+            return ApiResult.success(result);
+        } catch (Exception e) {
+            log.error("用户 {} 点赞操作失败，entityType={}, entityId={}", userId, request.getEntityType(), request.getEntityId(), e);
+            throw e;
+        }
     }
 
     @GetMapping("/info")

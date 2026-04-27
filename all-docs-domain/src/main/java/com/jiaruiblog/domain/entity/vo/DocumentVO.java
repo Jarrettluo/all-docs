@@ -27,6 +27,8 @@ public class DocumentVO {
 
     private Long commentNum;
 
+    private Long likeNum;
+
     private CategoryVO categoryVO;
 
     private List<TagVO> tagVOList;

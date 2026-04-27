@@ -6,6 +6,7 @@ import com.jiaruiblog.application.service.RedisService;
 import com.jiaruiblog.common.enums.RedisActionEnum;
 import com.jiaruiblog.domain.entity.po.CollectDocRelationship;
 import com.jiaruiblog.domain.entity.po.LikeDocRelationship;
+import com.jiaruiblog.infrastructure.repository.mysql.LikeDocRelationshipMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class LikeServiceImpl implements LikeService {
 
     @Resource
     private RedisService redisService;
+
+    @Resource
+    private LikeDocRelationshipMapper likeDocRelationshipMapper;
 
     public static final String ENTITY_LIKE_KEY_FORMAT = "like:entity:{0}:{1}";
 
@@ -70,8 +74,8 @@ public class LikeServiceImpl implements LikeService {
             if (redisCount != null && redisCount > 0) {
                 return redisCount;
             }
-            // Redis 没有从 DB 获取
-            return collectService.collectNum(entityId);
+            // Redis 没有从 DB 获取，使用正确的 entityType 查询数量
+            return likeDocRelationshipMapper.countByEntityIdAndEntityType(entityId, entityType);
         } catch (Exception e) {
             log.error("查询点赞数量失败: entityType={}, entityId={}", entityType, entityId, e);
             return 0L;
@@ -153,7 +157,8 @@ public class LikeServiceImpl implements LikeService {
             if (redisCount != null && redisCount > 0) {
                 return redisCount;
             }
-            return collectService.collectNum(docId);
+            // Redis 没有从 DB 获取，使用正确的 entityType 查询点赞数量
+            return likeDocRelationshipMapper.countByEntityIdAndEntityType(docId, RedisActionEnum.LIKE.getCode());
         } catch (Exception e) {
             log.error("查询点赞数量失败: docId={}", docId, e);
             return 0L;

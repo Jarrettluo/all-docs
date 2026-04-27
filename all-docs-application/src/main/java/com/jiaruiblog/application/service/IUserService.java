@@ -23,7 +23,6 @@ public interface IUserService {
 
     Map<String, String> login(RegistryUserDTO userDTO);
 
-
     /**
      * 注册用户
      * @param userDTO 用户注册信息（简化版，仅需账号密码）

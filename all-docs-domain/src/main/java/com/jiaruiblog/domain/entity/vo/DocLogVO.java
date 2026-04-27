@@ -16,6 +16,8 @@ public class DocLogVO {
 
     private String id;
 
+    private String userId;
+
     private String userName;
 
     private String action;
