@@ -1,6 +1,7 @@
 package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.ElasticService;
+import com.jiaruiblog.domain.entity.dto.SearchQuery;
 import com.jiaruiblog.domain.entity.po.SearchDocument;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import jakarta.annotation.Resource;
@@ -215,5 +216,95 @@ public class ElasticServiceImpl implements ElasticService {
             log.error("Failed to get word statistics", e);
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<String> searchDocuments(SearchQuery query) {
+        try {
+            String keyword = query.getKeyword();
+            Boolean fullText = query.getFullText();
+            Boolean segment = query.getSegment();
+            String searchType = query.getSearchType();
+
+            log.debug("searchDocuments - keyword: {}, fullText: {}, segment: {}, searchType: {}",
+                    keyword, fullText, segment, searchType);
+
+            // Determine fields to search based on fullText and searchType
+            List<Criteria> fieldCriteria = buildFieldCriteria(keyword, fullText, searchType);
+
+            // Build final criteria
+            Criteria criteria;
+            if (fieldCriteria.isEmpty()) {
+                // Empty keyword - return all documents with pagination
+                criteria = new Criteria("id").exists();
+            } else {
+                // Combine field criteria with OR
+                criteria = fieldCriteria.get(0);
+                for (int i = 1; i < fieldCriteria.size(); i++) {
+                    criteria = criteria.or(fieldCriteria.get(i));
+                }
+            }
+
+            // Build query with pagination
+            int page = query.getPage() != null ? query.getPage() : 1;
+            int pageSize = query.getPageSize() != null ? query.getPageSize() : 20;
+            Query esQuery = new CriteriaQuery(criteria)
+                    .setPageable(org.springframework.data.domain.PageRequest.of(page - 1, pageSize));
+
+            // Execute search
+            SearchHits<SearchDocument> searchHits = elasticsearchOperations.search(esQuery, SearchDocument.class);
+
+            List<String> docIds = searchHits.getSearchHits().stream()
+                    .map(SearchHit::getContent)
+                    .map(SearchDocument::getId)
+                    .collect(Collectors.toList());
+
+            log.info("searchDocuments - found {} documents", docIds.size());
+            return docIds;
+
+        } catch (Exception e) {
+            log.error("searchDocuments failed", e);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Build criteria for searchable fields based on fullText and searchType settings
+     */
+    private List<Criteria> buildFieldCriteria(String keyword, Boolean fullText, String searchType) {
+        List<Criteria> criteriaList = new ArrayList<>();
+
+        // If keyword is empty, no field criteria needed
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return criteriaList;
+        }
+
+        if (Boolean.TRUE.equals(fullText)) {
+            // fullText=true: search all relevant fields based on searchType
+            if ("all".equalsIgnoreCase(searchType)) {
+                // Search name + content + tagNames + categoryName
+                criteriaList.add(new Criteria("name").matches(keyword));
+                criteriaList.add(new Criteria("content").matches(keyword));
+                criteriaList.add(new Criteria("tagNames").matches(keyword));
+                criteriaList.add(new Criteria("categoryName").matches(keyword));
+            } else if ("name".equalsIgnoreCase(searchType)) {
+                // Search only name
+                criteriaList.add(new Criteria("name").matches(keyword));
+            } else if ("description".equalsIgnoreCase(searchType)) {
+                // Search only content
+                criteriaList.add(new Criteria("content").matches(keyword));
+            } else {
+                // Default to all fields
+                criteriaList.add(new Criteria("name").matches(keyword));
+                criteriaList.add(new Criteria("content").matches(keyword));
+                criteriaList.add(new Criteria("tagNames").matches(keyword));
+                criteriaList.add(new Criteria("categoryName").matches(keyword));
+            }
+        } else {
+            // fullText=false: only search name
+            criteriaList.add(new Criteria("name").matches(keyword));
+        }
+
+        return criteriaList;
     }
 }

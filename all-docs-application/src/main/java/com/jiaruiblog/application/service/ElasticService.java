@@ -1,5 +1,6 @@
 package com.jiaruiblog.application.service;
 
+import com.jiaruiblog.domain.entity.dto.SearchQuery;
 import com.jiaruiblog.domain.entity.po.SearchDocument;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 
@@ -94,4 +95,11 @@ public interface ElasticService {
      * 获取词云统计数据
      */
     java.util.List<java.util.Map<String, Object>> getWordStat();
+
+    /**
+     * 多条件文档检索
+     * @param query 搜索参数
+     * @return 匹配的文档ID列表
+     */
+    List<String> searchDocuments(SearchQuery query);
 }
