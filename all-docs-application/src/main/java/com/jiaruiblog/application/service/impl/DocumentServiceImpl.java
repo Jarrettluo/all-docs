@@ -572,6 +572,14 @@ public class DocumentServiceImpl implements DocumentService {
             return PageVO.<DocumentVO>builder().build();
         }
 
+        String filterWord = documentDTO.getFilterWord();
+
+        // filterWord 不为空时走 ES 全文检索
+        if (StringUtils.hasText(filterWord)) {
+            return searchFullText(documentDTO);
+        }
+
+        // 否则走现有 MySQL 逻辑（保留现有代码）
         List<FileDocument> documents;
         long total;
 
@@ -596,6 +604,65 @@ public class DocumentServiceImpl implements DocumentService {
                 .pageNum(documentDTO.getPage())
                 .pageSize(documentDTO.getRows())
                 .total(total)
+                .list(voList)
+                .build();
+    }
+
+    /**
+     * ES 全文检索模式
+     */
+    private PageVO<DocumentVO> searchFullText(DocumentDTO documentDTO) {
+        String filterWord = documentDTO.getFilterWord();
+        String tagId = documentDTO.getTagId();
+        String categoryId = documentDTO.getCategoryId();
+        int page = documentDTO.getPage();
+        int rows = documentDTO.getRows();
+
+        // 1. ES 检索
+        SearchResultVO searchResult = elasticService.searchDocumentsFullText(
+                filterWord, tagId, categoryId, page, rows);
+
+        if (searchResult == null || searchResult.getItems() == null || searchResult.getItems().isEmpty()) {
+            return PageVO.<DocumentVO>builder()
+                    .pageNum(page)
+                    .pageSize(rows)
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .build();
+        }
+
+        // 2. 获取文档 ID 列表
+        List<String> docIds = searchResult.getItems().stream()
+                .map(SearchResultItem::getId)
+                .toList();
+
+        // 3. 批量查询 MySQL 获取文档详情
+        List<FileDocument> documents = documentMybatisRepository.findByIdList(new ArrayList<>(docIds));
+
+        // 4. 构建 ID -> 高亮片段的映射
+        Map<String, List<String>> highlightMap = searchResult.getItems().stream()
+                .collect(Collectors.toMap(
+                        SearchResultItem::getId,
+                        SearchResultItem::getHighlightFragments,
+                        (existing, replacement) -> replacement
+                ));
+
+        // 5. 转换为 DocumentVO，高亮片段存入 description
+        List<DocumentVO> voList = documents.stream()
+                .map(doc -> {
+                    DocumentVO vo = convertDocument(new DocumentVO(), doc);
+                    List<String> highlights = highlightMap.get(doc.getId());
+                    if (highlights != null && !highlights.isEmpty()) {
+                        vo.setDescription(String.join("\n---\n", highlights));
+                    }
+                    return vo;
+                })
+                .toList();
+
+        return PageVO.<DocumentVO>builder()
+                .pageNum(page)
+                .pageSize(rows)
+                .total(searchResult.getTotal())
                 .list(voList)
                 .build();
     }

@@ -1,8 +1,10 @@
 package com.jiaruiblog.application.service;
 
 import com.jiaruiblog.domain.entity.dto.SearchQuery;
+import com.jiaruiblog.domain.entity.dto.SearchResultItem;
 import com.jiaruiblog.domain.entity.po.SearchDocument;
 import com.jiaruiblog.domain.entity.vo.PageVO;
+import com.jiaruiblog.domain.entity.vo.SearchResultVO;
 
 import java.io.InputStream;
 import java.util.List;
@@ -96,10 +98,28 @@ public interface ElasticService {
      */
     java.util.List<java.util.Map<String, Object>> getWordStat();
 
-    /**
+/**
      * 多条件文档检索
      * @param query 搜索参数
      * @return 匹配的文档ID列表
      */
     List<String> searchDocuments(SearchQuery query);
+
+    /**
+     * 多条件文档检索（带高亮）
+     * @param query 搜索参数
+     * @return 匹配的文档ID列表及高亮片段
+     */
+    java.util.List<SearchResultItem> searchDocumentsWithHighlight(SearchQuery query);
+
+    /**
+     * 全文检索 + 分页 + 多高亮片段
+     * @param filterWord 关键词
+     * @param tagId 标签ID（可选）
+     * @param categoryId 分类ID（可选）
+     * @param page 页码
+     * @param rows 每页条数
+     * @return SearchResultVO 含 total 和 items
+     */
+    SearchResultVO searchDocumentsFullText(String filterWord, String tagId, String categoryId, int page, int rows);
 }
