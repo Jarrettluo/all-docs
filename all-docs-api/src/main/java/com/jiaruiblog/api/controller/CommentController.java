@@ -145,8 +145,14 @@ public class CommentController {
         Map<String, String> docNameMap = documents.stream()
                 .collect(Collectors.toMap(FileDocument::getId, FileDocument::getName));
 
-        List<CommentWithUserVO> voList = commentPage.getList().stream()
-                .map(comment -> commentConverter.toVO(comment, docNameMap.get(comment.getDocId())))
+List<CommentWithUserVO> voList = commentPage.getList().stream()
+                .map(comment -> {
+                    String docName = docNameMap.get(comment.getDocId());
+                    if (docName == null) {
+                        docName = comment.getDocName(); // fallback to stored docName when document is deleted
+                    }
+                    return commentConverter.toVO(comment, docName);
+                })
                 .collect(Collectors.toList());
 
         return PageVO.<CommentWithUserVO>builder()

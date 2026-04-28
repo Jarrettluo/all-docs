@@ -2,12 +2,12 @@ package com.jiaruiblog.infrastructure.config.datasource;
 
 import com.jiaruiblog.common.enums.DocStateEnum;
 import com.jiaruiblog.common.enums.PermissionEnum;
-import com.jiaruiblog.common.enums.RedisActionEnum;
 import com.jiaruiblog.common.enums.ThumbSizeEnum;
 import com.jiaruiblog.common.enums.ThumbnailEnum;
 import com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler;
 import com.jiaruiblog.infrastructure.config.mybatis.DocStateEnumTypeHandler;
 import com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler;
+import com.jiaruiblog.infrastructure.config.mybatis.RedisActionEnumTypeHandler;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
@@ -32,7 +32,7 @@ public class MyBatisConfig {
             new BooleanTypeHandler(),
             new EnumTypeHandler<>(PermissionEnum.class),
             new DocStateEnumTypeHandler(),
-            new EnumTypeHandler<>(RedisActionEnum.class),
+            new RedisActionEnumTypeHandler(),
             new EnumTypeHandler<>(ThumbnailEnum.class),
             new EnumTypeHandler<>(ThumbSizeEnum.class)
         );

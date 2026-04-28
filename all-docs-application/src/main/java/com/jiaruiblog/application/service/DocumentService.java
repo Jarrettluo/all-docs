@@ -30,10 +30,11 @@ public interface DocumentService {
      */
     FileDocument saveFile(String md5, MultipartFile file);
 
-    /**
+/**
      * 用户上传文档
+     * @return FileDocument 上传后的文档对象
      */
-    void documentUpload(MultipartFile file, String userId, String username);
+    FileDocument documentUpload(MultipartFile file, String userId, String username);
 
     /**
      * 批量上传
@@ -242,4 +243,14 @@ public interface DocumentService {
      * @return 符合条件的文档分页结果
      */
     PageVO<DocSearchVO> search(SearchQuery query, String userId);
+
+    /**
+     * Get tag names for a document
+     */
+    List<String> getTagNamesByDocId(String docId);
+
+    /**
+     * Get category name for a document
+     */
+    String getCategoryNameByDocId(String docId);
 }

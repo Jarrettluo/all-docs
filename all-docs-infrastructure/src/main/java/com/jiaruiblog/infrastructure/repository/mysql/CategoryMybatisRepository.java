@@ -89,6 +89,6 @@ public class CategoryMybatisRepository implements CategoryRepository {
 
     @Override
     public List<CateDocRelationship> findByCategoryIdAndDocIdIn(String categoryId, List<String> docIds) {
-        return null;
+        return cateDocRelationshipMapper.findByCategoryIdAndFileIds(categoryId, docIds);
     }
 }

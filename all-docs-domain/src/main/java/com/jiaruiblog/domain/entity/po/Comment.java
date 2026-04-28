@@ -22,6 +22,8 @@ public class Comment {
 
     private String docId;
 
+    private String docName;
+
     private Date createDate;
 
     private Date updateDate;

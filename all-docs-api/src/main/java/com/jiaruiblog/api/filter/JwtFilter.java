@@ -36,7 +36,9 @@ public class JwtFilter implements Filter {
             "/api/v1/user/login",
             "/api/v1/user/register",
             "/api/v1/file/view",
+            "/api/v1/file/view2",
             "/api/v1/file/image",
+            "/api/v1/file/image2",
             "/api/v1/document/list",
             "/api/v1/category/all"
     );

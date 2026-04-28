@@ -467,11 +467,9 @@ public class FileController {
         }
         try (InputStream inputStream = fileService.getFileThumb(thumbId)) {
             if (inputStream == null) {
-                return new byte[0];
+                return new byte[]{};
             }
-            byte[] bytes = new byte[inputStream.available()];
-            inputStream.read(bytes, 0, inputStream.available());
-            return bytes;
+            return inputStream.readAllBytes();
         }
     }
 
@@ -495,6 +493,7 @@ public class FileController {
     public ResponseEntity<Object> previewThumb1(@PathVariable String id) throws IOException {
 
         if (StringUtils.hasText(id)) {
+            log.info("thumb endpoint called with id={}", id);
             InputStream inputStream = fileService.getFileThumb(id);
             if (inputStream == null) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -503,6 +502,7 @@ public class FileController {
             try (inputStream) {
                 bytes = IoUtil.readBytes(inputStream);
             }
+            log.info("thumb endpoint result length={}", bytes.length);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + id)
                     .header(HttpHeaders.CONTENT_TYPE, "image/png")
@@ -522,9 +522,14 @@ public class FileController {
 //            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 //            return new byte[]{};
 //        }
+        log.info("thumbi_id :  + {}", thumbId);
         // 设置响应头，缓存 1 小时
         response.setHeader("Cache-Control", "max-age=3600, public");
-        return fileService.getFileBytes(thumbId, StorageConstants.THUMBNAILS);
+        // 缩略图存储时带了 .jpg 后缀，读取时需要拼接完整路径
+        String objectKey = StorageConstants.thumbPath(thumbId, "jpg");
+        byte[] result = fileService.getFileBytes(objectKey, "");
+        log.info("image2 endpoint called with thumbId={}, result length={}", thumbId, result.length);
+        return result;
     }
 
     @GetMapping(value = "/text2/{txtId}", produces = MediaType.TEXT_PLAIN_VALUE)

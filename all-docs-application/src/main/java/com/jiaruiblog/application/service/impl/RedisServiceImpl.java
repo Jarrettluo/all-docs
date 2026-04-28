@@ -250,4 +250,13 @@ public class RedisServiceImpl implements RedisService {
         redisSearchTemplate.expire(key, java.time.Duration.ofDays(30));
         log.info("添加搜索历史：userId={}, word={}", userId, searchWord);
     }
+
+    @Override
+    public void incrementDocScore(String docId, int delta) {
+        if (!StringUtils.hasText(docId)) {
+            return;
+        }
+        redisSearchTemplate.opsForZSet().incrementScore(DOC_KEY, docId, delta);
+        log.info("更新文档热度：docId={}, delta={}", docId, delta);
+    }
 }

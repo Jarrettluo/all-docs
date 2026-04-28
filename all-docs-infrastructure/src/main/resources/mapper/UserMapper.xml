@@ -32,7 +32,7 @@
         INSERT INTO user (id, username, password, phone, mail, male, description, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
-            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum, jdbcType=INTEGER}, #{nickname},
+            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
             #{lastLogin}, #{createDate}, #{updateDate})
     </insert>
 
@@ -47,7 +47,7 @@
             avatar = #{avatar},
             birthtime = #{birthtime},
             banning = #{banning},
-            permission_enum = #{permissionEnum, jdbcType=INTEGER},
+            permission_enum = #{permissionEnum, typeHandler=com.jiaruiblog.infrastructure.config.mybatis.PermissionEnumTypeHandler},
             nickname = #{nickname},
             update_date = NOW()
         WHERE id = #{id}
@@ -69,7 +69,7 @@
         INSERT INTO user (id, username, password, phone, mail, male, description, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
-            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum, jdbcType=INTEGER}, #{nickname},
+            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
             #{lastLogin}, #{createDate}, #{updateDate})
         ON DUPLICATE KEY UPDATE
             username = VALUES(username),

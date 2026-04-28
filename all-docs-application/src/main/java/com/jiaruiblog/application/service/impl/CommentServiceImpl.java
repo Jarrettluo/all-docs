@@ -3,11 +3,13 @@ package com.jiaruiblog.application.service.impl;
 import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.application.service.ICommentService;
 import com.jiaruiblog.domain.entity.po.Comment;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.CommentListDTO;
 import com.jiaruiblog.domain.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.infrastructure.repository.CommentRepository;
+import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -32,10 +34,20 @@ public class CommentServiceImpl implements ICommentService {
     @Resource
     CommentRepository commentRepository;
 
+    @Resource
+    DocumentRepository documentRepository;
+
     @Override
     public void insert(Comment comment) {
         if (comment == null || !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return;
+        }
+        // Fetch document name and store it for resilience when document is deleted
+        if (StringUtils.hasText(comment.getDocId())) {
+            FileDocument doc = documentRepository.findById(comment.getDocId());
+            if (doc != null) {
+                comment.setDocName(doc.getName());
+            }
         }
         // Note: Sensitive filtering should be done at the API layer before calling this method
         comment.setId(IdUtil.fastUUID());

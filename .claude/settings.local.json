@@ -51,7 +51,8 @@
       "Bash(mvn dependency:tree)",
       "Bash(git:*)",
       "Bash(xxd \"C:\\\\Project\\\\java\\\\all-docs\\\\all-docs-bootstrap\\\\src\\\\main\\\\resources\\\\i18n\\\\messages_zh_CN.properties\")",
-      "Bash(./mvnw compile:*)"
+      "Bash(./mvnw compile:*)",
+      "Bash(xxd \"C:\\\\Project\\\\java\\\\all-docs\\\\all-docs-infrastructure\\\\src\\\\main\\\\resources\\\\mapper\\\\CommentMapper.xml\")"
     ]
   }
 }

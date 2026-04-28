@@ -51,12 +51,14 @@ public class LikeServiceImpl implements LikeService {
         if (isLiked) {
             // 已点赞 → 取消点赞
             redisService.deleteSetMember(entityLikeKey, userId);
+            redisService.incrementDocScore(entityId, -1);
             remove(like);
             log.debug("用户 {} 取消点赞实体 {}:{}", userId, entityType, entityId);
             return false;
         } else {
             // 未点赞 → 执行点赞
             redisService.setSet(entityLikeKey, userId);
+            redisService.incrementDocScore(entityId, 1);
             insertRelationShip(like);
             log.debug("用户 {} 点赞实体 {}:{}", userId, entityType, entityId);
             return true;

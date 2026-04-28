@@ -76,11 +76,15 @@ public abstract class TaskExecutor {
                 throw new TaskRunException("文本文件不存在，需要进行重新提取");
             }
             SearchDocument searchDocument = new SearchDocument();
-            searchDocument.setId(fileDocument.getMd5());
+            searchDocument.setId(fileDocument.getId()); // Use UUID to match initial indexing
             searchDocument.setName(fileDocument.getName());
             searchDocument.setType(fileDocument.getContentType());
             // 直接读取提取的文本内容，不做 base64 编码
             searchDocument.setContent(Files.readString(Paths.get(textFilePath), StandardCharsets.UTF_8));
+            // Preserve tagNames and categoryName from initial indexing
+            DocumentService documentService = SpringApplicationContext.getBean(DocumentService.class);
+            searchDocument.setTagNames(documentService.getTagNamesByDocId(fileDocument.getId()));
+            searchDocument.setCategoryName(documentService.getCategoryNameByDocId(fileDocument.getId()));
             this.upload(searchDocument);
 
         } catch (IOException | TaskRunException e) {

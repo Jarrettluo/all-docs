@@ -49,4 +49,6 @@ public interface CateDocRelationshipMapper {
     List<String> findFileIdsByCategoryIds(@Param("categoryIds") List<String> categoryIds);
 
     List<String> findCategoryIdsByFileId(@Param("fileId") String fileId);
+
+    List<CateDocRelationship> findByCategoryIdAndFileIds(@Param("categoryId") String categoryId, @Param("fileIds") List<String> fileIds);
 }

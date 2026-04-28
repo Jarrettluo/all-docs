@@ -9,13 +9,14 @@
         <result property="userName" column="user_name"/>
         <result property="content" column="content"/>
         <result property="docId" column="doc_id"/>
+        <result property="docName" column="doc_name"/>
         <result property="createDate" column="create_date"/>
         <result property="updateDate" column="update_date"/>
     </resultMap>
 
     <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.Comment">
-        INSERT INTO comment (id, create_user, user_id, user_name, content, doc_id, create_date, update_date)
-        VALUES (#{id}, #{createUser}, #{userId}, #{userName}, #{content}, #{docId}, #{createDate}, #{updateDate})
+        INSERT INTO comment (id, create_user, user_id, user_name, content, doc_id, doc_name, create_date, update_date)
+        VALUES (#{id}, #{createUser}, #{userId}, #{userName}, #{content}, #{docId}, #{docName}, #{createDate}, #{updateDate})
     </insert>
 
     <select id="findById" resultMap="CommentResultMap">

@@ -3,9 +3,9 @@ package com.jiaruiblog.application.service.impl;
 import com.jiaruiblog.application.service.DocReviewService;
 import com.jiaruiblog.application.service.TaskExecuteService;
 import com.jiaruiblog.common.enums.DocStateEnum;
+import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.po.DocReview;
 import com.jiaruiblog.domain.entity.po.FileDocument;
-import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.infrastructure.repository.DocReviewRepository;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
@@ -14,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author luojiarui
@@ -170,7 +167,18 @@ public class DocReviewServiceImpl implements DocReviewService {
             }
         }
 
-        List<DocReview> reviews = docReviewRepository.findByPage(pageNum - 1, pageSize, userId, isAdmin != null && isAdmin);
+        boolean adminFlag = isAdmin != null && isAdmin;
+        long total = docReviewRepository.countByUserId(userId, adminFlag);
+        int totalPages = (int) Math.ceil((double) total / pageSize);
+        if (pageNum > totalPages && total > 0) {
+            pageVO.setList(Collections.emptyList());
+            pageVO.setPageNum(pageNum);
+            pageVO.setPageSize(pageSize);
+            pageVO.setTotal(total);
+            return pageVO;
+        }
+
+        List<DocReview> reviews = docReviewRepository.findByPage(pageNum, pageSize, userId, adminFlag);
 
         // 过滤掉不属于该用户的记录
         List<DocReview> filteredList = new ArrayList<>();
@@ -187,7 +195,7 @@ public class DocReviewServiceImpl implements DocReviewService {
         pageVO.setList(filteredList);
         pageVO.setPageNum(pageNum);
         pageVO.setPageSize(pageSize);
-        pageVO.setTotal(docReviewRepository.countByUserId(userId, isAdmin != null && isAdmin));
+        pageVO.setTotal(total);
         return pageVO;
     }
 

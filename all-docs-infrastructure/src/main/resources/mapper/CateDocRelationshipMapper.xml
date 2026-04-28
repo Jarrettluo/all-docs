@@ -99,4 +99,12 @@
         SELECT category_id FROM cate_doc_relationship WHERE file_id = #{fileId}
     </select>
 
+    <select id="findByCategoryIdAndFileIds" resultMap="CateDocRelationshipResultMap">
+        SELECT * FROM cate_doc_relationship WHERE category_id = #{categoryId}
+        AND file_id IN
+        <foreach collection="fileIds" item="fileId" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </select>
+
 </mapper>

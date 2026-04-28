@@ -13,7 +13,7 @@
 
     <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.CollectDocRelationship">
         INSERT INTO collect_doc_relationship (id, redis_action_enum, user_id, doc_id, create_date, update_date)
-        VALUES (#{id}, #{redisActionEnum}, #{userId}, #{docId}, #{createDate}, #{updateDate})
+        VALUES (#{id}, #{redisActionEnum.code}, #{userId}, #{docId}, #{createDate}, #{updateDate})
     </insert>
 
     <delete id="remove" parameterType="com.jiaruiblog.domain.entity.po.CollectDocRelationship">

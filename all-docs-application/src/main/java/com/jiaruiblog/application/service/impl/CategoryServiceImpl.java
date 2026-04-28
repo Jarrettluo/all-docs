@@ -17,6 +17,7 @@ import com.jiaruiblog.infrastructure.repository.CategoryRepository;
 import com.jiaruiblog.infrastructure.repository.CollectRepository;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import com.jiaruiblog.infrastructure.repository.TagRepository;
+import com.jiaruiblog.infrastructure.repository.mysql.TagDocRelationshipMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
@@ -58,6 +59,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Resource
     CollectRepository collectRepository;
+
+    @Resource
+    TagDocRelationshipMapper tagDocRelationshipMapper;
 
     /**
      * 新增分类记录
@@ -482,6 +486,28 @@ public class CategoryServiceImpl implements CategoryService {
                 .filter(doc -> collectedDocIdSet.contains(doc.getId()))
                 .collect(Collectors.toList());
 
+        // Step 3.5: Filter by category and tag if provided
+        if (StringUtils.hasText(cateId)) {
+            List<String> docIds = filteredDocs.stream().map(FileDocument::getId).collect(Collectors.toList());
+            List<CateDocRelationship> cateRelationships = categoryRepository.findByCategoryIdAndDocIdIn(cateId, docIds);
+            Set<String> fileIdsInCategory = cateRelationships.stream()
+                    .map(CateDocRelationship::getFileId)
+                    .collect(Collectors.toSet());
+            filteredDocs = filteredDocs.stream()
+                    .filter(doc -> fileIdsInCategory.contains(doc.getId()))
+                    .collect(Collectors.toList());
+        }
+        if (StringUtils.hasText(tagId)) {
+            List<String> docIds = filteredDocs.stream().map(FileDocument::getId).collect(Collectors.toList());
+            List<TagDocRelationship> tagRelationships = tagDocRelationshipMapper.findByTagIdAndFileIds(tagId, docIds);
+            Set<String> fileIdsWithTag = tagRelationships.stream()
+                    .map(TagDocRelationship::getFileId)
+                    .collect(Collectors.toSet());
+            filteredDocs = filteredDocs.stream()
+                    .filter(doc -> fileIdsWithTag.contains(doc.getId()))
+                    .collect(Collectors.toList());
+        }
+
         // Step 4: Convert to DTO
         List<FileDocumentDTO> mappedResults = filteredDocs.stream().map(doc -> {
             FileDocumentDTO dto = new FileDocumentDTO();
@@ -518,6 +544,28 @@ public class CategoryServiceImpl implements CategoryService {
         } else {
             documents = documentRepository.findByUserId(userId, pageNumInt, pageSizeInt,
                     Sort.by(Sort.Direction.DESC, "uploadDate"));
+        }
+
+        // Filter by category and tag if provided
+        if (StringUtils.hasText(cateId)) {
+            List<String> docIds = documents.stream().map(FileDocument::getId).collect(Collectors.toList());
+            List<CateDocRelationship> cateRelationships = categoryRepository.findByCategoryIdAndDocIdIn(cateId, docIds);
+            Set<String> fileIdsInCategory = cateRelationships.stream()
+                    .map(CateDocRelationship::getFileId)
+                    .collect(Collectors.toSet());
+            documents = documents.stream()
+                    .filter(doc -> fileIdsInCategory.contains(doc.getId()))
+                    .collect(Collectors.toList());
+        }
+        if (StringUtils.hasText(tagId)) {
+            List<String> docIds = documents.stream().map(FileDocument::getId).collect(Collectors.toList());
+            List<TagDocRelationship> tagRelationships = tagDocRelationshipMapper.findByTagIdAndFileIds(tagId, docIds);
+            Set<String> fileIdsWithTag = tagRelationships.stream()
+                    .map(TagDocRelationship::getFileId)
+                    .collect(Collectors.toSet());
+            documents = documents.stream()
+                    .filter(doc -> fileIdsWithTag.contains(doc.getId()))
+                    .collect(Collectors.toList());
         }
 
         // Convert to DTO

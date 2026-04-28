@@ -32,7 +32,7 @@ public class CollectServiceImpl implements CollectService {
     public void insert(CollectDocRelationship collect) {
         Boolean aBoolean = insertRelationShip(collect);
         if (Boolean.FALSE.equals(aBoolean)) {
-            throw BusinessExceptionBuilder.of(ErrorCode.OPERATE_FAILED).build();
+            throw BusinessExceptionBuilder.of(ErrorCode.DOCUMENT_ALREADY_COLLECTED).build();
         }
     }
 
