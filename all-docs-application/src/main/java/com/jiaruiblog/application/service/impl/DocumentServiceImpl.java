@@ -2,12 +2,14 @@ package com.jiaruiblog.application.service.impl;
 
 import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.application.service.*;
+import com.jiaruiblog.application.service.IDocLogService;
 import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.DocStateEnum;
 import com.jiaruiblog.common.enums.FilterTypeEnum;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
 import com.jiaruiblog.domain.entity.dto.SearchQuery;
+import com.jiaruiblog.domain.entity.dto.SearchResultItem;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
 import com.jiaruiblog.domain.entity.po.*;
 import com.jiaruiblog.domain.entity.vo.*;
@@ -79,7 +81,8 @@ public class DocumentServiceImpl implements DocumentService {
     @Resource
     private LikeService likeService;
 
-    private static final String FILE_NAME = "filename";
+    @Resource
+    private IDocLogService docLogService;
 
     @Override
     public String uploadFileToGridFs(String fileName, InputStream inputStream, String contentType, String md5) {
@@ -285,10 +288,10 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public void documentUpload(MultipartFile file, String userId, String username) {
+    public FileDocument documentUpload(MultipartFile file, String userId, String username) {
         if (file == null || file.isEmpty()) {
             log.warn("Document upload failed: file is empty");
-            return;
+            return null;
         }
 
         try {
@@ -302,7 +305,7 @@ public class DocumentServiceImpl implements DocumentService {
             FileDocument existing = documentMybatisRepository.findByMd5(md5);
             if (existing != null) {
                 log.info("Document already exists: md5={}, docId={}", md5, existing.getId());
-                return;
+                return existing;
             }
 
             // 4. Upload to MinIO
@@ -337,9 +340,18 @@ public class DocumentServiceImpl implements DocumentService {
 
             log.info("Document upload success: userId={}, username={}, docId={}, filename={}",
                     userId, username, document.getId(), file.getOriginalFilename());
+
+            // 添加上传日志
+            User user = new User();
+            user.setId(userId);
+            user.setUsername(username);
+            docLogService.addLog(user, document, DocLogServiceImpl.Action.UPLOAD);
+
+            return document;
         } catch (IOException e) {
             log.error("Document upload failed: userId={}, username={}, error={}",
                     userId, username, e.getMessage());
+            return null;
         }
     }
 
@@ -431,6 +443,12 @@ public class DocumentServiceImpl implements DocumentService {
 
             log.info("Upload by URL success: userId={}, username={}, docId={}, filename={}, url={}",
                     userId, username, document.getId(), name, url);
+
+            // 添加上传日志
+            User user = new User();
+            user.setId(userId);
+            user.setUsername(username);
+            docLogService.addLog(user, document, DocLogServiceImpl.Action.UPLOAD);
         } catch (Exception e) {
             log.error("Upload by URL failed: userId={}, username={}, url={}, error={}",
                     userId, username, url, e.getMessage());
@@ -856,9 +874,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public PageVO<DocSearchVO> search(SearchQuery query, String userId) {
-        // Step 1: ES retrieval - get candidate doc IDs
-        List<String> esMatchedIds = elasticService.searchDocuments(query);
-        if (esMatchedIds == null || esMatchedIds.isEmpty()) {
+        // Step 1: ES retrieval - get candidate doc IDs with highlights
+        List<SearchResultItem> searchResults = elasticService.searchDocumentsWithHighlight(query);
+        if (searchResults == null || searchResults.isEmpty()) {
             return PageVO.<DocSearchVO>builder()
                     .pageNum(query.getPage())
                     .pageSize(query.getPageSize())
@@ -867,7 +885,15 @@ public class DocumentServiceImpl implements DocumentService {
                     .build();
         }
 
-        Set<String> candidateIds = new HashSet<>(esMatchedIds);
+        // Build highlight map: docId -> highlightFragment (use first fragment from list)
+        Map<String, String> highlightMap = new HashMap<>();
+        Set<String> candidateIds = new HashSet<>();
+        for (SearchResultItem item : searchResults) {
+            candidateIds.add(item.getId());
+            if (item.getHighlightFragments() != null && !item.getHighlightFragments().isEmpty()) {
+                highlightMap.put(item.getId(), item.getHighlightFragments().get(0));
+            }
+        }
 
         // Step 2: Tags filtering - intersect with docs that have ALL specified tags
         if (query.getTags() != null && !query.getTags().isEmpty()) {
@@ -966,7 +992,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Step 7: Assemble results - get liked/collected status and tags
         List<DocSearchVO> voList = pagedDocs.stream()
-                .map(doc -> convertToDocSearchVO(doc, userId))
+                .map(doc -> convertToDocSearchVO(doc, userId, highlightMap))
                 .toList();
 
         return PageVO.<DocSearchVO>builder()
@@ -977,14 +1003,16 @@ public class DocumentServiceImpl implements DocumentService {
                 .build();
     }
 
-    private DocSearchVO convertToDocSearchVO(FileDocument doc, String userId) {
+    private DocSearchVO convertToDocSearchVO(FileDocument doc, String userId, Map<String, String> highlightMap) {
         DocSearchVO vo = new DocSearchVO();
         vo.setId(doc.getId());
         vo.setName(doc.getName());
         vo.setType(doc.getSuffix());
         vo.setSize(doc.getSize());
         vo.setSizeDisplay(formatSize(doc.getSize()));
-        vo.setDescription(doc.getDescription());
+        // Use highlight fragment as description if available, otherwise use original description
+        String highlight = highlightMap.get(doc.getId());
+        vo.setDescription(highlight != null ? highlight : doc.getDescription());
         vo.setCreateTime(doc.getUploadDate());
         vo.setUpdateTime(doc.getUpdateDate());
 
@@ -1061,7 +1089,8 @@ public class DocumentServiceImpl implements DocumentService {
     /**
      * Get tag names for a document
      */
-    private List<String> getTagNamesByDocId(String docId) {
+    @Override
+    public List<String> getTagNamesByDocId(String docId) {
         if (docId == null || docId.isEmpty()) {
             return Collections.emptyList();
         }
@@ -1087,7 +1116,8 @@ public class DocumentServiceImpl implements DocumentService {
     /**
      * Get category name for a document
      */
-    private String getCategoryNameByDocId(String docId) {
+    @Override
+    public String getCategoryNameByDocId(String docId) {
         if (docId == null || docId.isEmpty()) {
             return "";
         }
