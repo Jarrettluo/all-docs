@@ -20,5 +20,12 @@ public class StatsVO {
 
     private Long commentNum;
 
+    private Long userNum;
+
+    private Long downloadNum;
+
+    private Long searchNum;
+
+    private Long viewNum;
 
 }

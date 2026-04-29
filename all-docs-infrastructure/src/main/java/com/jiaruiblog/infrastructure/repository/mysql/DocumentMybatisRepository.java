@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * MyBatis Document Repository Implementation
@@ -38,6 +39,11 @@ public class DocumentMybatisRepository implements DocumentRepository {
     }
 
     @Override
+    public long countWithFilter(String filterWord) {
+        return documentMapper.countWithFilter(filterWord);
+    }
+
+    @Override
     public FileDocument findById(String fileDocumentId) {
         return documentMapper.findById(fileDocumentId);
     }
@@ -62,6 +68,12 @@ public class DocumentMybatisRepository implements DocumentRepository {
     public List<FileDocument> findByPageWithFussySearch(Integer pageNum, Integer pageSize, Sort sort, String keyWord) {
         long offset = (long) pageNum * pageSize;
         return documentMapper.findByPageWithFussySearch(offset, pageSize, keyWord);
+    }
+
+    @Override
+    public List<FileDocument> findByPageWithFilter(Integer pageNum, Integer pageSize, Sort sort, String filterWord) {
+        long offset = (long) pageNum * pageSize;
+        return documentMapper.findByPageWithFilter(offset, pageSize, filterWord);
     }
 
     @Override
@@ -122,5 +134,15 @@ public class DocumentMybatisRepository implements DocumentRepository {
     @Override
     public long countByCategoryId(String categoryId) {
         return documentMapper.countByCategoryId(categoryId);
+    }
+
+    @Override
+    public List<Map<String, Object>> countByDocType() {
+        return documentMapper.countByDocType();
+    }
+
+    @Override
+    public List<Map<String, Object>> countByCategory() {
+        return documentMapper.countByCategory();
     }
 }

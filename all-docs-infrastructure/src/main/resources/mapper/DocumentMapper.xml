@@ -48,8 +48,13 @@
         WHERE id = #{id}
     </update>
 
-    <select id="count" resultType="long">
+<select id="count" resultType="long">
         SELECT COUNT(*) FROM file_document WHERE reviewing = false
+    </select>
+
+    <select id="countWithFilter" resultType="long">
+        SELECT COUNT(*) FROM file_document
+        WHERE reviewing = false AND (name LIKE CONCAT('%', #{filterWord}, '%') OR description LIKE CONCAT('%', #{filterWord}, '%'))
     </select>
 
     <select id="findById" resultMap="FileDocumentResultMap">
@@ -75,7 +80,14 @@
 
     <select id="findByPageWithFussySearch" resultMap="FileDocumentResultMap">
         SELECT * FROM file_document
-        WHERE reviewing = false AND name LIKE CONCAT('%', #{keyWord}, '%')
+        WHERE reviewing = false AND (name LIKE CONCAT('%', #{keyWord}, '%') OR description LIKE CONCAT('%', #{keyWord}, '%'))
+        ORDER BY upload_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="findByPageWithFilter" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document
+        WHERE reviewing = false AND (name LIKE CONCAT('%', #{filterWord}, '%') OR description LIKE CONCAT('%', #{filterWord}, '%'))
         ORDER BY upload_date DESC
         LIMIT #{offset}, #{limit}
     </select>
@@ -147,6 +159,20 @@
         SELECT COUNT(DISTINCT fd.id) FROM file_document fd
         INNER JOIN cate_doc_relationship cdr ON fd.id = cdr.file_id
         WHERE fd.reviewing = false AND cdr.category_id = #{categoryId}
+    </select>
+
+    <select id="countByDocType" resultType="java.util.Map">
+        SELECT suffix AS type, COUNT(*) AS count
+        FROM file_document
+        WHERE suffix IS NOT NULL AND suffix != ''
+        GROUP BY suffix
+    </select>
+
+    <select id="countByCategory" resultType="java.util.Map">
+        SELECT c.name AS category, COUNT(cdr.file_id) AS count
+        FROM category c
+        LEFT JOIN cate_doc_relationship cdr ON cdr.category_id = c.id
+        GROUP BY c.id, c.name
     </select>
 
 </mapper>

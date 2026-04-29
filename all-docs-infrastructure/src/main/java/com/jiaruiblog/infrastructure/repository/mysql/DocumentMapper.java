@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface DocumentMapper {
@@ -17,6 +18,8 @@ public interface DocumentMapper {
 
     long count();
 
+    long countWithFilter(@Param("filterWord") String filterWord);
+
     FileDocument findById(@Param("id") String id);
 
     List<FileDocument> findByIdList(@Param("idList") List<String> idList);
@@ -26,6 +29,8 @@ public interface DocumentMapper {
     List<FileDocument> findByPage(@Param("offset") long offset, @Param("limit") int limit);
 
     List<FileDocument> findByPageWithFussySearch(@Param("offset") long offset, @Param("limit") int limit, @Param("keyWord") String keyWord);
+
+    List<FileDocument> findByPageWithFilter(@Param("offset") long offset, @Param("limit") int limit, @Param("filterWord") String filterWord);
 
     List<FileDocument> findByUserId(@Param("userId") String userId, @Param("offset") long offset, @Param("limit") int limit);
 
@@ -46,4 +51,8 @@ public interface DocumentMapper {
     long countByTagId(@Param("tagId") String tagId);
 
     long countByCategoryId(@Param("categoryId") String categoryId);
+
+    List<Map<String, Object>> countByDocType();
+
+    List<Map<String, Object>> countByCategory();
 }
