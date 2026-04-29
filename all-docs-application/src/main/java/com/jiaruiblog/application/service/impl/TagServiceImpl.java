@@ -161,6 +161,7 @@ public class TagServiceImpl implements TagService {
                 || !StringUtils.hasText(tagRelationship.getFileId())) {
             throw BusinessExceptionBuilder.of(ErrorCode.INVALID_PARAM).detail("标签关系不能为空").build();
         }
+        tagRelationship.setId(UUID.randomUUID().toString());
         tagRepository.saveRelationship(tagRelationship);
         log.info("标签关联创建成功：tagId={}, fileId={}", tagRelationship.getTagId(), tagRelationship.getFileId());
     }

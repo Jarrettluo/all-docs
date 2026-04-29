@@ -204,6 +204,7 @@ public class CategoryServiceImpl implements CategoryService {
                 || !StringUtils.hasText(relationship.getFileId())) {
             throw BusinessExceptionBuilder.of(ErrorCode.INVALID_PARAM).detail("分类关系不能为空").build();
         }
+        relationship.setId(UUID.randomUUID().toString());
         categoryRepository.saveRelationship(relationship);
         log.info("分类关联创建成功：categoryId={}, fileId={}", relationship.getCategoryId(), relationship.getFileId());
     }
@@ -324,6 +325,7 @@ public class CategoryServiceImpl implements CategoryService {
             return;
         }
         CateDocRelationship relationship = new CateDocRelationship();
+        relationship.setId(UUID.randomUUID().toString());
         relationship.setCategoryId(categoryId);
         relationship.setFileId(docId);
         relationship.setCreateDate(new Date());

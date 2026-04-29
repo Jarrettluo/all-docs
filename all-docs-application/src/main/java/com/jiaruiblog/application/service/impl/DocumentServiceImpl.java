@@ -704,20 +704,21 @@ public class DocumentServiceImpl implements DocumentService {
             return PageVO.<DocWithCateVO>builder().build();
         }
 
+        String filterWord = documentDTO.getFilterWord();
         List<FileDocument> documents;
         long total;
 
-        FilterTypeEnum type = documentDTO.getType();
-        if (type == FilterTypeEnum.TAG && StringUtils.hasText(documentDTO.getTagId())) {
-            documents = documentMybatisRepository.findByPageByTag(documentDTO.getTagId(),
-                    documentDTO.getPage(), documentDTO.getRows());
-            total = documentMybatisRepository.countByTagId(documentDTO.getTagId());
-        } else if (type == FilterTypeEnum.CATEGORY && StringUtils.hasText(documentDTO.getCategoryId())) {
-            documents = documentMybatisRepository.findByPageByCategory(documentDTO.getCategoryId(),
-                    documentDTO.getPage(), documentDTO.getRows());
-            total = documentMybatisRepository.countByCategoryId(documentDTO.getCategoryId());
+        // 根据是否有过滤词选择不同的查询方法
+        if (StringUtils.hasText(filterWord)) {
+            documents = documentMybatisRepository.findByPageWithFilter(
+                    documentDTO.getPage(), documentDTO.getRows(),
+                    Sort.by(Sort.Direction.DESC, "uploadDate"), filterWord);
+            total = documentMybatisRepository.countWithFilter(filterWord);
         } else {
-            return PageVO.<DocWithCateVO>builder().build();
+            documents = documentMybatisRepository.findByPage(
+                    documentDTO.getPage(), documentDTO.getRows(),
+                    Sort.by(Sort.Direction.DESC, "uploadDate"));
+            total = documentMybatisRepository.count();
         }
 
         List<DocWithCateVO> voList = documents.stream()
@@ -740,31 +741,41 @@ public class DocumentServiceImpl implements DocumentService {
         vo.setCreateTime(doc.getUploadDate());
         vo.setChecked(false);
 
-        // Build category info
+        // Build category info and check if already belongs to this category
         if (StringUtils.hasText(categoryId)) {
             CategoryVO categoryVO = new CategoryVO();
             categoryVO.setId(categoryId);
-            // Get category name from relationship if needed
             List<CateDocRelationship> cateRels = cateDocRelationshipMapper.findByFileId(doc.getId());
-            cateRels.stream()
-                    .filter(rel -> rel.getCategoryId().equals(categoryId))
-                    .findFirst()
-                    .ifPresent(rel -> {
-                        categoryVO.setRelationShipId(rel.getId());
-                    });
+            for (CateDocRelationship rel : cateRels) {
+                if (rel.getCategoryId().equals(categoryId)) {
+                    categoryVO.setRelationShipId(rel.getId());
+                    vo.setChecked(true);
+                    break;
+                }
+            }
             vo.setCategoryVO(categoryVO);
         }
 
-        // Build tag list info
-        List<TagDocRelationship> tagRels = tagDocRelationshipMapper.findByFileId(doc.getId());
-        List<TagVO> tagVOList = tagRels.stream()
-                .map(rel -> {
-                    TagVO tagVO = new TagVO();
-                    tagVO.setId(rel.getTagId());
-                    return tagVO;
-                })
-                .toList();
-        vo.setTagVOList(tagVOList);
+        // Build tag list info and check if already belongs to this tag
+        if (StringUtils.hasText(tagId)) {
+            List<TagDocRelationship> tagRels = tagDocRelationshipMapper.findByFileId(doc.getId());
+            for (TagDocRelationship rel : tagRels) {
+                if (rel.getTagId().equals(tagId)) {
+                    vo.setChecked(true);
+                    break;
+                }
+            }
+            List<TagVO> tagVOList = tagRels.stream()
+                    .map(rel -> {
+                        TagVO tagVO = new TagVO();
+                        tagVO.setId(rel.getTagId());
+                        return tagVO;
+                    })
+                    .toList();
+            vo.setTagVOList(tagVOList);
+        } else {
+            vo.setTagVOList(new ArrayList<>());
+        }
 
         return vo;
     }
@@ -880,6 +891,32 @@ public class DocumentServiceImpl implements DocumentService {
         documentVO.setErrorMsg(fileDocument.getErrorMsg());
         documentVO.setTxtId(fileDocument.getTextFileId());
         documentVO.setPreviewFileId(fileDocument.getPreviewFileId());
+
+        // Populate categoryVO
+        List<CateDocRelationship> cateRels = cateDocRelationshipMapper.findByFileId(docId);
+        if (!cateRels.isEmpty()) {
+            CateDocRelationship rel = cateRels.get(0);
+            Category category = categoryRepository.findById(rel.getCategoryId()).orElse(null);
+            if (category != null) {
+                CategoryVO categoryVO = new CategoryVO();
+                categoryVO.setId(category.getId());
+                categoryVO.setName(category.getName());
+                categoryVO.setRelationShipId(rel.getId());
+                documentVO.setCategoryVO(categoryVO);
+            }
+        }
+
+        // Populate tagVOList
+        List<TagDocRelationship> tagRels = tagDocRelationshipMapper.findByFileId(docId);
+        if (!tagRels.isEmpty()) {
+            List<TagVO> tagVOList = tagRels.stream().map(rel -> {
+                TagVO tagVO = new TagVO();
+                tagVO.setId(rel.getTagId());
+                return tagVO;
+            }).toList();
+            documentVO.setTagVOList(tagVOList);
+        }
+
         return documentVO;
     }
 
