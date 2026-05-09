@@ -6,6 +6,7 @@ import org.springframework.data.domain.Sort;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p></p>
@@ -22,6 +23,8 @@ public interface DocumentRepository {
 
     long count();
 
+    long countWithFilter(String filterWord);
+
     FileDocument findById(String fileDocumentId);
 
     List<FileDocument> findByIdList(List<String> docIdList);
@@ -31,6 +34,8 @@ public interface DocumentRepository {
     List<FileDocument> findByPage(Integer pageNum, Integer pageSize, Sort sort);
 
     List<FileDocument> findByPageWithFussySearch(Integer pageNum, Integer pageSize, Sort sort, String keyWord);
+
+    List<FileDocument> findByPageWithFilter(Integer pageNum, Integer pageSize, Sort sort, String filterWord);
 
     List<FileDocument> findByUserId(String userId, Integer pageNum, Integer pageSize, Sort sort);
 
@@ -43,4 +48,16 @@ public interface DocumentRepository {
     List<MonthStatVO> stats(Date startDate, Date endDate);
 
     List<MonthStatVO> trend(Date startDate, Date endDate);
+
+    List<FileDocument> findByPageByTag(String tagId, int pageNum, int pageSize);
+
+    List<FileDocument> findByPageByCategory(String categoryId, int pageNum, int pageSize);
+
+    long countByTagId(String tagId);
+
+    long countByCategoryId(String categoryId);
+
+    List<Map<String, Object>> countByDocType();
+
+    List<Map<String, Object>> countByCategory();
 }

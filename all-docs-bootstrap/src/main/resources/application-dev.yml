@@ -9,9 +9,9 @@ spring:
 
   # 开发环境 MySQL
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:192.168.1.29}:${MYSQL_PORT:5455}/${MYSQL_DATABASE:all_docs}?useSSL=false&serverTimezone=UTC&characterEncoding=utf8mb4
+    url: jdbc:mysql://${MYSQL_HOST:192.168.1.29}:${MYSQL_PORT:5455}/${MYSQL_DATABASE:all_docs}?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
     username: root
-    password: ${MYSQL_PASSWORD:}
+    password: ${MYSQL_PASSWORD:infini_rag_flow}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -24,7 +24,7 @@ spring:
       database: 0
       host: ${REDIS_HOST:192.168.1.29}
       port: ${REDIS_PORT:16379}
-      password: ${REDIS_PWD:}
+      password: ${REDIS_PWD:infini_rag_flow}
       timeout: 3000
       jedis:
         pool:
@@ -40,6 +40,12 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
+  # Spring Data Elasticsearch 配置
+  elasticsearch:
+    uris: http://${ES_HOST:192.168.1.29}:${ES_PORT:1200}
+    username: ${ES_USERNAME:elastic}
+    password: ${ES_PASSWORD:infini_rag_flow}
+
 logging:
   level:
     root: INFO
@@ -49,6 +55,14 @@ cloud:
   elasticsearch:
     host: ${ES_HOST:192.168.1.29}
     port: ${ES_PORT:1200}
+    username: ${ES_USERNAME:elastic}
+    password: ${ES_PASSWORD:infini_rag_flow}
+
+# 禁用 ES 健康检查（启动时不检查 ES 连接）
+management:
+  health:
+    elasticsearch:
+      enabled: false
 
 # 开发环境 MinIO
 minio:
@@ -75,9 +89,19 @@ all-docs:
   file-path:
     sensitive-file: sensitive.txt
 
+# 开发环境 HMAC
+hmac:
+  secret:
+    key: ${HMAC_SECRET_KEY:dev-hmac-secret-key}
+
 # 异步线程池
 async:
   core-pool-size: 5
   max-pool-size: 20
   queue-capacity: 100
   keep-alive-seconds: 30
+
+# JWT 配置
+jwt:
+  secret: ${JWT_SECRET:dev-jwt-secret-key-change-in-production}
+  expiration: 172800000

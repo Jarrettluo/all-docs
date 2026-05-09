@@ -1,12 +1,15 @@
 package com.jiaruiblog.application.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import com.jiaruiblog.application.service.ICommentService;
 import com.jiaruiblog.domain.entity.po.Comment;
+import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.CommentListDTO;
 import com.jiaruiblog.domain.entity.vo.CommentWithUserVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.infrastructure.repository.CommentRepository;
+import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -31,12 +34,24 @@ public class CommentServiceImpl implements ICommentService {
     @Resource
     CommentRepository commentRepository;
 
+    @Resource
+    DocumentRepository documentRepository;
+
     @Override
     public void insert(Comment comment) {
         if (comment == null || !StringUtils.hasText(comment.getUserId()) || !StringUtils.hasText(comment.getUserName())) {
             return;
         }
+        // Fetch document name and store it for resilience when document is deleted
+        if (StringUtils.hasText(comment.getDocId())) {
+            FileDocument doc = documentRepository.findById(comment.getDocId());
+            if (doc != null) {
+                comment.setDocName(doc.getName());
+            }
+        }
         // Note: Sensitive filtering should be done at the API layer before calling this method
+        comment.setId(IdUtil.fastUUID());
+        comment.setCreateUser(comment.getUserId());
         comment.setCreateDate(new Date());
         comment.setUpdateDate(new Date());
         commentRepository.save(comment);
@@ -122,24 +137,30 @@ public class CommentServiceImpl implements ICommentService {
     }
 
     @Override
-    public PageVO<CommentWithUserVO> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
+    public PageVO<Comment> queryAllComments(BasePageDTO page, String userId, Boolean isAdmin) {
         log.info("查询的参数是：{}, {}", page, userId);
-        // Note: For admin, return all comments; for user, return only their own
-        List<Comment> comments = commentRepository.findByUserId(userId);
-        List<CommentWithUserVO> commentWithUserVOList = new ArrayList<>();
-
-        for (Comment comment : comments) {
-            CommentWithUserVO vo = new CommentWithUserVO();
-            BeanUtils.copyProperties(comment, vo);
-            commentWithUserVOList.add(vo);
+        List<Comment> comments;
+        if (Boolean.TRUE.equals(isAdmin)) {
+            comments = commentRepository.findAll();
+        } else {
+            comments = commentRepository.findByUserId(userId);
         }
 
-        long count = commentRepository.count();
-        return PageVO.<CommentWithUserVO>builder()
+        long count = comments.size();
+
+        int pageNum = page.getPage();
+        int pageSize = page.getRows();
+        int skip = (pageNum - 1) * pageSize;
+        comments = comments.stream()
+                .skip(skip)
+                .limit(pageSize)
+                .toList();
+
+        return PageVO.<Comment>builder()
                 .total((int) count)
-                .list(commentWithUserVOList)
-                .pageNum(page.getPage())
-                .pageSize(page.getRows())
+                .list(comments)
+                .pageNum(pageNum)
+                .pageSize(pageSize)
                 .build();
     }
 }

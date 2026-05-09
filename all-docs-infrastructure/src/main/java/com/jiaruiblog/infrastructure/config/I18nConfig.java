@@ -12,7 +12,7 @@ public class I18nConfig {
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource =
             new ReloadableResourceBundleMessageSource();
-        messageSource.setBasename("classpath:messages");
+        messageSource.setBasename("classpath:i18n/messages");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setCacheSeconds(3600); // 1小时刷新
         return messageSource;

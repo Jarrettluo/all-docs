@@ -27,6 +27,8 @@ public class UserBO {
 
     private String mail;
 
+    private String nickname;
+
     private Boolean male = false;
 
     private String description;

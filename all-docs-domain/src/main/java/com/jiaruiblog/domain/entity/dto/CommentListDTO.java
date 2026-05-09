@@ -4,6 +4,7 @@ import com.jiaruiblog.common.MessageConstant;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -15,6 +16,7 @@ import lombok.Data;
  **/
 @Schema(name = "根据文档信息查询所属的文档评论")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class CommentListDTO extends BasePageDTO {
 
     @Schema(description = "文档主键", required = true)

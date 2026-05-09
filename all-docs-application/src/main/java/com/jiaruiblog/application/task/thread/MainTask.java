@@ -52,6 +52,7 @@ public class MainTask implements RunnableTask, Runnable {
     @Override
     public void success() {
         taskData.getFileDocument().setDocState(DocStateEnum.SUCCESS);
+        taskData.getFileDocument().setReviewing(false);
         updateTaskStatus();
 
         // 更新文档的数据
@@ -64,6 +65,7 @@ public class MainTask implements RunnableTask, Runnable {
         log.error("解析文件报错啦", throwable);
         String errorMsg = throwable.getMessage();
         taskData.getFileDocument().setDocState(DocStateEnum.FAIL);
+        taskData.getFileDocument().setReviewing(false);
         taskData.getFileDocument().setErrorMsg(errorMsg +" " + throwable.getCause());
         updateTaskStatus();
     }

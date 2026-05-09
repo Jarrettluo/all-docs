@@ -4,7 +4,7 @@
 
     <resultMap id="CollectResultMap" type="com.jiaruiblog.domain.entity.po.CollectDocRelationship">
         <id property="id" column="id"/>
-        <result property="redisActionEnum" column="redis_action_enum" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+        <result property="redisActionEnum" column="redis_action_enum"/>
         <result property="userId" column="user_id"/>
         <result property="docId" column="doc_id"/>
         <result property="createDate" column="create_date"/>
@@ -13,7 +13,7 @@
 
     <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.CollectDocRelationship">
         INSERT INTO collect_doc_relationship (id, redis_action_enum, user_id, doc_id, create_date, update_date)
-        VALUES (#{id}, #{redisActionEnum}, #{userId}, #{docId}, #{createDate}, #{updateDate})
+        VALUES (#{id}, #{redisActionEnum.code}, #{userId}, #{docId}, #{createDate}, #{updateDate})
     </insert>
 
     <delete id="remove" parameterType="com.jiaruiblog.domain.entity.po.CollectDocRelationship">

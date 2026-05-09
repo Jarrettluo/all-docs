@@ -19,14 +19,6 @@ public interface IDocLogService {
 
     /**
      * @author luojiarui
-     * @Description 新增操作日志
-     * @Date 15:43 2022/11/5
-     * @Param [docLog]
-     */
-    void insert(DocLog docLog);
-
-    /**
-     * @author luojiarui
      * @Description 删除操作日志
      * @Date 15:43 2022/11/5
      * @Param [docLog]

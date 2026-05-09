@@ -23,7 +23,7 @@ public interface UserMapper {
 
     int deleteById(@Param("id") String id);
 
-    User save(User user);
+    int save(User user);
 
     long count();
 

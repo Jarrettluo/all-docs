@@ -3,12 +3,13 @@ package com.jiaruiblog.application.service;
 import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
+import com.jiaruiblog.domain.entity.dto.SearchQuery;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
+import com.jiaruiblog.domain.entity.vo.DocSearchVO;
 import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
 import com.jiaruiblog.domain.entity.vo.PageVO;
 import com.jiaruiblog.common.enums.DocStateEnum;
-import org.apache.http.auth.AuthenticationException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
@@ -29,10 +30,11 @@ public interface DocumentService {
      */
     FileDocument saveFile(String md5, MultipartFile file);
 
-    /**
+/**
      * 用户上传文档
+     * @return FileDocument 上传后的文档对象
      */
-    void documentUpload(MultipartFile file, String userId, String username) throws AuthenticationException;
+    FileDocument documentUpload(MultipartFile file, String userId, String username);
 
     /**
      * 批量上传
@@ -232,4 +234,23 @@ public interface DocumentService {
      * @return 分页结果
      */
     PageVO<DocumentVO> search(String keyword, int pageNum, int pageSize);
+
+    /**
+     * 多条件搜索文档（支持标签、分类筛选、排序、分页）
+     *
+     * @param query  搜索参数
+     * @param userId 当前用户ID（用于查询点赞/收藏状态）
+     * @return 符合条件的文档分页结果
+     */
+    PageVO<DocSearchVO> search(SearchQuery query, String userId);
+
+    /**
+     * Get tag names for a document
+     */
+    List<String> getTagNamesByDocId(String docId);
+
+    /**
+     * Get category name for a document
+     */
+    String getCategoryNameByDocId(String docId);
 }

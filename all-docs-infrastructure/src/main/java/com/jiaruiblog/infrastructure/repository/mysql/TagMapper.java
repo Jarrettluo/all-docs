@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface TagMapper {
 
-    Tag save(Tag tag);
+    int save(Tag tag);
 
     Tag findById(@Param("id") String id);
 

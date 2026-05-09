@@ -3,34 +3,34 @@ package com.jiaruiblog.api.controller;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.auth0.jwt.interfaces.Claim;
-import com.jiaruiblog.common.constants.StorageConstants;
-import com.jiaruiblog.common.enums.PermissionEnum;
-import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.infrastructure.config.SystemConfig;
-import com.jiaruiblog.domain.entity.po.FileDocument;
-import com.jiaruiblog.domain.entity.po.User;
-import com.jiaruiblog.domain.entity.dto.BasePageDTO;
-import com.jiaruiblog.domain.entity.dto.upload.FileUploadDTO;
-import com.jiaruiblog.domain.entity.dto.upload.UrlUploadDTO;
-import com.jiaruiblog.common.enums.DocStateEnum;
-import com.jiaruiblog.common.exception.BusinessException;
-import com.jiaruiblog.common.exception.ErrorCode;
+import com.jiaruiblog.api.auth.Permission;
 import com.jiaruiblog.api.intercepter.SensitiveFilter;
-import com.jiaruiblog.application.service.IDocLogService;
+import com.jiaruiblog.api.util.JwtUtil;
 import com.jiaruiblog.application.service.DocumentService;
+import com.jiaruiblog.application.service.IDocLogService;
 import com.jiaruiblog.application.service.IUserService;
 import com.jiaruiblog.application.service.TaskExecuteService;
 import com.jiaruiblog.application.service.impl.DocLogServiceImpl;
-import com.jiaruiblog.infrastructure.util.FileContentTypeUtils;
+import com.jiaruiblog.common.ApiResult;
+import com.jiaruiblog.common.constants.StorageConstants;
+import com.jiaruiblog.common.enums.DocStateEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.common.exception.BusinessException;
+import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.common.util.HmacUtil;
-import com.jiaruiblog.api.util.JwtUtil;
+import com.jiaruiblog.domain.entity.dto.BasePageDTO;
+import com.jiaruiblog.domain.entity.dto.upload.FileUploadDTO;
+import com.jiaruiblog.domain.entity.dto.upload.UrlUploadDTO;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.User;
+import com.jiaruiblog.infrastructure.config.SystemConfig;
+import com.jiaruiblog.infrastructure.util.FileContentTypeUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.auth.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -55,7 +55,6 @@ import java.util.regex.Pattern;
  */
 @Tag(name = "查询文档详情的接口")
 @Slf4j
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/v1/file")
 public class FileController {
@@ -98,7 +97,7 @@ public class FileController {
      */
     @Operation(summary = "查询文档预览结果")
     @GetMapping("/view/{id}")
-    public ResponseEntity<Object> serveFileOnline(@PathVariable String id)
+    public ResponseEntity<Object> serveFileOnline(@PathVariable String id, HttpServletRequest request)
             throws UnsupportedEncodingException {
         Optional<FileDocument> fileOpt = fileService.getById(id);
         if (fileOpt.isEmpty()) {
@@ -106,7 +105,11 @@ public class FileController {
         }
 
         FileDocument fileDocument = fileOpt.get();
+        String username = (String) request.getAttribute("username");
+        String userId = (String) request.getAttribute("id");
         User user = new User();
+        user.setUsername(username);
+        user.setId(userId);
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.PREVIEW);
 
         // 从MinIO下载文件内容
@@ -278,19 +281,16 @@ public class FileController {
      * @return BaseApiResult
      */
     @PostMapping("auth/upload")
+    @Permission
     public ApiResult<Object> documentUpload(@RequestParam("file") MultipartFile file,
-                                            HttpServletRequest request)
-            throws AuthenticationException {
+                                            HttpServletRequest request) {
         String username = (String) request.getAttribute(USERNAME);
         String userId = (String) request.getAttribute("id");
 
+        // 用户非管理员且普通用户禁止上传
         User user = userService.queryById(userId);
-        if (user == null) {
-            throw new AuthenticationException();
-        }
-        // 用户非管理员且普通用户禁止
-        if (Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
-            throw new AuthenticationException();
+        if (user == null || Boolean.TRUE.equals(!systemConfig.getUserUpload()) && user.getPermissionEnum() != PermissionEnum.ADMIN) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
         fileService.documentUpload(file, userId, username);
@@ -467,11 +467,9 @@ public class FileController {
         }
         try (InputStream inputStream = fileService.getFileThumb(thumbId)) {
             if (inputStream == null) {
-                return new byte[0];
+                return new byte[]{};
             }
-            byte[] bytes = new byte[inputStream.available()];
-            inputStream.read(bytes, 0, inputStream.available());
-            return bytes;
+            return inputStream.readAllBytes();
         }
     }
 
@@ -495,6 +493,7 @@ public class FileController {
     public ResponseEntity<Object> previewThumb1(@PathVariable String id) throws IOException {
 
         if (StringUtils.hasText(id)) {
+            log.info("thumb endpoint called with id={}", id);
             InputStream inputStream = fileService.getFileThumb(id);
             if (inputStream == null) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -503,6 +502,7 @@ public class FileController {
             try (inputStream) {
                 bytes = IoUtil.readBytes(inputStream);
             }
+            log.info("thumb endpoint result length={}", bytes.length);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "fileName=" + id)
                     .header(HttpHeaders.CONTENT_TYPE, "image/png")
@@ -522,9 +522,14 @@ public class FileController {
 //            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 //            return new byte[]{};
 //        }
+        log.info("thumbi_id :  + {}", thumbId);
         // 设置响应头，缓存 1 小时
         response.setHeader("Cache-Control", "max-age=3600, public");
-        return fileService.getFileBytes(thumbId, StorageConstants.THUMBS);
+        // 缩略图存储时带了 .jpg 后缀，读取时需要拼接完整路径
+        String objectKey = StorageConstants.thumbPath(thumbId, "jpg");
+        byte[] result = fileService.getFileBytes(objectKey, "");
+        log.info("image2 endpoint called with thumbId={}, result length={}", thumbId, result.length);
+        return result;
     }
 
     @GetMapping(value = "/text2/{txtId}", produces = MediaType.TEXT_PLAIN_VALUE)
@@ -552,9 +557,12 @@ public class FileController {
         // 解决跨域问题，配置可访问的域名
         String allowedOrigin = System.getenv("CORS_ALLOWED_ORIGIN");
         if (allowedOrigin == null || allowedOrigin.isEmpty()) {
-            allowedOrigin = "*";
+            // 当 credentials 为 true 时，不能使用 "*"
+            // 使用 allowedOriginPatterns 代替，或者在前端配置具体的 origin
+            allowedOrigin = "http://localhost:8080";
         }
         response.addHeader("Access-Control-Allow-Origin", allowedOrigin);
+        response.addHeader("Access-Control-Allow-Credentials", "true");
         response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         //Content-Disposition的作用：告知浏览器以何种方式显示响应返回的文件，用浏览器打开还是以附件的形式下载到本地保存
         //attachment表示以附件方式下载   inline表示在线打开   "Content-Disposition: inline; filename=文件名.mp3"

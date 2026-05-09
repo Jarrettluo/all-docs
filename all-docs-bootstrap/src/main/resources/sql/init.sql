@@ -87,6 +87,7 @@ CREATE TABLE `comment` (
     `user_name` VARCHAR(100) DEFAULT NULL COMMENT '用户名',
     `content` VARCHAR(500) NOT NULL COMMENT '评论内容',
     `doc_id` VARCHAR(64) NOT NULL COMMENT '文档ID',
+    `doc_name` VARCHAR(255) DEFAULT NULL COMMENT '文档名称',
     `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_date` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX `idx_doc_id` (`doc_id`),

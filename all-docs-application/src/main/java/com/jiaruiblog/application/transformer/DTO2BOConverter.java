@@ -33,6 +33,7 @@ public class DTO2BOConverter {
         }
         userBO.setPhone(userDTO.getPhone());
         userBO.setMail(userDTO.getMail());
+        userBO.setNickname(userDTO.getNickname());
         userBO.setMale(userDTO.isMale());
         userBO.setBirthtime(userDTO.getBirthtime());
         userBO.setDescription(userDTO.getDescription());

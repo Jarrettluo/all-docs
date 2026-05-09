@@ -10,9 +10,14 @@ import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.po.Tag;
 import com.jiaruiblog.domain.entity.po.TagDocRelationship;
 import com.jiaruiblog.domain.entity.dto.SearchKeyDTO;
+import com.jiaruiblog.domain.entity.vo.CategoryDistVO;
+import com.jiaruiblog.domain.entity.vo.DocTypeDistVO;
 import com.jiaruiblog.domain.entity.vo.DocumentVO;
+import com.jiaruiblog.domain.entity.vo.HotDocVO;
+import com.jiaruiblog.domain.entity.vo.SearchHotWordVO;
 import com.jiaruiblog.domain.entity.vo.StatsVO;
 import com.jiaruiblog.domain.entity.vo.TrendVO;
+import com.jiaruiblog.domain.entity.vo.UserActivityVO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +76,36 @@ public class StatisticsController {
         return ApiResult.success(statisticsService.all());
     }
 
+    @Operation(summary = "文档类型分布", description = "查询各文档类型的数量分布")
+    @GetMapping("/docTypeDist")
+    public ApiResult<List<DocTypeDistVO>> docTypeDist() {
+        return ApiResult.success(statisticsService.docTypeDist());
+    }
+
+    @Operation(summary = "分类文档分布", description = "查询各分类下的文档数量")
+    @GetMapping("/categoryDist")
+    public ApiResult<List<CategoryDistVO>> categoryDist() {
+        return ApiResult.success(statisticsService.categoryDist());
+    }
+
+    @Operation(summary = "热门文档 TOP 10", description = "查询热门文档排行")
+    @GetMapping("/hotDocs")
+    public ApiResult<List<HotDocVO>> hotDocs() {
+        return ApiResult.success(statisticsService.hotDocs());
+    }
+
+    @Operation(summary = "搜索热词排行", description = "查询搜索热词排行")
+    @GetMapping("/searchHotWords")
+    public ApiResult<List<SearchHotWordVO>> searchHotWords() {
+        return ApiResult.success(statisticsService.searchHotWords());
+    }
+
+    @Operation(summary = "用户活跃度趋势", description = "查询用户活跃度趋势")
+    @GetMapping("/userActivity")
+    public ApiResult<List<UserActivityVO>> userActivity() {
+        return ApiResult.success(statisticsService.userActivity());
+    }
+
     /**
      * @return com.jiaruiblog.utils.ApiResult
      * @author luojiarui
@@ -81,8 +116,9 @@ public class StatisticsController {
     public ApiResult<Map<String, List<String>>> getSearchResult(@RequestHeader HttpHeaders headers) {
         List<String> userSearchList = Lists.newArrayList();
         List<String> stringList = headers.get("id");
+        String userId = null;
         if (!CollectionUtils.isEmpty(stringList)) {
-            String userId = stringList.get(0);
+            userId = stringList.get(0);
             if (StringUtils.hasText(userId)) {
                 userSearchList = redisService.getSearchHistoryByUserId(userId);
             }
@@ -92,6 +128,8 @@ public class StatisticsController {
         Map<String, List<String>> result = new HashMap<>();
         result.put("userSearch", userSearchList);
         result.put("hotSearch", hotSearchList);
+        log.info("getSearchResult called, userId={}, userSearchSize={}, hotSearchSize={}",
+                userId, userSearchList.size(), hotSearchList.size());
         return ApiResult.success(result);
     }
 
@@ -121,7 +159,10 @@ public class StatisticsController {
         List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
 
         if (CollectionUtils.isEmpty(docIdList)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            Map<String, Object> result = new HashMap<>();
+            result.put("top1", null);
+            result.put("others", List.of());
+            return ApiResult.success(result);
         }
 
 

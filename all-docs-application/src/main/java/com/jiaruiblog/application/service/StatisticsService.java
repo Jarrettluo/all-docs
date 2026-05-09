@@ -1,9 +1,14 @@
 package com.jiaruiblog.application.service;
 
 import com.jiaruiblog.domain.entity.dto.StatisticsDTO;
+import com.jiaruiblog.domain.entity.vo.CategoryDistVO;
+import com.jiaruiblog.domain.entity.vo.DocTypeDistVO;
+import com.jiaruiblog.domain.entity.vo.HotDocVO;
 import com.jiaruiblog.domain.entity.vo.MonthStatVO;
+import com.jiaruiblog.domain.entity.vo.SearchHotWordVO;
 import com.jiaruiblog.domain.entity.vo.StatsVO;
 import com.jiaruiblog.domain.entity.vo.TrendVO;
+import com.jiaruiblog.domain.entity.vo.UserActivityVO;
 
 import java.util.List;
 import java.util.Map;
@@ -92,4 +97,29 @@ public interface StatisticsService {
      * 获取月度统计数据
      */
     List<MonthStatVO> getMonthStat();
+
+    /**
+     * 按文档类型统计分布
+     */
+    List<DocTypeDistVO> docTypeDist();
+
+    /**
+     * 按分类统计分布
+     */
+    List<CategoryDistVO> categoryDist();
+
+    /**
+     * 获取热门文档
+     */
+    List<HotDocVO> hotDocs();
+
+    /**
+     * 获取搜索热词
+     */
+    List<SearchHotWordVO> searchHotWords();
+
+    /**
+     * 获取用户活动统计
+     */
+    List<UserActivityVO> userActivity();
 }

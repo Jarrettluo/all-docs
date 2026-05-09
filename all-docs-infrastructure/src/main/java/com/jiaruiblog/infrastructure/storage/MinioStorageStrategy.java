@@ -30,7 +30,7 @@ public class MinioStorageStrategy implements StorageStrategy {
     @Autowired
     private MinioClient minioClient;
 
-    @Value("${minio.bucket-name:alldocs}")
+    @Value("${minio.bucket:all-docs-bucket}")
     private String bucketName;
 
     /**

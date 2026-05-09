@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface CommentMapper {
 
-    Comment save(Comment comment);
+    int save(Comment comment);
 
     Comment findById(@Param("id") String id);
 
@@ -17,9 +17,17 @@ public interface CommentMapper {
 
     List<Comment> findByUserId(@Param("userId") String userId);
 
+    List<Comment> findAll();
+
     long countByDocId(@Param("docId") String docId);
 
     void deleteById(@Param("id") String id);
 
     void deleteByDocId(@Param("docId") String docId);
+
+    List<Comment> findByContentContaining(@Param("keyword") String keyword);
+
+    void deleteAllByIdIn(@Param("idList") List<String> idList);
+
+    long count();
 }

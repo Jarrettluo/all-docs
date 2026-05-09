@@ -19,6 +19,9 @@ public class TagMybatisRepository implements TagRepository {
     @Autowired
     private TagMapper tagMapper;
 
+    @Autowired
+    private TagDocRelationshipMapper tagDocRelationshipMapper;
+
     @Override
     public Tag save(Tag tag) {
         tagMapper.save(tag);
@@ -105,7 +108,7 @@ public class TagMybatisRepository implements TagRepository {
 
     @Override
     public List<TagDocRelationship> findRelationshipsByTagId(String tagId) {
-        return null;
+        return tagDocRelationshipMapper.findByTagId(tagId);
     }
 
     @Override

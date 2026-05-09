@@ -4,10 +4,13 @@ import com.jiaruiblog.application.service.DocumentService;
 import com.jiaruiblog.application.service.ElasticService;
 import com.jiaruiblog.application.task.data.TaskData;
 import com.jiaruiblog.application.task.exception.TaskRunException;
+import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.FileFormatEnum;
 import com.jiaruiblog.common.util.SpringApplicationContext;
 import com.jiaruiblog.domain.entity.po.FileDocument;
 import com.jiaruiblog.domain.entity.po.SearchDocument;
+import com.jiaruiblog.infrastructure.storage.StorageFactory;
+import com.jiaruiblog.infrastructure.storage.StorageStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -40,17 +43,14 @@ public abstract class TaskExecutor {
         }
         docInputStream = new ByteArrayInputStream(dfsBytes);
         try {
-            // 制作不同分辨率的缩略图
+            // 第三步 制作不同分辨率的缩略图
             updateFileThumb(docInputStream, taskData.getFileDocument(), taskData);
         } catch (Exception e) {
             throw new TaskRunException("建立缩略图的时候出错啦！", e);
         }
-        // 第三步 制作预览文件
+        // 第四步 制作预览文件；例如ppt需要转成pdf进行预览
         docInputStream = new ByteArrayInputStream(dfsBytes);
         makePreviewFile(docInputStream, taskData);
-
-        // 清空内存占用
-        dfsBytes = new byte[]{};
     }
 
     /**
@@ -76,11 +76,15 @@ public abstract class TaskExecutor {
                 throw new TaskRunException("文本文件不存在，需要进行重新提取");
             }
             SearchDocument searchDocument = new SearchDocument();
-            searchDocument.setId(fileDocument.getMd5());
+            searchDocument.setId(fileDocument.getId()); // Use UUID to match initial indexing
             searchDocument.setName(fileDocument.getName());
             searchDocument.setType(fileDocument.getContentType());
             // 直接读取提取的文本内容，不做 base64 编码
             searchDocument.setContent(Files.readString(Paths.get(textFilePath), StandardCharsets.UTF_8));
+            // Preserve tagNames and categoryName from initial indexing
+            DocumentService documentService = SpringApplicationContext.getBean(DocumentService.class);
+            searchDocument.setTagNames(documentService.getTagNamesByDocId(fileDocument.getId()));
+            searchDocument.setCategoryName(documentService.getCategoryNameByDocId(fileDocument.getId()));
             this.upload(searchDocument);
 
         } catch (IOException | TaskRunException e) {
@@ -92,12 +96,19 @@ public abstract class TaskExecutor {
         // 被文本文件上传到gridFS系统中
         try (FileInputStream inputStream = new FileInputStream(textFilePath)) {
 
+            // 使用 document-texts/{md5}_{originalName}.txt 路径存储文本文件
+            String originalName = fileDocument.getName();
+            String md5 = fileDocument.getMd5();
+            // textObjectKey 已经包含 .txt 后缀，documentTextPath 会再添加一次，所以传入时不带 .txt
+            String textObjectKey = md5 + "_" + originalName;
+            String fullPath = StorageConstants.documentTextPath(textObjectKey);
+
             DocumentService fileService = SpringApplicationContext.getBean(DocumentService.class);
-            String txtObjId = fileService.uploadFileToGridFs(
-                    FileFormatEnum.TEXT.getFilePrefix(),
-                    inputStream,
-                    FileFormatEnum.TEXT.getContentType());
-            fileDocument.setTextFileId(txtObjId);
+            StorageFactory storageFactory = SpringApplicationContext.getBean(StorageFactory.class);
+            StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
+            storageStrategy.upload(inputStream, fullPath, FileFormatEnum.TEXT.getContentType());
+
+            fileDocument.setTextFileId(textObjectKey);
 
         } catch (IOException e) {
             throw new TaskRunException("存储文本文件报错了，请核对", e);
@@ -178,11 +189,12 @@ public abstract class TaskExecutor {
     public void updateFileThumb(InputStream inputStream, FileDocument fileDocument,
                                 TaskData taskData) throws IOException {
 
-        String picPath = "./" + java.util.UUID.randomUUID().toString() + ".png";
+        String picPath = "./" + java.util.UUID.randomUUID() + ".png";
         taskData.setThumbFilePath(picPath);
 
-        // 将pdf输入流转换为图片并临时保存下来
+        // 将文档输入流转换为图片并临时保存下来
         makeThumb(inputStream, picPath);
+
         if ( !new File(picPath).exists()) {
             return;
         }
@@ -202,7 +214,7 @@ public abstract class TaskExecutor {
         try {
             Files.delete(Paths.get(picPath));
         } catch (IOException e) {
-            log.error("删除文件路径{} ==> 失败信息{}", picPath, e);
+            log.error("删除文件路径{} ==> 失败信息{}", picPath, e.getMessage());
         }
 
     }

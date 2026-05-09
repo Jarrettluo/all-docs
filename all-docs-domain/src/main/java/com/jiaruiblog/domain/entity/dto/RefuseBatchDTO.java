@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -16,6 +17,7 @@ import lombok.Data;
  * @Version 1.0
  **/
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class RefuseBatchDTO extends BatchIdDTO{
 
     @NotNull(message = MessageConstant.PARAMS_IS_NOT_NULL)

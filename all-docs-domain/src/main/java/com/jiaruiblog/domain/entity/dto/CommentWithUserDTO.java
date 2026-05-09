@@ -1,6 +1,7 @@
 package com.jiaruiblog.domain.entity.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -12,6 +13,7 @@ import java.util.Date;
  * @Version 1.0
  **/
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class CommentWithUserDTO extends CommentDTO {
 
     private String id;

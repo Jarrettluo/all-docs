@@ -7,13 +7,15 @@ import java.util.Optional;
 
 public interface DocLogRepository {
 
-    DocLog save(DocLog docLog);
+    int save(DocLog docLog);
 
     Optional<DocLog> findById(String id);
 
     List<DocLog> findByDocId(String docId);
 
     List<DocLog> findByUserId(String userId);
+
+    List<DocLog> findAll();
 
     List<DocLog> findByAction(String action);
 

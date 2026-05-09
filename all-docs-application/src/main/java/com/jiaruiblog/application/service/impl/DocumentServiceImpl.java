@@ -1,29 +1,37 @@
 package com.jiaruiblog.application.service.impl;
 
 import cn.hutool.core.util.IdUtil;
-import com.jiaruiblog.application.service.DocumentService;
-import com.jiaruiblog.application.service.ElasticService;
-import com.jiaruiblog.application.service.CollectService;
-import com.jiaruiblog.application.service.ICommentService;
+import com.jiaruiblog.application.service.*;
+import com.jiaruiblog.application.service.IDocLogService;
 import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.DocStateEnum;
-import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.common.enums.FilterTypeEnum;
 import com.jiaruiblog.domain.entity.dto.BasePageDTO;
 import com.jiaruiblog.domain.entity.dto.DocumentDTO;
+import com.jiaruiblog.domain.entity.dto.SearchQuery;
+import com.jiaruiblog.domain.entity.dto.SearchResultItem;
 import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
-import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
-import com.jiaruiblog.domain.entity.vo.DocumentVO;
-import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.infrastructure.repository.DocumentRepository;
+import com.jiaruiblog.domain.entity.po.*;
+import com.jiaruiblog.domain.entity.vo.*;
+import com.jiaruiblog.infrastructure.repository.CategoryRepository;
+import com.jiaruiblog.infrastructure.repository.CollectRepository;
+import com.jiaruiblog.infrastructure.repository.TagRepository;
+import com.jiaruiblog.infrastructure.repository.mysql.CateDocRelationshipMapper;
+import com.jiaruiblog.infrastructure.repository.mysql.DocumentMybatisRepository;
+import com.jiaruiblog.infrastructure.repository.mysql.TagDocRelationshipMapper;
 import com.jiaruiblog.infrastructure.storage.StorageFactory;
 import com.jiaruiblog.infrastructure.storage.StorageStrategy;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,7 +43,7 @@ import java.util.stream.Collectors;
 public class DocumentServiceImpl implements DocumentService {
 
     @Resource
-    private DocumentRepository documentRepository;
+    private DocumentMybatisRepository documentMybatisRepository;
 
     @Resource
     private StorageFactory storageFactory;
@@ -49,7 +57,32 @@ public class DocumentServiceImpl implements DocumentService {
     @Resource
     private ElasticService elasticService;
 
-    private static final String FILE_NAME = "filename";
+    @Resource
+    private TaskExecuteService taskExecuteService;
+
+    @Resource
+    private DocReviewService docReviewService;
+
+    @Resource
+    private CateDocRelationshipMapper cateDocRelationshipMapper;
+
+    @Resource
+    private TagDocRelationshipMapper tagDocRelationshipMapper;
+
+    @Resource
+    private TagRepository tagRepository;
+
+    @Resource
+    private CategoryRepository categoryRepository;
+
+    @Resource
+    private CollectRepository collectRepository;
+
+    @Resource
+    private LikeService likeService;
+
+    @Resource
+    private IDocLogService docLogService;
 
     @Override
     public String uploadFileToGridFs(String fileName, InputStream inputStream, String contentType, String md5) {
@@ -57,17 +90,17 @@ public class DocumentServiceImpl implements DocumentService {
             throw new IllegalArgumentException("InputStream cannot be null");
         }
         StorageStrategy storageStrategy = storageFactory.getStorageStrategy();
-        // 使用UUID作为唯一key，路径前缀为 documents/
-        String uniqueKey = IdUtil.simpleUUID();
-        String objectKey = StorageConstants.documentPath(uniqueKey);
-        storageStrategy.upload(inputStream, objectKey, contentType);
-        log.info("Uploaded file to MinIO: objectKey={}, filename={}", objectKey, fileName);
-        return uniqueKey; // 返回唯一key，用于存储到MySQL的gridfsId字段
+        // 使用 md5 + originalFilename 作为 objectKey
+        String objectKey = md5 + "_" + fileName;
+        String fullPath = StorageConstants.documentPath(objectKey);
+        storageStrategy.upload(inputStream, fullPath, contentType);
+        log.info("Uploaded file to MinIO: objectKey={}, filename={}", fullPath, fileName);
+        return objectKey; // 返回 objectKey，用于存储到MySQL的gridfsId字段
     }
 
     @Override
     public List<FileDocument> list() {
-        return documentRepository.findByPage(1, 100, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        return documentMybatisRepository.findByPage(1, 100, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
@@ -75,7 +108,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (document == null) {
             return;
         }
-        documentRepository.save(document);
+        documentMybatisRepository.save(document);
     }
 
     @Override
@@ -98,7 +131,7 @@ public class DocumentServiceImpl implements DocumentService {
             return;
         }
         // Delete from MySQL
-        documentRepository.delete(document.getId());
+        documentMybatisRepository.delete(document.getId());
         // Delete from MinIO - 文档原文
         if (document.getGridfsId() != null) {
             storageFactory.getStorageStrategy().delete(StorageConstants.documentPath(document.getGridfsId()));
@@ -113,11 +146,11 @@ public class DocumentServiceImpl implements DocumentService {
         }
         // Delete from MinIO - 文本文件
         if (document.getTextFileId() != null) {
-            storageFactory.getStorageStrategy().delete(StorageConstants.textPath(document.getTextFileId()));
+            storageFactory.getStorageStrategy().delete(StorageConstants.documentTextPath(document.getTextFileId()));
         }
         // Delete from ES
-        if (document.getMd5() != null) {
-            elasticService.deleteById(document.getMd5());
+        if (document.getId() != null) {
+            elasticService.deleteById(document.getId());
         }
         log.info("Removed document: id={}", document.getId());
     }
@@ -136,7 +169,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (documentId == null || documentId.isEmpty()) {
             return null;
         }
-        return documentRepository.findById(documentId);
+        return documentMybatisRepository.findById(documentId);
     }
 
     @Override
@@ -144,7 +177,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (md5 == null || md5.isEmpty()) {
             return null;
         }
-        return documentRepository.findByMd5(md5);
+        return documentMybatisRepository.findByMd5(md5);
     }
 
     @Override
@@ -160,12 +193,12 @@ public class DocumentServiceImpl implements DocumentService {
         if (docIds == null || docIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return documentRepository.findByIdList(docIds);
+        return documentMybatisRepository.findByIdList(docIds);
     }
 
     @Override
     public List<FileDocument> queryAll() {
-        return documentRepository.findByPage(1, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        return documentMybatisRepository.findByPage(1, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
@@ -216,14 +249,14 @@ public class DocumentServiceImpl implements DocumentService {
         if (document == null) {
             return null;
         }
-        documentRepository.save(document);
+        documentMybatisRepository.save(document);
         return document;
     }
 
     @Override
     public PageVO<FileDocument> queryByPage(FileDocument document, int pageNum, int pageSize) {
-        List<FileDocument> documents = documentRepository.findByPage(pageNum, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
-        long total = documentRepository.count();
+        List<FileDocument> documents = documentMybatisRepository.findByPage(pageNum, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        long total = documentMybatisRepository.count();
         return PageVO.<FileDocument>builder()
                 .pageNum(pageNum)
                 .pageSize(pageSize)
@@ -237,7 +270,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (md5 == null || file == null) {
             return null;
         }
-        FileDocument existing = documentRepository.findByMd5(md5);
+        FileDocument existing = documentMybatisRepository.findByMd5(md5);
         if (existing != null) {
             return existing;
         }
@@ -250,14 +283,98 @@ public class DocumentServiceImpl implements DocumentService {
         if (file.getOriginalFilename() != null && file.getOriginalFilename().contains(".")) {
             document.setSuffix(file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")));
         }
-        documentRepository.save(document);
+        documentMybatisRepository.save(document);
         return document;
     }
 
     @Override
-    public void documentUpload(MultipartFile file, String userId, String username) {
-        // Implementation for document upload
-        log.info("Document upload: userId={}, username={}", userId, username);
+    public FileDocument documentUpload(MultipartFile file, String userId, String username) {
+        if (file == null || file.isEmpty()) {
+            log.warn("Document upload failed: file is empty");
+            return null;
+        }
+
+        try {
+            // 1. Read file bytes once for both MD5 calculation and upload
+            byte[] fileBytes = file.getBytes();
+
+            // 2. Calculate MD5
+            String md5 = calculateMd5(fileBytes);
+
+            // 3. Check for duplicate
+            FileDocument existing = documentMybatisRepository.findByMd5(md5);
+            if (existing != null) {
+                log.info("Document already exists: md5={}, docId={}", md5, existing.getId());
+                return existing;
+            }
+
+            // 4. Upload to MinIO
+            String uniqueKey = uploadFileToGridFs(file.getOriginalFilename(), new ByteArrayInputStream(fileBytes),
+                    file.getContentType(), md5);
+
+            // 5. Create and save FileDocument
+            FileDocument document = new FileDocument();
+            document.setId(IdUtil.simpleUUID());
+            document.setName(file.getOriginalFilename());
+            document.setSize(file.getSize());
+            document.setMd5(md5);
+            document.setContentType(file.getContentType());
+            document.setSuffix(getFileSuffix(file.getOriginalFilename()));
+            document.setUploadDate(new Date());
+            document.setGridfsId(uniqueKey);
+            document.setUserId(userId);
+            document.setUserName(username);
+            document.setDocState(DocStateEnum.WAIT);
+            document.setReviewing(true);
+            document.setCreateDate(new Date());
+            documentMybatisRepository.save(document);
+
+            // 6. Index document to ES
+            indexDocumentToEs(document);
+
+            // 7. Create review record
+            docReviewService.insert(document);
+
+            // 8. Submit async task for text extraction and ES indexing
+            taskExecuteService.execute(document);
+
+            log.info("Document upload success: userId={}, username={}, docId={}, filename={}",
+                    userId, username, document.getId(), file.getOriginalFilename());
+
+            // 添加上传日志
+            User user = new User();
+            user.setId(userId);
+            user.setUsername(username);
+            docLogService.addLog(user, document, DocLogServiceImpl.Action.UPLOAD);
+
+            return document;
+        } catch (IOException e) {
+            log.error("Document upload failed: userId={}, username={}, error={}",
+                    userId, username, e.getMessage());
+            return null;
+        }
+    }
+
+    private String calculateMd5(byte[] fileBytes) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (Exception e) {
+            throw new RuntimeException("MD5 calculation failed", e);
+        }
+        byte[] digest = md.digest(fileBytes);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    private String getFileSuffix(String fileName) {
+        if (fileName != null && fileName.contains(".")) {
+            return fileName.substring(fileName.lastIndexOf("."));
+        }
+        return "";
     }
 
     @Override
@@ -267,7 +384,75 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void uploadByUrl(String category, List<String> tags, String name, String description, String url, String userId, String username) {
-        log.info("Upload by URL: {}", url);
+        if (url == null || url.isEmpty()) {
+            log.warn("Upload by URL failed: url is empty");
+            return;
+        }
+
+        try {
+            // 1. Download file from URL
+            byte[] fileBytes = cn.hutool.http.HttpUtil.createGet(url).timeout(30000).execute().bodyBytes();
+            if (fileBytes == null || fileBytes.length == 0) {
+                log.warn("Upload by URL failed: downloaded content is empty, url={}", url);
+                return;
+            }
+
+            // 2. Calculate MD5
+            String md5 = calculateMd5(fileBytes);
+
+            // 3. Check for duplicate
+            FileDocument existing = documentMybatisRepository.findByMd5(md5);
+            if (existing != null) {
+                log.info("Document already exists: md5={}, docId={}", md5, existing.getId());
+                return;
+            }
+
+            // 4. Determine content type and suffix from name or URL
+            String contentType = cn.hutool.core.io.FileUtil.getMimeType(name != null ? name : url);
+            String suffix = getFileSuffix(name != null ? name : url);
+
+            // 5. Upload to MinIO
+            String uniqueKey = uploadFileToGridFs(name, new ByteArrayInputStream(fileBytes), contentType, md5);
+
+            // 6. Create and save FileDocument
+            FileDocument document = new FileDocument();
+            document.setId(IdUtil.simpleUUID());
+            document.setName(name);
+            document.setSize(fileBytes.length);
+            document.setMd5(md5);
+            document.setContentType(contentType);
+            document.setSuffix(suffix);
+            document.setDescription(description);
+            document.setUploadDate(new Date());
+            document.setGridfsId(uniqueKey);
+            document.setUserId(userId);
+            document.setUserName(username);
+            document.setDocState(DocStateEnum.WAIT);
+            document.setReviewing(true);
+            document.setCreateDate(new Date());
+            documentMybatisRepository.save(document);
+
+            // 7. Index document to ES
+            indexDocumentToEs(document);
+
+            // 8. Create review record
+            docReviewService.insert(document);
+
+            // 9. Submit async task for text extraction and ES indexing
+            taskExecuteService.execute(document);
+
+            log.info("Upload by URL success: userId={}, username={}, docId={}, filename={}, url={}",
+                    userId, username, document.getId(), name, url);
+
+            // 添加上传日志
+            User user = new User();
+            user.setId(userId);
+            user.setUsername(username);
+            docLogService.addLog(user, document, DocLogServiceImpl.Action.UPLOAD);
+        } catch (Exception e) {
+            log.error("Upload by URL failed: userId={}, username={}, url={}, error={}",
+                    userId, username, url, e.getMessage());
+        }
     }
 
     @Override
@@ -277,7 +462,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
         String objectId = uploadFileToGridFs(fileDocument.getName(), inputStream, fileDocument.getContentType(), fileDocument.getMd5());
         fileDocument.setGridfsId(objectId);
-        documentRepository.save(fileDocument);
+        documentMybatisRepository.save(fileDocument);
         return fileDocument;
     }
 
@@ -286,7 +471,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (fileDocument == null || fileDocument.getId() == null) {
             return;
         }
-        documentRepository.update(fileDocument);
+        documentMybatisRepository.update(fileDocument);
     }
 
     @Override
@@ -298,7 +483,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (errorMsg != null) {
             fileDocument.setErrorMsg(errorMsg);
         }
-        documentRepository.update(fileDocument);
+        documentMybatisRepository.update(fileDocument);
     }
 
     @Override
@@ -306,9 +491,9 @@ public class DocumentServiceImpl implements DocumentService {
         if (id == null || id.isEmpty()) {
             return;
         }
-        FileDocument document = documentRepository.findById(id);
+        FileDocument document = documentMybatisRepository.findById(id);
         if (document != null) {
-            documentRepository.delete(id);
+            documentMybatisRepository.delete(id);
             if (isDeleteFile) {
                 // 删除文档原文
                 if (document.getGridfsId() != null) {
@@ -324,7 +509,7 @@ public class DocumentServiceImpl implements DocumentService {
                 }
                 // 删除文本文件
                 if (document.getTextFileId() != null) {
-                    storageFactory.getStorageStrategy().delete(StorageConstants.textPath(document.getTextFileId()));
+                    storageFactory.getStorageStrategy().delete(StorageConstants.documentTextPath(document.getTextFileId()));
                 }
             }
         }
@@ -335,7 +520,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (id == null || id.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(documentRepository.findById(id));
+        return Optional.ofNullable(documentMybatisRepository.findById(id));
     }
 
     @Override
@@ -345,7 +530,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public FileDocument getByMd5(String md5) {
-        return documentRepository.findByMd5(md5);
+        return documentMybatisRepository.findByMd5(md5);
     }
 
     @Override
@@ -355,7 +540,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
         List<FileDocument> result = new ArrayList<>();
         for (String md5 : md5Set) {
-            FileDocument doc = documentRepository.findByMd5(md5);
+            FileDocument doc = documentMybatisRepository.findByMd5(md5);
             if (doc != null) {
                 result.add(doc);
             }
@@ -365,7 +550,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public List<FileDocument> listFilesByPage(int pageIndex, int pageSize) {
-        return documentRepository.findByPage(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        return documentMybatisRepository.findByPage(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
@@ -373,7 +558,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }
-        return documentRepository.findByIdList(new ArrayList<>(ids));
+        return documentMybatisRepository.findByIdList(new ArrayList<>(ids));
     }
 
     @Override
@@ -386,14 +571,99 @@ public class DocumentServiceImpl implements DocumentService {
         if (documentDTO == null) {
             return PageVO.<DocumentVO>builder().build();
         }
-        List<FileDocument> documents = listFilesByPage(documentDTO.getPage(), documentDTO.getRows());
+
+        String filterWord = documentDTO.getFilterWord();
+
+        // filterWord 不为空时走 ES 全文检索
+        if (StringUtils.hasText(filterWord)) {
+            return searchFullText(documentDTO);
+        }
+
+        // 否则走现有 MySQL 逻辑（保留现有代码）
+        List<FileDocument> documents;
+        long total;
+
+        FilterTypeEnum type = documentDTO.getType();
+        if (type == FilterTypeEnum.TAG && StringUtils.hasText(documentDTO.getTagId())) {
+            documents = documentMybatisRepository.findByPageByTag(documentDTO.getTagId(),
+                    documentDTO.getPage(), documentDTO.getRows());
+            total = documentMybatisRepository.countByTagId(documentDTO.getTagId());
+        } else if (type == FilterTypeEnum.CATEGORY && StringUtils.hasText(documentDTO.getCategoryId())) {
+            documents = documentMybatisRepository.findByPageByCategory(documentDTO.getCategoryId(),
+                    documentDTO.getPage(), documentDTO.getRows());
+            total = documentMybatisRepository.countByCategoryId(documentDTO.getCategoryId());
+        } else {
+            documents = listFilesByPage(documentDTO.getPage(), documentDTO.getRows());
+            total = documentMybatisRepository.count();
+        }
+
         List<DocumentVO> voList = documents.stream()
                 .map(doc -> convertDocument(new DocumentVO(), doc))
-                .collect(Collectors.toList());
+                .toList();
         return PageVO.<DocumentVO>builder()
                 .pageNum(documentDTO.getPage())
                 .pageSize(documentDTO.getRows())
-                .total(documentRepository.count())
+                .total(total)
+                .list(voList)
+                .build();
+    }
+
+    /**
+     * ES 全文检索模式
+     */
+    private PageVO<DocumentVO> searchFullText(DocumentDTO documentDTO) {
+        String filterWord = documentDTO.getFilterWord();
+        String tagId = documentDTO.getTagId();
+        String categoryId = documentDTO.getCategoryId();
+        int page = documentDTO.getPage();
+        int rows = documentDTO.getRows();
+
+        // 1. ES 检索
+        SearchResultVO searchResult = elasticService.searchDocumentsFullText(
+                filterWord, tagId, categoryId, page, rows);
+
+        if (searchResult == null || searchResult.getItems() == null || searchResult.getItems().isEmpty()) {
+            return PageVO.<DocumentVO>builder()
+                    .pageNum(page)
+                    .pageSize(rows)
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .build();
+        }
+
+        // 2. 获取文档 ID 列表
+        List<String> docIds = searchResult.getItems().stream()
+                .map(SearchResultItem::getId)
+                .toList();
+
+        // 3. 批量查询 MySQL 获取文档详情
+        List<FileDocument> documents = documentMybatisRepository.findByIdList(new ArrayList<>(docIds));
+
+        // 4. 构建 ID -> 高亮片段的映射
+        Map<String, List<String>> highlightMap = searchResult.getItems().stream()
+                .filter(item -> item.getId() != null)
+                .collect(Collectors.toMap(
+                        SearchResultItem::getId,
+                        item -> item.getHighlightFragments() != null ? item.getHighlightFragments() : Collections.emptyList(),
+                        (existing, replacement) -> replacement
+                ));
+
+        // 5. 转换为 DocumentVO，高亮片段存入 description
+        List<DocumentVO> voList = documents.stream()
+                .map(doc -> {
+                    DocumentVO vo = convertDocument(new DocumentVO(), doc);
+                    List<String> highlights = highlightMap.get(doc.getId());
+                    if (highlights != null && !highlights.isEmpty()) {
+                        vo.setDescription(String.join("\n---\n", highlights));
+                    }
+                    return vo;
+                })
+                .toList();
+
+        return PageVO.<DocumentVO>builder()
+                .pageNum(page)
+                .pageSize(rows)
+                .total(searchResult.getTotal())
                 .list(voList)
                 .build();
     }
@@ -417,7 +687,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (updateInfoDTO == null || updateInfoDTO.getId() == null) {
             return;
         }
-        FileDocument document = documentRepository.findById(updateInfoDTO.getId());
+        FileDocument document = documentMybatisRepository.findById(updateInfoDTO.getId());
         if (document != null) {
             if (updateInfoDTO.getName() != null) {
                 document.setName(updateInfoDTO.getName());
@@ -425,13 +695,90 @@ public class DocumentServiceImpl implements DocumentService {
             if (updateInfoDTO.getDesc() != null) {
                 document.setDescription(updateInfoDTO.getDesc());
             }
-            documentRepository.update(document);
+            documentMybatisRepository.update(document);
         }
     }
 
     @Override
     public PageVO<DocWithCateVO> listWithCategory(DocumentDTO documentDTO) {
-        return PageVO.<DocWithCateVO>builder().build();
+        if (documentDTO == null) {
+            return PageVO.<DocWithCateVO>builder().build();
+        }
+
+        String filterWord = documentDTO.getFilterWord();
+        List<FileDocument> documents;
+        long total;
+
+        // 根据是否有过滤词选择不同的查询方法
+        if (StringUtils.hasText(filterWord)) {
+            documents = documentMybatisRepository.findByPageWithFilter(
+                    documentDTO.getPage(), documentDTO.getRows(),
+                    Sort.by(Sort.Direction.DESC, "uploadDate"), filterWord);
+            total = documentMybatisRepository.countWithFilter(filterWord);
+        } else {
+            documents = documentMybatisRepository.findByPage(
+                    documentDTO.getPage(), documentDTO.getRows(),
+                    Sort.by(Sort.Direction.DESC, "uploadDate"));
+            total = documentMybatisRepository.count();
+        }
+
+        List<DocWithCateVO> voList = documents.stream()
+                .map(doc -> convertToDocWithCateVO(doc, documentDTO.getTagId(), documentDTO.getCategoryId()))
+                .toList();
+        return PageVO.<DocWithCateVO>builder()
+                .pageNum(documentDTO.getPage())
+                .pageSize(documentDTO.getRows())
+                .total(total)
+                .list(voList)
+                .build();
+    }
+
+    private DocWithCateVO convertToDocWithCateVO(FileDocument doc, String tagId, String categoryId) {
+        DocWithCateVO vo = new DocWithCateVO();
+        vo.setId(doc.getId());
+        vo.setTitle(doc.getName());
+        vo.setSize(doc.getSize());
+        vo.setUserName(doc.getUserName());
+        vo.setCreateTime(doc.getUploadDate());
+        vo.setChecked(false);
+
+        // Build category info and check if already belongs to this category
+        if (StringUtils.hasText(categoryId)) {
+            CategoryVO categoryVO = new CategoryVO();
+            categoryVO.setId(categoryId);
+            List<CateDocRelationship> cateRels = cateDocRelationshipMapper.findByFileId(doc.getId());
+            for (CateDocRelationship rel : cateRels) {
+                if (rel.getCategoryId().equals(categoryId)) {
+                    categoryVO.setRelationShipId(rel.getId());
+                    vo.setChecked(true);
+                    break;
+                }
+            }
+            vo.setCategoryVO(categoryVO);
+        }
+
+        // Build tag list info and check if already belongs to this tag
+        if (StringUtils.hasText(tagId)) {
+            List<TagDocRelationship> tagRels = tagDocRelationshipMapper.findByFileId(doc.getId());
+            for (TagDocRelationship rel : tagRels) {
+                if (rel.getTagId().equals(tagId)) {
+                    vo.setChecked(true);
+                    break;
+                }
+            }
+            List<TagVO> tagVOList = tagRels.stream()
+                    .map(rel -> {
+                        TagVO tagVO = new TagVO();
+                        tagVO.setId(rel.getTagId());
+                        return tagVO;
+                    })
+                    .toList();
+            vo.setTagVOList(tagVOList);
+        } else {
+            vo.setTagVOList(new ArrayList<>());
+        }
+
+        return vo;
     }
 
     @Override
@@ -465,7 +812,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.length == 0) {
             return Collections.emptyList();
         }
-        return documentRepository.findByIdList(Arrays.asList(docId));
+        return documentMybatisRepository.findByIdList(Arrays.asList(docId));
     }
 
     @Override
@@ -473,8 +820,8 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.length == 0) {
             return Collections.emptyList();
         }
-        List<FileDocument> result = documentRepository.findByIdList(Arrays.asList(docId));
-        documentRepository.deleteByIdList(Arrays.asList(docId));
+        List<FileDocument> result = documentMybatisRepository.findByIdList(Arrays.asList(docId));
+        documentMybatisRepository.deleteByIdList(Arrays.asList(docId));
         log.info("Query and remove documents: {}", Arrays.asList(docId));
         return result;
     }
@@ -484,7 +831,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.length == 0) {
             return Collections.emptyList();
         }
-        return documentRepository.findByIdList(Arrays.asList(docId));
+        return documentMybatisRepository.findByIdList(Arrays.asList(docId));
     }
 
     @Override
@@ -494,20 +841,20 @@ public class DocumentServiceImpl implements DocumentService {
         }
         int page = pageDTO.getPage() != null ? pageDTO.getPage() : 1;
         int size = pageDTO.getRows() != null ? pageDTO.getRows() : 10;
-        return documentRepository.findByPage(page, size, Sort.by(Sort.Direction.DESC, "uploadDate"));
+        return documentMybatisRepository.findByPage(page, size, Sort.by(Sort.Direction.DESC, "uploadDate"));
     }
 
     @Override
     public Map<String, Object> queryFileDocumentResult(BasePageDTO pageDTO, boolean reviewing) {
         Map<String, Object> result = new HashMap<>();
         result.put("data", queryFileDocument(pageDTO, reviewing));
-        result.put("total", documentRepository.count());
+        result.put("total", documentMybatisRepository.count());
         return result;
     }
 
     @Override
     public long countAllFile() {
-        return documentRepository.count();
+        return documentMybatisRepository.count();
     }
 
     @Override
@@ -515,7 +862,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (docId == null || docId.isEmpty()) {
             return false;
         }
-        return documentRepository.findById(docId) != null;
+        return documentMybatisRepository.findById(docId) != null;
     }
 
     @Override
@@ -538,10 +885,39 @@ public class DocumentServiceImpl implements DocumentService {
         if (collectService != null) {
             documentVO.setCollectNum(collectService.collectNum(docId));
         }
+        if (likeService != null) {
+            documentVO.setLikeNum(likeService.likeNum(docId));
+        }
         documentVO.setDocState(fileDocument.getDocState());
         documentVO.setErrorMsg(fileDocument.getErrorMsg());
         documentVO.setTxtId(fileDocument.getTextFileId());
         documentVO.setPreviewFileId(fileDocument.getPreviewFileId());
+
+        // Populate categoryVO
+        List<CateDocRelationship> cateRels = cateDocRelationshipMapper.findByFileId(docId);
+        if (!cateRels.isEmpty()) {
+            CateDocRelationship rel = cateRels.get(0);
+            Category category = categoryRepository.findById(rel.getCategoryId()).orElse(null);
+            if (category != null) {
+                CategoryVO categoryVO = new CategoryVO();
+                categoryVO.setId(category.getId());
+                categoryVO.setName(category.getName());
+                categoryVO.setRelationShipId(rel.getId());
+                documentVO.setCategoryVO(categoryVO);
+            }
+        }
+
+        // Populate tagVOList
+        List<TagDocRelationship> tagRels = tagDocRelationshipMapper.findByFileId(docId);
+        if (!tagRels.isEmpty()) {
+            List<TagVO> tagVOList = tagRels.stream().map(rel -> {
+                TagVO tagVO = new TagVO();
+                tagVO.setId(rel.getTagId());
+                return tagVO;
+            }).toList();
+            documentVO.setTagVOList(tagVOList);
+        }
+
         return documentVO;
     }
 
@@ -566,10 +942,10 @@ public class DocumentServiceImpl implements DocumentService {
                     .build();
         }
         // Step 2: Query MySQL, filter by reviewing=false AND docState=SUCCESS
-        java.util.List<FileDocument> allMatchedDocs = documentRepository.findByIdList(matchedIds);
+        java.util.List<FileDocument> allMatchedDocs = documentMybatisRepository.findByIdList(matchedIds);
         java.util.List<FileDocument> filteredDocs = allMatchedDocs.stream()
-                .filter(doc -> !doc.isReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
-                .collect(java.util.stream.Collectors.toList());
+                .filter(doc -> !doc.getReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
+                .toList();
         // Step 3: Pagination
         int total = filteredDocs.size();
         int start = (pageNum - 1) * pageSize;
@@ -580,7 +956,7 @@ public class DocumentServiceImpl implements DocumentService {
         // Step 4: Convert to VO
         java.util.List<DocumentVO> voList = pagedDocs.stream()
                 .map(this::convertToVO)
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
         return PageVO.<DocumentVO>builder()
                 .pageNum(pageNum)
                 .pageSize(pageSize)
@@ -599,5 +975,296 @@ public class DocumentServiceImpl implements DocumentService {
         vo.setUserName(doc.getUserName());
         vo.setCreateTime(doc.getUploadDate());
         return vo;
+    }
+
+    @Override
+    public PageVO<DocSearchVO> search(SearchQuery query, String userId) {
+        // Step 1: ES retrieval - get candidate doc IDs with highlights
+        List<SearchResultItem> searchResults = elasticService.searchDocumentsWithHighlight(query);
+        if (searchResults == null || searchResults.isEmpty()) {
+            return PageVO.<DocSearchVO>builder()
+                    .pageNum(query.getPage())
+                    .pageSize(query.getPageSize())
+                    .total(0)
+                    .list(new ArrayList<>())
+                    .build();
+        }
+
+        // Build highlight map: docId -> highlightFragment (use first fragment from list)
+        Map<String, String> highlightMap = new HashMap<>();
+        Set<String> candidateIds = new HashSet<>();
+        for (SearchResultItem item : searchResults) {
+            candidateIds.add(item.getId());
+            if (item.getHighlightFragments() != null && !item.getHighlightFragments().isEmpty()) {
+                highlightMap.put(item.getId(), item.getHighlightFragments().get(0));
+            }
+        }
+
+        // Step 2: Tags filtering - intersect with docs that have ALL specified tags
+        if (query.getTags() != null && !query.getTags().isEmpty()) {
+            List<Tag> tags = tagRepository.findByNames(query.getTags());
+            if (tags.isEmpty()) {
+                // No matching tags found, return empty result
+                return PageVO.<DocSearchVO>builder()
+                        .pageNum(query.getPage())
+                        .pageSize(query.getPageSize())
+                        .total(0)
+                        .list(new ArrayList<>())
+                        .build();
+            }
+            List<String> tagIds = tags.stream().map(Tag::getId).toList();
+            List<String> docIdsWithAllTags = tagDocRelationshipMapper.findByFileIds(new ArrayList<>(candidateIds))
+                    .stream()
+                    .collect(java.util.stream.Collectors.groupingBy(TagDocRelationship::getFileId))
+                    .entrySet().stream()
+                    .filter(entry -> {
+                        Set<String> docTagIds = entry.getValue().stream()
+                                .map(TagDocRelationship::getTagId)
+                                .collect(Collectors.toSet());
+                        return docTagIds.containsAll(tagIds);
+                    })
+                    .map(Map.Entry::getKey)
+                    .toList();
+            candidateIds.retainAll(docIdsWithAllTags);
+            if (candidateIds.isEmpty()) {
+                return PageVO.<DocSearchVO>builder()
+                        .pageNum(query.getPage())
+                        .pageSize(query.getPageSize())
+                        .total(0)
+                        .list(new ArrayList<>())
+                        .build();
+            }
+        }
+
+        // Step 3: Category filtering - intersect with docs in the specified category
+        if (StringUtils.hasText(query.getCategory())) {
+            List<Category> categories = categoryRepository.findByName(query.getCategory());
+            if (categories.isEmpty()) {
+                return PageVO.<DocSearchVO>builder()
+                        .pageNum(query.getPage())
+                        .pageSize(query.getPageSize())
+                        .total(0)
+                        .list(new ArrayList<>())
+                        .build();
+            }
+            String categoryId = categories.get(0).getId();
+            List<String> docIdsInCategory = cateDocRelationshipMapper.findByFileIds(new ArrayList<>(candidateIds))
+                    .stream()
+                    .filter(rel -> categoryId.equals(rel.getCategoryId()))
+                    .map(CateDocRelationship::getFileId)
+                    .toList();
+            candidateIds.retainAll(docIdsInCategory);
+            if (candidateIds.isEmpty()) {
+                return PageVO.<DocSearchVO>builder()
+                        .pageNum(query.getPage())
+                        .pageSize(query.getPageSize())
+                        .total(0)
+                        .list(new ArrayList<>())
+                        .build();
+            }
+        }
+
+        // Step 4: Query documents from MySQL
+        List<FileDocument> documents = documentMybatisRepository.findByIdList(new ArrayList<>(candidateIds));
+        // Filter by reviewing=false AND docState=SUCCESS
+        List<FileDocument> filteredDocs = documents.stream()
+                .filter(doc -> !doc.getReviewing() && doc.getDocState() == DocStateEnum.SUCCESS)
+                .collect(Collectors.toList());
+
+        // Step 5: Sorting
+        String sortField = query.getSortField();
+        String sortOrder = query.getSortOrder();
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortOrder) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Comparator<FileDocument> comparator = switch (sortField != null ? sortField : "createTime") {
+            case "name" -> Comparator.comparing(FileDocument::getName, Comparator.nullsLast(Comparator.naturalOrder()));
+            case "size" -> Comparator.comparing(FileDocument::getSize, Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(FileDocument::getUploadDate, Comparator.nullsLast(Comparator.naturalOrder()));
+        };
+        if (direction == Sort.Direction.DESC) {
+            comparator = comparator.reversed();
+        }
+        filteredDocs.sort(comparator);
+
+        // Step 6: Pagination
+        int total = filteredDocs.size();
+        int page = query.getPage() != null ? query.getPage() : 1;
+        int pageSize = query.getPageSize() != null ? query.getPageSize() : 20;
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, total);
+        List<FileDocument> pagedDocs = (start >= total)
+                ? new ArrayList<>()
+                : filteredDocs.subList(start, end);
+
+        // Step 7: Assemble results - get liked/collected status and tags
+        List<DocSearchVO> voList = pagedDocs.stream()
+                .map(doc -> convertToDocSearchVO(doc, userId, highlightMap))
+                .toList();
+
+        return PageVO.<DocSearchVO>builder()
+                .pageNum(page)
+                .pageSize(pageSize)
+                .total(total)
+                .list(voList)
+                .build();
+    }
+
+    private DocSearchVO convertToDocSearchVO(FileDocument doc, String userId, Map<String, String> highlightMap) {
+        DocSearchVO vo = new DocSearchVO();
+        vo.setId(doc.getId());
+        vo.setName(doc.getName());
+        vo.setType(doc.getSuffix());
+        vo.setSize(doc.getSize());
+        vo.setSizeDisplay(formatSize(doc.getSize()));
+        // Use highlight fragment as description if available, otherwise use original description
+        String highlight = highlightMap.get(doc.getId());
+        vo.setDescription(highlight != null ? highlight : doc.getDescription());
+        vo.setCreateTime(doc.getUploadDate());
+        vo.setUpdateTime(doc.getUpdateDate());
+
+        // Query liked status
+        if (StringUtils.hasText(userId)) {
+            int likeStatus = likeService.findEntityLikeStatus(userId, 1, doc.getId());
+            vo.setLiked(likeStatus > 0);
+            int collectStatus = likeService.findEntityLikeStatus(userId, 2, doc.getId());
+            vo.setCollected(collectStatus > 0);
+        } else {
+            vo.setLiked(false);
+            vo.setCollected(false);
+        }
+
+        // Query tags with color
+        List<TagDocRelationship> tagRels = tagDocRelationshipMapper.findByFileId(doc.getId());
+        List<TagColorVO> tagColorVOList = tagRels.stream()
+                .map(rel -> {
+                    Tag tag = tagRepository.findById(rel.getTagId());
+                    TagColorVO tagColorVO = new TagColorVO();
+                    if (tag != null) {
+                        tagColorVO.setName(tag.getName());
+                        tagColorVO.setColor(tag.getColor());
+                    }
+                    return tagColorVO;
+                })
+                .filter(t -> t.getName() != null)
+                .toList();
+        vo.setTags(tagColorVOList);
+
+        // Query category
+        List<CateDocRelationship> cateRels = cateDocRelationshipMapper.findByFileId(doc.getId());
+        if (!cateRels.isEmpty()) {
+            Category category = categoryRepository.findById(cateRels.get(0).getCategoryId()).orElse(null);
+            if (category != null) {
+                vo.setCategory(category.getName());
+            }
+        }
+
+        return vo;
+    }
+
+    private String formatSize(Long size) {
+        if (size == null) return "0 B";
+        if (size < 1024) return size + " B";
+        if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
+        if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
+        return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
+    }
+
+    /**
+     * Index document to Elasticsearch
+     */
+    private void indexDocumentToEs(FileDocument document) {
+        if (document == null || document.getId() == null) {
+            log.warn("Cannot index null or id-less document to ES");
+            return;
+        }
+        try {
+            SearchDocument searchDocument = new SearchDocument();
+            searchDocument.setId(document.getId());  // Use UUID as ES document ID
+            searchDocument.setName(document.getName());
+            searchDocument.setType(document.getSuffix());
+            searchDocument.setContent(""); // empty initially, will be filled by text extraction task
+            searchDocument.setTagNames(getTagNamesByDocId(document.getId()));
+            searchDocument.setCategoryName(getCategoryNameByDocId(document.getId()));
+            elasticService.upload(searchDocument);
+            log.info("Document indexed to ES: id={}, name={}", document.getId(), document.getName());
+        } catch (Exception e) {
+            log.error("Failed to index document to ES: id={}", document.getId(), e);
+        }
+    }
+
+    /**
+     * Get tag names for a document
+     */
+    @Override
+    public List<String> getTagNamesByDocId(String docId) {
+        if (docId == null || docId.isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            List<TagDocRelationship> relationships = tagDocRelationshipMapper.findByFileId(docId);
+            if (relationships == null || relationships.isEmpty()) {
+                return Collections.emptyList();
+            }
+            List<String> tagIds = relationships.stream()
+                    .map(TagDocRelationship::getTagId)
+                    .collect(Collectors.toList());
+            List<Tag> tags = tagRepository.findByIds(tagIds);
+            return tags.stream()
+                    .map(Tag::getName)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Failed to get tag names for docId={}", docId, e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Get category name for a document
+     */
+    @Override
+    public String getCategoryNameByDocId(String docId) {
+        if (docId == null || docId.isEmpty()) {
+            return "";
+        }
+        try {
+            List<CateDocRelationship> relationships = cateDocRelationshipMapper.findByFileId(docId);
+            if (relationships == null || relationships.isEmpty()) {
+                return "";
+            }
+            // Return the first category's name
+            String categoryId = relationships.get(0).getCategoryId();
+            Optional<Category> category = categoryRepository.findById(categoryId);
+            return category.map(Category::getName).orElse("");
+        } catch (Exception e) {
+            log.error("Failed to get category name for docId={}", docId, e);
+            return "";
+        }
+    }
+
+    /**
+     * Update document content in ES after text extraction
+     */
+    private void updateFileContentToEs(String docId, String content) {
+        if (docId == null || docId.isEmpty()) {
+            return;
+        }
+        FileDocument document = documentMybatisRepository.findById(docId);
+        if (document == null || document.getId() == null) {
+            log.warn("Cannot update ES content: document not found for docId={}", docId);
+            return;
+        }
+        try {
+            SearchDocument searchDocument = new SearchDocument();
+            searchDocument.setId(document.getId());  // Use UUID as ES document ID
+            searchDocument.setName(document.getName());
+            searchDocument.setType(document.getSuffix());
+            searchDocument.setContent(content);
+            searchDocument.setTagNames(getTagNamesByDocId(docId));
+            searchDocument.setCategoryName(getCategoryNameByDocId(docId));
+            elasticService.updateFileObj(null, searchDocument);
+            log.info("Document content updated in ES: docId={}", docId);
+        } catch (Exception e) {
+            log.error("Failed to update document content in ES: docId={}", docId, e);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.jiaruiblog.domain.entity.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jiaruiblog.common.MessageConstant;
 import com.jiaruiblog.common.RegexConstant;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -50,6 +51,8 @@ public class RegistryUserDTO {
     String nickname;
 
     @Autowired
+    @JsonIgnore
+    @Schema(hidden = true)
     private BCryptPasswordEncoder passwordEncoder;
 
     public String getEncodePassword() {

@@ -37,6 +37,9 @@ public enum ErrorCode {
     OPERATE_FAILED(1203, "error-code.operate-failed"),
     DATA_IS_EMPTY(1204, "error-code.data-is-empty"),
 
+    // Collect Related
+    DOCUMENT_ALREADY_COLLECTED(1205, "error-code.document-already-collected"),
+
     // File Related
     FILE_NOT_FOUND(2001, "error-code.file-not-found"),
     FILE_UPLOAD_FAILED(2002, "error-code.file-upload-failed"),

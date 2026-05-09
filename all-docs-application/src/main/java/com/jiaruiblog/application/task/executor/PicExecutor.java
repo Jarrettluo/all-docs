@@ -1,7 +1,10 @@
 package com.jiaruiblog.application.task.executor;
 
+import com.jiaruiblog.application.service.ThumbnailService;
 import com.jiaruiblog.application.task.data.TaskData;
+import com.jiaruiblog.common.util.SpringApplicationContext;
 import com.jiaruiblog.domain.entity.po.FileDocument;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -18,6 +21,7 @@ import java.math.BigDecimal;
  * @Date 2023/10/6 23:36
  * @Version 1.0
  **/
+@Slf4j
 public class PicExecutor extends TaskExecutor {
 
     public static final String PNG = "png";
@@ -45,7 +49,9 @@ public class PicExecutor extends TaskExecutor {
 
     @Override
     protected void makePreviewFile(InputStream is, TaskData taskData) {
-        // do nothing for pic
+        // 图片文件不需要格式转换，预览图直接使用缩略图即可
+        // previewFileId 不需要设置，图片本身即是预览
+        log.debug("图片文件不需要生成预览文件，直接使用缩略图即可");
     }
 
 

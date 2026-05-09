@@ -46,6 +46,7 @@ public class TagServiceImpl implements TagService {
         if (tag == null || !StringUtils.hasText(tag.getName())) {
             throw BusinessExceptionBuilder.of(ErrorCode.INVALID_PARAM).detail("标签名称不能为空").build();
         }
+        tag.setId(UUID.randomUUID().toString());
         tag.setCreateDate(new Date());
         tag.setUpdateDate(new Date());
         tagRepository.save(tag);
@@ -160,6 +161,7 @@ public class TagServiceImpl implements TagService {
                 || !StringUtils.hasText(tagRelationship.getFileId())) {
             throw BusinessExceptionBuilder.of(ErrorCode.INVALID_PARAM).detail("标签关系不能为空").build();
         }
+        tagRelationship.setId(UUID.randomUUID().toString());
         tagRepository.saveRelationship(tagRelationship);
         log.info("标签关联创建成功：tagId={}, fileId={}", tagRelationship.getTagId(), tagRelationship.getFileId());
     }
@@ -201,6 +203,7 @@ public class TagServiceImpl implements TagService {
             return existingTags.get(0).getId();
         }
         Tag tag = new Tag();
+        tag.setId(UUID.randomUUID().toString());
         tag.setName(tagName);
         tag.setCreateDate(new Date());
         tag.setUpdateDate(new Date());

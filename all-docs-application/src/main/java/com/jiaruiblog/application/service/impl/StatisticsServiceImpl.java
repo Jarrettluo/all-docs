@@ -2,9 +2,15 @@ package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.StatisticsService;
 import com.jiaruiblog.domain.entity.dto.StatisticsDTO;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.vo.CategoryDistVO;
+import com.jiaruiblog.domain.entity.vo.DocTypeDistVO;
+import com.jiaruiblog.domain.entity.vo.HotDocVO;
 import com.jiaruiblog.domain.entity.vo.MonthStatVO;
+import com.jiaruiblog.domain.entity.vo.SearchHotWordVO;
 import com.jiaruiblog.domain.entity.vo.StatsVO;
 import com.jiaruiblog.domain.entity.vo.TrendVO;
+import com.jiaruiblog.domain.entity.vo.UserActivityVO;
 import com.jiaruiblog.common.enums.RedisActionEnum;
 import com.jiaruiblog.infrastructure.repository.DocumentRepository;
 import com.jiaruiblog.infrastructure.repository.UserRepository;
@@ -22,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -162,9 +169,14 @@ public class StatisticsServiceImpl implements StatisticsService {
     public StatsVO all() {
         StatsVO vo = new StatsVO();
         vo.setDocNum(countDocument());
+        vo.setUserNum(userRepository.count());
         vo.setCategoryNum(countCategory());
         vo.setTagNum(countTag());
         vo.setCommentNum(commentRepository.count());
+        // 以下暂无数据源，返回 0
+        vo.setDownloadNum(0L);
+        vo.setSearchNum(0L);
+        vo.setViewNum(0L);
         return vo;
     }
 
@@ -181,5 +193,80 @@ public class StatisticsServiceImpl implements StatisticsService {
             log.error("获取月度统计失败", e);
             return List.of();
         }
+    }
+
+    @Override
+    public List<DocTypeDistVO> docTypeDist() {
+        List<Map<String, Object>> rawList = documentRepository.countByDocType();
+        List<DocTypeDistVO> result = new ArrayList<>();
+        for (Map<String, Object> map : rawList) {
+            DocTypeDistVO vo = new DocTypeDistVO();
+            vo.setType((String) map.get("type"));
+            Object countObj = map.get("count");
+            vo.setCount(countObj != null ? ((Number) countObj).longValue() : 0L);
+            result.add(vo);
+        }
+        return result;
+    }
+
+    @Override
+    public List<CategoryDistVO> categoryDist() {
+        List<Map<String, Object>> rawList = documentRepository.countByCategory();
+        List<CategoryDistVO> result = new ArrayList<>();
+        for (Map<String, Object> map : rawList) {
+            CategoryDistVO vo = new CategoryDistVO();
+            vo.setCategory((String) map.get("category"));
+            Object countObj = map.get("count");
+            vo.setCount(countObj != null ? ((Number) countObj).longValue() : 0L);
+            result.add(vo);
+        }
+        return result;
+    }
+
+    @Override
+    public List<HotDocVO> hotDocs() {
+        List<String> docIdList = redisService.getHotList(null, RedisServiceImpl.DOC_KEY);
+        List<HotDocVO> result = new ArrayList<>();
+        if (docIdList == null || docIdList.isEmpty()) {
+            return result;
+        }
+        int limit = Math.min(docIdList.size(), 10);
+        for (int i = 0; i < limit; i++) {
+            String docId = docIdList.get(i);
+            FileDocument doc = documentRepository.findById(docId);
+            if (doc == null) {
+                continue;
+            }
+            HotDocVO vo = new HotDocVO();
+            vo.setId(docId);
+            vo.setTitle(doc.getName());
+            vo.setViewCount((long) redisService.score(RedisServiceImpl.DOC_KEY, docId));
+            result.add(vo);
+        }
+        return result;
+    }
+
+    @Override
+    public List<SearchHotWordVO> searchHotWords() {
+        List<String> hotList = redisService.getHotList(null, RedisServiceImpl.SEARCH_KEY);
+        List<SearchHotWordVO> result = new ArrayList<>();
+        if (hotList == null || hotList.isEmpty()) {
+            return result;
+        }
+        int limit = Math.min(hotList.size(), 10);
+        for (int i = 0; i < limit; i++) {
+            String keyword = hotList.get(i);
+            SearchHotWordVO vo = new SearchHotWordVO();
+            vo.setKeyword(keyword);
+            vo.setCount((long) redisService.score(RedisServiceImpl.SEARCH_KEY, keyword));
+            result.add(vo);
+        }
+        return result;
+    }
+
+    @Override
+    public List<UserActivityVO> userActivity() {
+        // 暂无数据源，返回空列表
+        return new ArrayList<>();
     }
 }

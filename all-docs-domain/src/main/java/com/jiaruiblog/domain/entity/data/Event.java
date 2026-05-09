@@ -1,6 +1,7 @@
 package com.jiaruiblog.domain.entity.data;
 
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class Event {
     private String entityType; // 事件发生在哪种类型上
     private String entityId;  // 事件发生在的实体的id
     private String entityUserId; //事件发生的实体对应的作者的id
+    @Default
     private Map<String,Object> data = new HashMap<>();
 
     public String getTopic() {

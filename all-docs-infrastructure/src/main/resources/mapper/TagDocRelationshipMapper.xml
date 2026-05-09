@@ -99,4 +99,12 @@
         </foreach>
     </select>
 
+    <select id="findByTagIdAndFileIds" resultMap="TagDocRelationshipResultMap">
+        SELECT * FROM tag_doc_relationship WHERE tag_id = #{tagId}
+        AND file_id IN
+        <foreach collection="fileIds" item="fileId" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </select>
+
 </mapper>

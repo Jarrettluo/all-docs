@@ -9,13 +9,14 @@
         <result property="userName" column="user_name"/>
         <result property="content" column="content"/>
         <result property="docId" column="doc_id"/>
+        <result property="docName" column="doc_name"/>
         <result property="createDate" column="create_date"/>
         <result property="updateDate" column="update_date"/>
     </resultMap>
 
     <insert id="save" parameterType="com.jiaruiblog.domain.entity.po.Comment">
-        INSERT INTO comment (id, create_user, user_id, user_name, content, doc_id, create_date, update_date)
-        VALUES (#{id}, #{createUser}, #{userId}, #{userName}, #{content}, #{docId}, #{createDate}, #{updateDate})
+        INSERT INTO comment (id, create_user, user_id, user_name, content, doc_id, doc_name, create_date, update_date)
+        VALUES (#{id}, #{createUser}, #{userId}, #{userName}, #{content}, #{docId}, #{docName}, #{createDate}, #{updateDate})
     </insert>
 
     <select id="findById" resultMap="CommentResultMap">
@@ -30,6 +31,10 @@
         SELECT * FROM comment WHERE user_id = #{userId} ORDER BY create_date DESC
     </select>
 
+    <select id="findAll" resultMap="CommentResultMap">
+        SELECT * FROM comment ORDER BY create_date DESC
+    </select>
+
     <select id="countByDocId" resultType="long">
         SELECT COUNT(*) FROM comment WHERE doc_id = #{docId}
     </select>
@@ -41,5 +46,20 @@
     <delete id="deleteByDocId">
         DELETE FROM comment WHERE doc_id = #{docId}
     </delete>
+
+    <select id="findByContentContaining" resultMap="CommentResultMap">
+        SELECT * FROM comment WHERE content LIKE CONCAT('%', #{keyword}, '%') ORDER BY create_date DESC
+    </select>
+
+    <delete id="deleteAllByIdIn">
+        DELETE FROM comment WHERE id IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM comment
+    </select>
 
 </mapper>

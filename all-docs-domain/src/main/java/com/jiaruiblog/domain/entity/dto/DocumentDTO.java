@@ -5,6 +5,7 @@ import com.jiaruiblog.common.enums.FilterTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -16,6 +17,7 @@ import lombok.Data;
  **/
 @Schema(description = "文档查询对象")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class DocumentDTO extends BasePageDTO{
 
     @Schema(description = "过滤类型", requiredMode = Schema.RequiredMode.REQUIRED)

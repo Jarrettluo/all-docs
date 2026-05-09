@@ -252,4 +252,11 @@ public interface RedisService {
      * 增加用户搜索词分数
      */
     void incrementScoreByUserId(String searchWord, String key);
+
+    /**
+     * 增加文档热度分数
+     * @param docId 文档ID
+     * @param delta 增加的值（正数点赞，负数取消点赞）
+     */
+    void incrementDocScore(String docId, int delta);
 }

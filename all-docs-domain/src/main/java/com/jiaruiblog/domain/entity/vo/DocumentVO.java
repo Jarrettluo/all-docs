@@ -27,6 +27,8 @@ public class DocumentVO {
 
     private Long commentNum;
 
+    private Long likeNum;
+
     private CategoryVO categoryVO;
 
     private List<TagVO> tagVOList;
@@ -45,6 +47,6 @@ public class DocumentVO {
 
     private java.util.Date createTime;
 
-    private List<PageVO> pageVOList;
+//    private List<PageVO> pageVOList;
 
 }

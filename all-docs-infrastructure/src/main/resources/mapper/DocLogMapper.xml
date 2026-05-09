@@ -30,6 +30,10 @@
         SELECT * FROM doc_log WHERE user_id = #{userId} ORDER BY create_date DESC
     </select>
 
+    <select id="findAll" resultMap="DocLogResultMap">
+        SELECT * FROM doc_log ORDER BY create_date DESC
+    </select>
+
     <select id="findByAction" resultMap="DocLogResultMap">
         SELECT * FROM doc_log WHERE action = #{action} ORDER BY create_date DESC
     </select>

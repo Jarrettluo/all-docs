@@ -47,4 +47,6 @@ public interface TagDocRelationshipMapper {
     List<String> findFileIdsByTagId(@Param("tagId") String tagId);
 
     List<String> findFileIdsByTagIds(@Param("tagIds") List<String> tagIds);
+
+    List<TagDocRelationship> findByTagIdAndFileIds(@Param("tagId") String tagId, @Param("fileIds") List<String> fileIds);
 }

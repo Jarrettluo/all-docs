@@ -64,6 +64,18 @@
             <artifactId>itextpdf</artifactId>
         </dependency>
 
+        <!-- Apache PDFBox -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+        </dependency>
+
+        <!-- Apache POI for PPT/PPTX -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+        </dependency>
+
         <!-- ANSJ分词 -->
         <dependency>
             <groupId>org.ansj</groupId>
@@ -75,6 +87,13 @@
             <groupId>net.coobird</groupId>
             <artifactId>thumbnailator</artifactId>
             <version>0.4.20</version>
+        </dependency>
+
+        <!-- JWT -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${java-jwt.version}</version>
         </dependency>
 
         <!-- Lombok -->

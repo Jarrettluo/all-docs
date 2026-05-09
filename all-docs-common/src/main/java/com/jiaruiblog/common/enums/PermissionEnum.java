@@ -27,10 +27,6 @@ public enum PermissionEnum implements BaseEnum {
         return code;
     }
 
-    public String getMsg() {
-        return msg;
-    }
-
     public static PermissionEnum getRoleByName(String name) {
         if (StringUtils.isEmpty(name)) {
             return null;

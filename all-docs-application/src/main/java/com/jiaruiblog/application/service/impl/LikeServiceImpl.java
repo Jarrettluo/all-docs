@@ -1,20 +1,18 @@
 package com.jiaruiblog.application.service.impl;
 
+import com.jiaruiblog.application.service.CollectService;
 import com.jiaruiblog.application.service.LikeService;
 import com.jiaruiblog.application.service.RedisService;
-import com.jiaruiblog.application.task.like.UserLikeDetail;
+import com.jiaruiblog.common.enums.RedisActionEnum;
 import com.jiaruiblog.domain.entity.po.CollectDocRelationship;
 import com.jiaruiblog.domain.entity.po.LikeDocRelationship;
-import com.jiaruiblog.application.service.CollectService;
-import com.jiaruiblog.common.enums.RedisActionEnum;
+import com.jiaruiblog.infrastructure.repository.mysql.LikeDocRelationshipMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.Date;
 
 /**
  * @author luojiarui
@@ -29,22 +27,41 @@ public class LikeServiceImpl implements LikeService {
     @Resource
     private RedisService redisService;
 
-    // 对实体进行点赞的类型
-    // 0: entityType，1表示点赞；2表示收藏信息
-    // 1: 用户信息
+    @Resource
+    private LikeDocRelationshipMapper likeDocRelationshipMapper;
+
     public static final String ENTITY_LIKE_KEY_FORMAT = "like:entity:{0}:{1}";
 
     @Override
-    public void like(String userId, Integer entityType, String entityId) {
+    public boolean like(String userId, Integer entityType, String entityId) {
         if (userId == null || entityType == null || entityId == null || entityId.isEmpty()) {
-            return;
+            return false;
         }
-        try {
-            String entityLikeKey = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT, entityType, entityId);
+        String entityLikeKey = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT, entityType, entityId);
+
+        // 查询当前点赞状态
+        boolean isLiked = redisService.isSetMember(entityLikeKey, userId);
+
+        LikeDocRelationship like = new LikeDocRelationship();
+        like.setUserId(userId);
+        like.setEntityType(entityType);
+        like.setEntityId(entityId);
+        like.setCreateDate(new Date());
+
+        if (isLiked) {
+            // 已点赞 → 取消点赞
+            redisService.deleteSetMember(entityLikeKey, userId);
+            redisService.incrementDocScore(entityId, -1);
+            remove(like);
+            log.debug("用户 {} 取消点赞实体 {}:{}", userId, entityType, entityId);
+            return false;
+        } else {
+            // 未点赞 → 执行点赞
             redisService.setSet(entityLikeKey, userId);
-            log.debug("用户 {} 点赞了类型为 {} 的实体 {}", userId, entityType, entityId);
-        } catch (Exception e) {
-            log.error("点赞失败: userId={}, entityType={}, entityId={}", userId, entityType, entityId, e);
+            redisService.incrementDocScore(entityId, 1);
+            insertRelationShip(like);
+            log.debug("用户 {} 点赞实体 {}:{}", userId, entityType, entityId);
+            return true;
         }
     }
 
@@ -55,7 +72,12 @@ public class LikeServiceImpl implements LikeService {
         }
         try {
             String entityLikeKey = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT, entityType, entityId);
-            return redisService.getSetSize(entityLikeKey);
+            Long redisCount = redisService.getSetSize(entityLikeKey);
+            if (redisCount != null && redisCount > 0) {
+                return redisCount;
+            }
+            // Redis 没有从 DB 获取，使用正确的 entityType 查询数量
+            return likeDocRelationshipMapper.countByEntityIdAndEntityType(entityId, entityType);
         } catch (Exception e) {
             log.error("查询点赞数量失败: entityType={}, entityId={}", entityType, entityId, e);
             return 0L;
@@ -82,12 +104,12 @@ public class LikeServiceImpl implements LikeService {
             return;
         }
         try {
-            // 将LikeDocRelationship转换为CollectDocRelationship并保存
             CollectDocRelationship collect = new CollectDocRelationship();
             collect.setUserId(like.getUserId());
-            collect.setDocId(like.getDocId());
+            collect.setDocId(like.getEntityId());
+            collect.setRedisActionEnum(RedisActionEnum.getActionByCode(like.getEntityType()));
             collectService.insert(collect);
-            log.info("点赞关系保存成功: userId={}, docId={}", like.getUserId(), like.getDocId());
+            log.info("点赞关系保存成功: userId={}, docId={}", like.getUserId(), like.getEntityId());
         } catch (Exception e) {
             log.error("保存点赞关系失败", e);
         }
@@ -101,7 +123,8 @@ public class LikeServiceImpl implements LikeService {
         try {
             CollectDocRelationship collect = new CollectDocRelationship();
             collect.setUserId(like.getUserId());
-            collect.setDocId(like.getDocId());
+            collect.setDocId(like.getEntityId());
+            collect.setRedisActionEnum(RedisActionEnum.getActionByCode(like.getEntityType()));
             return collectService.insertRelationShip(collect);
         } catch (Exception e) {
             log.error("保存点赞关系失败", e);
@@ -117,9 +140,10 @@ public class LikeServiceImpl implements LikeService {
         try {
             CollectDocRelationship collect = new CollectDocRelationship();
             collect.setUserId(like.getUserId());
-            collect.setDocId(like.getDocId());
+            collect.setDocId(like.getEntityId());
+            collect.setRedisActionEnum(RedisActionEnum.getActionByCode(like.getEntityType()));
             collectService.remove(collect);
-            log.info("点赞关系删除成功: userId={}, docId={}", like.getUserId(), like.getDocId());
+            log.info("点赞关系删除成功: userId={}, docId={}", like.getUserId(), like.getEntityId());
         } catch (Exception e) {
             log.error("删除点赞关系失败", e);
         }
@@ -131,13 +155,12 @@ public class LikeServiceImpl implements LikeService {
             return 0L;
         }
         try {
-            // 先尝试从Redis获取
             Long redisCount = findEntityLikeCount(RedisActionEnum.LIKE.getCode(), docId);
             if (redisCount != null && redisCount > 0) {
                 return redisCount;
             }
-            // 如果Redis没有，从CollectService获取
-            return collectService.collectNum(docId);
+            // Redis 没有从 DB 获取，使用正确的 entityType 查询点赞数量
+            return likeDocRelationshipMapper.countByEntityIdAndEntityType(docId, RedisActionEnum.LIKE.getCode());
         } catch (Exception e) {
             log.error("查询点赞数量失败: docId={}", docId, e);
             return 0L;
@@ -150,156 +173,10 @@ public class LikeServiceImpl implements LikeService {
             return;
         }
         try {
-            // 从CollectService删除
             collectService.removeRelateByDocId(docId);
-            // 从Redis删除相关点赞数据
-            String likeKey = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT, RedisActionEnum.LIKE.getCode(), docId);
-            redisService.deleteKey(likeKey);
             log.info("删除文档关联的点赞关系: docId={}", docId);
         } catch (Exception e) {
             log.error("删除文档点赞关系失败: docId={}", docId, e);
         }
-    }
-
-    @Override
-    public void transLikedFromRedis2DB() {
-        log.info("开始从Redis同步点赞数据到数据库");
-
-        try {
-            List<UserLikeDetail> likedDataFromRedis = getLikedDataFromRedis();
-            if (likedDataFromRedis.isEmpty()) {
-                log.info("没有需要同步的点赞数据");
-                return;
-            }
-
-            // 过滤出点赞和收藏的数据
-            List<UserLikeDetail> validData = likedDataFromRedis.stream()
-                    .filter(item -> item.getAction() != null &&
-                            (item.getAction().equals(RedisActionEnum.LIKE) ||
-                             item.getAction().equals(RedisActionEnum.COLLECT)))
-                    .toList();
-
-            if (validData.isEmpty()) {
-                log.info("没有有效的点赞或收藏数据需要同步");
-                return;
-            }
-
-            log.info("开始同步 {} 条点赞/收藏数据到数据库", validData.size());
-
-            List<UserLikeDetail> saveFailedList = new ArrayList<>();
-
-            // 批量保存点赞和收藏信息
-            for (UserLikeDetail userLikeDetail : validData) {
-                try {
-                    CollectDocRelationship relationship = userLikeDetailSwitch(userLikeDetail);
-                    Boolean success = collectService.insertRelationShip(relationship);
-
-                    if (Boolean.FALSE.equals(success)) {
-                        log.warn("保存点赞关系失败: userId={}, entityId={}, action={}",
-                                userLikeDetail.getUserId(), userLikeDetail.getEntityId(), userLikeDetail.getAction());
-                        saveFailedList.add(userLikeDetail);
-                    }
-                } catch (Exception e) {
-                    log.error("保存点赞关系时发生异常: userId={}, entityId={}, action={}",
-                            userLikeDetail.getUserId(), userLikeDetail.getEntityId(), userLikeDetail.getAction(), e);
-                    saveFailedList.add(userLikeDetail);
-                }
-            }
-
-            // 从redis中清除保存失败的信息
-            for (UserLikeDetail userLikeDetail : saveFailedList) {
-                try {
-                    String key = MessageFormat.format(ENTITY_LIKE_KEY_FORMAT,
-                            userLikeDetail.getAction().getCode(), userLikeDetail.getEntityId());
-                    redisService.deleteSetMember(key, userLikeDetail.getUserId());
-                } catch (Exception e) {
-                    log.error("从Redis移除失败数据时发生异常: userId={}, entityId={}",
-                            userLikeDetail.getUserId(), userLikeDetail.getEntityId(), e);
-                }
-            }
-
-            log.info("Redis到数据库的点赞数据同步完成，成功同步 {} 条，失败 {} 条",
-                    validData.size() - saveFailedList.size(), saveFailedList.size());
-
-        } catch (Exception e) {
-            log.error("从Redis同步点赞数据到数据库时发生异常", e);
-        }
-    }
-
-    /**
-     * 从redis中获取获取点赞和收藏的数据
-     * @return 用户点赞详情列表
-     */
-    private List<UserLikeDetail> getLikedDataFromRedis() {
-        List<UserLikeDetail> result = new ArrayList<>();
-
-        try {
-            Set<String> setKeys = redisService.keys("like:entity:*");
-            if (setKeys == null || setKeys.isEmpty()) {
-                log.debug("Redis中没有找到点赞相关的key");
-                return result;
-            }
-
-            log.info("从Redis中获取到 {} 个点赞相关的key", setKeys.size());
-
-            for (String key : setKeys) {
-                Set<String> members = redisService.getSet(key);
-                if (members == null || members.isEmpty()) {
-                    continue;
-                }
-
-                // 分离出动作类型，实体id
-                String[] split = key.split(":");
-                if (split.length < 4) {
-                    log.warn("Redis key格式不正确: {}", key);
-                    continue;
-                }
-
-                String actionType = split[2];
-                String entityId = split[3];
-                RedisActionEnum redisActionEnum = RedisActionEnum.getActionByCode(Integer.valueOf(actionType));
-
-                if (redisActionEnum == null) {
-                    log.warn("无效的动作类型: {}", actionType);
-                    continue;
-                }
-
-                // 组装成 UserLikeDetail 对象
-                for (String member : members) {
-                    if (member == null || member.isEmpty()) {
-                        continue;
-                    }
-
-                    UserLikeDetail userLikeDetail = new UserLikeDetail();
-                    userLikeDetail.setUserId(member);
-                    userLikeDetail.setEntityId(entityId);
-                    userLikeDetail.setAction(redisActionEnum);
-                    result.add(userLikeDetail);
-                }
-            }
-
-            log.info("从Redis中获取到 {} 条点赞数据", result.size());
-            return result;
-        } catch (Exception e) {
-            log.error("从Redis获取点赞数据失败", e);
-            return result;
-        }
-    }
-
-    /**
-     * 将UserLikeDetail转换为CollectDocRelationship
-     * @param userLikeDetail 用户点赞详情
-     * @return 收藏文档关系对象
-     */
-    private CollectDocRelationship userLikeDetailSwitch(UserLikeDetail userLikeDetail) {
-        if (userLikeDetail == null) {
-            return null;
-        }
-
-        CollectDocRelationship relationship = new CollectDocRelationship();
-        relationship.setDocId(userLikeDetail.getEntityId());
-        relationship.setUserId(userLikeDetail.getUserId());
-        relationship.setRedisActionEnum(userLikeDetail.getAction());
-        return relationship;
     }
 }

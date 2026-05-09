@@ -16,4 +16,8 @@ public interface ThumbnailMapper {
     List<Thumbnail> findAllByObjectId(@Param("objectId") String objectId);
 
     void deleteByObjectId(@Param("objectId") String objectId);
+
+    Thumbnail findByObjectIdAndType(@Param("objectId") String objectId, @Param("thumbnailEnum") String thumbnailEnum);
+
+    Thumbnail findByObjectIdAndSize(@Param("objectId") String objectId, @Param("thumbSizeEnum") String thumbSizeEnum);
 }

@@ -1,7 +1,5 @@
 package com.jiaruiblog.domain.entity.po;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.util.Date;
@@ -10,10 +8,8 @@ import java.util.Date;
  * @author luojiarui
  **/
 @Data
-@Table(name = "doc_log")
 public class DocLog {
 
-    @Id
     private String id;
 
     private String userId;

@@ -13,6 +13,8 @@ public class Tag {
 
     private String name;
 
+    private String color;
+
     private Date createDate;
 
     private Date updateDate;

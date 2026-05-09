@@ -1,9 +1,6 @@
 package com.jiaruiblog.domain.entity.po;
 
 import com.jiaruiblog.common.enums.DocStateEnum;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 import lombok.Data;
 
 import java.util.Date;
@@ -17,7 +14,6 @@ public class FileDocument {
     /**
      * 主键
      */
-    @Id
     private String id;
 
     /**
@@ -80,7 +76,6 @@ public class FileDocument {
     /**
      * 文档的状态
      **/
-    @Enumerated(EnumType.STRING)
     private DocStateEnum docState = DocStateEnum.WAIT;
 
     /**
@@ -89,7 +84,7 @@ public class FileDocument {
     private String errorMsg;
 
     // true 正在审核；false 审核完毕
-    private boolean reviewing = true;
+    private Boolean reviewing = true;
 
     private String userId;
 

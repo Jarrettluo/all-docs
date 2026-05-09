@@ -1,25 +1,25 @@
 package com.jiaruiblog.api.controller;
 
 import com.jiaruiblog.api.auth.Permission;
-import com.jiaruiblog.common.enums.PermissionEnum;
-import com.jiaruiblog.common.ApiResult;
-import com.jiaruiblog.domain.entity.po.FileDocument;
-import com.jiaruiblog.domain.entity.po.User;
-import com.jiaruiblog.domain.entity.dto.DocumentDTO;
-import com.jiaruiblog.domain.entity.dto.RemoveObjectDTO;
-import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
-import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
-import com.jiaruiblog.domain.entity.vo.DocumentVO;
-import com.jiaruiblog.domain.entity.vo.PageVO;
-import com.jiaruiblog.common.enums.FilterTypeEnum;
-import com.jiaruiblog.common.exception.BusinessException;
-import com.jiaruiblog.common.exception.ErrorCode;
 import com.jiaruiblog.api.intercepter.SensitiveFilter;
-import com.jiaruiblog.application.service.IDocLogService;
 import com.jiaruiblog.application.service.DocumentService;
+import com.jiaruiblog.application.service.IDocLogService;
 import com.jiaruiblog.application.service.RedisService;
 import com.jiaruiblog.application.service.impl.DocLogServiceImpl;
 import com.jiaruiblog.application.service.impl.RedisServiceImpl;
+import com.jiaruiblog.common.ApiResult;
+import com.jiaruiblog.common.enums.FilterTypeEnum;
+import com.jiaruiblog.common.enums.PermissionEnum;
+import com.jiaruiblog.common.exception.BusinessException;
+import com.jiaruiblog.common.exception.ErrorCode;
+import com.jiaruiblog.domain.entity.dto.DocumentDTO;
+import com.jiaruiblog.domain.entity.dto.RemoveObjectDTO;
+import com.jiaruiblog.domain.entity.dto.SearchQuery;
+import com.jiaruiblog.domain.entity.dto.document.UpdateInfoDTO;
+import com.jiaruiblog.domain.entity.po.FileDocument;
+import com.jiaruiblog.domain.entity.po.User;
+import com.jiaruiblog.domain.entity.vo.DocWithCateVO;
+import com.jiaruiblog.domain.entity.vo.PageVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Resource;
@@ -57,17 +57,18 @@ public class DocumentController {
     public ApiResult<Object> list(@RequestBody @Schema(description = "文档查询DTO") DocumentDTO documentDTO)
             throws IOException {
         String userId = documentDTO.getUserId();
-        if (StringUtils.hasText(documentDTO.getFilterWord()) &&
-                documentDTO.getType() == FilterTypeEnum.FILTER) {
+        if (StringUtils.hasText(documentDTO.getFilterWord())) {
             String filterWord = documentDTO.getFilterWord();
-            //非法敏感词汇判断
+            // 敏感词汇判断
             SensitiveFilter filter = SensitiveFilter.getInstance();
             int n = filter.checkSensitiveWord(filterWord, 0, 1);
-            //存在非法字符
+            // 存在非法字符时仅记录日志，不影响搜索
             if (n > 0) {
                 log.error("这个人输入了非法字符--> {},不知道他到底要查什么~", filterWord);
             } else {
+                // 热门搜索词所有人都能看，记录到 ZSet
                 redisService.incrementScoreByUserId(filterWord, RedisServiceImpl.SEARCH_KEY);
+                // 用户搜索历史，只在用户已登录时记录
                 if (StringUtils.hasText(userId)) {
                     redisService.addSearchHistoryByUserId(userId, filterWord);
                 }
@@ -148,31 +149,13 @@ public class DocumentController {
         return ApiResult.success(keyList);
     }
 
-    @Operation(summary = "2.4 文档全文搜索", description = "根据关键字搜索已审核且解析成功的文档")
-    @GetMapping(value = "/search")
+    @Operation(summary = "文档搜索", description = "根据多条件搜索文档")
+    @PostMapping(value = "/searchList")
+    @Permission(value = PermissionEnum.USER)
     public ApiResult<Object> search(
-            @RequestParam(value = "keyword")
-            @Schema(description = "搜索关键字") String keyword,
-            @RequestParam(value = "page", defaultValue = "1")
-            @Schema(description = "页码") int page,
-            @RequestParam(value = "size", defaultValue = "10")
-            @Schema(description = "每页大小") int size) throws IOException {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return ApiResult.success(PageVO.<DocumentVO>builder()
-                    .pageNum(page)
-                    .pageSize(size)
-                    .total(0)
-                    .list(new java.util.ArrayList<>())
-                    .build());
-        }
-        // 记录搜索词
-        if (StringUtils.hasText(keyword)) {
-            SensitiveFilter filter = SensitiveFilter.getInstance();
-            int n = filter.checkSensitiveWord(keyword, 0, 1);
-            if (n <= 0) {
-                redisService.incrementScoreByUserId(keyword, RedisServiceImpl.SEARCH_KEY);
-            }
-        }
-        return ApiResult.success(documentService.search(keyword.trim(), page, size));
+            @RequestBody @Schema(description = "搜索参数") SearchQuery query,
+            HttpServletRequest request) {
+        String userId = (String) request.getAttribute("id");
+        return ApiResult.success(documentService.search(query, userId));
     }
 }

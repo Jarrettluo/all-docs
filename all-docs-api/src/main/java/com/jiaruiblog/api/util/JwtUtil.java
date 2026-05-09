@@ -6,6 +6,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.jiaruiblog.domain.entity.po.User;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -18,21 +20,18 @@ import java.util.Map;
  * @Date 2022/6/19 9:20 下午
  * @Version 1.0
  **/
+@Component
 public class JwtUtil {
 
     private JwtUtil() {
-        throw new IllegalStateException("jwtUtil error");
+        // Spring bean constructor
     }
 
     /**
-     * 密钥 - 从环境变量获取
+     * 密钥持有类 - 解决静态字段无法注入的问题
      */
-    private static final String SECRET = System.getenv("JWT_SECRET");
-
-    static {
-        if (SECRET == null || SECRET.isEmpty()) {
-            throw new IllegalStateException("JWT_SECRET environment variable must be configured");
-        }
+    private static class JwtSecretHolder {
+        private static String SECRET;
     }
 
     /**
@@ -40,6 +39,11 @@ public class JwtUtil {
      * 单位为秒
      **/
     private static final long EXPIRATION = 864000L;
+
+    @Value("${jwt.secret}")
+    public void setSecret(String secret) {
+        JwtSecretHolder.SECRET = secret;
+    }
 
     /**
      * 生成用户token,设置token超时时间
@@ -61,7 +65,7 @@ public class JwtUtil {
                 //签发时间
                 .withIssuedAt(new Date())
                 //SECRET加密
-                .sign(Algorithm.HMAC256(SECRET));
+                .sign(Algorithm.HMAC256(JwtSecretHolder.SECRET));
 
     }
 
@@ -71,7 +75,7 @@ public class JwtUtil {
     public static Map<String, Claim> verifyToken(String token) {
         DecodedJWT jwt;
         try {
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(JwtSecretHolder.SECRET)).build();
             jwt = verifier.verify(token);
         } catch (Exception e) {
             //解码异常则抛出异常

@@ -16,9 +16,9 @@
         <result property="thumbId" column="thumb_id"/>
         <result property="textFileId" column="text_file_id"/>
         <result property="previewFileId" column="preview_file_id"/>
-        <result property="docState" column="doc_state" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.EnumTypeHandler"/>
+        <result property="docState" column="doc_state" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.DocStateEnumTypeHandler"/>
         <result property="errorMsg" column="error_msg"/>
-        <result property="reviewing" column="reviewing"/>
+        <result property="reviewing" column="reviewing" typeHandler="com.jiaruiblog.infrastructure.config.mybatis.BooleanTypeHandler"/>
         <result property="userId" column="user_id"/>
         <result property="userName" column="user_name"/>
         <result property="createDate" column="create_date"/>
@@ -31,7 +31,7 @@
             error_msg, reviewing, user_id, user_name, create_date, update_date)
         VALUES (#{id}, #{name}, #{size}, #{uploadDate}, #{md5}, #{content}, #{contentType},
             #{suffix}, #{description}, #{gridfsId}, #{thumbId}, #{textFileId}, #{previewFileId},
-            #{docState}, #{errorMsg}, #{reviewing}, #{userId}, #{userName}, #{createDate}, #{updateDate})
+            #{docState,typeHandler=com.jiaruiblog.infrastructure.config.mybatis.DocStateEnumTypeHandler}, #{errorMsg}, #{reviewing}, #{userId}, #{userName}, #{createDate}, #{updateDate})
     </insert>
 
     <update id="update" parameterType="com.jiaruiblog.domain.entity.po.FileDocument">
@@ -41,12 +41,20 @@
             text_file_id = #{textFileId},
             thumb_id = #{thumbId},
             preview_file_id = #{previewFileId},
+            doc_state = #{docState,typeHandler=com.jiaruiblog.infrastructure.config.mybatis.DocStateEnumTypeHandler},
+            error_msg = #{errorMsg},
+            reviewing = #{reviewing},
             update_date = NOW()
         WHERE id = #{id}
     </update>
 
-    <select id="count" resultType="long">
+<select id="count" resultType="long">
         SELECT COUNT(*) FROM file_document WHERE reviewing = false
+    </select>
+
+    <select id="countWithFilter" resultType="long">
+        SELECT COUNT(*) FROM file_document
+        WHERE reviewing = false AND (name LIKE CONCAT('%', #{filterWord}, '%') OR description LIKE CONCAT('%', #{filterWord}, '%'))
     </select>
 
     <select id="findById" resultMap="FileDocumentResultMap">
@@ -72,7 +80,14 @@
 
     <select id="findByPageWithFussySearch" resultMap="FileDocumentResultMap">
         SELECT * FROM file_document
-        WHERE reviewing = false AND name LIKE CONCAT('%', #{keyWord}, '%')
+        WHERE reviewing = false AND (name LIKE CONCAT('%', #{keyWord}, '%') OR description LIKE CONCAT('%', #{keyWord}, '%'))
+        ORDER BY upload_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="findByPageWithFilter" resultMap="FileDocumentResultMap">
+        SELECT * FROM file_document
+        WHERE reviewing = false AND (name LIKE CONCAT('%', #{filterWord}, '%') OR description LIKE CONCAT('%', #{filterWord}, '%'))
         ORDER BY upload_date DESC
         LIMIT #{offset}, #{limit}
     </select>
@@ -116,6 +131,48 @@
         WHERE upload_date BETWEEN #{startDate} AND #{endDate}
         GROUP BY DATE_FORMAT(upload_date, '%Y-%m-%d')
         ORDER BY date ASC
+    </select>
+
+    <select id="findByPageByTag" resultMap="FileDocumentResultMap">
+        SELECT fd.* FROM file_document fd
+        INNER JOIN tag_doc_relationship tdr ON fd.id = tdr.file_id
+        WHERE fd.reviewing = false AND tdr.tag_id = #{tagId}
+        ORDER BY fd.upload_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="findByPageByCategory" resultMap="FileDocumentResultMap">
+        SELECT fd.* FROM file_document fd
+        INNER JOIN cate_doc_relationship cdr ON fd.id = cdr.file_id
+        WHERE fd.reviewing = false AND cdr.category_id = #{categoryId}
+        ORDER BY fd.upload_date DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByTagId" resultType="long">
+        SELECT COUNT(DISTINCT fd.id) FROM file_document fd
+        INNER JOIN tag_doc_relationship tdr ON fd.id = tdr.file_id
+        WHERE fd.reviewing = false AND tdr.tag_id = #{tagId}
+    </select>
+
+    <select id="countByCategoryId" resultType="long">
+        SELECT COUNT(DISTINCT fd.id) FROM file_document fd
+        INNER JOIN cate_doc_relationship cdr ON fd.id = cdr.file_id
+        WHERE fd.reviewing = false AND cdr.category_id = #{categoryId}
+    </select>
+
+    <select id="countByDocType" resultType="java.util.Map">
+        SELECT suffix AS type, COUNT(*) AS count
+        FROM file_document
+        WHERE suffix IS NOT NULL AND suffix != ''
+        GROUP BY suffix
+    </select>
+
+    <select id="countByCategory" resultType="java.util.Map">
+        SELECT c.name AS category, COUNT(cdr.file_id) AS count
+        FROM category c
+        LEFT JOIN cate_doc_relationship cdr ON cdr.category_id = c.id
+        GROUP BY c.id, c.name
     </select>
 
 </mapper>

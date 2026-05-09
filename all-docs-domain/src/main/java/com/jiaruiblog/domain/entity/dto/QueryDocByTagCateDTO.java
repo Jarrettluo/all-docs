@@ -1,6 +1,7 @@
 package com.jiaruiblog.domain.entity.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @ClassName QueryDocByTagCateDTO
@@ -10,6 +11,7 @@ import lombok.Data;
  * @Version 1.0
  **/
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class QueryDocByTagCateDTO extends BasePageDTO{
 
     String cateId;

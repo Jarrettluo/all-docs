@@ -44,6 +44,10 @@
         SELECT COUNT(*) FROM like_relationship WHERE entity_id = #{entityId}
     </select>
 
+    <select id="countByEntityIdAndEntityType" resultType="long">
+        SELECT COUNT(*) FROM like_relationship WHERE entity_id = #{entityId} AND entity_type = #{entityType}
+    </select>
+
     <delete id="deleteById">
         DELETE FROM like_relationship WHERE id = #{id}
     </delete>

@@ -4,6 +4,7 @@ import com.auth0.jwt.interfaces.Claim;
 import com.jiaruiblog.api.util.JwtUtil;
 import com.jiaruiblog.common.context.TimeZoneContext;
 import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ import java.util.Map;
  * @version v2.0
  */
 @Slf4j
-//@WebFilter(filterName = "JwtFilter", urlPatterns = {"/*"})
+@WebFilter(filterName = "JwtFilter", urlPatterns = {"/*"})
 public class JwtFilter implements Filter {
 
     private static final String OPTIONS = "OPTIONS";
@@ -35,11 +36,17 @@ public class JwtFilter implements Filter {
             "/api/v1/user/login",
             "/api/v1/user/register",
             "/api/v1/file/view",
+            "/api/v1/file/view2",
             "/api/v1/file/image",
+            "/api/v1/file/image2",
             "/api/v1/document/list",
             "/api/v1/category/all"
     );
 
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // No initialization needed
+    }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -107,6 +114,11 @@ public class JwtFilter implements Filter {
         } finally {
             TimeZoneContext.clear();
         }
+    }
+
+    @Override
+    public void destroy() {
+        // No cleanup needed
     }
 
 }

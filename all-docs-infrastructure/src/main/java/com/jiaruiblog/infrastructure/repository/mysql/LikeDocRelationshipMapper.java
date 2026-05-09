@@ -28,6 +28,8 @@ public interface LikeDocRelationshipMapper {
 
     long countByEntityId(@Param("entityId") String entityId);
 
+    long countByEntityIdAndEntityType(@Param("entityId") String entityId, @Param("entityType") Integer entityType);
+
     void deleteById(@Param("id") String id);
 
     void deleteByUserId(@Param("userId") String userId);
