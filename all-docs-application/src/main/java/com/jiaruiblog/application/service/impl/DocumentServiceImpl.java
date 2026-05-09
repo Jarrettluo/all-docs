@@ -641,9 +641,10 @@ public class DocumentServiceImpl implements DocumentService {
 
         // 4. 构建 ID -> 高亮片段的映射
         Map<String, List<String>> highlightMap = searchResult.getItems().stream()
+                .filter(item -> item.getId() != null)
                 .collect(Collectors.toMap(
                         SearchResultItem::getId,
-                        SearchResultItem::getHighlightFragments,
+                        item -> item.getHighlightFragments() != null ? item.getHighlightFragments() : Collections.emptyList(),
                         (existing, replacement) -> replacement
                 ));
 
