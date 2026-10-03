@@ -24,6 +24,12 @@ public class RedisServiceImpl implements RedisService {
 
     public static final String SEARCH_KEY = "search:hot";
     public static final String DOC_KEY = "doc:hot";
+    /** 站点累计浏览量计数器 */
+    public static final String VIEW_COUNT_KEY = "stats:view:total";
+    /** 站点累计下载量计数器 */
+    public static final String DOWNLOAD_COUNT_KEY = "stats:download:total";
+    /** 用户活跃度集合键前缀（完整键形如 active:user:2026-10） */
+    public static final String USER_ACTIVITY_KEY_PREFIX = "active:user:";
 
     @Resource
     private StringRedisTemplate redisSearchTemplate;
@@ -258,5 +264,58 @@ public class RedisServiceImpl implements RedisService {
         }
         redisSearchTemplate.opsForZSet().incrementScore(DOC_KEY, docId, delta);
         log.info("更新文档热度：docId={}, delta={}", docId, delta);
+    }
+
+    @Override
+    public double getZSetTotalScore(String key) {
+        if (!StringUtils.hasText(key)) {
+            return 0.0;
+        }
+        try {
+            Set<String> members = redisSearchTemplate.opsForZSet().range(key, 0, -1);
+            if (members == null || members.isEmpty()) {
+                return 0.0;
+            }
+            double total = 0.0;
+            for (String member : members) {
+                Double score = redisSearchTemplate.opsForZSet().score(key, member);
+                if (score != null) {
+                    total += score;
+                }
+            }
+            return total;
+        } catch (Exception e) {
+            log.error("统计 ZSet 总分失败：key={}", key, e);
+            return 0.0;
+        }
+    }
+
+    @Override
+    public void recordUserActivity(String userId) {
+        if (!StringUtils.hasText(userId)) {
+            return;
+        }
+        try {
+            String key = USER_ACTIVITY_KEY_PREFIX + java.time.YearMonth.now();
+            redisSearchTemplate.opsForSet().add(key, userId);
+            // 保留约 13 个月，便于展示最近 12 个月的数据
+            redisSearchTemplate.expire(key, java.time.Duration.ofDays(400));
+        } catch (Exception e) {
+            log.error("记录用户活跃度失败：userId={}", userId, e);
+        }
+    }
+
+    @Override
+    public long countUserActivity(String month) {
+        if (!StringUtils.hasText(month)) {
+            return 0L;
+        }
+        try {
+            Long size = redisSearchTemplate.opsForSet().size(USER_ACTIVITY_KEY_PREFIX + month);
+            return size != null ? size : 0L;
+        } catch (Exception e) {
+            log.error("查询用户活跃度失败：month={}", month, e);
+            return 0L;
+        }
     }
 }

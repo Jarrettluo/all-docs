@@ -1,44 +1,37 @@
 # 待补充功能
 
-以下功能在 Statistics API 扩展中暂未实现，后续补充：
+> 2026-10-03 更新：以下 4 项功能已全部实现（feature/stats-metrics 分支）。
 
-## 1. 浏览量统计 (viewNum)
+## ✅ 1. 浏览量统计 (viewNum) —— 已实现
 
-**目标：** 在 `/statistics/all` 接口中返回真实的文档浏览次数
+**实现方式：** 文档浏览接口 `GET /file/view/{id}` 与 `GET /file/view2/{id}` 中：
+- 调用 `redisService.incrementDocScore(docId, 1)` 更新热门文档 ZSet (`doc:hot`)
+- 调用 `redisService.increment("stats:view:total")` 累计全站浏览量
 
-**方案：** 在文档浏览接口中增加 Redis ZSet 计数，key 为 `doc:hot`
+`/statistics/all` 的 `viewNum` 读取 `stats:view:total` 计数器。
 
-**待办：**
-- [ ] 在文档浏览接口中调用 `redisService.incrementDocScore(docId, 1)`
-- [ ] 验证 `doc:hot` ZSet 是否正常更新
+## ✅ 2. 下载次数统计 (downloadNum) —— 已实现
 
-## 2. 下载次数统计 (downloadNum)
+**实现方式：** 下载接口 `GET /file/downloadFile`（HMAC 核验通过后）与 `GET /file/{id}` 中：
+- 调用 `redisService.increment("stats:download:total")` 累计全站下载量
 
-**目标：** 在 `/statistics/all` 接口中返回真实的文档下载次数
+`/statistics/all` 的 `downloadNum` 读取 `stats:download:total` 计数器。
 
-**方案：** 在文档下载接口中增加 Redis 计数
+## ✅ 3. 搜索次数统计 (searchNum) —— 已实现
 
-**待办：**
-- [ ] 确定下载接口位置
-- [ ] 增加下载计数逻辑
-- [ ] 在 `all()` 方法中聚合下载次数
+**实现方式：** `/statistics/all` 的 `searchNum` = Redis ZSet `search:hot` 所有成员分数总和
+（新增 `RedisService.getZSetTotalScore()` 方法）。
 
-## 3. 搜索次数统计 (searchNum)
+## ✅ 4. 用户活跃度统计 (userActivity) —— 已实现
 
-**目标：** 在 `/statistics/all` 接口中返回真实的搜索次数
+**实现方式：**
+- 用户登录成功时写入月度活跃集合 `active:user:{yyyy-MM}`（Redis Set，保留约 13 个月）
+- `/statistics/userActivity` 返回最近 12 个月数据：`{month, activeUsers, totalUsers}`
 
-**方案：** 使用 Redis ZSet `search:hot` 的总分数作为搜索次数
+---
 
-**待办：**
-- [ ] 在 `all()` 方法中聚合 `search:hot` ZSet 的总分
+## 附：本次一并修复的问题
 
-## 4. 用户活跃度统计 (userActivity)
-
-**目标：** 实现 `/statistics/userActivity` 接口
-
-**方案：** 在用户登录/关键操作时记录活跃状态，按月聚合
-
-**待办：**
-- [ ] 设计用户活跃度记录机制（Redis 或数据库）
-- [ ] 实现按月统计活跃用户数
-- [ ] 实现 `userActivity()` 方法
+- `UserMapper.xml` 的 `insert` / `save` 语句补充 `PermissionEnumTypeHandler`
+  （修复：全新部署时初始化管理员写库失败 `Incorrect integer value: 'ADMIN'`）
+- 前端 `document.js` 缺失的 URL 常量补全（`DOC_TXT_URL` / `DOC_REBUILD_URL` / `DOC_GENERATE_DOWNLOAD_KEY` / `DOC_DOWNLOAD`）

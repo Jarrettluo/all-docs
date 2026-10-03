@@ -32,7 +32,7 @@
         INSERT INTO user (id, username, password, phone, mail, male, description, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
-            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
+            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum, typeHandler=com.jiaruiblog.infrastructure.config.mybatis.PermissionEnumTypeHandler}, #{nickname},
             #{lastLogin}, #{createDate}, #{updateDate})
     </insert>
 
@@ -69,7 +69,7 @@
         INSERT INTO user (id, username, password, phone, mail, male, description, avatar,
             birthtime, banning, permission_enum, nickname, last_login, create_date, update_date)
         VALUES (#{id}, #{username}, #{password}, #{phone}, #{mail}, #{male}, #{description},
-            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum}, #{nickname},
+            #{avatar}, #{birthtime}, #{banning}, #{permissionEnum, typeHandler=com.jiaruiblog.infrastructure.config.mybatis.PermissionEnumTypeHandler}, #{nickname},
             #{lastLogin}, #{createDate}, #{updateDate})
         ON DUPLICATE KEY UPDATE
             username = VALUES(username),

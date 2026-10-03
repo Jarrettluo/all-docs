@@ -156,6 +156,13 @@ public class DocumentController {
             @RequestBody @Schema(description = "搜索参数") SearchQuery query,
             HttpServletRequest request) {
         String userId = (String) request.getAttribute("id");
+        // 记录搜索热度（用于搜索次数统计与热词排行）
+        if (query != null && StringUtils.hasText(query.getKeyword())) {
+            redisService.incrementScoreByUserId(query.getKeyword(), RedisServiceImpl.SEARCH_KEY);
+            if (StringUtils.hasText(userId)) {
+                redisService.addSearchHistoryByUserId(userId, query.getKeyword());
+            }
+        }
         return ApiResult.success(documentService.search(query, userId));
     }
 }

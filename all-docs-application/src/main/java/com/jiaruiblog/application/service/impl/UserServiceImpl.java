@@ -2,6 +2,7 @@ package com.jiaruiblog.application.service.impl;
 
 import com.jiaruiblog.application.service.IUserService;
 import com.jiaruiblog.application.service.ITokenService;
+import com.jiaruiblog.application.service.RedisService;
 import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.PermissionEnum;
 import com.jiaruiblog.common.exception.BusinessException;
@@ -50,6 +51,9 @@ public class UserServiceImpl implements IUserService {
 
     @Resource
     ITokenService tokenService;
+
+    @Resource
+    RedisService redisService;
 
     @Override
     public void initFirstUser() {
@@ -112,6 +116,9 @@ public class UserServiceImpl implements IUserService {
         // 更新登录时间
         user.setLastLogin(new Date());
         userRepository.updateLoginTime(user);
+
+        // 记录用户活跃度（按月份集合统计）
+        redisService.recordUserActivity(user.getId());
 
         return result;
     }

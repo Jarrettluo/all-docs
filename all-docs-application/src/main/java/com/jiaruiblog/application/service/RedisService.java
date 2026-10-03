@@ -259,4 +259,26 @@ public interface RedisService {
      * @param delta 增加的值（正数点赞，负数取消点赞）
      */
     void incrementDocScore(String docId, int delta);
+
+    /**
+     * 获取 ZSet 所有成员的分数总和
+     * 用于统计累计搜索次数等聚合指标
+     *
+     * @param key ZSet 键
+     * @return 分数总和，键不存在或失败时返回 0
+     */
+    double getZSetTotalScore(String key);
+
+    /**
+     * 记录用户活跃度（写入当前月份的 Redis Set）
+     * @param userId 用户ID
+     */
+    void recordUserActivity(String userId);
+
+    /**
+     * 统计某个月份的活跃用户数
+     * @param month 月份，格式 yyyy-MM
+     * @return 活跃用户数
+     */
+    long countUserActivity(String month);
 }

@@ -22,8 +22,10 @@ import com.jiaruiblog.application.service.RedisService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.text.MessageFormat;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -173,11 +175,24 @@ public class StatisticsServiceImpl implements StatisticsService {
         vo.setCategoryNum(countCategory());
         vo.setTagNum(countTag());
         vo.setCommentNum(commentRepository.count());
-        // 以下暂无数据源，返回 0
-        vo.setDownloadNum(0L);
-        vo.setSearchNum(0L);
-        vo.setViewNum(0L);
+        vo.setDownloadNum(getCounter(RedisServiceImpl.DOWNLOAD_COUNT_KEY));
+        vo.setViewNum(getCounter(RedisServiceImpl.VIEW_COUNT_KEY));
+        // 搜索次数 = 搜索热词 ZSet 的总分数
+        vo.setSearchNum((long) redisService.getZSetTotalScore(RedisServiceImpl.SEARCH_KEY));
         return vo;
+    }
+
+    /**
+     * 读取累计计数器的值（不存在或异常时返回 0）
+     */
+    private long getCounter(String key) {
+        try {
+            String value = redisService.getString(key);
+            return StringUtils.hasText(value) ? Long.parseLong(value) : 0L;
+        } catch (Exception e) {
+            log.error("读取计数器失败：key={}", key, e);
+            return 0L;
+        }
     }
 
     @Override
@@ -266,7 +281,18 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<UserActivityVO> userActivity() {
-        // 暂无数据源，返回空列表
-        return new ArrayList<>();
+        List<UserActivityVO> result = new ArrayList<>();
+        long totalUsers = userRepository.count();
+        YearMonth current = YearMonth.now();
+        // 最近 12 个月（含当月）
+        for (int i = 11; i >= 0; i--) {
+            String month = current.minusMonths(i).toString();
+            UserActivityVO vo = new UserActivityVO();
+            vo.setMonth(month);
+            vo.setActiveUsers(redisService.countUserActivity(month));
+            vo.setTotalUsers(totalUsers);
+            result.add(vo);
+        }
+        return result;
     }
 }
