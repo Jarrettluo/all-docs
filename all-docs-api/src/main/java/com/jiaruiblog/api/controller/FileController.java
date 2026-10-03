@@ -9,8 +9,10 @@ import com.jiaruiblog.api.util.JwtUtil;
 import com.jiaruiblog.application.service.DocumentService;
 import com.jiaruiblog.application.service.IDocLogService;
 import com.jiaruiblog.application.service.IUserService;
+import com.jiaruiblog.application.service.RedisService;
 import com.jiaruiblog.application.service.TaskExecuteService;
 import com.jiaruiblog.application.service.impl.DocLogServiceImpl;
+import com.jiaruiblog.application.service.impl.RedisServiceImpl;
 import com.jiaruiblog.common.ApiResult;
 import com.jiaruiblog.common.constants.StorageConstants;
 import com.jiaruiblog.common.enums.DocStateEnum;
@@ -76,6 +78,9 @@ public class FileController {
     @Resource
     private IDocLogService docLogService;
 
+    @Resource
+    private RedisService redisService;
+
     /**
      * @return java.util.List<com.jiaruiblog.entity.FileDocument>
      * @author luojiarui
@@ -111,6 +116,10 @@ public class FileController {
         user.setUsername(username);
         user.setId(userId);
         docLogService.addLog(user, fileDocument, DocLogServiceImpl.Action.PREVIEW);
+
+        // 记录浏览量：更新文档热度 ZSet + 累计浏览量计数器
+        redisService.incrementDocScore(id, 1);
+        redisService.increment(RedisServiceImpl.VIEW_COUNT_KEY);
 
         // 从MinIO下载文件内容
         byte[] content;
@@ -201,6 +210,9 @@ public class FileController {
                 content = fileDocument.getContent();
             }
 
+            // 下载成功，累计下载量计数
+            redisService.increment(RedisServiceImpl.DOWNLOAD_COUNT_KEY);
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; fileName=" + URLEncoder.encode(fileDocument.getName(), "utf-8"))
@@ -224,6 +236,10 @@ public class FileController {
             throw new BusinessException(ErrorCode.FILE_NOT_FOUND);
         }
         FileDocument fileDocument = file.get();
+
+        // 记录浏览量：更新文档热度 ZSet + 累计浏览量计数器
+        redisService.incrementDocScore(id, 1);
+        redisService.increment(RedisServiceImpl.VIEW_COUNT_KEY);
 
         // 从MinIO下载文件内容
         byte[] content;
@@ -265,6 +281,9 @@ public class FileController {
         } else {
             content = fileDocument.getContent();
         }
+
+        // 下载成功，累计下载量计数
+        redisService.increment(RedisServiceImpl.DOWNLOAD_COUNT_KEY);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=" + URLEncoder.encode(fileDocument.getName(), "utf-8"))
